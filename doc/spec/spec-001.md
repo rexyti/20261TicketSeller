@@ -1,6 +1,6 @@
 # Feature Specification: [Registrar Recinto]
 
-**Created**: [21/02/2025]  
+**Created**: [21/02/2026]  
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -19,7 +19,7 @@
 
 ### User Story 1 - [Registrar Recinto] (Priority: P1)
 
-[El administrador puede registrar un recinto donde se realizarán las ventas, ingresando su nombre, ubicación y capacidad.]
+[Como administrador quiero puedeo registrar un recinto donde se realizarán las ventas, ingresando su nombre, ubicación y capacidad.]
 
 **Why this priority**: [Es esencial porque sin registrar el recinto no se pueden organizar ni gestionar las ventas.]
 
