@@ -19,7 +19,7 @@
 
 ### User Story 1 - [Registrar Recinto] (Priority: P1)
 
-[Como administrador quiero puedeo registrar un recinto donde se realizarán las ventas, ingresando su nombre, ubicación y capacidad.]
+[Como administrador quiero poder registrar un recinto donde se realizarán las ventas, ingresando su nombre, ubicación y capacidad.]
 
 **Why this priority**: [Es esencial porque sin registrar el recinto no se pueden organizar ni gestionar las ventas.]
 
