@@ -1,6 +1,6 @@
-# Feature Specification: [FEATURE NAME]
+# Feature Specification: [Resgistro Recinto]
 
-**Created**: [DATE]  
+**Created**: [21/08/2005]  
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -17,25 +17,25 @@
   - Demonstrated to users independently
 -->
 
-### User Story 1 - [Brief Title] (Priority: P1)
+### User Story 1 - [Registrar Recinto] (Priority: P1)
 
-[Describe this user journey in plain language]
+[El administrador puede registrar un recinto donde se realizarán las ventas, ingresando su nombre, ubicación y capacidad.]
 
-**Why this priority**: [Explain the value and why it has this priority level]
+**Why this priority**: [Es esencial porque sin registrar el recinto no se pueden organizar ni gestionar las ventas.]
 
-**Independent Test**: [Describe how this can be tested independently - e.g., "Can be fully tested by [specific action] and delivers [specific value]"]
+**Independent Test**: [Puede probarse creando un recinto y verificando que queda almacenado y disponible en el sistema.]
 
 **Acceptance Scenarios**:
 
-1. **Scenario**: [Descriptive scenario name]
-   - **Given** [initial state]
-   - **When** [action]
-   - **Then** [expected outcome]
+1. **Scenario**: [Registro exitoso]
+   - **Given** [que el administrador accede al formulario de registro]
+   - **When** [ingresa los datos obligatorios y guarda]
+   - **Then** [el recinto queda registrado y disponible en el sistema]
 
-2. **Scenario**: [Descriptive scenario name]
-   - **Given** [initial state]
-   - **When** [action]
-   - **Then** [expected outcome]
+2. **Scenario**: [Campos obligatorios vacíos]
+   - **Given** [que el administrador abre el formulario]
+   - **When** [intenta guardar sin completar los campos obligatorios]
+   - **Then** [el sistema muestra mensajes de validación]
 
 ---
 
