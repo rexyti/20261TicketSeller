@@ -1,6 +1,6 @@
-# Feature Specification: [Resgistro Recinto]
+# Feature Specification: [Registrar Recinto]
 
-**Created**: [21/08/2005]  
+**Created**: [21/02/2025]  
 
 ## User Scenarios & Testing *(mandatory)*
 
