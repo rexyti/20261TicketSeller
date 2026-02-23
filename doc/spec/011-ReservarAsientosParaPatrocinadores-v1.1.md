@@ -1,6 +1,6 @@
 # Feature Specification: Bloqueos y Cortesías
 
-**Created**: 22/02/2026
+**Created**: 23/02/2026
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -8,22 +8,22 @@
 
 ### User Story 1 - Bloquear asientos para patrocinadores (Priority: P1)
 
-Como **Gestor de Inventario**, quiero poder bloquear asientos específicos para patrocinadores antes de que salgan a la venta general, para cumplir con los acuerdos comerciales.
+Como **Coordinador de patrocionios**, quiero poder bloquear asientos específicos para patrocinadores antes de que salgan a la venta general, para cumplir con los acuerdos comerciales.
 
-**Why this priority**: Es la función principal. Gracias a esto, no se pueden reservar asientos para patrocinadores y se incumplen contratos.
+**Why this priority**: Es la función principal. Gracias a esto, se pueden reservar asientos para patrocinadores y se cumplen los contratos.
 
-**Independent Test**: El gestor selecciona 20 asientos en la sección VIP, los marca como "Bloqueados para patrocinador" y verifica que ya no aparecen disponibles en el mapa público.
+**Independent Test**: El coordinador selecciona 20 asientos en la sección VIP, los marca como "Bloqueados para patrocinador" y verifica que ya no aparecen disponibles en el mapa público.
 
 **Acceptance Scenarios**:
 
 1. **Scenario: Bloqueo exitoso de asientos**
     - **Given** que hay asientos disponibles en el mapa del evento
-    - **When** el gestor selecciona varios asientos y los bloquea para un patrocinador específico
+    - **When** el coordinador selecciona varios asientos y los bloquea para un patrocinador específico
     - **Then** los asientos aparecen como **BLOQUEADOS - PATROCINADOR** en el sistema interno
     - **And** no son visibles ni seleccionables para el público general
 
 2. **Scenario: Bloqueo con etiqueta de patrocinador**
-    - **Given** que el gestor quiere bloquear asientos para "Empresa X"
+    - **Given** que el coordinador quiere bloquear asientos para "Empresa X"
     - **When** completa el bloqueo
     - **Then** cada asiento bloqueado tiene la etiqueta "Patrocinador: Empresa X" para trazabilidad
 
@@ -31,23 +31,23 @@ Como **Gestor de Inventario**, quiero poder bloquear asientos específicos para 
 
 ### User Story 2 - Crear cortesías para invitados (Priority: P1)
 
-Como **Gestor de Inventario**, quiero poder generar tickets de cortesía para invitados especiales, sin que pasen por el proceso de pago, para facilitar la entrada de patrocinadores, prensa o artistas.
+Como **Coordinador de patrocinios**, quiero poder generar tickets de cortesía para invitados especiales, sin que pasen por el proceso de pago, para facilitar la entrada de patrocinadores, prensa o artistas.
 
 **Why this priority**: Es una funcionalidad crítica para relaciones públicas y operación del evento.
 
-**Independent Test**: El gestor crea 5 cortesías para "Prensa", asigna asientos específicos y verifica que aparecen como "Cortesía" en el sistema y que pueden ser validadas en puerta.
+**Independent Test**: El coordinador crea 5 cortesías para "Prensa", asigna asientos específicos y verifica que aparecen como "Cortesía" en el sistema y que pueden ser validadas en puerta.
 
 **Acceptance Scenarios**:
 
 1. **Scenario: Creación de cortesía con asiento asignado**
     - **Given** que hay asientos disponibles
-    - **When** el gestor crea una cortesía y le asigna un asiento específico
+    - **When** el coordinador crea una cortesía y le asigna un asiento específico
     - **Then** el asiento queda marcado como **CORTESÍA** en el inventario
     - **And** se genera un código único para el invitado
 
 2. **Scenario: Creación de cortesía sin asiento asignado**
     - **Given** que el evento tiene área de pie o gradas sin numerar
-    - **When** el gestor crea una cortesía sin asiento fijo
+    - **When** el coordinador crea una cortesía sin asiento fijo
     - **Then** la cortesía se marca como **ACCESO GENERAL - CORTESÍA**
     - **And** cuenta para el control de aforo total
 
@@ -55,28 +55,28 @@ Como **Gestor de Inventario**, quiero poder generar tickets de cortesía para in
 
 ### User Story 3 - Gestionar bloqueos y cortesías desde panel (Priority: P2)
 
-Como **Gestor de Inventario**, quiero tener un panel donde pueda ver todos los asientos bloqueados y cortesías creadas, para tener control total y evitar duplicaciones.
+Como **Coordinador de Patrocinios**, quiero tener un panel donde pueda ver todos los asientos bloqueados y cortesías creadas, para tener control total y evitar duplicaciones.
 
 **Why this priority**: Sin visibilidad, es fácil bloquear dos veces el mismo asiento o perder el control del inventario.
 
-**Independent Test**: El gestor accede al panel, filtra por "Bloqueados" y ve la lista completa con patrocinadores, fechas y estados.
+**Independent Test**: El coordinador accede al panel, filtra por "Bloqueados" y ve la lista completa con patrocinadores, fechas y estados.
 
 **Acceptance Scenarios**:
 
 1. **Scenario: Visualización de bloqueos activos**
     - **Given** que hay múltiples bloqueos y cortesías creadas
-    - **When** el gestor abre el panel de administración
+    - **When** el coordinador abre el panel de administración
     - **Then** ve una lista clara con asiento, tipo (bloqueo/cortesía), destinatario y fecha de expiración
 
 2. **Scenario: Edición de bloqueo existente**
     - **Given** un bloqueo creado para "Empresa X"
-    - **When** el gestor necesita cambiarlo a "Empresa Y"
+    - **When** el coordinador necesita cambiarlo a "Empresa Y"
     - **Then** puede editar la etiqueta sin liberar el asiento
 
 3. **Scenario: Liberación manual anticipada**
     - **Given** un bloqueo activo
     - **When** el patrocinador confirma que no usará los asientos
-    - **Then** el gestor puede liberarlos manualmente y pasan a disponible inmediatamente
+    - **Then** el coordinador puede liberarlos manualmente y pasan a disponible inmediatamente
 
 ---
 
@@ -84,11 +84,11 @@ Como **Gestor de Inventario**, quiero tener un panel donde pueda ver todos los a
 
 - **¿Qué pasa si se bloquea un asiento que ya estaba bloqueado?** El sistema debe alertar que el asiento ya tiene un bloqueo activo y no permitir duplicados.
 - **¿Qué pasa si se crea una cortesía para un asiento ya ocupado?** El sistema debe rechazar la operación y mostrar error.
-- **¿Qué pasa si el patrocinador necesita más asientos de los disponibles en una sección?** El gestor debe poder ver disponibilidad en tiempo real y ajustar.
+- **¿Qué pasa si el patrocinador necesita más asientos de los disponibles en una sección?** El coordinador debe poder ver disponibilidad en tiempo real y ajustar.
 - **¿Qué pasa con bloqueos para eventos recurrentes?** El sistema debe permitir copiar configuración de bloqueos de un evento a otro.
 - **¿Qué pasa si un invitado con cortesía no llega?** El asiento queda marcado como "Cortesía no usada" para reportes.
-- **¿Qué pasa si se necesita transferir una cortesía a otra persona?** El gestor debe poder reasignar el ticket a otro nombre sin cambiar el asiento.
-- **¿Qué pasa si un bloqueo no tiene fecha de liberación y el evento se acerca?** El gestor debe poder ver esos casos en el panel y decidir si liberar manualmente.
+- **¿Qué pasa si se necesita transferir una cortesía a otra persona?** El coordinador debe poder reasignar el ticket a otro nombre sin cambiar el asiento.
+- **¿Qué pasa si un bloqueo no tiene fecha de liberación y el evento se acerca?** El coordinador debe poder ver esos casos en el panel y decidir si liberar manualmente.
 
 ---
 
