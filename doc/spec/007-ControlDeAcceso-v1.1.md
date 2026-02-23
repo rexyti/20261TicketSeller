@@ -11,7 +11,7 @@
 Como **Validador** (personal de puerta), quiero poder escanear el código de un ticket (QR/código de barras) y que el
 sistema me indique si es válido para acceder al recinto, para permitir la entrada rápida y correcta de los asistentes.
 
-**Why this priority**: Es la operación fundamental del control de acceso; sin ella no se puede gestionar la entrada al
+**Why this priority**: Es la operación fundamental del control de acceso; indispensable para gestionar la entrada al
 evento.
 
 **Independent Test**: Un validador escanea un ticket válido que corresponde a un asiento libre para el evento actual. El
@@ -186,8 +186,12 @@ el segundo recibe "TICKET YA UTILIZADO" inmediatamente.
 
 ### Key Entities *(include if feature involves data)*
 
-- **[Entity 1]**: [What it represents, key attributes without implementation]
-- **[Entity 2]**: [What it represents, relationships to other entities]
+- **[Ticket]** : Es la representación digital del derecho de acceso. Contiene la información que será escaneada (código QR/barras). Sus atributos clave incluyen: Código único, Estado (Vendido, Usado, Cancelado/Reembolsado), Evento asociado, Asiento asociado, Tipo de acceso (general, VIP, cortesía, movilidad reducida, ticket familiar con contador de usos).
+- **[Evento]** : Representa la instancia del espectáculo. Es crucial para validar que el ticket corresponde al evento correcto y al horario adecuado. Atributos clave: Fecha, Hora de inicio/fin, Recinto, Aforo máximo.
+- **[Validación (Intento de Acceso)]** : Representa el registro de cada intento de escaneo, exitoso o no. Es una entidad de auditoría. Sus atributos: Timestamp, Ticket ID, Validador ID, Resultado (éxito/fallo), Código de rechazo (ya usado, evento incorrecto, etc.), Modo (online/offline).
+- **[Recinto]** : Define el espacio físico. Es necesario para gestionar el aforo en tiempo real y las reglas de acceso por puerta.
+- **[Aforo (Contador en Tiempo Real)]** : Representa la capacidad máxima del recinto y el contador actual de personas que han ingresado. Es una entidad de control, especialmente para eventos sin asientos numerados.
+- **[Registro Offline]** : Representa las validaciones almacenadas localmente en el dispositivo cuando no hay conexión. Contiene la misma información que una validación normal, más un flag de sincronización (pendiente/sincronizado).
 
 ## Success Criteria *(mandatory)*
 
