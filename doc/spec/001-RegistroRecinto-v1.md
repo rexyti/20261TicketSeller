@@ -11,7 +11,7 @@
 Como **Administrador de Recintos**, quiero poder registrar un nuevo recinto donde se realizarán las ventas,
 con su información básica, para que esté disponible para asignación de eventos y venta de tickets.
 
-**Why this priority**: Es esencial porque sin registrar los recintos no se pueden organizar los eventos ni gestionar las
+**Why this priority**: Es esencial porque el registro de los recintos es crucial para organizar eventos y gestionar las
 ventas.
 
 **Independent Test**: Un administrador llena el formulario de ***Nuevo Recinto*** con los
@@ -21,13 +21,13 @@ del sistema.
 **Acceptance Scenarios**:
 
 1. **Scenario: Registro Exitoso**
-    - **Given** que el administrador ha iniciado sesión y accede al formulario de ***registro de recintos***.
-    - **When** el administrador ingresa los datos obligatorios y hace click en el botón ***guardar***.
-    - **Then** el sistema muestra un mensaje de ***Recinto registrado con éxito*** y este debe aparecer en la lista
-      principal de recintos.
+    - **Given** que no se ha creado aún un recinto.
+    - **When** el administrador ingresa los datos obligatorios y hace clic en el botón ***guardar***.
+    - **Then** el sistema muestra un mensaje de ***Recinto registrado con éxito***, lo persiste, y este debe aparecer en
+      la lista principal de recintos.
 
 2. **Scenario: Registro Fallido**
-    - **Given** el administrador está en el formulario de ***registro de recintos***.
+    - **Given** que no se ha creado aún un recinto.
     - **When** el administrador intenta ***guardar*** sin completar los campos obligatorios.
     - **Then** el sistema debe mostrar un mensaje indicando ***los campos obligatorios que no se completaron***
       y ***no*** debe crear el recinto.
