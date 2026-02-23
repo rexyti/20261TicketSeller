@@ -11,7 +11,7 @@
 Como **Comprador** quiero poder comprar uno o varios tickets usando mi tarjeta o cualquier medio de pago online
 de forma segura para asegurar mi entrada a algún evento sin tener que ir a una taquilla física.
 
-**Why this priority**: Es el eje central del sistema. Sin esto el negocio no existe. Al ser ventas online, debe ser
+**Why this priority**: Es el eje central del sistema. Totalmente indispensable. Al ser ventas online, debe ser
 robusto y confiable desde el lanzamiento inicial.
 
 **Independent Test**: Un comprador elige un evento con disponibilidad, y un asiento, ya sea manual, automático o
@@ -108,8 +108,15 @@ para completar la transacción.
 
 ### Key Entities *(include if feature involves data)*
 
-- **[Entity 1]**: [What it represents, key attributes without implementation]
-- **[Entity 2]**: [What it represents, relationships to other entities]
+- **[Comprador]** : Representa a la persona que realiza la compra. Se menciona en la necesidad de asociar la compra a un usuario y en el registro de auditoría (IP, datos de contacto para el envío del email).
+- **[Venta]** : Es la transacción comercial principal. Representa el intento de compra de uno o múltiples tickets. Sus atributos clave incluyen: Estado (Pendiente, Completada, Fallida, etc.), Fecha, Monto total, Método de pago, ID único de transacción.
+- **[Ticket]** : Representa el comprobante digital de entrada para un asiento específico en un evento. Es el "producto" final que se compra. Se relaciona con Venta y contiene atributos como: Código QR único, Estado (Vendido, Reembolsado).
+- **[Asiento]** : Representa la ubicación física específica que el comprador está adquiriendo. Es crucial para gestionar la disponibilidad y las reservas. Sus estados clave en este contexto son: Disponible, Reservado, Vendido.
+- **[Evento]** : Representa la instancia del espectáculo o función para la cual se compran los tickets. Define la disponibilidad de los asientos.
+- **[Transacción Financiera]** : Representa la interacción con la pasarela de pagos. Aunque podría ser parte de la entidad Venta, el spec sugiere la necesidad de un registro detallado para auditoría: Respuesta de la pasarela, Código de autorización, Estado del pago (aprobado/rechazado).
+- **[Carrito]** : Representa el contexto temporal del comprador. Contiene la selección de Asientos y gestiona el tiempo de Reserva (timeout de 15 minutos).
+- **[Reserva]** : Es un estado temporal aplicado a un Asiento (o grupo de asientos) durante el proceso de compra. Contiene información como: Timestamp de inicio, Duración, Estado (Activa/Expirada).
+- **[Pasarela de Pagos]** : Si bien es un sistema externo, desde la perspectiva del sistema es una entidad de integración con la que se interactúa para procesar los pagos.
 
 ## Success Criteria *(mandatory)*
 
