@@ -34,7 +34,7 @@ ya no aparece como disponible para la venta.
 
 3. **Scenario: Cambio a un estado no permitido por reglas de negocio**
     - **Given** un asiento que ya está en estado ***Vendido***, por ejemplo.
-    - **When** el gestor intenta cambiarlo directamente a "libre".
+    - **When** el gestor intenta cambiarlo directamente a ***Disponible***.
     - **Then** el sistema muestra un mensaje ***No se puede cambiar un asiento comprado a libre. Debe procesar la
       cancelación de la venta primero.** * y el estado permanece sin cambios.
 
@@ -49,28 +49,29 @@ reconfiguración o liberar grupos de asientos reservados.
 **Why this priority**: Mejora la eficiencia operativa, pero no es imprescindible para un lanzamiento inicial; puede
 implementarse en una segunda fase.
 
-**Independent Test**: El gestor selecciona una zona completa de asientos (ej. "Fila A"), elige la acción masiva "
-Bloquear", confirma la operación y verifica que todos los asientos de esa fila aparezcan como bloqueados.
+**Independent Test**: El gestor selecciona una zona completa de asientos (ej. "Fila A"), elige la acción masiva
+***Bloquear***, confirma la operación y verifica que todos los asientos de esa fila aparezcan como ***bloqueados***.
 
 **Acceptance Scenarios**:
 
 1. **Scenario: Cambio masivo exitoso**
     - **Given** un evento con varias secciones y asientos en distintos estados.
     - **When** el gestor aplica un filtro (por ejemplo, "todos los asientos de la zona VIP") y selecciona la acción
-      masiva "Marcar como bloqueado".
+      masiva ***Marcar como bloqueado***.
     - **Then** el sistema solicita confirmación mostrando el número de asientos afectados, y tras confirmar, actualiza
       todos los asientos seleccionados al nuevo estado, mostrando un mensaje de éxito.
 
 2. **Scenario: Cambio masivo con advertencia de asientos no modificables**
-    - **Given** una selección que incluye asientos en estado "comprado" y el gestor intenta cambiarlos a "bloqueado".
+    - **Given** una selección que incluye asientos en estado ***comprado*** y el gestor intenta cambiarlos a
+      ***bloqueado***.
     - **When** el sistema detecta que algunos asientos no pueden ser modificados por reglas de negocio.
     - **Then** el sistema muestra una advertencia:
       ***X asientos no pueden ser modificados porque están comprados. ¿Desea continuar solo con los asientos
       modificables (Y asientos)?***. Si el gestor acepta, se aplica el cambio solo a los permitidos.
 
 3. **Scenario: Cancelación de cambio masivo**
-    - **Given** el gestor ha seleccionado múltiples asientos y elegido una acción masiva.
-    - **When** en el diálogo de confirmación, elige "Cancelar".
+    - **Given** que hay una selección de múltiples asientos y elegido una acción masiva.
+    - **When** el gestor entra en el diálogo de confirmación, elige ***Cancelar***.
     - **Then** no se realiza ningún cambio y todos los asientos mantienen su estado original.
 
 ---
@@ -97,25 +98,20 @@ muestra una lista cronológica con fecha, usuario, estado anterior y nuevo.
 2. **Scenario: Historial vacío**
     - **Given** un asiento que nunca ha sido modificado manualmente (solo estado inicial).
     - **When** el gestor consulta el historial.
-    - **Then** el sistema muestra un mensaje ***No hay cambios registrados para este asiento.** *
-
-3. **Scenario: Permisos de acceso**
-    - **Given** un usuario sin permisos de auditoría intenta acceder al historial.
-    - **When** intenta ver el historial.
-    - **Then** el sistema deniega el acceso mostrando un mensaje de permisos insuficientes.
+    - **Then** el sistema muestra un mensaje ***No hay cambios registrados para este asiento.**
 
 ---
-
+<!--
 ### User Story 4 - Revertir un Cambio de Estado (Priority: P3)
 
 Como **Gestor de Inventario**, quiero poder revertir un cambio de estado reciente en caso de error, para restaurar
 rápidamente la situación anterior sin tener que buscar y reasignar manualmente.
 
-**Why this priority**: Aumenta la usabilidad y reduce el impacto de errores operativos, pero puede ser reemplazado por
+**Why this priority**: Aumenta la usabilidad y reduce el impacto de errores operativos, aunque puede ser reemplazado por
 un cambio manual en su defecto.
 
-**Independent Test**: El gestor comete un error al cambiar un asiento a "bloqueado", accede al historial y selecciona "
-Revertir" en el último cambio. El test es exitoso si el asiento vuelve al estado anterior.
+**Independent Test**: El gestor comete un error al cambiar un asiento a ***Bloqueado***, accede al historial y 
+selecciona ***Revertir último cambio***. El test es exitoso si el asiento vuelve al estado anterior.
 
 **Acceptance Scenarios**:
 
@@ -139,6 +135,7 @@ Revertir" en el último cambio. El test es exitoso si el asiento vuelve al estad
       mensaje correspondiente.
 
 ---
+-->
 
 ### Edge Cases
 
@@ -187,8 +184,9 @@ Revertir" en el último cambio. El test es exitoso si el asiento vuelve al estad
 
 ### Key Entities *(include if feature involves data)*
 
-- **[Entity 1]**: [What it represents, key attributes without implementation]
-- **[Entity 2]**: [What it represents, relationships to other entities]
+1. **Asiento**:
+    - Representa un puesto dentro del recinto donde se organizan los eventos, el cual el comprador reserva y usa.
+    - **Atributos**: ***ID único, Fila, Columna, Número, Estado***
 
 ## Success Criteria *(mandatory)*
 
