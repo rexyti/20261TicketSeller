@@ -43,6 +43,37 @@ y recibe por email un QR para validar su acceso.
 
 ---
 
+### User Story 2 - Manejo de Carrito y Timeout (Priority: P2)
+
+Como **Comprador**, quiero que los asientos que estoy comprando se reserven temporalmente mientras completo el proceso
+de pago, para que nadie más me los quite, pero también quiero que se liberen si me arrepiento o tardo mucho en completar
+la transacción.
+
+**Why this priority**: Es importante porque evita la frustración del comprador de que alguien le gane el/los asiento(s),
+pero también evita que compradores malintencionados bloqueen asientos sin pagar, aunque no es critíco para un
+lanzamiento inicial.
+
+**Independent Test**: Un comprador añade asientos al carrito y los mantiene reservados por 10-15 minutos. Si cierra el
+navegador sin pagar, los asientos se liberan automáticamente pasados los 10-15 minutos en caso de que este no regrese
+para completar la transacción.
+
+**Acceptance Scenarios**:
+
+1. **Scenario: Reserva Temporal al añadir al carrito**
+    - **Given** que hay uno o muchos asientos disponibles en un evento.
+    - **When** el comprador los añade a su carrito.
+    - **Then** los asientos deben marcarse como ***Reservado*** en el sistema por 10-15 minutos y los demás compradores
+      que vean el mapa de asientos para ese evento, deben ver el asiento como ***Reservado*** también, o
+      ***Temporalmente no disponible***.
+
+2. **Scenario: Liberación automática por timeout**
+    - **Given** un asiento reservado por 10-15 minutos.
+    - **When** pasan 10-15 minutos y el comprador no completó la compra.
+    - **Then** el asiento debe volver a estado ***Disponible*** y el sistema debe registrar "***Reserva liberada por
+      timeout***"
+
+---
+
 ## Edge Cases
 
 - ¿Qué pasa cuando **compro un ticket, pero cierro el sistema sin completar el pago**?  
@@ -73,6 +104,7 @@ y recibe por email un QR para validar su acceso.
   Reembolsada, Fallida***.
 - **FR-009**: El sistema **DEBE** registrar todas las transacciones para auditoría (***fecha, monto, método, usuario,
   IP***).
+- **FR-010**: [**NEEDS CLARIFICATION**: ¿El sistema debe extender el tiempo de reserva al iniciar el pago?]
 
 ### Key Entities *(include if feature involves data)*
 
