@@ -54,7 +54,7 @@ Como **Comprador**, quiero que el sistema me impida comprar un asiento que otro 
 
 ### User Story 3 - Confirmar compra y marcar asiento como ocupado (Priority: P1)
 
-Como **Sistema**, necesito que al confirmarse el pago, el asiento se marque como ocupado de forma permanente, para mantener la integridad del inventario.
+Como **Agente de ventas**, necesito que al confirmarse el pago, el sistema marque el asiento como ocupado de forma permanente, para mantener la integridad del inventario.
 
 **Why this priority**: Es el cierre del ciclo de compra. Sin esto, el inventario quedaría inconsistente.
 
@@ -78,7 +78,7 @@ Como **Sistema**, necesito que al confirmarse el pago, el asiento se marque como
 
 ### User Story 4 - Manejo de concurrencia en compras simultáneas (Priority: P2)
 
-Como **Sistema**, quiero garantizar que si dos compradores intentan comprar el mismo asiento exactamente al mismo tiempo, solo uno lo logre, para evitar sobreventa.
+Como **Agente de ventas**, quiero garantizar que si dos compradores intentan comprar el mismo asiento exactamente al mismo tiempo, el sistema haga que solo uno lo logre, para evitar sobreventa.
 
 **Why this priority**: Protege contra casos extremos de alta concurrencia, aunque no ocurre frecuentemente.
 
