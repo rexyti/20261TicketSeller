@@ -9,17 +9,13 @@
 ### User Story 1 - Designar Aforo del Recinto (Priority: P1)
 
 Como **Administrador de Recintos**, quiero poder establecer la capacidad máxima total de un recinto, para controlar que
-no se vendan
-más entradas de las permitidas.
+no se vendan más entradas de las permitidas.
 
-**Why this priority**: Es una configuración esencial. Sin un número máximo de personas, el sistema no puede evitar la
-sobreventa.
+**Why this priority**: Es esencial para mejorar la gestion del espacio y establecer limites pertinentes. 
 La seguridad y legalidad de los eventos dependen de esto.
 
 **Independent Test**: Un administrador accede a la configuración de un recinto existente, o durante la creación de uno,
-encuentra un
-campo llamado ***Capacidad Máxima Total***, ingresa un número, **por ejemplo, 500**, y guarda. El test es exitoso si al
-intentar
+encuentra un campo llamado ***Capacidad Máxima Total***, ingresa un número, **por ejemplo, 500**, y guarda. El test es exitoso si al intentar
 crear un evento en ese recinto, el sistema no permite vender más de 500 entradas.
 
 **Acceptance Scenarios**:
@@ -94,7 +90,7 @@ al comprar, el usuario puede elegir zona y el sistema respeta los límites de ca
     - **Given** un recinto ya existente con capacidad máxima establecida.
     - **When** el administrador intenta crear una zona, pero la capacidad de esta supera la restante del recinto.
     - **Then** el sistema debe mostrar un error "***La suma de la capacidad de las zonas no puede exceder la capacidad
-      total del recinto***" y **no** debe permitir guardar.
+      total del recinto***" y **NO** debe permitir guardar.
 
 ---
 
@@ -106,7 +102,6 @@ al comprar, el usuario puede elegir zona y el sistema respeta los límites de ca
   tiene.
 - ¿Qué pasaría si **una zona con tickets vendidos es eliminada**?  
   El sistema no debe permitirlo. Se debe requerir reubicar los tickets o cancelar la operación.
-- How does system handle [error scenario]?
 
 ## Requirements *(mandatory)*
 
@@ -122,8 +117,10 @@ al comprar, el usuario puede elegir zona y el sistema respeta los límites de ca
 
 ### Key Entities *(include if feature involves data)*
 
-- **[Entity 1]**: [What it represents, key attributes without implementation]
-- **[Entity 2]**: [What it represents, relationships to other entities]
+- **Recinto**:  Representa el espacio físico donde se realizan los eventos. Contiene información básica como nombre, ubicación, capacidad total máxima, y la categoría a la que pertenece. Puede estar compuesto por una o varias zonas internas.
+- **Categoria del Recinto**: Clasificación predefinida que permite agrupar recintos por tipo. Ayuda a la organización y filtrado en la interfaz.
+- **Zona**:  División interna de un recinto con una capacidad específica. Cada zona pertenece a un único recinto y su capacidad no puede exceder la capacidad total del mismo. Permite una gestión más detallada del aforo para eventos complejos.
+- **Evento**: Representa una instancia de un evento programado en un recinto. Al configurar la capacidad del recinto, se debe considerar que existen eventos asociados para evitar cambios que afecten ventas existentes.
 
 ## Success Criteria *(mandatory)*
 
