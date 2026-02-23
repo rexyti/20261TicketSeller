@@ -1,6 +1,6 @@
 # Feature Specification: Verificación de Reservas de Asientos
 
-**Created**: 22/02/2026
+**Created**: 23/02/2026
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -10,7 +10,7 @@
 
 Como **Comprador**, quiero que el sistema verifique que el asiento que seleccioné sigue disponible antes de confirmar mi compra, para asegurarme de que nadie más lo reservó mientras yo pagaba.
 
-**Why this priority**: Es la función principal. Gracias a esta verificación, podrían venderse dos veces el mismo asient.
+**Why this priority**: Es la función principal. Gracias a esta verificación, podrían venderse dos veces el mismo asiento.
 
 **Independent Test**: Un comprador selecciona un asiento, procede al pago y, justo antes de confirmar, el sistema verifica disponibilidad. Si el asiento está libre, continúa. Si alguien más lo compró, muestra error.
 
