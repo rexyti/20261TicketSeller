@@ -1,0 +1,215 @@
+# Feature Specification: Campañas y Descuentos
+
+**Created**: 22/02/2026
+
+## User Scenarios & Testing *(mandatory)*
+
+---
+
+### User Story 1 - Crear preventa exclusiva (Priority: P1)
+
+Como **Gestor de Inventario**, quiero poder crear una preventa exclusiva donde solo ciertos usuarios (ej. clientes registrados, miembros de un club) puedan comprar entradas antes que el público general, para premiar la fidelidad y generar expectativa.
+
+**Why this priority**: Es la función principal de campañas. Permite segmentar la venta y crear exclusividad.
+
+**Independent Test**: El gestor crea una preventa para "Miembros VIP" con 500 asientos disponibles. Un usuario miembro puede comprar, pero un usuario normal no ve los asientos disponibles hasta la fecha de venta general.
+
+**Acceptance Scenarios**:
+
+1. **Scenario: Creación de preventa exitosa**
+    - **Given** que hay asientos disponibles en el evento
+    - **When** el gestor crea una preventa con nombre "Preventa Club Fans", selecciona 200 asientos y define fechas
+    - **Then** la campaña queda activa en el sistema
+    - **And** solo los usuarios del club pueden ver y comprar esos asientos
+
+2. **Scenario: Acceso a preventa para usuarios autorizados**
+    - **Given** una preventa activa para "Miembros Premium"
+    - **When** un usuario miembro ingresa al mapa de asientos
+    - **Then** ve los asientos de preventa como disponibles
+    - **When** un usuario no miembro ingresa
+    - **Then** no ve esos asientos (o los ve bloqueados)
+
+---
+
+### User Story 2 - Crear descuento por tiempo limitado (Priority: P1)
+
+Como **Gestor de Inventario**, quiero poder crear descuentos porcentuales o por monto fijo que se apliquen automáticamente en el carrito durante un período específico, para incentivar ventas rápidas.
+
+**Why this priority**: Es la forma más común de promoción y genera conversión inmediata.
+
+**Independent Test**: El gestor crea un descuento de 20% por 48 horas. Un usuario agrega un ticket al carrito y ve el precio con descuento aplicado automáticamente.
+
+**Acceptance Scenarios**:
+
+1. **Scenario: Descuento porcentual activo**
+    - **Given** una campaña de descuento de 15% para todos los tickets
+    - **When** un usuario agrega un ticket de $100 al carrito
+    - **Then** el precio final muestra $85 con el descuento aplicado
+
+2. **Scenario: Descuento por monto fijo**
+    - **Given** una campaña de "$10 off" en compras mayores a $50
+    - **When** un usuario agrega tickets por $60 al carrito
+    - **Then** el precio final muestra $50
+
+3. **Scenario: Descuento fuera de vigencia**
+    - **Given** una campaña de descuento que terminó ayer
+    - **When** un usuario intenta comprar
+    - **Then** el precio se muestra sin descuento
+
+---
+
+### User Story 3 - Crear descuento por código promocional (Priority: P1)
+
+Como **Gestor de Inventario**, quiero poder generar códigos promocionales únicos o masivos que los usuarios deban ingresar para obtener un descuento, para medir el impacto de campañas específicas o influencers.
+
+**Why this priority**: Permite trackear el origen de las ventas y crear campañas segmentadas.
+
+**Independent Test**: El gestor crea 100 códigos "INFLUENCER10" con 10% de descuento. Un usuario ingresa el código y ve el descuento aplicado. Otro usuario intenta usar el mismo código dos veces y el sistema lo rechaza.
+
+**Acceptance Scenarios**:
+
+1. **Scenario: Código promocional válido**
+    - **Given** un código "AMIGO20" con 20% de descuento
+    - **When** el usuario ingresa el código en el carrito
+    - **Then** el descuento se aplica al total
+
+2. **Scenario: Código ya usado**
+    - **Given** un código de uso único que ya fue utilizado
+    - **When** otro usuario intenta usarlo
+    - **Then** el sistema muestra **CÓDIGO INVÁLIDO O YA UTILIZADO**
+
+3. **Scenario: Código expirado**
+    - **Given** un código con fecha de vencimiento pasada
+    - **When** un usuario intenta usarlo
+    - **Then** el sistema muestra **CÓDIGO EXPIRADO**
+
+4. **Scenario: Código con límite de usos**
+    - **Given** un código "VERANO10" válido para 50 usos
+    - **When** se llega a 50 usos
+    - **Then** el código deja de funcionar automáticamente
+
+---
+
+### User Story 4 - Combinar múltiples campañas (Priority: P2)
+
+Como **Gestor de Inventario**, quiero poder definir si los descuentos son acumulables o no, para tener control sobre la rentabilidad de las promociones.
+
+**Why this priority**: Importante para evitar descuentos excesivos que afecten la ganancia.
+
+**Independent Test**: El gestor configura dos descuentos como no acumulables. Un usuario con ambos códigos recibe solo el mayor descuento.
+
+**Acceptance Scenarios**:
+
+1. **Scenario: Descuentos no acumulables**
+    - **Given** dos descuentos activos (10% y 15%) configurados como no acumulables
+    - **When** un usuario aplica ambos
+    - **Then** se aplica solo el descuento mayor (15%)
+
+2. **Scenario: Descuentos acumulables**
+    - **Given** dos descuentos configurados como acumulables (10% y $5)
+    - **When** un usuario aplica ambos
+    - **Then** se aplican ambos descuentos
+
+---
+
+### User Story 5 - Segmentar descuentos por tipo de ticket o sección (Priority: P2)
+
+Como **Gestor de Inventario**, quiero poder aplicar descuentos solo a ciertas secciones (ej. VIP) o tipos de ticket (ej. estudiantes), para promocionar áreas específicas del evento.
+
+**Why this priority**: Permite estrategias de venta más precisas y mover inventario de zonas menos demandadas.
+
+**Independent Test**: El gestor crea 25% de descuento solo para sección "Platea Alta". Un usuario ve el descuento solo en tickets de esa sección.
+
+**Acceptance Scenarios**:
+
+1. **Scenario: Descuento por sección específica**
+    - **Given** un descuento de 30% solo para "Zona VIP"
+    - **When** un usuario agrega un ticket VIP al carrito
+    - **Then** ve el descuento aplicado
+    - **When** agrega un ticket de "General"
+    - **Then** no ve descuento en ese ticket
+
+2. **Scenario: Descuento por tipo de ticket**
+    - **Given** un descuento de 40% para "Estudiantes"
+    - **When** un estudiante compra con verificación
+    - **Then** se aplica el descuento
+
+---
+
+### User Story 6 - Pausar o finalizar campaña anticipadamente (Priority: P2)
+
+Como **Gestor de Inventario**, quiero poder pausar o detener una campaña antes de su fecha de fin si es necesario, para reaccionar rápido ante problemas o cambios de estrategia.
+
+**Why this priority**: Da control operativo sobre las promociones en curso.
+
+**Independent Test**: El gestor pausa una campaña activa y verifica que los usuarios ya no ven el descuento.
+
+**Acceptance Scenarios**:
+
+1. **Scenario: Pausar campaña activa**
+    - **Given** una campaña de descuento en curso
+    - **When** el gestor la pausa manualmente
+    - **Then** los usuarios dejan de ver el descuento inmediatamente
+
+2. **Scenario: Reanudar campaña pausada**
+    - **Given** una campaña pausada
+    - **When** el gestor la reanuda
+    - **Then** el descuento vuelve a estar activo
+
+3. **Scenario: Finalizar campaña anticipadamente**
+    - **Given** una campaña con fecha de fin en 7 días
+    - **When** el gestor la finaliza hoy manualmente
+    - **Then** la campaña termina y no se pueden usar más los beneficios
+
+---
+
+### Edge Cases
+
+- **¿Qué pasa si un usuario aplica un código y luego agrega más tickets?** El sistema debe recalcular el descuento sobre el nuevo total.
+- **¿Qué pasa si un descuento deja de ser válido mientras el usuario está en el carrito?** Al finalizar la compra, se debe reverificar y si expiró, mostrar mensaje.
+- **¿Qué pasa con descuentos en compras de grupos familiares?** Aplicar solo a tickets elegibles dentro del grupo.
+- **¿Qué pasa si se crea un código promocional sin límite de usos?** El sistema debe permitirlo pero alertar sobre el riesgo.
+- **¿Qué pasa si dos campañas aplican al mismo ticket y son acumulables?** El sistema debe aplicar en orden y mostrar desglose.
+- **¿Qué pasa si el gestor quiere eliminar una campaña que ya tuvo usos?** No debe permitirse, solo pausar o finalizar, para mantener trazabilidad.
+
+---
+
+## Requirements *(mandatory)*
+
+### Functional Requirements
+
+- **FR-001**: El sistema DEBE permitir crear preventas con fechas de inicio y fin, y segmentación por tipo de usuario.
+- **FR-002**: El sistema DEBE validar que solo usuarios autorizados puedan ver y comprar en preventas.
+- **FR-003**: El sistema DEBE permitir crear descuentos porcentuales o por monto fijo.
+- **FR-004**: El sistema DEBE aplicar descuentos automáticamente en el carrito según las reglas de la campaña.
+- **FR-005**: El sistema DEBE permitir generar códigos promocionales únicos o masivos.
+- **FR-006**: El sistema DEBE controlar límites de uso por código (máximo de usos totales o por usuario).
+- **FR-007**: El sistema DEBE validar códigos promocionales al momento de aplicarlos.
+- **FR-008**: El sistema DEBE permitir configurar si los descuentos son acumulables o no.
+- **FR-009**: El sistema DEBE permitir segmentar descuentos por sección, tipo de ticket o categoría de usuario.
+- **FR-010**: El sistema DEBE permitir pausar, reanudar o finalizar campañas manualmente.
+- **FR-011**: El sistema DEBE mostrar al usuario el detalle de los descuentos aplicados en el carrito.
+- **FR-012**: El sistema DEBE [NEEDS CLARIFICATION: definir si los descuentos aplican antes o después de impuestos?]
+- **FR-013**: El sistema DEBE [NEEDS CLARIFICATION: hay un monto máximo de descuento por transacción?]
+
+---
+
+### Key Entities
+
+- **Campaña**: Promoción o preventa configurada. Atributos: ID, Nombre, Tipo (Preventa, Descuento, Códigos), Fechas, Estado (Activa, Pausada, Finalizada).
+- **Descuento**: Regla de reducción de precio. Atributos: Tipo (Porcentaje, Monto fijo), Valor, Segmentación, Acumulable.
+- **Código Promocional**: Identificador para aplicar descuento. Atributos: Código, Campaña asociada, Usos máximos, Usos actuales, Fechas de validez.
+- **Preventa**: Segmentación de acceso. Atributos: Usuarios autorizados, Asientos disponibles, Fechas.
+
+---
+
+## Success Criteria *(mandatory)*
+
+### Measurable Outcomes
+
+- **SC-001**: Crear una campaña nueva toma menos de 3 minutos.
+- **SC-002**: El descuento se refleja en el carrito en menos de 1 segundo después de aplicar código.
+- **SC-003**: Cero casos donde un usuario no autorizado acceda a una preventa.
+- **SC-004**: Cero casos donde un código promocional se use más veces de las permitidas.
+- **SC-005**: Las campañas pausadas dejan de afectar compras en menos de 1 minuto.
+- **SC-006**: Aumento del 20% en ventas durante períodos de campaña activa (versus períodos sin campaña).
