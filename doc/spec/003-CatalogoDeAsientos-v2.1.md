@@ -11,8 +11,8 @@
 Como **Gestor de Inventario**, quiero poder registrar un nuevo tipo de asiento con su información básica, para poder
 categorizar los asientos disponibles en los recintos (por ejemplo, VIP, Platea, General).
 
-**Why this priority**: Es esencial porque sin los tipos de asiento no se pueden diferenciar las categorías de asientos,
-lo que impediría una correcta venta de entradas.
+**Why this priority**: Es esencial puesto que los tipos de asiento se usan para diferenciar las categorías de asientos,
+para así tener una correcta venta de entradas.
 
 **Independent Test**: Un gestor llena el formulario de ***Nuevo Tipo de Asiento*** con los datos mínimos requeridos y lo
 guarda. El test es exitoso si el tipo de asiento aparece inmediatamente en la lista de tipos de asiento del sistema.
@@ -60,7 +60,7 @@ Como **Gestor de Inventario**, quiero poder asignar un tipo de asiento a una zon
 ejemplo, "Zona VIP" en el "Estadio Nacional"), para que los asientos de esa zona queden categorizados y puedan ser
 ofrecidos con el precio y condiciones correspondientes.
 
-**Why this priority**: Es una funcionalidad clave para operar, ya que sin esta asignación los tipos de asiento no tienen
+**Why this priority**: Es una funcionalidad clave para operar, para que con esta asignación los tipos de asiento tengan
 aplicación práctica en los eventos.
 
 **Independent Test**: Un gestor selecciona un recinto y una zona existente, elige un tipo de asiento de la lista y
@@ -178,8 +178,12 @@ mapa visual.
 
 ### Key Entities *(include if feature involves data)*
 
-- **[Entity 1]**: [What it represents, key attributes without implementation]
-- **[Entity 2]**: [What it represents, relationships to other entities]
+- **[Tipo de Asiento]** : Representa la categoría o clasificación de un asiento (ej. VIP, Platea, General). Sus atributos clave incluyen: Nombre, Descripción, ID único interno, Estado (Activo/Inactivo).
+- **[Recinto]** : Representa el espacio físico (ej. Estadio Nacional, Teatro) que contiene las zonas donde se asignan los asientos.
+- **[Zona]** : Representa una subdivisión o área específica dentro de un recinto (ej. Zona VIP, Platea Baja). Es la entidad a la que se le asigna un Tipo de Asiento.
+- **[Mapa de Asientos]** : Representa la configuración detallada de la disposición de los asientos dentro de un recinto.
+- **[Asiento (Numerado)]** : Representa una unidad individual y única dentro de un Mapa de Asientos (ej. Fila A, Asiento 12).
+- **[Evento]** : Representa una ocurrencia futura (ej. un concierto o partido) que utiliza las secciones y sus tipos de asiento asignados. Es crucial para validar restricciones (no desactivar tipos con eventos futuros).
 
 ## Success Criteria *(mandatory)*
 
