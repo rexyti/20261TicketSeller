@@ -9,32 +9,31 @@
 ### User Story 1 - Cambio Individual de Estado de Asiento (Priority: P1)
 
 Como **Gestor de Inventario**, quiero poder cambiar el estado de un asiento específico dentro de un evento, para
-gestionar incidencias puntuales (por ejemplo, marcar como bloqueado un asiento con problemas físicos o liberar uno
-reservado manualmente).
+gestionar incidencias puntuales como el mantenimiento del recinto.
 
 **Why this priority**: Es la operación más básica y necesaria para el control manual del inventario de asientos,
 permitiendo reaccionar a situaciones imprevistas.
 
 **Independent Test**: El gestor selecciona un evento, accede al mapa de asientos, elige un asiento libre, cambia su
-estado a "bloqueado" y guarda. El test es exitoso si al recargar la vista, el asiento muestra el nuevo estado y ya no
-aparece como disponible para la venta.
+estado a ***bloqueado*** y guarda. El test es exitoso si al recargar la vista, el asiento muestra el nuevo estado y
+ya no aparece como disponible para la venta.
 
 **Acceptance Scenarios**:
 
 1. **Scenario: Cambio exitoso de estado**
-    - **Given** un evento con asientos cargados y el gestor autenticado en la vista de mapa de asientos.
-    - **When** el gestor selecciona un asiento en estado "libre", elige el estado "bloqueado" en el menú contextual y
-      confirma el cambio.
-    - **Then** el sistema muestra un mensaje ***Estado actualizado correctamente*** y el asiento aparece visualmente
-      como bloqueado, reflejando el nuevo estado en todos los módulos del sistema.
+    - **Given** un evento con asientos cargados.
+    - **When** el gestor selecciona un asiento del mapa en estado ***Disponible***, elige el estado ***Mantenimiento***
+      y confirma el cambio.
+    - **Then** el sistema muestra un mensaje ***Estado actualizado correctamente***, persiste el cambio y el asiento
+      aparece visualmente como ***En Mantenimiento***, reflejando el nuevo estado en todos los módulos del sistema.
 
 2. **Scenario: Intento de cambio sin seleccionar estado destino**
-    - **Given** el gestor tiene un asiento seleccionado.
-    - **When** intenta guardar sin haber elegido un nuevo estado.
+    - **Given** un evento con asientos cargados.
+    - **When** el gestor tiene un asiento seleccionado e intenta guardar sin haber elegido un nuevo estado.
     - **Then** el sistema muestra un mensaje ***Debe seleccionar un estado destino*** y no realiza ningún cambio.
 
 3. **Scenario: Cambio a un estado no permitido por reglas de negocio**
-    - **Given** un asiento que ya está en estado "comprado".
+    - **Given** un asiento que ya está en estado ***Vendido***, por ejemplo.
     - **When** el gestor intenta cambiarlo directamente a "libre".
     - **Then** el sistema muestra un mensaje ***No se puede cambiar un asiento comprado a libre. Debe procesar la
       cancelación de la venta primero.** * y el estado permanece sin cambios.

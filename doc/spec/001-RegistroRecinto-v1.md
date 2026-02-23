@@ -61,8 +61,8 @@ se ha actualizado correctamente.
 Como **Administrador de Recinto**, quiero poder desactivar un recinto que ya no estará en uso, para que no aparezca
 en la lista de opciones al crear nuevos eventos.
 
-**Why this priority**: Es una funcionalidad de "limpieza" y control de inventario. No es crítica, pero es necesaria a
-medida que el sistema crece y se acumulan recintos antiguos.
+**Why this priority**: Es una funcionalidad de "***limpieza***" y control de inventario. No es crítica, pero es 
+necesaria a medida que el sistema crece y se acumulan recintos antiguos.
 
 **Independent Test**: Un administrador desactiva un recinto. Luego, intenta crear un nuevo evento. El test es exitoso si
 el recinto desactivado **no** aparece en la lista desplegable para elegir el lugar del evento.
@@ -74,6 +74,7 @@ el recinto desactivado **no** aparece en la lista desplegable para elegir el lug
     - **When** el administrador ***cambia el estado*** del recinto a ***inactivo***.
     - **Then** el recinto debe desaparecer de las listas de selección activas y marcarse como **inactivo** en el
       historial.
+   
 2. **Scenario: Desactivar un recinto con eventos futuros**
     - **Given** un recinto que tiene uno o más eventos programados.
     - **When** el administrador intente ***cambiar el estado*** del recinto a ***inactivo***.
@@ -104,16 +105,11 @@ el recinto desactivado **no** aparece en la lista desplegable para elegir el lug
 - **FR-004**: El sistema **NO DEBE** permitir borrar físicamente un recinto, solo desactivarlo, para mantener la
   integridad de eventos pasados.
 
-*Example of marking unclear requirements:*
-
-- **FR-006**: System MUST authenticate users
-  via [NEEDS CLARIFICATION: auth method not specified - email/password, SSO, OAuth?]
-- **FR-007**: System MUST retain user data for [NEEDS CLARIFICATION: retention period not specified]
-
 ### Key Entities *(include if feature involves data)*
 
-- **[Entity 1]**: [What it represents, key attributes without implementation]
-- **[Entity 2]**: [What it represents, relationships to other entities]
+1. **Recinto**:
+    - Representa el espacio físico en el que se realizan los eventos.
+    - **Atributos**: ***ID único, Nombre, Ciudad, Dirección, Capacidad Máxima, Teléfono***
 
 ## Success Criteria *(mandatory)*
 
