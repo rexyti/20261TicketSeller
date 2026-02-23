@@ -112,11 +112,13 @@ al comprar, el usuario puede elegir zona y el sistema respeta los límites de ca
 
 ### Functional Requirements
 
-- **FR-001**: El sistema DEBE permitir configurar una capacidad máxima total para cada recinto.
-- **FR-002**: El sistema DEBE validar que la capacidad total sea un número entero positivo mayor a cero.
-- **FR-003**: El sistema DEBE permitir asignar una categoría al recinto desde una lista predefinida.
-- **FR-004**: El sistema DEBE permitir crear zonas dentro de un recinto, cada una con su propia capacidad.
-- **FR-005**: El sistema DEBE validar que la suma de capacidades de las zonas no supere la capacidad total del recinto.
+- **FR-001**: El administrador de recinto **DEBE** poder asignar la capacidad máxima a un recinto.
+- **FR-002**: El sistema **DEBE** validar que la capacidad total sea un número entero positivo mayor a cero.
+- **FR-003**: El sistema **DEBE** permitir asignar una categoría al recinto desde una lista predefinida.
+- **FR-004**: El administrador de recinto **DEBE** poder crear zonas dentro de un recinto, cada una con su propia
+  capacidad.
+- **FR-005**: El sistema **DEBE** validar que la suma de capacidades de las zonas no supere la capacidad total del
+  recinto.
 
 ### Key Entities *(include if feature involves data)*
 

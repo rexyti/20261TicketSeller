@@ -162,7 +162,7 @@ el segundo recibe "TICKET YA UTILIZADO" inmediatamente.
 
 ### Functional Requirements
 
-- **FR-001**: El sistema **DEBE** permitir al **Validador** escanear códigos (QR/código de barras) de tickets mediante
+- **FR-001**: El Validador de Accesos **DEBE** poder escanear códigos (QR/código de barras) de tickets mediante
   un dispositivo móvil o escáner, o introducir el código manualmente.
 - **FR-002**: El sistema **DEBE** comunicarse con el subsistema de gestión de eventos (del otro grupo) para verificar la
   validez del ticket (existencia, evento correcto, no cancelado) y con el subsistema de inventario (nuestro grupo) para

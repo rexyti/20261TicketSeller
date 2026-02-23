@@ -171,10 +171,10 @@ Revertir" en el último cambio. El test es exitoso si el asiento vuelve al estad
 
 ### Functional Requirements
 
-- **FR-001**: El sistema **DEBE** permitir al **Gestor de Inventario** cambiar el estado de un asiento individual en el
-  contexto de un evento específico.
-- **FR-002**: El sistema **DEBE** proporcionar una interfaz para seleccionar múltiples asientos (por sección, fila, o
-  mediante filtros) y aplicar un cambio de estado masivo.
+- **FR-001**: El Gestor de Inventario **DEBE** poder cambiar el estado de un asiento individual en el contexto de un
+  evento específico.
+- **FR-002**: El Gestor de Inventario **DEBE** poder seleccionar varios asientos mediante un mapa de asientos, y aplicar
+  un cambio de estado masivo.
 - **FR-003**: El sistema **DEBE** validar que los cambios de estado cumplan con las reglas de negocio definidas (por
   ejemplo, no permitir cambiar un asiento comprado a libre sin una cancelación asociada).
 - **FR-004**: El sistema **DEBE** registrar en un historial de auditoría todos los cambios de estado manuales,

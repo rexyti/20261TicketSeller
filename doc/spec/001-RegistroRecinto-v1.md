@@ -96,7 +96,7 @@ el recinto desactivado **no** aparece en la lista desplegable para elegir el lug
 
 ### Functional Requirements
 
-- **FR-001**: El sistema **DEBE** permitir al **Administrador de recintos** crear un recinto con, al menos:
+- **FR-001**: El administrador de recinto **DEBE** poder crear un recinto con, al menos:
   ***Nombre, Ciudad, Dirección y un ID único interno***.
 - **FR-002**: El sistema **DEBE** validar que no haya campos obligatorios vacíos antes de guardar.
 - **FR-003**: El sistema **DEBE** listar todos los recintos registrados en una vista de admin, con su estado

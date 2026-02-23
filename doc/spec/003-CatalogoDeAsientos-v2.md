@@ -116,11 +116,11 @@ Como **Gestor de Inventario**, quiero poder definir un mapa detallado con asient
 cada persona tiene una ubicación específica.
 
 **Why this priority**: Es una funcionalidad compleja. Este mapa sirve para casos más específicos como
-***teatros y cines***, aunque muchos eventos funcionan solo con entrada general o por zonas, por lo que no es crítico 
+***teatros y cines***, aunque muchos eventos funcionan solo con entrada general o por zonas, por lo que no es crítico
 para un lanzamiento inicial.
 
 **Independent Test**: Un gestor accede a un recinto, activa el ***Mapa de Asientos*** y dibuja una cuadrícula de
-que se asemeje al recinto. Luego crea un evento y los compradores deben poder elegir su asiento específico en un 
+que se asemeje al recinto. Luego crea un evento y los compradores deben poder elegir su asiento específico en un
 mapa visual.
 
 **Acceptance Scenarios**:
@@ -140,8 +140,8 @@ mapa visual.
 ### Edge Cases
 
 - **¿Qué sucede si intento registrar un tipo de asiento con un nombre que ya existe?**
-  El sistema debería mostrar una advertencia: "***Ya existe un tipo de asiento con este nombre. ¿Desea continuar de 
-  todas formas?***", permitiendo al gestor decidir si se trata de una duplicidad intencional (por ejemplo, 
+  El sistema debería mostrar una advertencia: "***Ya existe un tipo de asiento con este nombre. ¿Desea continuar de
+  todas formas?***", permitiendo al gestor decidir si se trata de una duplicidad intencional (por ejemplo,
   para diferentes recintos) o un error.
 
 - **¿Cómo maneja el sistema la edición de un tipo de asiento que ya está asignado a secciones?**
@@ -165,16 +165,16 @@ mapa visual.
 
 ### Functional Requirements
 
-- **FR-001**: El sistema **DEBE** permitir al **Gestor de Inventario** crear un tipo de asiento con, al menos:
+- **FR-001**: El Gestor de Inventario **DEBE** poder crear un tipo de asiento con, al menos:
   ***Nombre, Descripción, ID único interno y Estado (Activo/Inactivo)***.
 - **FR-002**: El sistema **DEBE** validar que el campo ***Nombre*** no esté vacío al guardar un nuevo tipo de asiento.
 - **FR-003**: El sistema **DEBE** listar todos los tipos de asiento registrados en una vista de administración,
   mostrando su estado y un indicador de si están siendo utilizados en secciones.
-- **FR-004**: El sistema **DEBE** permitir asignar un tipo de asiento a una sección específica de un recinto, siempre
-  que el tipo esté activo.
-- **FR-005**: El sistema **NO DEBE** permitir desactivar un tipo de asiento que esté asignado a una sección con eventos
+- **FR-004**: El Gestor de Inventario **DEBE** poder asignar un tipo de asiento a una zona específica de un recinto,
+  siempre que el tipo esté activo.
+- **FR-005**: El sistema **NO DEBE** permitir desactivar un tipo de asiento que esté asignado a una zona con eventos
   futuros.
-- **FR-006**: El sistema **DEBE** permitir la creación de un mapa de asientos detallado con filas y números.
+- **FR-006**: El Gestor de Inventario **DEBE** poder crear mapas de asientos detallados con filas y números.
 
 ### Key Entities *(include if feature involves data)*
 
