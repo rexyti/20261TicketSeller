@@ -20,18 +20,18 @@ comprador recibe un email de confirmación.
 **Acceptance Scenarios**:
 
 1. **Scenario**: Cancelación exitosa dentro del plazo
-    - **Given** un comprador con un ticket pagado y el evento aún no ocurre.
+    - **Given** un ticket pagado y el evento aún no ocurre.
     - **When** el comprador solicita la cancelación del ticket.
     - **Then** el sistema cancela el ticket, libera el asiento y notifica que el reembolso se procesará en X días
       hábiles.
 
 2. **Scenario**: Cancelación fuera de plazo
-    - **Given** un comprador con un ticket para un evento próximo o en curso.
+    - **Given** un ticket para un evento próximo o en curso.
     - **When** el comprador intenta cancelar su ticket.
     - **Then** el sistema muestra un mensaje indicando que no es posible cancelar y sugiere contactar a soporte.
 
 3. **Scenario**: Cancelación parcial de tickets
-    - **Given** que el comprador compró varios tickets para un evento
+    - **Given** varios tickets comprados para un evento.
     - **When** el comprador selecciona solo unos cuantos de ellos para cancelar
     - **Then** el sistema debe procesar la cancelación parcial, se debe reembolsar el monto correspondiente a los
       tickets cancelados y los demás deben permanecer activos.
@@ -43,8 +43,8 @@ comprador recibe un email de confirmación.
 Como **Comprador**, quiero recibir automáticamente mi reembolso completo si el evento es cancelado, para no tener que
 hacer ningún trámite adicional.
 
-**Why this priority**: Es una obligación legal y ética. Si el evento no ocurre, el comprador no debe perder su dinero.
-Además, debe ser automático para evitar una avalancha de reclamos.
+**Why this priority**: Es una obligación legal y ética. El comprador debe recibir su dinero de vuelta si el evento no se
+lleva a cabo. Además, debe ser automático para evitar una avalancha de reclamos.
 
 **Independent Test**: Un administrador marca un evento como "Cancelado". El sistema y el **Agente de Ventas** deben
 automáticamente iniciar reembolsos para todos los tickets vendidos de ese evento.
@@ -52,7 +52,7 @@ automáticamente iniciar reembolsos para todos los tickets vendidos de ese event
 **Acceptance Scenarios**:
 
 1. **Scenario**: Reembolso automático por cancelación de evento
-    - **Given** que hay un evento con tickets vendidos.
+    - **Given** un evento con tickets vendidos.
     - **When** el evento sea marcado como ***Cancelado***.
     - **Then** el sistema debe cambiar el estado de todos los tickets a ***Reembolso pendiente***, inicial el proceso de
       reembolso para cada transacción y enviar un email masivo notificando a los compradores de la situación.
@@ -64,24 +64,22 @@ automáticamente iniciar reembolsos para todos los tickets vendidos de ese event
 Como **Agente de Ventas**, quiero poder cambiar el estado de un ticket después de verificar que no hay irregularidades
 con el pago, previniendo asi que haya fraudes o intentos de estafa.
 
-<!-- Edit from here to scenario 2 -->
-
 **Why this priority**: Necesario para manejar excepciones operativas y evitar inconsistencias en casos especiales.
 
-**Independent Test**: Desde el panel de administración, buscar un ticket, cambiar su estado manualmente y verificar que
-el cambio persiste y queda registrado en el historial.
+**Independent Test**: Desde el panel de administración, buscar un ticket, cambiar su estado manualmente al validar el
+pago y verificar que el cambio persiste y queda registrado en el historial.
 
 **Acceptance Scenarios**:
 
-1. **Scenario**: Marcar ticket como usado manualmente
-    - **Given** un ticket válido que no fue escaneado correctamente
-    - **When** soporte lo marca como "usado"
-    - **Then** el estado cambia y queda registrado quién y cuándo realizó el cambio
+1. **Scenario**: Marcar ticket como vendido manualmente
+    - **Given** un ticket comprado recientemente.
+    - **When** el agente valida el pago lo marca como ***Vendido*** en caso de no estar en ese estado.
+    - **Then** se persisten los cambios del ticket y queda registrado quién y cuándo lo realizó.
 
-2. **Scenario**: Cancelación excepcional con reembolso manual
-    - **Given** un ticket fuera de plazo que requiere excepción
-    - **When** soporte lo cancela y autoriza reembolso
-    - **Then** el sistema cambia el estado a "cancelado con reembolso" y registra la acción
+2. **Scenario**: Marcar ticket como anulado
+    - **Given** un ticket comprado recientemente.
+    - **When** el agente encuentra irregularidades con el pago, lo marca como ***Anulado***
+    - **Then** el sistema notifica al comprador de la cancelación de su compra por el motivo que la haya causado.
 
 ---
 
@@ -91,8 +89,8 @@ Como **Agente de Ventas**, quiero poder procesar reembolsos manuales que hagan l
 satisfacción del
 cliente, pero sobre todo, verificar la seguridad y autenticidad de los reembolsos.
 
-**Why this priority**: No es el flujo común, pero es necesario para resolver problemas que no encajan en las reglas
-automáticas.
+**Why this priority**: Es importante para resolver problemas que no encajan en las reglas automáticas del sistema.
+Pero no es indispensable para un lanzamiento inicial.
 
 **Independent Test**: Un agente accede al panel de administración, busca una compra cancelada, y hace clic en
 ***Reembolsar manualmente*** con opción de reembolso parcial o total.
@@ -124,27 +122,28 @@ estado del reembolso junto al ticket cancelado.
 **Acceptance Scenarios**:
 
 1. **Scenario**: Visualización de estados de reembolso
-    - **Given** que un comprador tiene tickets en diferentes estados
+    - **Given** un ticket marcado como ***Cancelado***
     - **When** el comprador accede a su historial de compras
     - **Then** el comprador debe ver claramente los detalles de la cancelación del ticket.
 
 2. **Scenario**: Notificación de cambio de estado
     - **Given** que un reembolso pasó de ***En proceso*** a ***Completado***
     - **When** el banco confirma la transacción
-    - **Then** el comprador debe recibir un email:
-      ***Tu reembolso ha sido procesado. El dinero estará en tu cuenta en 3-5 días hábiles***
+    - **Then** el comprador debe recibir un email: ***Tu reembolso ha sido procesado. El dinero estará en tu cuenta en
+      3-5 días hábiles***
 
 ---
 
 ### Edge Cases
 
-- ¿Qué pasa si **el ticket ya fue usado**?  
+- **¿Qué pasa si el ticket ya fue usado?**  
   No se debe permitir cancelación ni reembolso.
-- ¿Qué ocurre si **la pasarela de pago falla al procesar el reembolso**?  
-  El sistema debe marcar "reembolso pendiente" y notificar a soporte.
-- ¿Cómo manejar **reembolsos parciales en compras múltiples**?
-- ¿Qué sucede si **el evento ya ocurrió**?  
-  No se permiten cancelaciones, salvo override explícito por soporte/admin.
+- **¿Qué ocurre si la pasarela de pago falla al procesar el reembolso?**  
+  El sistema debe marcar ***reembolso pendiente*** y notificar a soporte.
+- **¿Cómo manejar reembolsos parciales en compras múltiples?**
+  El sistema debe cancelar solo los tickets seleccionados por el comprador y realizar el reembolso por ese valor.
+- **¿Qué sucede si el evento ya ocurrió?**  
+  No se permiten cancelaciones, salvo override explícito por el agente de ventas.
 
 ---
 
@@ -163,8 +162,17 @@ estado del reembolso junto al ticket cancelado.
 
 ### Key Entities
 
-- **[Entity 1]**: [What it represents, key attributes without implementation]
-- **[Entity 2]**: [What it represents, relationships to other entities]
+- **Comprador**: Representa a la persona que realiza la compra. Se menciona en la necesidad de asociar la compra a un
+  usuario y en el registro de auditoría (IP, datos de contacto para el envío del email).
+- **Ticket**: Representa el comprobante digital de entrada para un asiento específico en un evento. Es el "producto"
+  final que se compra. Se relaciona con Venta y contiene atributos como: Código QR único, Estado (Vendido, Reembolsado).
+- **Asiento**: Representa la ubicación física específica que el comprador está adquiriendo. Es crucial para gestionar
+  la disponibilidad y las reservas. Sus estados clave en este contexto son: Disponible, Reservado, Vendido.
+- **Evento**: Representa la instancia del espectáculo o función para la cual se compran los tickets. Define la
+  disponibilidad de los asientos.
+- **Transacción Financiera**: Representa la interacción con la pasarela de pagos. Aunque podría ser parte de la
+  entidad Venta, el spec sugiere la necesidad de un registro detallado para auditoría: Respuesta de la pasarela, Código
+  de autorización, Estado del reembolso (aprobado/pendiente).
 
 ---
 

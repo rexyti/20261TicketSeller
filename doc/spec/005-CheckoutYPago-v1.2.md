@@ -22,21 +22,21 @@ y recibe por email un QR para validar su acceso.
 **Acceptance Scenarios**:
 
 1. **Scenario: Ticket Comprado exitosamente**
-    - **Given** un evento con disponibilidad, el comprador ha seleccionado una o varias entradas, y está en la
-      pantalla de pago.
-    - **When** el comprador ingresa los datos de su medio de pago y hace click en ***pagar***.
+    - **Given** un evento con disponibilidad
+    - **When** el comprador ha seleccionado una o varias entradas, y está en la pantalla de pago. Ingresa los datos de
+      su medio de pago y hace clic en ***pagar***.
     - **Then** el sistema debe ***procesar el pago***, el estado de la venta cambia a ***Pagada***, el estado del ticket
       cambia a ***Vendido***, genera los QR necesarios y el sistema envía las entradas al comprador por email.
 
 2. **Scenario: No tienes fondos suficientes para realizar la compra**
-    - **Given** que el comprador esta en la pantalla de pago.
-    - **When** ingresa los datos de un medio de pago con fondos insuficientes.
+    - **Given** un evento con disponibilidad y asientos seleccionados.
+    - **When** el comprador ingresa los datos de un medio de pago con fondos insuficientes.
     - **Then** el sistema debe mostrar "***La transacción fue rechazada por el banco. Por favor intenta con otra tarjeta
       u otro medio de pago***, el estado de la venta debe permanecer en ***Pendiente***" y los asientos deben ***seguir
       reservados*** para el comprador.
 
 3. **Scenario: Error de Conexión con la Pasarela de Pagos**
-    - **Given** que el comprador esté en la pantalla de pago.
+    - **Given** que el pago esté en proceso.
     - **When** la pasarela de pagos no responde.
     - **Then** el sistema debe mostrar "***Error temporal procesando el pago. No se ha realizado ningún cargo. Por
       favor, intenta en unos minutos***" y los asientos deben ***permanecer reservados***.
@@ -49,7 +49,7 @@ Como **Comprador**, quiero que los asientos que estoy comprando se reserven temp
 de pago, para que nadie más me los quite, pero también quiero que se liberen si me arrepiento o tardo mucho en completar
 la transacción.
 
-**Why this priority**: Es importante porque evita la frustración del comprador de que alguien le gane el/los asiento(s),
+**Why this priority**: Es importante porque evita la frustración del comprador de que alguien le gane los asientos,
 pero también evita que compradores malintencionados bloqueen asientos sin pagar, aunque no es critíco para un
 lanzamiento inicial.
 
@@ -60,7 +60,7 @@ para completar la transacción.
 **Acceptance Scenarios**:
 
 1. **Scenario: Reserva Temporal al añadir al carrito**
-    - **Given** que hay uno o muchos asientos disponibles en un evento.
+    - **Given** un evento con disponibilidad de asientos.
     - **When** el comprador los añade a su carrito.
     - **Then** los asientos deben marcarse como ***Reservado*** en el sistema por 10-15 minutos y los demás compradores
       que vean el mapa de asientos para ese evento, deben ver el asiento como ***Reservado*** también, o
@@ -76,16 +76,18 @@ para completar la transacción.
 
 ## Edge Cases
 
-- ¿Qué pasa cuando **compro un ticket, pero cierro el sistema sin completar el pago**?  
+- **¿Qué pasa cuando compro un ticket, pero cierro el sistema sin completar el pago?**  
   El sistema bloquea el asiento durante 10-15 minutos, que deberían ser suficientes para que el comprador pueda
   realizar el pago para obtener su ticket.
-- ¿Cómo maneja el sistema **cuando se intenta comprar un ticket con un asiento inactivo**?  
+- **¿Cómo maneja el sistema cuando se intenta comprar un ticket con un asiento inactivo?**  
   El sistema **no** lo permite. Al intentar comprar un ticket, el sistema primero debe validar si el asiento u asientos
   escogidos está ***disponible***. De lo contrario, el sistema mostrará un error relacionado.
-- ¿Cómo maneja el sistema ***los pagos duplicados***? Al darle click a ***Pagar*** el botón queda inhabilitado hasta
-  hasta cerrar la pantalla de pago, excepto si el estado de venta no ha cambiado.
-- ¿Qué pasa cuando **ocurren compras simultáneas**? Si dos usuarios intentan pagar el mismo asiento al mismo tiempo, el
-  sistema debe procesar el primero y rechazar el segundo con un mensaje amigable.
+- **¿Cómo maneja el sistema los pagos duplicados?**  
+  Al darle clic a ***Pagar*** el botón queda inhabilitado hasta cerrar la pantalla de pago, excepto si el estado de
+  venta no ha cambiado.
+- **¿Qué pasa cuando ocurren compras simultáneas?**  
+  Si dos usuarios intentan pagar el mismo asiento al mismo tiempo, el sistema debe procesar el primero y rechazar el
+  segundo con un mensaje amigable.
 
 ## Requirements *(mandatory)*
 
@@ -108,15 +110,17 @@ para completar la transacción.
 
 ### Key Entities *(include if feature involves data)*
 
-- **[Comprador]** : Representa a la persona que realiza la compra. Se menciona en la necesidad de asociar la compra a un usuario y en el registro de auditoría (IP, datos de contacto para el envío del email).
-- **[Venta]** : Es la transacción comercial principal. Representa el intento de compra de uno o múltiples tickets. Sus atributos clave incluyen: Estado (Pendiente, Completada, Fallida, etc.), Fecha, Monto total, Método de pago, ID único de transacción.
-- **[Ticket]** : Representa el comprobante digital de entrada para un asiento específico en un evento. Es el "producto" final que se compra. Se relaciona con Venta y contiene atributos como: Código QR único, Estado (Vendido, Reembolsado).
-- **[Asiento]** : Representa la ubicación física específica que el comprador está adquiriendo. Es crucial para gestionar la disponibilidad y las reservas. Sus estados clave en este contexto son: Disponible, Reservado, Vendido.
-- **[Evento]** : Representa la instancia del espectáculo o función para la cual se compran los tickets. Define la disponibilidad de los asientos.
-- **[Transacción Financiera]** : Representa la interacción con la pasarela de pagos. Aunque podría ser parte de la entidad Venta, el spec sugiere la necesidad de un registro detallado para auditoría: Respuesta de la pasarela, Código de autorización, Estado del pago (aprobado/rechazado).
-- **[Carrito]** : Representa el contexto temporal del comprador. Contiene la selección de Asientos y gestiona el tiempo de Reserva (timeout de 15 minutos).
-- **[Reserva]** : Es un estado temporal aplicado a un Asiento (o grupo de asientos) durante el proceso de compra. Contiene información como: Timestamp de inicio, Duración, Estado (Activa/Expirada).
-- **[Pasarela de Pagos]** : Si bien es un sistema externo, desde la perspectiva del sistema es una entidad de integración con la que se interactúa para procesar los pagos.
+- **Ticket**: Representa el comprobante digital de entrada para un asiento específico en un evento. Es el "producto"
+  final que se compra. Se relaciona con Venta y contiene atributos como: Código QR único, Estado (Vendido, Reembolsado).
+- **Asiento**: Representa la ubicación física específica que el comprador está adquiriendo. Es crucial para gestionar
+  la disponibilidad y las reservas. Sus estados clave en este contexto son: Disponible, Reservado, Vendido.
+- **Evento**: Representa la instancia del espectáculo o función para la cual se compran los tickets. Define la
+  disponibilidad de los asientos.
+- **Transacción Financiera**: Representa la interacción con la pasarela de pagos. Aunque podría ser parte de la
+  entidad Venta, el spec sugiere la necesidad de un registro detallado para auditoría: Respuesta de la pasarela, Código
+  de autorización, Estado del pago (aprobado/rechazado).
+- **Carrito**: Representa el contexto temporal del comprador. Contiene la selección de Asientos y gestiona el tiempo
+  de Reserva (timeout de 15 minutos).
 
 ## Success Criteria *(mandatory)*
 

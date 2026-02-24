@@ -20,13 +20,13 @@ guarda. El test es exitoso si el tipo de asiento aparece inmediatamente en la li
 **Acceptance Scenarios**:
 
 1. **Scenario: Registro Exitoso**
-    - **Given** que el gestor ha iniciado sesión y accede al formulario de ***registro de tipos de asiento***.
-    - **When** el gestor ingresa los datos obligatorios (nombre, descripción) y hace click en ***guardar***.
-    - **Then** el sistema muestra un mensaje de ***Tipo de asiento registrado con éxito*** y este debe aparecer en la
-      lista principal de tipos de asiento.
+    - **Given** que no se ha registrado un tipo de asiento.
+    - **When** el gestor ingresa los datos obligatorios y hace clic en ***guardar***.
+    - **Then** el sistema muestra un mensaje de ***Tipo de asiento registrado con éxito***, debe persistirlo,
+      y este debe aparecer en la lista principal de tipos de asiento.
 
 2. **Scenario: Registro Fallido**
-    - **Given** el gestor está en el formulario de ***registro de tipos de asiento***.
+    - **Given** que no se ha registrado un tipo de asiento.
     - **When** el gestor intenta ***guardar*** sin completar el campo obligatorio (nombre).
     - **Then** el sistema debe mostrar un mensaje indicando ***El campo nombre es obligatorio*** y ***no*** debe crear
       el tipo de asiento.
@@ -48,16 +48,16 @@ guarda. El test es exitoso si al volver a la lista, la información del tipo de 
 
 1. **Scenario: Edición Exitosa**
     - **Given** que existe un tipo de asiento que el gestor desea modificar.
-    - **When** el gestor edita la información (por ejemplo, descripción) y ***guarda***.
-    - **Then** el sistema debe mostrar ***Actualizado correctamente*** y en el detalle del tipo de asiento ahora deben
-      aparecer los cambios realizados.
+    - **When** el gestor edita la información y ***guarda***.
+    - **Then** el sistema debe mostrar ***Actualizado correctamente***, persiste los cambios, y en el detalle del tipo
+      de asiento ahora deben aparecer los cambios realizados.
 
 ---
 
 ### User Story 3 - Designar Tipo de Asiento a una Zona de un Recinto (Priority: P2)
 
 Como **Gestor de Inventario**, quiero poder asignar un tipo de asiento a una zona específica de un recinto (por
-ejemplo, "Zona VIP" en el "Estadio Nacional"), para que los asientos de esa zona queden categorizados y puedan ser
+ejemplo, ***Zona VIP*** en el "Estadio Nacional"), para que los asientos de esa zona queden categorizados y puedan ser
 ofrecidos con el precio y condiciones correspondientes.
 
 **Why this priority**: Es una funcionalidad clave para operar, para que con esta asignación los tipos de asiento tengan
@@ -72,7 +72,7 @@ asignado.
 1. **Scenario: Asignación Exitosa**
     - **Given** un recinto con al menos una zona definida, y un tipo de asiento activo.
     - **When** el gestor accede a la configuración del recinto, selecciona una zona, elige el tipo de asiento y hace
-      click en ***asignar***.
+      clic en ***asignar***.
     - **Then** el sistema muestra un mensaje de ***Tipo de asiento asignado correctamente*** y la zona refleja el
       nuevo tipo.
 
@@ -89,8 +89,8 @@ asignado.
 Como **Gestor de Inventario**, quiero poder desactivar un tipo de asiento que ya no se usará, para que no aparezca en
 las listas de selección al asignar secciones o crear nuevos eventos.
 
-**Why this priority**: Es una funcionalidad de limpieza y control de inventario, necesaria a medida que se acumulan
-tipos obsoletos.
+**Why this priority**: Es una funcionalidad de ***limpieza*** y control de inventario, necesaria a medida que se
+acumulan tipos obsoletos.
 
 **Independent Test**: Un gestor desactiva un tipo de asiento. Luego, intenta asignarlo a una sección. El test es exitoso
 si el tipo desactivado **no** aparece en la lista desplegable.
@@ -126,7 +126,7 @@ mapa visual.
 **Acceptance Scenarios**:
 
 1. **Scenario: Crear una cuadrícula básica de asientos**
-    - **Given** que el gestor está en el ***configurador de mapa***.
+    - **Given** que existe un recinto sin mapa de asientos definido.
     - **When** el gestor define ***N*** filas y ***M*** asientos por fila.
     - **Then** el sistema debe generar automáticamente ***NxM*** asientos únicos y guardarlos en el inventario.
 
@@ -139,25 +139,25 @@ mapa visual.
 
 ### Edge Cases
 
-- **¿Qué sucede si intento registrar un tipo de asiento con un nombre que ya existe?**
+- **¿Qué sucede si intento registrar un tipo de asiento con un nombre que ya existe?**  
   El sistema debería mostrar una advertencia: "***Ya existe un tipo de asiento con este nombre. ¿Desea continuar de
   todas formas?***", permitiendo al gestor decidir si se trata de una duplicidad intencional (por ejemplo,
   para diferentes recintos) o un error.
 
-- **¿Cómo maneja el sistema la edición de un tipo de asiento que ya está asignado a secciones?**
+- **¿Cómo maneja el sistema la edición de un tipo de asiento que ya está asignado a secciones?**  
   El sistema debería permitir editar solo campos descriptivos (como descripción o color) pero bloquear cambios en el
   nombre si ya hay asignaciones, para mantener la consistencia en reportes y tickets ya vendidos.
 
-- **¿Qué pasa si intento designar un tipo de asiento a una sección que ya tiene un tipo asignado?**
-  El sistema debería preguntar si desea sobrescribir la asignación anterior, mostrando una advertencia: "
-  ***Esta sección ya tiene un tipo de asiento asignado. ¿Desea reemplazarlo?***". Si el gestor confirma, se actualiza;
+- **¿Qué pasa si intento designar un tipo de asiento a una sección que ya tiene un tipo asignado?**  
+  El sistema debería preguntar si desea sobrescribir la asignación anterior, mostrando una advertencia:
+  "***Esta sección ya tiene un tipo de asiento asignado. ¿Desea reemplazarlo?***". Si el gestor confirma, se actualiza;
   si no, se cancela la operación.
 
-- **¿Cómo se comporta el sistema al desactivar un tipo de asiento que tiene histórico de ventas?**
+- **¿Cómo se comporta el sistema al desactivar un tipo de asiento que tiene histórico de ventas?**  
   El sistema debe permitir la desactivación, pero conservar el tipo en los registros históricos de ventas para mantener
   la integridad de los datos. No debe permitir la desactivación solo si hay eventos futuros que lo utilicen.
 
-- ¿Se permite que **un recinto tenga zonas y además mapa de asientos dentro de cada zona**?  
+- **¿Se permite que un recinto tenga zonas y además mapa de asientos dentro de cada zona?**  
   El sistema no lo permite. Un recinto puede tener opcionalmente un mapa de asientos, y en este se deben evidenciar
   todas las distintas zonas de este.
 
@@ -165,8 +165,7 @@ mapa visual.
 
 ### Functional Requirements
 
-- **FR-001**: El Gestor de Inventario **DEBE** poder crear un tipo de asiento con, al menos:
-  ***Nombre, Descripción, ID único interno y Estado (Activo/Inactivo)***.
+- **FR-001**: El Gestor de Inventario **DEBE** poder crear un tipo de asiento.
 - **FR-002**: El sistema **DEBE** validar que el campo ***Nombre*** no esté vacío al guardar un nuevo tipo de asiento.
 - **FR-003**: El sistema **DEBE** listar todos los tipos de asiento registrados en una vista de administración,
   mostrando su estado y un indicador de si están siendo utilizados en secciones.
@@ -178,12 +177,12 @@ mapa visual.
 
 ### Key Entities *(include if feature involves data)*
 
-- **[Tipo de Asiento]** : Representa la categoría o clasificación de un asiento (ej. VIP, Platea, General). Sus atributos clave incluyen: Nombre, Descripción, ID único interno, Estado (Activo/Inactivo).
-- **[Recinto]** : Representa el espacio físico (ej. Estadio Nacional, Teatro) que contiene las zonas donde se asignan los asientos.
-- **[Zona]** : Representa una subdivisión o área específica dentro de un recinto (ej. Zona VIP, Platea Baja). Es la entidad a la que se le asigna un Tipo de Asiento.
-- **[Mapa de Asientos]** : Representa la configuración detallada de la disposición de los asientos dentro de un recinto.
-- **[Asiento (Numerado)]** : Representa una unidad individual y única dentro de un Mapa de Asientos (ej. Fila A, Asiento 12).
-- **[Evento]** : Representa una ocurrencia futura (ej. un concierto o partido) que utiliza las secciones y sus tipos de asiento asignados. Es crucial para validar restricciones (no desactivar tipos con eventos futuros).
+- **Tipo de Asiento**: Representa la categoría o clasificación de un asiento (ej. VIP, Platea, General). Sus
+  atributos clave incluyen: Nombre, Descripción, ID único interno, Estado (Activo/Inactivo).
+- **Zona**: Representa una subdivisión o área específica dentro de un recinto (ej. Zona VIP, Platea Baja). Es la
+  entidad a la que se le asigna un Tipo de Asiento.
+- **Mapa de Asientos**: Representa la configuración detallada de la disposición de los asientos dentro de un recinto.
+- **Asiento**: Representa una unidad individual y única dentro de un Mapa de Asientos (ej. Fila A, Asiento 12).
 
 ## Success Criteria *(mandatory)*
 

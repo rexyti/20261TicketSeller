@@ -8,15 +8,15 @@
 
 ### User Story 1 - Validación Exitosa de Ticket (Priority: P1)
 
-Como **Validador** (personal de puerta), quiero poder escanear el código de un ticket (QR/código de barras) y que el
+Como **Validador de Accesos**, quiero poder escanear el código de un ticket (QR/código de barras) y que el
 sistema me indique si es válido para acceder al recinto, para permitir la entrada rápida y correcta de los asistentes.
 
 **Why this priority**: Es la operación fundamental del control de acceso; indispensable para gestionar la entrada al
 evento.
 
-**Independent Test**: Un validador escanea un ticket válido que corresponde a un asiento libre para el evento actual. El
-test es exitoso si el sistema muestra una pantalla verde con el mensaje "Acceso permitido" y el asiento pasa a estado "
-usado".
+**Independent Test**: Un validador escanea un ticket válido que corresponde a un asiento libre para el evento actual.
+El test es exitoso si el sistema muestra una pantalla verde con el mensaje ***Acceso permitido*** y el asiento pasa a
+estado ***Usado***.
 
 **Acceptance Scenarios**:
 
@@ -39,8 +39,8 @@ usado".
 
 ### User Story 2 - Validación de Ticket Inválido o Ya Usado (Priority: P1)
 
-Como **Validador**, quiero que el sistema me alerte claramente cuando un ticket no es válido (ya usado, para otro
-evento, etc.), para poder denegar el acceso de forma fundamentada y manejar la situación con el asistente.
+Como **Validador de Accesos**, quiero que el sistema me alerte claramente cuando un ticket no es válido (ya usado, para
+otro evento, etc.), para poder denegar el acceso de forma fundamentada y manejar la situación con el asistente.
 
 **Why this priority**: Es tan crítica como la validación exitosa, ya que gestiona los casos de error y previene accesos
 no autorizados.
@@ -57,8 +57,7 @@ muestra una pantalla roja con el mensaje "TICKET YA USADO" y no permite el acces
       ingreso.
 
 2. **Scenario: Ticket para evento incorrecto**
-    - **Given** un ticket válido pero para un evento diferente al que se está realizando (fecha distinta, otro recinto,
-      etc.).
+    - **Given** un ticket válido, para un evento diferente al que se está realizando.
     - **When** el validador escanea el ticket.
     - **Then** el sistema muestra **ACCESO DENEGADO - TICKET NO CORRESPONDE AL EVENTO ACTUAL**, indicando el evento
       correcto al que pertenece.
@@ -75,30 +74,7 @@ muestra una pantalla roja con el mensaje "TICKET YA USADO" y no permite el acces
 
 ---
 
-### User Story 3 - Validación en Modo Offline (Priority: P2)
-
-Como **Validador**, quiero poder seguir validando tickets incluso si la conexión a internet falla, para que la entrada
-no se detenga por problemas técnicos.
-
-**Why this priority**: Es una contingencia crítica para la operación en vivo, pero puede implementarse en una segunda
-fase con sincronización posterior.
-
-**Independent Test**: Un validador activa el modo offline, escanea tickets válidos y no válidos. Luego, al recuperar la
-conexión, los registros se sincronizan con el sistema central.
-
-**Acceptance Scenarios**:
-
-1. **Scenario: Validación offline exitosa con sincronización posterior**
-    - **Given** el dispositivo del validador sin conexión a internet.
-    - **When** escanea un ticket válido.
-    - **Then** el sistema muestra ***ACCESO PERMITIDO (MODO OFFLINE)*** y almacena localmente el registro de ingreso.
-    - **When** el dispositivo recupera la conexión.
-    - **Then** el sistema sincroniza automáticamente los registros offline con el servidor central, actualizando los
-      estados de los asientos y quedando disponibles para consulta.
-
----
-
-### User Story 4 - Revalidación y Control de Doble Ingreso (Priority: P2)
+### User Story 3 - Revalidación y Control de Doble Ingreso (Priority: P2)
 
 Como **Validador**, quiero que el sistema detecte si se intenta validar el mismo ticket en dos puntos de acceso
 simultáneamente, para evitar que dos personas accedan con el mismo ticket.
@@ -118,7 +94,7 @@ el segundo recibe "TICKET YA UTILIZADO" inmediatamente.
       sea rechazada como ticket ya usado, gracias a mecanismos de concurrencia (bloqueos atómicos, transacciones).
 
 2. **Scenario: Validación después de un ingreso reciente**
-    - **Given** un ticket que acaba de ser validado exitosamente hace menos de 1 minuto.
+    - **Given** un ticket que ha sido validado exitosamente.
     - **When** se intenta validar nuevamente.
     - **Then** el sistema lo rechaza como ticket ya usado, aunque la sincronización entre dispositivos sea casi en
       tiempo real.
@@ -173,25 +149,28 @@ el segundo recibe "TICKET YA UTILIZADO" inmediatamente.
   permitido, rojo = denegado) y mensajes legibles en el idioma local.
 - **FR-005**: El sistema **DEBE** registrar cada intento de validación (exitoso o fallido) con timestamp, identificador
   del validador, código del ticket y resultado, para auditoría.
-- **FR-006**: El sistema **DEBE** soportar un modo offline que permita validaciones locales, almacenando los registros
-  para sincronización posterior cuando se restablezca la conexión.
-- **FR-007**: El sistema **DEBE** implementar mecanismos de concurrencia para garantizar que un ticket solo pueda ser
+- **FR-006**: El sistema **DEBE** implementar mecanismos de concurrencia para garantizar que un ticket solo pueda ser
   validado una vez, incluso bajo alta carga.
-- **FR-008**: El sistema **DEBE** permitir la configuración de horarios de acceso por evento, rechazando validaciones
+- **FR-007**: El sistema **DEBE** permitir la configuración de horarios de acceso por evento, rechazando validaciones
   fuera de ese rango.
-- **FR-009**: El sistema **PUEDE** mostrar información adicional del ticket (tipo de acceso, puerta recomendada,
+- **FR-008**: El sistema **PUEDE** mostrar información adicional del ticket (tipo de acceso, puerta recomendada,
   restricciones) para ayudar al validador.
-- **FR-010**: El sistema **DEBE** mantener un contador de aforo actualizado en tiempo real y denegar accesos si se
+- **FR-009**: El sistema **DEBE** mantener un contador de aforo actualizado en tiempo real y denegar accesos si se
   alcanza el aforo máximo del recinto para eventos sin asientos numerados.
 
 ### Key Entities *(include if feature involves data)*
 
-- **[Ticket]** : Es la representación digital del derecho de acceso. Contiene la información que será escaneada (código QR/barras). Sus atributos clave incluyen: Código único, Estado (Vendido, Usado, Cancelado/Reembolsado), Evento asociado, Asiento asociado, Tipo de acceso (general, VIP, cortesía, movilidad reducida, ticket familiar con contador de usos).
-- **[Evento]** : Representa la instancia del espectáculo. Es crucial para validar que el ticket corresponde al evento correcto y al horario adecuado. Atributos clave: Fecha, Hora de inicio/fin, Recinto, Aforo máximo.
-- **[Validación (Intento de Acceso)]** : Representa el registro de cada intento de escaneo, exitoso o no. Es una entidad de auditoría. Sus atributos: Timestamp, Ticket ID, Validador ID, Resultado (éxito/fallo), Código de rechazo (ya usado, evento incorrecto, etc.), Modo (online/offline).
-- **[Recinto]** : Define el espacio físico. Es necesario para gestionar el aforo en tiempo real y las reglas de acceso por puerta.
-- **[Aforo (Contador en Tiempo Real)]** : Representa la capacidad máxima del recinto y el contador actual de personas que han ingresado. Es una entidad de control, especialmente para eventos sin asientos numerados.
-- **[Registro Offline]** : Representa las validaciones almacenadas localmente en el dispositivo cuando no hay conexión. Contiene la misma información que una validación normal, más un flag de sincronización (pendiente/sincronizado).
+- **Ticket**: Es la representación digital del derecho de acceso. Contiene la información que será escaneada (código
+  QR/barras). Sus atributos clave incluyen: Código único, Estado (Vendido, Usado, Cancelado/Reembolsado), Evento
+  asociado, Asiento asociado, Tipo de acceso (general, VIP, cortesía, movilidad reducida, ticket familiar con contador
+  de usos).
+- **Evento**: Representa la instancia del espectáculo. Es crucial para validar que el ticket corresponde al evento
+  correcto y al horario adecuado. Atributos clave: Fecha, Hora de inicio/fin, Recinto, Aforo máximo.
+- **Validación (Intento de Acceso)** : Representa el registro de cada intento de escaneo, exitoso o no. Es una entidad
+  de auditoría. Sus atributos: Timestamp, Ticket ID, Validador ID, Resultado (éxito/fallo), Código de rechazo (ya usado,
+  evento incorrecto, etc.), Modo (online/offline).
+- **Recinto**: Define el espacio físico. Es necesario para gestionar el aforo en tiempo real y las reglas de acceso
+  por puerta.
 
 ## Success Criteria *(mandatory)*
 
@@ -202,10 +181,5 @@ el segundo recibe "TICKET YA UTILIZADO" inmediatamente.
 - **SC-002**: El sistema debe manejar al menos 10 validaciones por segundo por punto de acceso sin degradación del
   rendimiento.
 - **SC-003**: Cero casos de doble ingreso con el mismo ticket en producción (fraude detectado y bloqueado).
-- **SC-004**: El modo offline debe permitir al menos 500 validaciones antes de necesitar sincronización, con capacidad
-  de almacenamiento local.
-- **SC-005**: La sincronización offline, al restaurarse la conexión, debe completarse en menos de 1 minuto para 500
-  registros.
-- **SC-006**: El 100% de los intentos de validación deben quedar registrados en el historial de auditoría.
-- **SC-007**: Tiempo de disponibilidad del sistema durante el evento: 99.9% (excluyendo caídas de internet, que son
-  cubiertas por modo offline).
+- **SC-004**: El 100% de los intentos de validación deben quedar registrados en el historial de auditoría.
+- **SC-005**: Tiempo de disponibilidad del sistema durante el evento: 99.9%.
