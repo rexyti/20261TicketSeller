@@ -110,17 +110,19 @@ para completar la transacción.
 
 ### Key Entities *(include if feature involves data)*
 
-- **Ticket**: Representa el comprobante digital de entrada para un asiento específico en un evento. Es el "producto"
-  final que se compra. Se relaciona con Venta y contiene atributos como: Código QR único, Estado (Vendido, Reembolsado).
-- **Asiento**: Representa la ubicación física específica que el comprador está adquiriendo. Es crucial para gestionar
-  la disponibilidad y las reservas. Sus estados clave en este contexto son: Disponible, Reservado, Vendido.
-- **Evento**: Representa la instancia del espectáculo o función para la cual se compran los tickets. Define la
-  disponibilidad de los asientos.
-- **Transacción Financiera**: Representa la interacción con la pasarela de pagos. Aunque podría ser parte de la
-  entidad Venta, el spec sugiere la necesidad de un registro detallado para auditoría: Respuesta de la pasarela, Código
-  de autorización, Estado del pago (aprobado/rechazado).
-- **Carrito**: Representa el contexto temporal del comprador. Contiene la selección de Asientos y gestiona el tiempo
-  de Reserva (timeout de 15 minutos).
+1. **Ticket**: Representa el comprobante digital de entrada para un asiento específico en un evento. Es el "producto"
+   final que se compra. Se relaciona con Venta y contiene atributos como: Código QR único, Estado (Vendido,
+   Reembolsado).
+2. **Asiento**:
+    - Representa un puesto dentro del recinto donde se organizan los eventos, el cual el comprador reserva y usa.
+    - **Atributos**: ***ID único, Fila, Columna, Número, Estado***
+3. **Evento**: Representa la instancia del espectáculo o función para la cual se compran los tickets. Define la
+   disponibilidad de los asientos.
+4. **Transacción Financiera**: Representa la interacción con la pasarela de pagos. Aunque podría ser parte de la
+   entidad Venta, el spec sugiere la necesidad de un registro detallado para auditoría: Respuesta de la pasarela, Código
+   de autorización, Estado del pago (aprobado/rechazado).
+5. **Carrito**: Representa el contexto temporal del comprador. Contiene la selección de Asientos y gestiona el tiempo
+   de Reserva (timeout de 15 minutos).
 
 ## Success Criteria *(mandatory)*
 

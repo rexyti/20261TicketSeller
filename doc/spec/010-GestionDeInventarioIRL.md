@@ -130,10 +130,12 @@ exitosa.
 
 ### Key Entities
 
-- **Asiento**: Representa una ubicación física en el evento. Atributos: ID, Ubicación (fila, número), Tipo, Estado
-  (Disponible, Reservado, Ocupado).
-- **Ticket**: Representa el comprobante digital de entrada para un asiento específico en un evento. Es el "producto"
-  final que se compra. Se relaciona con Venta y contiene atributos como: Código QR único, Estado (Vendido, Reembolsado).
+1. **Asiento**:
+    - Representa un puesto dentro del recinto donde se organizan los eventos, el cual el comprador reserva y usa.
+    - **Atributos**: ***ID único, Fila, Columna, Número, Estado***
+2. **Ticket**: Representa el comprobante digital de entrada para un asiento específico en un evento. Es el "producto"
+   final que se compra. Se relaciona con Venta y contiene atributos como: Código QR único, Estado (Vendido,
+   Reembolsado).
 
 ---
 

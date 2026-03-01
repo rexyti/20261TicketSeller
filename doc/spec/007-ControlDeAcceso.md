@@ -160,17 +160,20 @@ el segundo recibe "TICKET YA UTILIZADO" inmediatamente.
 
 ### Key Entities *(include if feature involves data)*
 
-- **Ticket**: Es la representación digital del derecho de acceso. Contiene la información que será escaneada (código
-  QR/barras). Sus atributos clave incluyen: Código único, Estado (Vendido, Usado, Cancelado/Reembolsado), Evento
-  asociado, Asiento asociado, Tipo de acceso (general, VIP, cortesía, movilidad reducida, ticket familiar con contador
-  de usos).
-- **Evento**: Representa la instancia del espectáculo. Es crucial para validar que el ticket corresponde al evento
-  correcto y al horario adecuado. Atributos clave: Fecha, Hora de inicio/fin, Recinto, Aforo máximo.
-- **Validación (Intento de Acceso)** : Representa el registro de cada intento de escaneo, exitoso o no. Es una entidad
-  de auditoría. Sus atributos: Timestamp, Ticket ID, Validador ID, Resultado (éxito/fallo), Código de rechazo (ya usado,
-  evento incorrecto, etc.), Modo (online/offline).
-- **Recinto**: Define el espacio físico. Es necesario para gestionar el aforo en tiempo real y las reglas de acceso
-  por puerta.
+1. **Ticket**: Es la representación digital del derecho de acceso. Contiene la información que será escaneada (código
+   QR/barras). Sus atributos clave incluyen: Código único, Estado (Vendido, Usado, Cancelado/Reembolsado), Evento
+   asociado, Asiento asociado, Tipo de acceso (general, VIP, cortesía, movilidad reducida, ticket familiar con contador
+   de usos).
+2. **Evento**: Representa la instancia del espectáculo. Es crucial para validar que el ticket corresponde al evento
+   correcto y al horario adecuado. Atributos clave: Fecha, Hora de inicio/fin, Recinto, Aforo máximo.
+3. **Validación (Intento de Acceso)** : Representa el registro de cada intento de escaneo, exitoso o no. Es una entidad
+   de auditoría. Sus atributos: Timestamp, Ticket ID, Validador ID, Resultado (éxito/fallo), Código de rechazo (ya
+   usado,
+   evento incorrecto, etc.), Modo (online/offline).
+
+4. **Recinto**:
+    - Representa el espacio físico en el que se realizan los eventos.
+    - **Atributos**: ***ID único, Nombre, Ciudad, Dirección, Capacidad Máxima, Teléfono, Fecha de Creación***
 
 ## Success Criteria *(mandatory)*
 

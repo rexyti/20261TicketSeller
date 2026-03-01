@@ -119,10 +119,13 @@ patrocinadores, fechas y estados.
 
 ### Key Entities
 
-- **Ticket**: Representa el comprobante digital de entrada para un asiento específico en un evento. Es el "producto"
-  final que se compra. Se relaciona con Venta y contiene atributos como: Código QR único, Estado (Vendido, Reembolsado).
-- **Evento**: Instancia del espectáculo. Atributos: Nombre, Fecha, Lugar.
-- **Asiento**: Ubicación física. Atributos: ID, Ubicación, Estado (Disponible, Bloqueado, Ocupado, Cortesía).
+1. **Ticket**: Representa el comprobante digital de entrada para un asiento específico en un evento. Es el "producto"
+   final que se compra. Se relaciona con Venta y contiene atributos como: Código QR único, Estado (Vendido,
+   Reembolsado).
+2. **Evento**: Instancia del espectáculo. Atributos: Nombre, Fecha, Lugar.
+3. **Asiento**:
+    - Representa un puesto dentro del recinto donde se organizan los eventos, el cual el comprador reserva y usa.
+    - **Atributos**: ***ID único, Fila, Columna, Número, Estado***
 
 ---
 
@@ -134,4 +137,4 @@ patrocinadores, fechas y estados.
 - **SC-002**: Cero casos donde un asiento bloqueado se venda al público.
 - **SC-003**: El panel de administración carga la lista de bloqueos en menos de 3 segundos.
 - **SC-004**: 95% de las cortesías tienen información completa de destinatario y categoría.
-- **SC-005**: Cero reclamos de patrocinadores por asientos bloqueados incorrectamente.
+- **SC-005**: Reducir a cero los reclamos de patrocinadores por asientos bloqueados incorrectamente.

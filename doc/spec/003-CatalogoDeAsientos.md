@@ -56,16 +56,15 @@ guarda. El test es exitoso si al volver a la lista, la información del tipo de 
 
 ### User Story 3 - Designar Tipo de Asiento a una Zona de un Recinto (Priority: P2)
 
-Como **Gestor de Inventario**, quiero poder asignar un tipo de asiento a una zona específica de un recinto (por
-ejemplo, ***Zona VIP*** en el "Estadio Nacional"), para que los asientos de esa zona queden categorizados y puedan ser
-ofrecidos con el precio y condiciones correspondientes.
+Como **Gestor de Inventario**, quiero poder asignar un tipo de asiento a una zona específica de un recinto para que los
+asientos de esa zona queden categorizados y puedan ser ofrecidos con el precio y condiciones correspondientes.
 
 **Why this priority**: Es una funcionalidad clave para operar, para que con esta asignación los tipos de asiento tengan
 aplicación práctica en los eventos.
 
-**Independent Test**: Un gestor selecciona un recinto y una zona existente, elige un tipo de asiento de la lista y
-confirma la asignación. El test es exitoso si al consultar la zona, el tipo de asiento aparece correctamente
-asignado.
+**Independent Test**: Un gestor selecciona un recinto y una zona existente, (por ejemplo, ***Zona VIP*** en el
+***Estadio Nacional***), elige un tipo de asiento de la lista y confirma la asignación. El test es exitoso si al
+consultar la zona, el tipo de asiento aparece correctamente asignado.
 
 **Acceptance Scenarios**:
 
@@ -177,12 +176,15 @@ mapa visual.
 
 ### Key Entities *(include if feature involves data)*
 
-- **Asiento**: Representa una unidad individual y única dentro de un Mapa de Asientos (ej. Fila A, Asiento 12).
-- **Tipo de Asiento**: Representa la categoría o clasificación de un asiento (ej. VIP, Platea, General). Sus
-  atributos clave incluyen: Nombre, Descripción, ID único interno, Estado (Activo/Inactivo).
-- **Zona**: Representa una subdivisión o área específica dentro de un recinto (ej. Zona VIP, Platea Baja). Es la
-  entidad a la que se le asigna un Tipo de Asiento.
-- **Mapa de Asientos**: Representa la configuración detallada de la disposición de los asientos dentro de un recinto.
+1. **Asiento**:
+    - Representa un puesto dentro del recinto donde se organizan los eventos, el cual el comprador reserva y usa.
+    - **Atributos**: ***ID único, Fila, Columna, Número, Estado***
+2. **Tipo de Asiento**:
+    - Representa la categoría o clasificación de un asiento.
+    - **Atributos**: ***Nombre, Descripción, ID único interno, Estado (Activo/Inactivo)***.
+3. **Zona**: Representa una subdivisión o área específica dentro de un recinto (ej. Zona VIP, Platea Baja). Es la
+   entidad a la que se le asigna un Tipo de Asiento.
+4. **Mapa de Asientos**: Representa la configuración detallada de la disposición de los asientos dentro de un recinto.
 
 ## Success Criteria *(mandatory)*
 

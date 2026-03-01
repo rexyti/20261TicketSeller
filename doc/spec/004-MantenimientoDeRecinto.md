@@ -101,41 +101,6 @@ muestra una lista cronológica con fecha, usuario, estado anterior y nuevo.
     - **Then** el sistema muestra un mensaje ***No hay cambios registrados para este asiento.**
 
 ---
-<!--
-### User Story 4 - Revertir un Cambio de Estado (Priority: P3)
-
-Como **Gestor de Inventario**, quiero poder revertir un cambio de estado reciente en caso de error, para restaurar
-rápidamente la situación anterior sin tener que buscar y reasignar manualmente.
-
-**Why this priority**: Aumenta la usabilidad y reduce el impacto de errores operativos, aunque puede ser reemplazado por
-un cambio manual en su defecto.
-
-**Independent Test**: El gestor comete un error al cambiar un asiento a ***Bloqueado***, accede al historial y 
-selecciona ***Revertir último cambio***. El test es exitoso si el asiento vuelve al estado anterior.
-
-**Acceptance Scenarios**:
-
-1. **Scenario: Reversión exitosa**
-    - **Given** un asiento con un cambio reciente (menos de 24 horas) realizado por el mismo usuario.
-    - **When** el gestor, desde el historial, hace clic en "Revertir" sobre ese cambio.
-    - **Then** el sistema solicita confirmación y, al aceptar, restaura el estado anterior, registrando la reversión
-      como un nuevo cambio en el historial.
-
-2. **Scenario: Intento de revertir un cambio antiguo**
-    - **Given** un cambio que ocurrió hace más de 7 días.
-    - **When** el gestor intenta revertirlo.
-    - **Then** el sistema muestra un mensaje ***No es posible revertir cambios antiguos. Realice el cambio manualmente
-      si es necesario.** *
-
-3. **Scenario: Reversión no permitida por reglas de negocio**
-    - **Given** un asiento que fue cambiado de "comprado" a "cancelado" (por devolución) y luego se intenta revertir a "
-      comprado".
-    - **When** el gestor intenta revertir.
-    - **Then** el sistema valida que no se puede porque el asiento ya no está asociado a una venta activa, mostrando el
-      mensaje correspondiente.
-
----
--->
 
 ### Edge Cases
 

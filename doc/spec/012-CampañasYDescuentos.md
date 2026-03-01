@@ -176,12 +176,12 @@ en tickets de esa zona.
 
 ### Key Entities
 
-- **Promoción**: Promoción o preventa configurada. Atributos: ID, Nombre, Tipo (Preventa, Descuento, Códigos), Fechas,
-  Estado (Activa, Pausada, Finalizada).
-- **Descuento**: Regla de reducción de precio. Atributos: Tipo (Porcentaje, Monto fijo), Valor, Segmentación,
-  Acumulable.
-- **Código Promocional**: Identificador para aplicar descuento. Atributos: Código, Campaña asociada, Usos máximos, Usos
-  actuales, Fechas de validez.
+1. **Promoción**: Promoción o preventa configurada. Atributos: ID, Nombre, Tipo (Preventa, Descuento, Códigos), Fechas,
+   Estado (Activa, Pausada, Finalizada).
+2. **Descuento**: Regla de reducción de precio. Atributos: Tipo (Porcentaje, Monto fijo), Valor, Segmentación,
+   Acumulable.
+3. **Código Promocional**: Identificador para aplicar descuento. Atributos: Código, Campaña asociada, Usos máximos,
+   Usos actuales, Fechas de validez.
 
 ---
 

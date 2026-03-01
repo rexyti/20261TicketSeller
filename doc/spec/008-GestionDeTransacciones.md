@@ -28,7 +28,8 @@ queda registrado en el historial y el ticket asociado se habilita para el compra
       registra la fecha y hora del cambio.
 
 2. **Scenario: Cambio de estado manual por soporte**
-    - **Given** que existe una venta en estado ***Pendiente*** y un agente de soporte con permisos de edición sobre ella.
+    - **Given** que existe una venta en estado ***Pendiente*** y un agente de soporte con permisos de edición sobre
+      ella.
     - **When** el agente selecciona un nuevo estado válido y confirma el cambio con una justificación.
     - **Then** el sistema actualiza el estado de la venta, registra el agente responsable, la
       justificación y el timestamp del cambio.
@@ -91,7 +92,8 @@ El test es exitoso si la lista muestra únicamente ventas con ese estado, sin me
       de más reciente a más antigua.
 
 2. **Scenario: Sin resultados para el filtro aplicado**
-    - **Given** que el sistema no tiene transacciones registradas que coincidan con los criterios de filtrado seleccionados.
+    - **Given** que el sistema no tiene transacciones registradas que coincidan con los criterios de filtrado
+      seleccionados.
     - **When** el agente ejecuta la búsqueda con esos filtros.
     - **Then** el sistema muestra el mensaje ***"No se encontraron transacciones con los filtros
       aplicados"*** sin errores ni pantallas en blanco.
@@ -132,10 +134,10 @@ El test es exitoso si la lista muestra únicamente ventas con ese estado, sin me
 
 ### Key Entities *(include if feature involves data)*
 
-- **Venta**: Representa el acto comercial entre el comprador y el sistema para adquirir uno o más tickets.
+1. **Venta**: Representa el acto comercial entre el comprador y el sistema para adquirir uno o más tickets.
     - **Atributos**: *ID único, ID de comprador, ID de evento, Estado actual, Fecha de creación,
       Monto total*
-- **Historial de Estado**: Representa cada cambio de estado que ha sufrido una venta.
+2. **Historial de Estado**: Representa cada cambio de estado que ha sufrido una venta.
     - **Atributos**: *ID único, ID de venta, Estado anterior, Estado nuevo, Timestamp, Actor
       responsable (sistema o ID de agente), Justificación (opcional/obligatoria según el actor)*
 

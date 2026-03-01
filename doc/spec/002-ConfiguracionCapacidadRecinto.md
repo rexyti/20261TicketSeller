@@ -44,7 +44,7 @@ filtros útiles a los compradores.
 y que tipo de eventos se pueden llevar a cabo en ellos.
 
 **Independent Test**: Un administrador edita un recinto, o durante la creación de este, encuentra un selector
-desplegable llamado ***Tipo de Recinto***, selecciona algún tipo y guarda. El test es exitoso si al buscar recintos en 
+desplegable llamado ***Tipo de Recinto***, selecciona algún tipo y guarda. El test es exitoso si al buscar recintos en
 la página pública, aparece filtrado por esta categoría.
 
 **Acceptance Scenarios**:
@@ -106,14 +106,14 @@ exitoso si al comprar, el usuario puede elegir zona y el sistema respeta los lí
 
 ### Key Entities *(include if feature involves data)*
 
-- **Recinto**: Representa el espacio físico donde se realizan los eventos. Contiene información básica como nombre,
-  ubicación, capacidad total máxima, y la categoría a la que pertenece. Puede estar compuesto por una o varias zonas
-  internas.
-- **Categoria del Recinto**: Clasificación predefinida que permite agrupar recintos por tipo. Ayuda a la organización y
-  filtrado en la interfaz.
-- **Zona**: División interna de un recinto con una capacidad específica. Cada zona pertenece a un único recinto y su
-  capacidad no puede exceder la capacidad total del mismo. Permite una gestión más detallada del aforo para eventos
-  complejos.
+1. **Recinto**: Representa el espacio físico donde se realizan los eventos. Contiene información básica como nombre,
+   ubicación, capacidad total máxima, y la categoría a la que pertenece. Puede estar compuesto por una o varias zonas
+   internas.
+2. **Categoria del Recinto**: Clasificación predefinida que permite agrupar recintos por tipo. Ayuda a la organización y
+   filtrado en la interfaz.
+3. **Zona**: División interna de un recinto con una capacidad específica. Cada zona pertenece a un único recinto y su
+   capacidad no puede exceder la capacidad total del mismo. Permite una gestión más detallada del aforo para eventos
+   complejos.
 
 ## Success Criteria *(mandatory)*
 

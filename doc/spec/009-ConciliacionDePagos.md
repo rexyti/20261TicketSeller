@@ -49,13 +49,15 @@ de pago responde con éxito, el sistema actualiza automáticamente el estado de 
 **Acceptance Scenarios**:
 
 1. **Scenario: Confirmación automática exitosa**
-    - **Given** que existe una transacción en estado ***Pendiente*** con una respuesta exitosa disponible desde la pasarela de pago.
+    - **Given** que existe una transacción en estado ***Pendiente*** con una respuesta exitosa disponible desde la
+      pasarela de pago.
     - **When** el sistema procesa la respuesta de la pasarela.
     - **Then** el sistema actualiza la transacción a ***Confirmada***, registra la fecha y hora de
       confirmación, y habilita el ticket para descarga o uso.
 
 2. **Scenario: Transacción no confirmada — timeout o error de pasarela**
-    - **Given** que existe una transacción en estado ***Pendiente*** cuyo tiempo de espera ha sido superado o cuya pasarela reportó un error.
+    - **Given** que existe una transacción en estado ***Pendiente*** cuyo tiempo de espera ha sido superado o cuya
+      pasarela reportó un error.
     - **When** el sistema evalúa el estado de la transacción.
     - **Then** el sistema marca la transacción como ***Fallida***, **no** entrega el ticket, y
       notifica al comprador para que intente nuevamente.
@@ -78,13 +80,15 @@ el pago cambia de estado y queda registrado quién lo resolvió y cuándo.
 **Acceptance Scenarios**:
 
 1. **Scenario: Soporte confirma manualmente un pago válido**
-    - **Given** que existe un pago en estado ***En discrepancia*** cuya información de la pasarela es consistente con el monto del ticket.
+    - **Given** que existe un pago en estado ***En discrepancia*** cuya información de la pasarela es consistente con el
+      monto del ticket.
     - **When** el agente hace clic en ***Confirmar pago manualmente*** e ingresa una justificación.
     - **Then** el sistema actualiza el pago a ***Confirmado manualmente***, registra el agente
       responsable y habilita el ticket para el comprador.
 
 2. **Scenario: Soporte rechaza el pago e inicia reembolso**
-    - **Given** que existe un pago en estado ***En discrepancia*** cuyo monto registrado no corresponde al valor del ticket asociado.
+    - **Given** que existe un pago en estado ***En discrepancia*** cuyo monto registrado no corresponde al valor del
+      ticket asociado.
     - **When** el agente hace clic en ***Rechazar y reembolsar***.
     - **Then** el sistema marca la transacción como ***Reembolsada***, inicia el proceso de devolución
       y notifica al comprador.
@@ -125,11 +129,11 @@ el pago cambia de estado y queda registrado quién lo resolvió y cuándo.
 
 ### Key Entities *(include if feature involves data)*
 
-- **Transacción**: Representa el registro financiero de un intento de pago.
+1. **Transacción**: Representa el registro financiero de un intento de pago.
     - **Atributos**: *ID único, ID de ticket asociado, Monto esperado, Monto recibido, Estado,
       Fecha de creación, Fecha de confirmación, ID de respuesta de pasarela, ID de agente (si aplica),
       Justificación manual (si aplica)*
-- **Pago**: Representa la respuesta recibida desde la pasarela de pago externa.
+2. **Pago**: Representa la respuesta recibida desde la pasarela de pago externa.
     - **Atributos**: *ID externo de pasarela, Estado de pasarela, Monto, Moneda, Timestamp*
 
 ---
