@@ -177,12 +177,12 @@ mapa visual.
 
 ### Key Entities *(include if feature involves data)*
 
+- **Asiento**: Representa una unidad individual y única dentro de un Mapa de Asientos (ej. Fila A, Asiento 12).
 - **Tipo de Asiento**: Representa la categoría o clasificación de un asiento (ej. VIP, Platea, General). Sus
   atributos clave incluyen: Nombre, Descripción, ID único interno, Estado (Activo/Inactivo).
 - **Zona**: Representa una subdivisión o área específica dentro de un recinto (ej. Zona VIP, Platea Baja). Es la
   entidad a la que se le asigna un Tipo de Asiento.
 - **Mapa de Asientos**: Representa la configuración detallada de la disposición de los asientos dentro de un recinto.
-- **Asiento**: Representa una unidad individual y única dentro de un Mapa de Asientos (ej. Fila A, Asiento 12).
 
 ## Success Criteria *(mandatory)*
 

@@ -109,13 +109,13 @@ el recinto desactivado **no** aparece en la lista desplegable para elegir el lug
 
 1. **Recinto**:
     - Representa el espacio físico en el que se realizan los eventos.
-    - **Atributos**: ***ID único, Nombre, Ciudad, Dirección, Capacidad Máxima, Teléfono***
+    - **Atributos**: ***ID único, Nombre, Ciudad, Dirección, Capacidad Máxima, Teléfono, Fecha de Creación***
 
 ## Success Criteria *(mandatory)*
 
 ### Measurable Outcomes
 
-- **SC-001**: Un administrador de recintos con poca experiencia debe poder registrar un nuevo recinto en menos de 2
+- **SC-001**: Un administrador de recintos debe poder registrar un nuevo recinto en menos de 2
   minutos desde que inicia sesión.
 - **SC-002**: El sistema debe reducir a 0 la creación de recintos duplicados mediante validaciones en tiempo real.
 - **SC-003**: Al desactivar un recinto, los eventos asociados a él deben ser revisados y bloqueados para su edición,
