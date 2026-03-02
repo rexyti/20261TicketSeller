@@ -6,6 +6,6 @@ Todos los specs creados anteriormente requieren un prototipo inicial para tener 
 tienen en mente para el diseño de la app.
 
 ## Registro y Catálogo de Recintos
-* [Crear Recinto](registro-y-catalogo-de-recintos/Crear-Recinto.png)
-* [Editar Recinto](registro-y-catalogo-de-recintos/Edicion-Recinto.png)
-* [Listado y Búsqueda de Recintos](registro-y-catalogo-de-recintos/Listado-Y-Filtrado-Recintos.png)
+* [Crear Recinto](registro-config-y-catalogo-de-recintos/Crear-Recinto.png)
+* [Editar Recinto](registro-config-y-catalogo-de-recintos/Editar-Recinto.png)
+* [Listado y Búsqueda de Recintos](registro-config-y-catalogo-de-recintos/Listado-Y-Filtrado-Recintos.png)
