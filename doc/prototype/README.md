@@ -4,3 +4,8 @@
 
 Todos los specs creados anteriormente requieren un prototipo inicial para tener una vista previa de las ideas que se
 tienen en mente para el diseño de la app.
+
+## Registro y Catálogo de Recintos
+* [Crear Recinto](registro-y-catalogo-de-recintos/Crear-Recinto.png)
+* [Editar Recinto](registro-y-catalogo-de-recintos/Edicion-Recinto.png)
+* [Listado y Búsqueda de Recintos](registro-y-catalogo-de-recintos/Listado-Y-Filtrado-Recintos.png)

@@ -12,7 +12,7 @@ Como **Administrador de Recintos**, quiero poder ver el listado completo de los 
 tener una visión general y poder acceder rápidamente a cualquiera de ellos.
 
 **Why this priority**: Es la pantalla principal del admin de recintos, es esencial para tener una vista de los recintos
-una vez estos han sido creados. (*ver 001-RegistroRecinto.md, **User Story 1***).
+una vez estos han sido creados. (*ver [001-RegistroRecinto.md](001-RegistroRecinto.md), **User Story 1***).
 
 **Independent Test**: Después de que el administrador ha creado un nuevo recinto, este vuelve a su pantalla principal.
 El test es exitoso si el nuevo recinto ahora aparece listado en esta pantalla.
