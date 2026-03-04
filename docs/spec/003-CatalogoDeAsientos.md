@@ -190,7 +190,7 @@ mapa visual.
 
 ### Measurable Outcomes
 
-- **SC-001**: Un gestor de inventario con poca experiencia debe poder registrar un nuevo tipo de asiento en menos de 1
+- **SC-001**: Un gestor de inventario debe poder registrar un nuevo tipo de asiento en menos de 1
   minuto desde que inicia sesión.
 - **SC-002**: El sistema debe reducir a 0 la creación de tipos de asiento duplicados mediante validaciones en tiempo
   real (alerta de nombre existente).
