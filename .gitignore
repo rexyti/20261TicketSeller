@@ -32,4 +32,4 @@ build/
 ### VS Code ###
 .vscode/
 
-/doc/spec/spec-template.md
+/docs/spec/spec-template.md

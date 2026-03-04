@@ -10,3 +10,6 @@ tienen en mente para el diseño de la app.
 * [Editar Recinto](registro-config-y-catalogo-de-recintos/Editar-Recinto.png)
 * [Listado y Búsqueda de Recintos](registro-config-y-catalogo-de-recintos/Listado-Y-Filtrado-Recintos.png)
 * [Configurar Zonas del Recinto](registro-config-y-catalogo-de-recintos/Configurar-Zonas-Recinto.png)
+
+## Checkout y Pago
+* [Home Page](checkout-y-pago/Home-Page.png)
