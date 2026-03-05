@@ -13,3 +13,4 @@ tienen en mente para el diseño de la app.
 
 ## Checkout y Pago
 * [Home Page](checkout-y-pago/Home-Page.png)
+* [Carrito Tickets](checkout-y-pago/Carrito-Tickets.png)
