@@ -1,188 +1,163 @@
-# Feature Specification: Control de Acceso (Validación de Tickets)
+# Feature Specification: Exposición de API REST de Inventario para Control de Accesos
 
-**Created**: 22/02/2026
+**Created**: 07/03/2026
 
 ## User Scenarios & Testing *(mandatory)*
 
 ---
 
-### User Story 1 - Validación Exitosa de Ticket (Priority: P1)
+### User Story 1 - Consulta de Estado de Ticket en Tiempo Real (Priority: P1)
 
-Como **Validador de Accesos**, quiero poder escanear el código de un ticket (QR/código de barras) y que el
-sistema me indique si es válido para acceder al recinto, para permitir la entrada rápida y correcta de los asistentes.
+Cuando el Módulo 2 recibe un intento de ingreso al recinto, consulta al Módulo 1 el estado vigente del ticket 
+presentado. El Módulo 1 debe retornar el estado exacto dentro del ciclo de vida del inventario (Vendido, Anulado, 
+Reservado, etc.) para que el Módulo 2 pueda determinar si el acceso es válido o debe ser denegado.
 
-**Why this priority**: Es la operación fundamental del control de acceso; indispensable para gestionar la entrada al
-evento.
+**Why this priority**: Sin esta respuesta, el Módulo 2 no puede operar. Es el contrato de
+integración más crítico entre ambos módulos: toda la lógica de acceso del Módulo 2 depende
+del estado que el Módulo 1 exponga en tiempo real.
 
-**Independent Test**: Un validador escanea un ticket válido que corresponde a un asiento libre para el evento actual.
-El test es exitoso si el sistema muestra una pantalla verde con el mensaje ***Acceso permitido*** y el asiento pasa a
-estado ***Usado***.
-
-**Acceptance Scenarios**:
-
-1. **Scenario: Validación exitosa - Ticket válido y no usado**
-    - **Given** un evento en curso y un ticket válido (emitido para el evento, asiento correcto) que aún no ha sido
-      utilizado.
-    - **When** el validador escanea el código del ticket.
-    - **Then** el sistema muestra un mensaje claro de **ACCESO PERMITIDO**, con información básica (tipo de asiento,
-      sección, fila/asiento si aplica) y registra el ingreso. El asiento se marca como ***usado*** en el sistema de
-      inventario.
-
-2. **Scenario: Validación exitosa con advertencia**
-    - **Given** un ticket válido pero con alguna condición especial (ej. acceso para personas con movilidad reducida,
-      cortesía, etc.).
-    - **When** el validador escanea el ticket.
-    - **Then** el sistema muestra ***ACCESO PERMITIDO - ACCESO ESPECIAL*** con la información relevante para que el
-      validador pueda guiar al asistente adecuadamente.
-
----
-
-### User Story 2 - Validación de Ticket Inválido o Ya Usado (Priority: P1)
-
-Como **Validador de Accesos**, quiero que el sistema me alerte claramente cuando un ticket no es válido (ya usado, para
-otro evento, etc.), para poder denegar el acceso de forma fundamentada y manejar la situación con el asistente.
-
-**Why this priority**: Es tan crítica como la validación exitosa, ya que gestiona los casos de error y previene accesos
-no autorizados.
-
-**Independent Test**: Un validador escanea un ticket que ya fue utilizado previamente. El test es exitoso si el sistema
-muestra una pantalla roja con el mensaje "TICKET YA USADO" y no permite el acceso.
+**Independent Test**: Puede probarse de forma aislada haciendo requests al endpoint del Módulo 1
+con identificadores de tickets en distintos estados del ciclo de vida, verificando que la
+respuesta JSON contiene el estado correcto en cada caso. No requiere que el Módulo 2 esté
+implementado.
 
 **Acceptance Scenarios**:
 
-1. **Scenario: Ticket ya utilizado**
-    - **Given** un ticket que ya fue escaneado y marcado como usado anteriormente.
-    - **When** el validador intenta escanearlo nuevamente.
-    - **Then** el sistema muestra un mensaje de **ACCESO DENEGADO - TICKET YA UTILIZADO** y no registra ningún nuevo
-      ingreso.
+1. **Scenario**: Consulta sobre un ticket con estado Vendido
+    - **Given** un ticket con estado `Vendido` registrado en el inventario del Módulo 1
+    - **When** el Módulo 2 hace un GET al endpoint de estado de ticket con su identificador único
+    - **Then** el Módulo 1 retorna HTTP 200 con un JSON que incluye estado `Vendido`, categoría del asiento y coordenada
+      de acceso asignada
 
-2. **Scenario: Ticket para evento incorrecto**
-    - **Given** un ticket válido, para un evento diferente al que se está realizando.
-    - **When** el validador escanea el ticket.
-    - **Then** el sistema muestra **ACCESO DENEGADO - TICKET NO CORRESPONDE AL EVENTO ACTUAL**, indicando el evento
-      correcto al que pertenece.
+2. **Scenario**: Consulta sobre un ticket Anulado
+    - **Given** un ticket con estado `Anulado/Reingresado` por fraude o cancelación
+    - **When** el Módulo 2 consulta su estado
+    - **Then** el Módulo 1 retorna HTTP 200 con estado `Anulado`, permitiendo al Módulo 2 denegar el ingreso con el
+      error `Estado Inválido`
 
-3. **Scenario: Ticket no existente en sistema**
-    - **Given** un código escaneado que no corresponde a ningún ticket registrado (ej. código falso, dañado).
-    - **When** el validador escanea.
-    - **Then** el sistema muestra **ACCESO DENEGADO - TICKET NO VÁLIDO**.
+3. **Scenario**: Consulta sobre un ticket cuyo TTL de Reserva expiró
+    - **Given** un ticket en estado `Reservado` cuyo bloqueo temporal de 10-15 min ha vencido sin confirmación de pago
+    - **When** el Módulo 2 consulta su estado
+    - **Then** el Módulo 1 retorna el estado actualizado `Disponible`, no el estado obsoleto `Reservado`
 
-4. **Scenario: Ticket cancelado o reembolsado**
-    - **Given** un ticket que fue cancelado o reembolsado después de su emisión.
-    - **When** el validador escanea.
-    - **Then** el sistema muestra **ACCESO DENEGADO - TICKET CANCELADO/REEMBOLSADO**.
+4. **Scenario**: Consulta con identificador de ticket inexistente
+    - **Given** un identificador de ticket que no existe en el inventario del Módulo 1
+    - **When** el Módulo 2 hace un GET con ese identificador
+    - **Then** el Módulo 1 retorna HTTP 404 con un mensaje de error estructurado, para que el Módulo 2 active el error
+      `Sesión Inválida`
 
 ---
 
-### User Story 3 - Revalidación y Control de Doble Ingreso (Priority: P2)
+### User Story 2 - Consulta de Zona y Categoría para Validación de Puerta (Priority: P1)
 
-Como **Validador**, quiero que el sistema detecte si se intenta validar el mismo ticket en dos puntos de acceso
-simultáneamente, para evitar que dos personas accedan con el mismo ticket.
+Cuando el Módulo 2 detecta un intento de ingreso por una puerta específica, consulta al Módulo 1
+los atributos de localización y categoría del ticket para determinar si el acceso por esa puerta
+es válido. El Módulo 1 expone estos atributos en la misma respuesta de estado para evitar
+llamadas adicionales.
 
-**Why this priority**: Protege contra fraudes y garantiza que cada ticket solo permita un acceso, incluso en condiciones
-de alta concurrencia.
+**Why this priority**: Previene directamente el error `Zona Incorrecta` del diccionario del
+Módulo 2. El Módulo 1 es el único que conoce la asignación de Bloque/Categoría/Coordenada
+de cada ticket.
 
-**Independent Test**: Dos validadores escanean el mismo ticket casi simultáneamente. El primero recibe acceso permitido;
-el segundo recibe "TICKET YA UTILIZADO" inmediatamente.
+**Independent Test**: Puede probarse consultando el endpoint de estado de distintos tickets y
+verificando que la respuesta JSON incluye siempre la categoría y coordenada de acceso correctas.
 
 **Acceptance Scenarios**:
 
-1. **Scenario: Intento de doble validación simultánea**
-    - **Given** un ticket válido no usado.
-    - **When** dos validadores escanean el mismo ticket en un intervalo de milisegundos.
-    - **Then** el sistema debe garantizar que solo una validación sea exitosa (la primera en ser procesada) y la segunda
-      sea rechazada como ticket ya usado, gracias a mecanismos de concurrencia (bloqueos atómicos, transacciones).
+1. **Scenario**: Ticket VIP consultado — respuesta incluye zona correcta
+    - **Given** un ticket de categoría `VIP` asignado al Bloque A con coordenada de acceso norte
+    - **When** el Módulo 2 consulta el estado del ticket
+    - **Then** el Módulo 1 retorna en el mismo JSON: estado `Vendido`, categoría `VIP`, bloque `A` y coordenada `norte`
 
-2. **Scenario: Validación después de un ingreso reciente**
-    - **Given** un ticket que ha sido validado exitosamente.
-    - **When** se intenta validar nuevamente.
-    - **Then** el sistema lo rechaza como ticket ya usado, aunque la sincronización entre dispositivos sea casi en
-      tiempo real.
+2. **Scenario**: Ticket General consultado — el Módulo 2 detecta discrepancia de zona
+    - **Given** un ticket de categoría `General` asignado al Bloque C
+    - **When** el Módulo 2 consulta el ticket y lo compara contra una puerta de acceso VIP
+    - **Then** el Módulo 1 retorna categoría `General` y bloque `C`, con lo cual el Módulo 2 identifica la discrepancia
+      y activa el error `Zona Incorrecta`
 
 ---
 
-### Edge Cases
+### User Story 3 - Consulta de Metadatos de Evento para Validación de Sesión (Priority: P2)
 
-- **¿Qué sucede si el código escaneado es ilegible o está dañado?**
-  El sistema debe permitir la introducción manual del código (ej. número de ticket) para que el validador pueda
-  teclearlo en caso necesario, manteniendo todas las validaciones de negocio.
+El Módulo 2 necesita verificar que el ticket presentado corresponde al evento y fecha en curso.
+El Módulo 1 incluye los metadatos de evento vinculados al ticket en su respuesta REST para que
+el Módulo 2 pueda detectar el error `Sesión Inválida` sin llamadas adicionales.
 
-- **¿Cómo maneja el sistema la validación de tickets de grupos o paquetes familiares?**
-  Si un ticket incluye acceso para múltiples personas (ej. ticket familiar), el sistema debe permitir validaciones
-  parciales, registrando cuántos accesos de ese paquete se han utilizado y cuántos quedan, mostrando la información al
-  validador.
+**Why this priority**: Es un control de seguridad adicional. Un ticket técnicamente válido en
+estado pero perteneciente a otro evento debe ser denegado.
 
-- **¿Qué pasa si el validador escanea accidentalmente el mismo ticket dos veces seguidas?**
-  El sistema debería tener una protección de "doble clic" o tiempo mínimo entre validaciones para evitar errores
-  humanos, mostrando un mensaje de advertencia si se intenta validar el mismo código en menos de X segundos.
+**Independent Test**: Puede probarse consultando el estado de un ticket de un evento anterior
+y verificando que el JSON retornado incluye el identificador de evento y fecha originales,
+distintos al evento activo.
 
-- **¿Cómo se comporta el sistema si el evento ya terminó?**
-  El sistema debe rechazar cualquier validación mostrando ***EVENTO FINALIZADO*** y no permitir accesos después de la
-  hora de cierre configurada.
+**Acceptance Scenarios**:
 
-- **¿Qué ocurre si hay un corte de luz o el dispositivo se apaga durante una validación?**
-  Las validaciones deben ser transaccionales: o se completa el registro y se marca el asiento, o no se hace nada. El
-  sistema debe ser idempotente para evitar estados inconsistentes.
+1. **Scenario**: Ticket de evento anterior presentado en evento actual
+    - **Given** un ticket `Vendido` vinculado al Evento A con fecha 2025-03-01
+    - **When** el Módulo 2 consulta el estado del ticket durante el Evento B activo el 2025-05-15
+    - **Then** el Módulo 1 retorna en el JSON el identificador de evento `A` y la fecha `2025-03-01`, permitiendo al
+      Módulo 2 activar el error `Sesión Inválida`
 
-- **¿Cómo se integra la validación con el sistema de aforo en tiempo real?**
-  Además de marcar el asiento individual, el sistema debería incrementar un contador de aforo actual del recinto, y si
-  se alcanza el máximo (independientemente de asientos individuales, ej. gradas sin numerar), denegar accesos
-  adicionales.
+2. **Scenario**: Ticket válido para el evento en curso
+    - **Given** un ticket `Vendido` vinculado al evento activo en curso
+    - **When** el Módulo 2 consulta su estado
+    - **Then** el Módulo 1 retorna el identificador de evento y la fecha que coinciden con el evento activo
 
-- **¿Qué pasa si el ticket es válido pero el asistente intenta acceder por una puerta incorrecta (ej. entrada general
-  vs. VIP)?**
-  El sistema debería mostrar ***ACCESO PERMITIDO - PUERTA INCORRECTA. REDIRIGIR A [PUERTA CORRECTA]*** para ayudar al
-  validador a guiar al asistente, pero sin denegar el acceso si es válido.
+---
+
+## Edge Cases
+
+- ¿Qué retorna el Módulo 1 si el identificador de ticket existe pero su estado es `Bloqueado` o `Mantenimiento`? ¿HTTP
+  200 con el estado, o un código de error diferente?
+- ¿Cómo maneja el Módulo 1 consultas concurrentes sobre el mismo ticket desde múltiples lectores de acceso
+  simultáneamente?
+- ¿Qué ocurre si el TTL de un ticket `Reservado` expira exactamente durante el procesamiento de una consulta en curso?
+- ¿El Módulo 1 aplica algún rate limiting sobre el endpoint de consulta de estado, dado que el Módulo 2 puede hacer
+  miles de requests durante un evento masivo?
+- ¿Qué mecanismo de autenticación protege los endpoints del Módulo 1 para que solo el Módulo 2 pueda
+  consumirlos? [NEEDS CLARIFICATION: estrategia de autenticación entre servicios no definida]
+
+---
 
 ## Requirements *(mandatory)*
 
 ### Functional Requirements
 
-- **FR-001**: El Validador de Accesos **DEBE** poder escanear códigos (QR/código de barras) de tickets mediante
-  un dispositivo móvil o escáner, o introducir el código manualmente.
-- **FR-002**: El sistema **DEBE** comunicarse con el subsistema de gestión de eventos (del otro grupo) para verificar la
-  validez del ticket (existencia, evento correcto, no cancelado) y con el subsistema de inventario (nuestro grupo) para
-  verificar el estado del asiento (no usado).
-- **FR-003**: El sistema **DEBE** actualizar el estado del asiento a ***usado*** en el subsistema de inventario
-  inmediatamente después de una validación exitosa, de forma atómica para evitar condiciones de carrera.
-- **FR-004**: El sistema **DEBE** mostrar claramente el resultado de la validación con códigos de color (verde =
-  permitido, rojo = denegado) y mensajes legibles en el idioma local.
-- **FR-005**: El sistema **DEBE** registrar cada intento de validación (exitoso o fallido) con timestamp, identificador
-  del validador, código del ticket y resultado, para auditoría.
-- **FR-006**: El sistema **DEBE** implementar mecanismos de concurrencia para garantizar que un ticket solo pueda ser
-  validado una vez, incluso bajo alta carga.
-- **FR-007**: El sistema **DEBE** permitir la configuración de horarios de acceso por evento, rechazando validaciones
-  fuera de ese rango.
-- **FR-008**: El sistema **PUEDE** mostrar información adicional del ticket (tipo de acceso, puerta recomendada,
-  restricciones) para ayudar al validador.
-- **FR-009**: El sistema **DEBE** mantener un contador de aforo actualizado en tiempo real y denegar accesos si se
-  alcanza el aforo máximo del recinto para eventos sin asientos numerados.
+- **FR-001**: El Módulo 1 DEBE exponer un endpoint REST `GET /tickets/{id}` que retorne el estado actual del ciclo de
+  vida del ticket, su categoría, bloque, coordenada de acceso, identificador de evento y fecha del evento en un único
+  JSON.
+- **FR-002**: El Módulo 1 DEBE retornar HTTP 404 con un mensaje de error estructurado cuando el identificador de ticket
+  consultado no exista en el inventario.
+- **FR-003**: El Módulo 1 DEBE actualizar el estado de un ticket de `Reservado` a `Disponible` automáticamente cuando su
+  TTL expire, de forma que cualquier consulta posterior refleje el estado correcto.
+- **FR-004**: El Módulo 1 DEBE responder consultas de estado con el dato más reciente persistido, sin retornar estados
+  cacheados desactualizados.
+- **FR-005**: El Módulo 1 DEBE garantizar consistencia en consultas concurrentes sobre el mismo ticket desde múltiples
+  lectores simultáneos.
+- **FR-006**: El Módulo 1 DEBE exponer un endpoint REST `GET /recintos/{id}` que retorne los metadatos de estructura del
+  recinto (bloques, categorías, coordenadas de acceso) para que el Módulo 2 pueda validar coherencia de zona.
 
-### Key Entities *(include if feature involves data)*
+### Key Entities
 
-1. **Ticket**: Es la representación digital del derecho de acceso. Contiene la información que será escaneada (código
-   QR/barras). Sus atributos clave incluyen: Código único, Estado (Vendido, Usado, Cancelado/Reembolsado), Evento
-   asociado, Asiento asociado, Tipo de acceso (general, VIP, cortesía, movilidad reducida, ticket familiar con contador
-   de usos).
-2. **Evento**: Representa la instancia del espectáculo. Es crucial para validar que el ticket corresponde al evento
-   correcto y al horario adecuado. Atributos clave: Fecha, Hora de inicio/fin, Recinto, Aforo máximo.
-3. **Validación (Intento de Acceso)** : Representa el registro de cada intento de escaneo, exitoso o no. Es una entidad
-   de auditoría. Sus atributos: Timestamp, Ticket ID, Validador ID, Resultado (éxito/fallo), Código de rechazo (ya
-   usado,
-   evento incorrecto, etc.), Modo (online/offline).
+- **Ticket**: Unidad de inventario vendida. Atributos expuestos vía REST: identificador único, estado del ciclo de vida,
+  categoría, bloque, coordenada de acceso, identificador de evento, fecha del evento.
+- **Estado del Ciclo de Vida**: Enum de estados posibles — `Disponible`, `Bloqueado`, `Reservado`, `Vendido`,
+  `Anulado/Reingresado`, `Mantenimiento`. Determina si un ticket es válido para ingreso.
+- **Recinto**: Espacio físico. Atributos expuestos vía REST: identificador, bloques, categorías por bloque, coordenadas
+  de acceso por categoría.
 
-4. **Recinto**:
-    - Representa el espacio físico en el que se realizan los eventos.
-    - **Atributos**: ***ID único, Nombre, Ciudad, Dirección, Capacidad Máxima, Teléfono, Fecha de Creación***
+---
 
 ## Success Criteria *(mandatory)*
 
 ### Measurable Outcomes
 
-- **SC-001**: Un validador debe poder completar una validación exitosa en menos de 4 segundos desde el escaneo hasta la
-  respuesta visual.
-- **SC-002**: El sistema debe manejar al menos 10 validaciones por segundo por punto de acceso sin degradación del
-  rendimiento.
-- **SC-003**: Cero casos de doble ingreso con el mismo ticket en producción (fraude detectado y bloqueado).
-- **SC-004**: El 100% de los intentos de validación deben quedar registrados en el historial de auditoría.
-- **SC-005**: Tiempo de disponibilidad del sistema durante el evento: 99.9%.
+- **SC-001**: El endpoint de consulta de estado retorna el estado correcto del ticket en el 100% de los requests
+  realizados por el Módulo 2 durante un evento en vivo.
+- **SC-002**: Los endpoints del Módulo 1 consumidos por el Módulo 2 mantienen disponibilidad del 100% durante toda la
+  duración de cada evento, sin interrupciones que bloqueen el control de accesos.
+- **SC-003**: El estado de un ticket `Reservado` con TTL vencido es actualizado y reflejado correctamente en la próxima
+  consulta, sin intervención manual, en el 100% de los casos.
+- **SC-004**: El tiempo de respuesta de los endpoints del Módulo 1 no se convierte en el cuello de botella del flujo de
+  validación del Módulo 2 durante picos de ingreso
+  masivo. [NEEDS CLARIFICATION: SLA de tiempo de respuesta no definido aún]
