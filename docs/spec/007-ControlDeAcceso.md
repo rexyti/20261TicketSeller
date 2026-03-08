@@ -12,9 +12,9 @@ Cuando el Módulo 2 recibe un intento de ingreso al recinto, consulta al Módulo
 presentado. El Módulo 1 debe retornar el estado exacto dentro del ciclo de vida del inventario (Vendido, Anulado, 
 Reservado, etc.) para que el Módulo 2 pueda determinar si el acceso es válido o debe ser denegado.
 
-**Why this priority**: Sin esta respuesta, el Módulo 2 no puede operar. Es el contrato de
-integración más crítico entre ambos módulos: toda la lógica de acceso del Módulo 2 depende
-del estado que el Módulo 1 exponga en tiempo real.
+**Why this priority**: Esta respuesta es el habilitador fundamental para que el Módulo 2 opere correctamente.
+Establece el contrato de integración más crítico entre ambos módulos, permitiendo que toda la lógica de acceso del
+Módulo 2 se ejecute en tiempo real basándose en el estado actualizado que el Módulo 1 expone.
 
 **Independent Test**: Puede probarse de forma aislada haciendo requests al endpoint del Módulo 1
 con identificadores de tickets en distintos estados del ciclo de vida, verificando que la

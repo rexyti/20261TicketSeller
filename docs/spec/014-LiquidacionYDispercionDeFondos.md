@@ -14,9 +14,9 @@ asistieron, cuántos son cortesía y cuántos fueron cancelados. El Módulo 1 ex
 consolidado vía REST para que el Módulo 3 calcule los montos a dispersar según la matriz
 de condiciones definida.
 
-**Why this priority**: Es el insumo principal de la liquidación. Sin este endpoint, el Módulo 3
-no puede calcular los montos a dispersar. Todo el proceso de pago a Promotor, Recinto y
-Ticketera depende de que esta consulta retorne datos completos y correctos.
+**Why this priority**: Este endpoint es el insumo principal de la liquidación, ya que proporciona los datos necesarios
+para que el Módulo 3 calcule con precisión los montos a dispersar. Garantiza que el proceso de pago a Promotor,
+Recinto y Ticketera se realice correctamente al proveer información completa y fiable.
 
 **Independent Test**: Puede probarse de forma aislada registrando tickets en distintos estados
 en el Módulo 1, cerrando el evento, y verificando que el endpoint retorna el conteo correcto
