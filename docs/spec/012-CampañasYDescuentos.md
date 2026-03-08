@@ -33,7 +33,7 @@ miembro puede comprar, pero un usuario normal no ve los asientos disponibles has
 
 ### User Story 2 - Crear descuento por tiempo limitado (Priority: P2)
 
-Como **Coordinador de Patrocinios**, quiero poder crear descuentos porcentuales o por monto fijo que se apliquen
+Como **Agente de Ventas**, quiero poder crear descuentos porcentuales o por monto fijo que se apliquen
 automáticamente en el carrito durante un período específico, para incentivar ventas rápidas.
 
 **Why this priority**: Es la forma más común de promoción y genera conversión inmediata.
@@ -56,13 +56,13 @@ precio con descuento aplicado automáticamente.
 3. **Scenario: Descuento fuera de vigencia**
     - **Given** una campaña de descuento que terminó ayer
     - **When** un comprador intenta comprar tickets para aprovechar el descuento
-    - **Then** el precio se muestra sin descuento porque este ya no esta vigente
+    - **Then** el precio se muestra sin descuento porque este ya no está vigente
 
 ---
 
 ### User Story 3 - Crear descuento por código promocional (Priority: P2)
 
-Como **Coordinador de Patrocinios**, quiero poder generar códigos promocionales únicos o masivos que los usuarios deban
+Como **Agente de Ventas**, quiero poder generar códigos promocionales únicos o masivos que los usuarios deban
 ingresar para obtener un descuento.
 
 **Why this priority**: Permite rastrear el origen de las ventas y crear campañas segmentadas.
@@ -124,7 +124,7 @@ para reaccionar rápido ante problemas o cambios de estrategia.
 
 ### User Story 5 - Segmentar descuentos por zonas (Priority: P3)
 
-Como **Coordinador de Patrocinios**, quiero poder aplicar descuentos solo a ciertas zonas (ej. VIP) para promocionar
+Como **Agente de Ventas**, quiero poder aplicar descuentos solo a ciertas zonas (ej. VIP) para promocionar
 áreas específicas del evento.
 
 **Why this priority**: Permite estrategias de venta más precisas y mover inventario de zonas menos demandadas.
@@ -159,9 +159,9 @@ en tickets de esa zona.
 
 ### Functional Requirements
 
-- **FR-001**: El sistema **DEBE** permitir crear preventas con fechas de inicio y fin, y segmentación por tipo de
+- **FR-001**: El sistema **DEBE** permitir crear pre-ventas con fechas de inicio y fin, y segmentación por tipo de
   usuario.
-- **FR-002**: El sistema **DEBE** validar que solo usuarios autorizados puedan ver y comprar en preventas.
+- **FR-002**: El sistema **DEBE** validar que solo usuarios autorizados puedan ver y comprar en pre-ventas.
 - **FR-003**: El sistema **DEBE** permitir crear descuentos porcentuales o por monto fijo.
 - **FR-004**: El sistema **DEBE** aplicar descuentos automáticamente en el carrito según las reglas de la campaña.
 - **FR-005**: El sistema **DEBE** permitir generar códigos promocionales únicos o masivos.
