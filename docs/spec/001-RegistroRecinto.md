@@ -77,7 +77,7 @@ el recinto desactivado **no** aparece en la lista desplegable para elegir el lug
    
 2. **Scenario: Desactivar un recinto con eventos futuros**
     - **Given** un recinto que tiene uno o más eventos programados.
-    - **When** el administrador intente ***cambiar el estado*** del recinto a ***inactivo***.
+    - **When** el administrador intenta ***cambiar el estado*** del recinto a ***inactivo***.
     - **Then** el sistema **no** debe permitirlo. Debe mostrar un mensaje ***No se puede desactivar el recinto
       porque tiene eventos programados. Finalice o reubique los eventos primero***.
 

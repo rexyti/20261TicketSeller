@@ -53,9 +53,9 @@ la transacción.
 pero también evita que compradores malintencionados bloqueen asientos sin pagar, aunque no es critíco para un
 lanzamiento inicial.
 
-**Independent Test**: Un comprador añade asientos al carrito y los mantiene reservados por 10-15 minutos. Si cierra el
-navegador sin pagar, los asientos se liberan automáticamente pasados los 10-15 minutos en caso de que este no regrese
-para completar la transacción.
+**Independent Test**: Un comprador añade asientos, de un mismo evento, al carrito y los mantiene reservados por 10-15 
+minutos. Si cierra el navegador sin pagar, los asientos se liberan automáticamente pasados los 10-15 minutos en caso de 
+que este no regrese para completar la transacción.
 
 **Acceptance Scenarios**:
 
@@ -121,8 +121,6 @@ para completar la transacción.
 4. **Transacción Financiera**: Representa la interacción con la pasarela de pagos. Aunque podría ser parte de la
    entidad Venta, el spec sugiere la necesidad de un registro detallado para auditoría: Respuesta de la pasarela, Código
    de autorización, Estado del pago (aprobado/rechazado).
-5. **Carrito**: Representa el contexto temporal del comprador. Contiene la selección de Asientos y gestiona el tiempo
-   de Reserva (timeout de 15 minutos).
 
 ## Success Criteria *(mandatory)*
 
