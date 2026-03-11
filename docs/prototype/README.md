@@ -14,3 +14,13 @@ tienen en mente para el diseño de la app.
 ## Checkout y Pago
 * [Home Page](checkout-y-pago/Home-Page.png)
 * [Checkout Page](checkout-y-pago/Checkout-Page.png)
+
+- ### Páginas para Comprar los Tickets
+1. [Recinto sin asientos, solo zonas](checkout-y-pago/Recinto-Solo-Zonas.png)  
+    1.1. [Selección Cantidad de Entradas](checkout-y-pago/Seleccion-Cantidad-Asientos.png)
+
+2. [Recinto tipo estadio]
+
+3. [Recinto con asientos]
+
+* [Purchases Page](checkout-y-pago/Purchases-Page.png)
