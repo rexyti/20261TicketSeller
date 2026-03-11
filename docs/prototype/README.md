@@ -17,9 +17,10 @@ tienen en mente para el diseño de la app.
 
 - ### Páginas para Comprar los Tickets
 1. [Recinto sin asientos, solo zonas](checkout-y-pago/Recinto-Solo-Zonas.png)  
-    1.1. [Selección Cantidad de Entradas](checkout-y-pago/Seleccion-Cantidad-Asientos.png)
+    1.1. [Selección Cantidad de Entradas](checkout-y-pago/Seleccion-Cantidad-Entradas.png)  
 
-2. [Recinto tipo estadio]
+2. [Recinto tipo estadio](checkout-y-pago/Recinto-Tipo-Estadio.png)  
+    2.1. [Selección Cantidad de Asientos](checkout-y-pago/Seleccion-Cantidad-Asientos.png)
 
 3. [Recinto con asientos]
 
