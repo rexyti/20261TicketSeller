@@ -2,10 +2,14 @@
 
 **Created**: 01/03/2026
 
-Todos los specs creados anteriormente requieren un prototipo inicial para tener una vista previa de las ideas que se
-tienen en mente para el diseño de la app.
+La mayoría los specs creados anteriormente requieren un prototipo inicial para tener una vista previa de las ideas que 
+se tienen en mente para el diseño de la app.
 
-## Registro y Catálogo de Recintos
+[**Prototipo en Figma**](https://www.figma.com/design/vOLlAuqZxGASradDvk1Ws2/Ticket-Seller?node-id=622-3602&t=H2wBlBQtvCkfshsx-1)
+
+Lo que encontramos a continuación, son imágenes de funciones específicas del prototipo:
+
+## Registro, Configuración y Catálogo de Recintos
 * [Crear Recinto](registro-config-y-catalogo-de-recintos/Crear-Recinto.png)
 * [Editar Recinto](registro-config-y-catalogo-de-recintos/Editar-Recinto.png)
 * [Listado y Búsqueda de Recintos](registro-config-y-catalogo-de-recintos/Listado-Y-Filtrado-Recintos.png)
@@ -22,6 +26,13 @@ tienen en mente para el diseño de la app.
 2. [Recinto tipo estadio](checkout-y-pago/Recinto-Tipo-Estadio.png)  
     2.1. [Selección Cantidad de Asientos](checkout-y-pago/Seleccion-Cantidad-Asientos.png)
 
-3. [Recinto con asientos]
+3. [Recinto con asientos](checkout-y-pago/Recinto-Asientos.png)
 
 * [Purchases Page](checkout-y-pago/Purchases-Page.png)
+
+## Registro, Configuración y Catálogo de Eventos
+* [Crear Evento]
+* [Editar Evento]
+* [Configurar Precios Para Evento]
+* [Home Page]
+* [Mis Eventos]
