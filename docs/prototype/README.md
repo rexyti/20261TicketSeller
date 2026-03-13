@@ -36,3 +36,14 @@ Lo que encontramos a continuación, son imágenes de funciones específicas del 
 * [Configurar Precios Para Evento]
 * [Home Page]
 * [Mis Eventos]
+
+## Catalogo de Asientos y Mantenimiento de Recinto
+
+1. [Lista tipos de asientos](ListadoTiposAsientos.png)
+   1.1 [Crear Nuevo tipo de asientos](CrearNuevoTipoAsiento.png)
+   1.2 [Editar tipos de asientos](EditarTiposAsientos.png)
+2. [Listado de recitntos (vista de gestor)](ListaRecintosGestorInventario.png)
+3. [Mapa de asientos](MapaAsientosRecintos.png)
+   3.1 [Cambio individual de asientos](CambioIndividualAsientoMapa.png)
+   3.2 [Cambio masivo de asientos](CambioMasivoAsiento.png)
+   3.3 [Historial de cambios de asientos](HistorialMapa.png)
