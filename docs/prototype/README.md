@@ -32,12 +32,12 @@ Lo que encontramos a continuación, son imágenes de funciones específicas del 
 
 
 ## Devoluciones y Reembolsos
-* [Menú de Tickets](Devoluciones-Y-Reembolsos/Menu_Tickets.png)
-* [Menú Contextual de Tickets](Devoluciones-Y-Reembolsos/PopUp_MenuTickets.png)
-* [Formulario de Reembolsos](Devoluciones-Y-Reembolsos/Form_de_Reembolsos.png)
-* [Confirmación de Datos del Formulario](Devoluciones-Y-Reembolsos/Confirmacion_de_Datos_del_Form.png)
-* [Procesando Reembolso](Devoluciones-Y-Reembolsos/Procesando_reembolso_Vista.png)
-* [Reembolso Aceptado](Devoluciones-Y-Reembolsos/Reembolso_aceptado.png)
+1. [Menú de Tickets](Devoluciones-Y-Reembolsos/Menu_Tickets.png)
+   1.1.  [PopUp Del Menu de Tickets](Devoluciones-Y-Reembolsos/PopUp_MenuTickets.png)
+2. [Formulario de Reembolsos](Devoluciones-Y-Reembolsos/Form_de_Reembolsos.png)
+   2.1. [Confirmación de Datos del Formulario](Devoluciones-Y-Reembolsos/Confirmacion_de_Datos_del_Form.png)
+   2.2. [Reembolso Aceptado](Devoluciones-Y-Reembolsos/Reembolso_aceptado.png)
+3. [Vista Procesando Reembolso](Devoluciones-Y-Reembolsos/Procesando_reembolso_Vista.png)
 
 
 ## Registro, Configuración y Catálogo de Eventos
