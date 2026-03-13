@@ -30,6 +30,16 @@ Lo que encontramos a continuación, son imágenes de funciones específicas del 
 
 * [Purchases Page](checkout-y-pago/Purchases-Page.png)
 
+
+## Devoluciones y Reembolsos
+* [Menú de Tickets](Devoluciones-Y-Reembolsos/Menu_Tickets.png)
+* [Menú Contextual de Tickets](Devoluciones-Y-Reembolsos/PopUp_MenuTickets.png)
+* [Formulario de Reembolsos](Devoluciones-Y-Reembolsos/Form_de_Reembolsos.png)
+* [Confirmación de Datos del Formulario](Devoluciones-Y-Reembolsos/Confirmacion_de_Datos_del_Form.png)
+* [Procesando Reembolso](Devoluciones-Y-Reembolsos/Procesando_reembolso_Vista.png)
+* [Reembolso Aceptado](Devoluciones-Y-Reembolsos/Reembolso_aceptado.png)
+
+
 ## Registro, Configuración y Catálogo de Eventos
 * [Crear Evento]
 * [Editar Evento]
