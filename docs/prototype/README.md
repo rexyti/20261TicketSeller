@@ -32,28 +32,28 @@ Lo que encontramos a continuación, son imágenes de funciones específicas del 
 
 
 ## Devoluciones y Reembolsos
-1. [Menú de Tickets](Devoluciones-Y-Reembolsos/Menu_Tickets.png)
+1. [Menú de Tickets](Devoluciones-Y-Reembolsos/Menu_Tickets.png)  
    1.1.  [PopUp Del Menu de Tickets](Devoluciones-Y-Reembolsos/PopUp_MenuTickets.png)
-2. [Formulario de Reembolsos](Devoluciones-Y-Reembolsos/Form_de_Reembolsos.png)
-   2.1. [Confirmación de Datos del Formulario](Devoluciones-Y-Reembolsos/Confirmacion_de_Datos_del_Form.png)
+2. [Formulario de Reembolsos](Devoluciones-Y-Reembolsos/Form_de_Reembolsos.png)  
+   2.1. [Confirmación de Datos del Formulario](Devoluciones-Y-Reembolsos/Confirmacion_de_Datos_del_Form.png)  
    2.2. [Reembolso Aceptado](Devoluciones-Y-Reembolsos/Reembolso_aceptado.png)
 3. [Vista Procesando Reembolso](Devoluciones-Y-Reembolsos/Procesando_reembolso_Vista.png)
 
 
 ## Registro, Configuración y Catálogo de Eventos
-* [Crear Evento]
-* [Editar Evento]
+* [Crear Evento](registro-config-y-catalogo-de-eventos/Nuevo-Evento.png)
+* [Editar Evento](registro-config-y-catalogo-de-eventos/Editar-Evento.png)
 * [Configurar Precios Para Evento]
-* [Home Page]
-* [Mis Eventos]
+* [Home Page](registro-config-y-catalogo-de-eventos/Home-Page-Promotor.png)
+* [Mis Eventos](registro-config-y-catalogo-de-eventos/Eventos-Promotor.png)
 
-## Catalogo de Asientos y Mantenimiento de Recinto
+## Catálogo de Asientos y Mantenimiento de Recinto
 
-1. [Lista tipos de asientos](ListadoTiposAsientos.png)
-   1.1 [Crear Nuevo tipo de asientos](CrearNuevoTipoAsiento.png)
-   1.2 [Editar tipos de asientos](EditarTiposAsientos.png)
-2. [Listado de recitntos (vista de gestor)](ListaRecintosGestorInventario.png)
-3. [Mapa de asientos](MapaAsientosRecintos.png)
-   3.1 [Cambio individual de asientos](CambioIndividualAsientoMapa.png)
-   3.2 [Cambio masivo de asientos](CambioMasivoAsiento.png)
-   3.3 [Historial de cambios de asientos](HistorialMapa.png)
+1. [Listar tipos de asientos](Asientos/ListadoTiposAsientos.png)  
+   1.1 [Crear Nuevo tipo de asientos](Asientos/CrearNuevoTipoAsiento.png)  
+   1.2 [Editar tipos de asientos](Asientos/EditarTiposAsientos.png)
+2. [Listado de recintos (vista de gestor)](Asientos/ListaRecintosGestorInventarios.png)
+3. [Mapa de asientos](Asientos/MapaAsientosRecintos.png)  
+   3.1 [Cambio individual de asientos](Asientos/CambioIndividualAsientoMapa.png)  
+   3.2 [Cambio masivo de asientos](Asientos/CambioMasivoAsiento.png)  
+   3.3 [Historial de cambios de asientos](Asientos/HistorialCambios.png)
