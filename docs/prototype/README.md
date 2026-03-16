@@ -13,7 +13,7 @@ Lo que encontramos a continuación, son imágenes de funciones específicas del 
 * [Crear Recinto](registro-config-y-catalogo-de-recintos/Crear-Recinto.png)
 * [Editar Recinto](registro-config-y-catalogo-de-recintos/Editar-Recinto.png)
 * [Listado y Búsqueda de Recintos](registro-config-y-catalogo-de-recintos/Listado-Y-Filtrado-Recintos.png)
-* [Configurar Zonas del Recinto](registro-config-y-catalogo-de-recintos/Configurar-Zonas-Recinto.png)
+* [Configurar Recinto](registro-config-y-catalogo-de-recintos/Configurar-Recinto.png)
 
 ## Checkout y Pago
 * [Home Page](checkout-y-pago/Home-Page.png)

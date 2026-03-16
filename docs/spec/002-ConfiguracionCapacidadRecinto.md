@@ -83,6 +83,32 @@ exitoso si al comprar, el usuario puede elegir zona y el sistema respeta los lí
 
 ---
 
+### User Story 4 - Configurar Compuertas de Entrada (Priority: P1)
+
+Como **Administrador de Recintos**, quiero poder asignar las distintas compuertas de entrada que puede tener un recinto,
+para tener un registro más detallado tanto de este, como de los tickets.
+
+**Why this priority**: Es importante para eventos medianos o grandes, ya que esto permitiría una mejor gestion al
+momento de que la gente quiera ingresar a un evento.
+
+**Independent Test**: Mientras el administrador está creando las zonas del recinto, este puede crear las compuertas e
+irlas relacionando con las zonas para una configuración más detallada. Por defecto, una compuerta será de uso general.
+El test es exitoso si al momento de comprar un ticket, este te asigna una compuerta relacionada a la zona escogida.
+
+**Acceptance Scenarios**:
+
+1. **Scenario: Crear una nueva compuerta para zona existente**
+    - **Given** un recinto ya existente con al menos una zona
+    - **When** el administrador agrega una compuerta y selecciona dicha zona para asignarla
+    - **Then** la compuerta debe aparecer en la lista, a la espera de guardar la configuración.
+
+2. **Scenario: Crear una nueva compuerta general**
+    - **Given** un recinto ya existente posiblemente sin zonas
+    - **When** el administrador agrega una compuerta
+    - **Then** la compuerta debe aparecer en la lista, marcada como una entrada general
+
+---
+
 ## Edge Cases
 
 - **¿Qué pasa cuando hay eventos creados y la capacidad maxima cambia?**  
@@ -91,6 +117,11 @@ exitoso si al comprar, el usuario puede elegir zona y el sistema respeta los lí
   tiene.
 - **¿Qué pasaría si una zona con tickets vendidos es eliminada?**  
   El sistema no debe permitirlo. Se debe requerir reubicar los tickets o cancelar la operación.
+- **¿Comó maneja el sistema cuando se asigna una compuerta a una zona que no existe?**  
+  El sistema no debe permitir que esa situación ocurra. En dado caso, se marcará la compuerta como entrada general.
+- **¿Qué pasa cuando se deja una zona sin una compuerta asignada?**  
+  Si no hay una compuerta de entrada general, el sistema no debe permitir que se mantenga asi la configuración, pidiendo
+  al administrador que le relacione una compuerta.
 
 ## Requirements *(mandatory)*
 
@@ -103,17 +134,21 @@ exitoso si al comprar, el usuario puede elegir zona y el sistema respeta los lí
   capacidad.
 - **FR-005**: El sistema **DEBE** validar que la suma de capacidades de las zonas no supere la capacidad total del
   recinto.
+- **FR-006**: EL administrador de recinto **DEBE** poder crear y asignar compuertas de acceso dentro de un recinto.
 
 ### Key Entities *(include if feature involves data)*
 
-1. **Recinto**: Representa el espacio físico donde se realizan los eventos. Contiene información básica como nombre,
-   ubicación, capacidad total máxima, y la categoría a la que pertenece. Puede estar compuesto por una o varias zonas
-   internas.
+1. **Recinto**:
+    - Representa el espacio físico en el que se realizan los eventos.
+    - **Atributos**: ***ID único, Nombre, Ciudad, Dirección, Capacidad Máxima, Teléfono, Fecha de Creación,
+      Compuertas de Ingreso***
 2. **Categoria del Recinto**: Clasificación predefinida que permite agrupar recintos por tipo. Ayuda a la organización y
    filtrado en la interfaz.
-3. **Zona**: División interna de un recinto con una capacidad específica. Cada zona pertenece a un único recinto y su
-   capacidad no puede exceder la capacidad total del mismo. Permite una gestión más detallada del aforo para eventos
-   complejos.
+3. **Zona**:
+    - Representa una división interna de un recinto con una capacidad específica.
+    - **Atributos**: ***ID único, Nombre, Capacidad***
+4. **Compuerta de Ingreso**: Representa las puertas que tiene el recinto, claves para la gestion del ingreso de
+   personas a los eventos.
 
 ## Success Criteria *(mandatory)*
 

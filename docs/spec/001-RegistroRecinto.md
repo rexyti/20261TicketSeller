@@ -109,7 +109,8 @@ el recinto desactivado **no** aparece en la lista desplegable para elegir el lug
 
 1. **Recinto**:
     - Representa el espacio físico en el que se realizan los eventos.
-    - **Atributos**: ***ID único, Nombre, Ciudad, Dirección, Capacidad Máxima, Teléfono, Fecha de Creación***
+    - **Atributos**: ***ID único, Nombre, Ciudad, Dirección, Capacidad Máxima, Teléfono, Fecha de Creación, 
+        Compuertas de Ingreso***
 
 ## Success Criteria *(mandatory)*
 
