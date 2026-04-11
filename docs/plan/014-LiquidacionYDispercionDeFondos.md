@@ -28,6 +28,15 @@ el snapshot solo es accesible una vez que el evento está formalmente cerrado.
 
 ## Project Structure
 
+### Documentation (this feature)
+
+```text
+specs/
+└── spec.md             # 014-LiquidacionYDispercionDeFondos.md
+plan/
+└── plan.md             # Este archivo
+```
+
 ### Clases nuevas que agrega este feature
 
 ```text

@@ -1,7 +1,7 @@
-# Implementation Plan: Configuración de Capacidad del Recinto
+# Implementation Plan: Configuración del Recinto
 
 **Date**: 09/04/2026  
-**Spec**: [002-ConfiguracionCapacidadRecinto.md](/docs/spec/002-ConfiguracionCapacidadRecinto.md)
+**Spec**: [002-ConfiguracionCapacidadRecinto.md](/docs/spec/002-ConfiguracionRecinto.md)
 
 ## Summary
 
@@ -27,6 +27,15 @@ cambiar la capacidad máxima si hay tickets vendidos. No se puede eliminar una z
 **Scale/Scope**: Extiende el feature 001 — depende de que `Recinto` ya exista en base de datos
 
 ## Project Structure
+
+### Documentation (this feature)
+
+```text
+specs/
+└── spec.md             # 002-ConfiguracionRecinto.md
+plan/
+└── plan.md             # Este archivo
+```
 
 ### Clases nuevas que agrega este feature
 

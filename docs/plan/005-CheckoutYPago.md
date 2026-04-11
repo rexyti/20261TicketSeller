@@ -30,6 +30,15 @@ email)
 
 ## Project Structure
 
+### Documentation (this feature)
+
+```text
+specs/
+└── spec.md             # 005-CheckoutYPago.md
+plan/
+└── plan.md             # Este archivo
+```
+
 ### Clases nuevas que agrega este feature
 
 ```text

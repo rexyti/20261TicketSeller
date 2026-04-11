@@ -27,6 +27,15 @@ requiere justificación. Depende de features 001 y 002 completados.
 
 ## Project Structure
 
+### Documentation (this feature)
+
+```text
+specs/
+└── spec.md             # 015-GestionDeEventos.md
+plan/
+└── plan.md             # Este archivo
+```
+
 ### Clases nuevas que agrega este feature
 
 ```text

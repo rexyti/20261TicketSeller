@@ -1,67 +1,120 @@
 # Implementation Plan: Registrar Recinto
 
-**Date**: 05/04/2026  
+**Date**: 05/04/2026
 **Spec**: [001-RegistroRecinto.md](/docs/spec/001-RegistroRecinto.md)
 
 ## Summary
 
-El **Administrador de Recintos** debe poder registrar, editar y desactivar recintos en el sistema.
-El recinto es la entidad física base del Módulo 1: necesaria para configurar inventario,
-asignar eventos y vender tickets. La implementación expone una API REST con endpoints CRUD
-sobre la entidad Recinto, con validaciones de integridad (campos obligatorios, duplicados por
-nombre+ciudad, bloqueo de desactivación con eventos activos) y soft delete como único mecanismo
-de eliminación.
+El **Administrador de Recintos** debe poder registrar, editar y desactivar recintos en el
+sistema. El recinto es la entidad física base del Módulo 1: necesaria para configurar
+inventario, asignar eventos y vender tickets. La implementación expone una API REST con
+endpoints CRUD sobre la entidad `Recinto`, con validaciones de integridad (campos
+obligatorios, duplicados por nombre+ciudad, bloqueo de desactivación con eventos activos)
+y soft delete como único mecanismo de eliminación.
+
+La arquitectura es hexagonal (puertos y adaptadores): el dominio no tiene dependencias de
+Spring ni R2DBC. Los casos de uso se comunican con el exterior únicamente a través de
+interfaces (puertos), y los adaptadores (controladores REST, repositorios R2DBC) implementan
+esas interfaces.
 
 ## Technical Context
 
-**Language/Version**: ***Java 21***  
-**Primary Dependencies**: ***SpringBoot 3.x, Spring Data JPA, Spring Reactive Web***  
-**Storage**: ***PostgreSQL***  
-**Testing**: ***JUnit 5, Mockito, Spring Boot Test, Testcontainers (PostgreSQL para tests de integración)***  
-**Target Platform**: ***Backend server***
-**Project Type**: ***Web (API REST)***  
-**Performance Goals**: ***El registro de un recinto debe completarse en respuesta menor a 500ms***  
-**Constraints**: [domain-specific, e.g., <200ms p95, <100MB memory, offline-capable or NEEDS CLARIFICATION]  
-**Scale/Scope**: [domain-specific, e.g., 10k users, 1M LOC, 50 screens or NEEDS CLARIFICATION]
+**Language/Version**: Java 21
+**Primary Dependencies**: Spring Boot 3.x, Spring Data R2DBC, Spring WebFlux, Bean Validation (Jakarta)
+**Storage**: PostgreSQL
+**Testing**: JUnit 5, Mockito, Spring Boot Test, Testcontainers (PostgreSQL para tests de integración)
+**Target Platform**: Backend server — microservicio Módulo 1
+**Project Type**: Web (API REST reactiva con WebFlux)
+**Performance Goals**: El registro de un recinto debe completarse en respuesta menor a 500ms (SC-001)
+**Constraints**: No se permite borrado físico de recintos, solo desactivación (FR-004). Cambios estructurales como aforo
+máximo deben bloquearse si el recinto tiene tickets vendidos. El campo `activo` debe existir desde la migración inicial.
+**Scale/Scope**: Entidad base del módulo — debe estar disponible antes de cualquier otro feature del Módulo 1. Bloquea
+directamente los features 002, 013 y 015.
 
 ## Project Structure
 
 ### Documentation (this feature)
 
 ```text
-specs/              
+specs/
 └── spec.md             # 001-RegistroRecinto.md
 plan/
-└── plan.md             # This file
+└── plan.md             # Este archivo
 ```
 
-### Source Code (repository root)
+### Clases nuevas que agrega este feature
 
 ```text
-src/
-├── domain/
-├── application/
-└── infrastructure/
+src/main/java/com/modulo1/
+│
+├── domain/                                     # Núcleo — sin dependencias de Spring ni R2DBC
+│   ├── model/
+│   │   └── Recinto.java                        # Entidad de dominio pura
+│   ├── exception/
+│   │   ├── RecintoNotFoundException.java
+│   │   ├── RecintoConEventosException.java
+│   │   └── RecintoDuplicadoException.java
+│   └── port/
+│       ├── in/                                 # Puertos de entrada (casos de uso)
+│       │   ├── RegistrarRecintoUseCase.java
+│       │   ├── EditarRecintoUseCase.java
+│       │   └── DesactivarRecintoUseCase.java
+│       └── out/                                # Puertos de salida (hacia infraestructura)
+│           └── RecintoRepositoryPort.java
+│
+├── application/                                # Casos de uso — orquesta el dominio
+│   └── RecintoService.java                     # Implementa los puertos de entrada
+│
+└── infrastructure/                             # Adaptadores — todo lo externo
+    ├── adapter/
+    │   ├── in/rest/
+    │   │   ├── RecintoController.java
+    │   │   ├── dto/
+    │   │   │   ├── CrearRecintoRequest.java
+    │   │   │   ├── EditarRecintoRequest.java
+    │   │   │   └── RecintoResponse.java
+    │   │   └── mapper/
+    │   │       └── RecintoRestMapper.java
+    │   └── out/persistence/
+    │       ├── RecintoEntity.java              # Entidad R2DBC
+    │       ├── RecintoR2dbcRepository.java     # Interface Spring Data R2DBC
+    │       ├── RecintoRepositoryAdapter.java   # Implementa RecintoRepositoryPort
+    │       └── mapper/
+    │           └── RecintoPersistenceMapper.java
+    └── config/
+        └── BeanConfiguration.java             # Inyección de dependencias hexagonal
 
 tests/
-├── contract/
-├── integration/
-└── unit/
+├── domain/
+│   └── RecintoTest.java                        # Tests unitarios del dominio puro
+├── application/
+│   └── RecintoServiceTest.java                 # Tests unitarios con Mockito
+└── infrastructure/
+    ├── adapter/in/rest/
+    │   └── RecintoControllerTest.java          # Tests de contrato (WebTestClient)
+    └── adapter/out/persistence/
+        └── RecintoRepositoryAdapterTest.java   # Tests de integración (Testcontainers)
 ```
 
-**Structure Decision**: Arquitectura hexagonal con tres capas claramente separadas. `domain/` no importa nada de Spring
-ni JPA — es Java puro. `application/` contiene los servicios que implementan los puertos de entrada y dependen solo de
-los puertos de salida, nunca de la infraestructura directamente. `infrastructure/` contiene todo lo que toca el mundo
-exterior. Los mappers convierten entre modelo de dominio y modelos de infraestructura para que nunca se mezclen.
+**Structure Decision**: Arquitectura hexagonal con tres capas claramente separadas. `domain/`
+no importa nada de Spring ni R2DBC — es Java puro. `application/` contiene los servicios que
+implementan los puertos de entrada y dependen solo de los puertos de salida, nunca de la
+infraestructura directamente. `infrastructure/` contiene todo lo que toca el mundo exterior.
+Los mappers convierten entre modelo de dominio y modelos de infraestructura para que nunca
+se mezclen.
+
+---
 
 ## Phase 1: Setup (Shared Infrastructure)
 
 **Purpose**: Inicialización del proyecto y estructura base del microservicio
 
-- [ ] T001 Crear proyecto Spring Boot 3.x con Java 21
+- [ ] T001 Crear proyecto Spring Boot 3.x con Java 21 (dependencias: Spring WebFlux, Spring Data R2DBC, Validation,
+  R2DBC PostgreSQL Driver, Testcontainers)
 - [ ] T002 Crear estructura de paquetes hexagonal completa según el layout definido arriba
-- [ ] T003 Configurar `application.yml` con conexión a PostgreSQL (dev) y propiedades base de Spring
-- [ ] T004 Configurar Checkstyle para linting de código Java
+- [ ] T003 Configurar `application.yml` con conexión R2DBC a PostgreSQL (dev) y propiedades base de Spring
+- [ ] T004 Configurar Flyway para migraciones de base de datos
+- [ ] T005 Configurar Checkstyle para linting de código Java
 
 ---
 
@@ -69,83 +122,85 @@ exterior. Los mappers convierten entre modelo de dominio y modelos de infraestru
 
 **Purpose**: Núcleo de dominio e infraestructura base que debe estar completa antes de implementar cualquier user story
 
-**⚠️ CRITICAL**: No user story work can begin until this phase is complete
+**⚠️ CRITICAL**: Ninguna user story puede comenzar hasta que esta fase esté completa. Este feature bloquea los features
+002, 013 y 015.
 
-- [ ] T005 Crear clase de dominio `Recinto.java` en `domain/model/` con atributos:
-  ***id (UUID), nombre, ciudad, dirección, capacidad maxima, teléfono, fecha creación, compuertas ingreso, estado***
-- [ ] T006 Crear excepciones de dominio en `domain/exception/`: `RecintoNotFoundException`,
+- [ ] T006 Crear clase de dominio `Recinto.java` en `domain/model/` con atributos: id (UUID), nombre, ciudad, direccion,
+  capacidadMaxima, telefono, fechaCreacion, compuertasIngreso, activo (boolean) — sin anotaciones R2DBC ni Spring
+- [ ] T007 Crear excepciones de dominio en `domain/exception/`: `RecintoNotFoundException`,
   `RecintoConEventosException`, `RecintoDuplicadoException`
-- [ ] T007 Crear interfaces de puertos de entrada en `domain/port/in/`: `RegistrarRecintoUseCase`,
-  `EditarRecintoUseCase`, `DesactivarRecintoUseCase` — cada una con su método principal definido
-- [ ] T008 Crear interfaz de puerto de salida `RecintoRepositoryPort.java` en `domain/port/out/` con métodos:
-  `guardar()`, `buscarPorId()`, `buscarPorNombreYCiudad()`, `listarTodos()`, `tieneEventosFuturos()`
-- [ ] T009 Crear entidad JPA `RecintoEntity.java` en `infrastructure/adapter/out/persistence/` con anotaciones
-  `@Entity`, mapeo de columnas y campo `activo` para soft delete (FR-004)
-- [ ] T010 Crear migración inicial de Flyway: tabla `recintos` con todos los campos incluyendo columna `activo` — el
+- [ ] T008 Crear interfaces de puertos de entrada en `domain/port/in/`: `RegistrarRecintoUseCase`,
+  `EditarRecintoUseCase`, `DesactivarRecintoUseCase` — cada una con su método principal definido retornando `Mono<T>`
+- [ ] T009 Crear interfaz de puerto de salida `RecintoRepositoryPort.java` en `domain/port/out/` con métodos:
+  `guardar()`, `buscarPorId()`, `buscarPorNombreYCiudad()`, `listarTodos()`, `tieneEventosFuturos()` — todos retornando
+  `Mono<T>` o `Flux<T>`
+- [ ] T010 Crear entidad R2DBC `RecintoEntity.java` en `infrastructure/adapter/out/persistence/` con anotaciones
+  `@Table`, mapeo de columnas y campo `activo` para soft delete (FR-004)
+- [ ] T011 Crear migración inicial de Flyway: tabla `recintos` con todos los campos incluyendo columna `activo` — el
   soft delete debe existir desde el inicio porque FR-004 aplica a todos los registros
-- [ ] T011 Implementar `RecintoRepositoryAdapter.java` que implementa `RecintoRepositoryPort` usando
-  `RecintoJpaRepository` (Spring Data)
-- [ ] T012 Implementar `RecintoPersistenceMapper.java` para convertir entre `Recinto` (dominio) y `RecintoEntity` (JPA)
-- [ ] T013 Crear `BeanConfiguration.java` en `infrastructure/config/` para registrar los beans de casos de uso con
+- [ ] T012 Implementar `RecintoRepositoryAdapter.java` que implementa `RecintoRepositoryPort` usando
+  `RecintoR2dbcRepository`
+- [ ] T013 Implementar `RecintoPersistenceMapper.java` para convertir entre `Recinto` (dominio) y `RecintoEntity` (
+  R2DBC)
+- [ ] T014 Crear `BeanConfiguration.java` en `infrastructure/config/` para registrar los beans de casos de uso con
   inyección explícita de dependencias (necesario en arquitectura hexagonal para que el dominio no dependa de Spring)
-- [ ] T014 Implementar handler global de excepciones (`@RestControllerAdvice`) que mapee las excepciones de dominio a
+- [ ] T015 Implementar handler global de excepciones (`@RestControllerAdvice`) que mapee las excepciones de dominio a
   respuestas HTTP estructuradas con código y mensaje
 
-**Checkpoint**: Dominio modelado, adaptador de persistencia funcional y manejo de errores listo — las user
+**Checkpoint**: Dominio modelado, BD migrada, adaptador de persistencia funcional y manejo de errores listo — las user
 stories pueden comenzar
 
 ---
 
-## Phase 3: User Story 1 - Registro Basico de un Recinto (Priority: P1)
+## Phase 3: User Story 1 — Registro Básico de un Recinto (Priority: P1)
 
 **Goal**: El administrador puede crear un nuevo recinto con datos mínimos obligatorios y verlo en la lista del sistema
 
-**Independent Test**: `POST /api/recintos` con body JSON válido retorna HTTP 201 y el recinto aparece en  
+**Independent Test**: `POST /api/recintos` con body JSON válido retorna HTTP 201 y el recinto aparece en
 `GET /api/recintos`. `POST /api/recintos` con campos vacíos retorna HTTP 400 con detalle de campos faltantes.
 
-### Tests for User Story 1
+### Tests para User Story 1
 
-- [ ] T015 [P] [US1] Test de contrato: `POST /api/recintos` con datos válidos retorna HTTP 201 con recinto en body —
+- [ ] T016 [P] [US1] Test de contrato: `POST /api/recintos` con datos válidos retorna HTTP 201 con recinto en body —
   `RecintoControllerTest.java`
-- [ ] T016 [P] [US1] Test de contrato: `POST /api/recintos` sin campos obligatorios retorna HTTP 400 con campos
+- [ ] T017 [P] [US1] Test de contrato: `POST /api/recintos` sin campos obligatorios retorna HTTP 400 con campos
   faltantes identificados en el body — `RecintoControllerTest.java`
-- [ ] T017 [P] [US1] Test de contrato: `GET /api/recintos` retorna listado con el recinto recién creado —
+- [ ] T018 [P] [US1] Test de contrato: `GET /api/recintos` retorna listado con el recinto recién creado —
   `RecintoControllerTest.java`
-- [ ] T018 [P] [US1] Test de contrato: `POST /api/recintos` con nombre duplicado en misma ciudad retorna HTTP 201 con
+- [ ] T019 [P] [US1] Test de contrato: `POST /api/recintos` con nombre duplicado en misma ciudad retorna HTTP 201 con
   campo `advertencia` en el response (no bloquea) — `RecintoControllerTest.java`
-- [ ] T019 [P] [US1] Test unitario de `RecintoService.registrar()` con mock de `RecintoRepositoryPort` via Mockito —
+- [ ] T020 [P] [US1] Test unitario de `RecintoService.registrar()` con mock de `RecintoRepositoryPort` via Mockito —
   `RecintoServiceTest.java`
-- [ ] T020 [P] [US1] Test de integración con Testcontainers: flujo completo POST → persistencia en PostgreSQL → GET —
+- [ ] T021 [P] [US1] Test de integración con Testcontainers: flujo completo POST → persistencia en PostgreSQL → GET —
   `RecintoRepositoryAdapterTest.java`
 
-### Implementation for User Story 1
+### Implementación de User Story 1
 
-- [ ] T021 [US1] Implementar `RecintoService.java` en `application/` implementando `RegistrarRecintoUseCase`: validar
+- [ ] T022 [US1] Implementar `RecintoService.java` en `application/` implementando `RegistrarRecintoUseCase`: validar
   campos obligatorios, detectar duplicado nombre+ciudad (advertencia sin bloqueo), persistir vía
-  `RecintoRepositoryPort` (depende de T008, T009)
-- [ ] T022 [US1] Implementar `listarRecintos()` en `RecintoService.java` retornando todos los recintos activos con su
-  estado (FR-003)
-- [ ] T023 [US1] Crear DTOs `CrearRecintoRequest.java` con anotaciones `@NotBlank` y `@NotNull` de Jakarta Validation, y
+  `RecintoRepositoryPort` — retornar `Mono<Recinto>` (depende de T008, T009)
+- [ ] T023 [US1] Implementar `listarRecintos()` en `RecintoService.java` retornando todos los recintos activos —
+  retornar `Flux<Recinto>` (FR-003)
+- [ ] T024 [US1] Crear DTOs `CrearRecintoRequest.java` con anotaciones `@NotBlank` y `@NotNull` de Jakarta Validation, y
   `RecintoResponse.java` en `infrastructure/adapter/in/rest/dto/`
-- [ ] T024 [US1] Crear `RecintoRestMapper.java` en `infrastructure/mapper/` para convertir entre DTOs
+- [ ] T025 [US1] Crear `RecintoRestMapper.java` en `infrastructure/adapter/in/rest/mapper/` para convertir entre DTOs
   REST y modelo de dominio `Recinto`
-- [ ] T025 [US1] Implementar endpoints `POST /api/recintos` y `GET /api/recintos` en `RecintoController.java` (depende
-  de T022, T023, T024, T025)
+- [ ] T026 [US1] Implementar endpoints `POST /api/recintos` y `GET /api/recintos` en `RecintoController.java` retornando
+  `Mono<ResponseEntity<RecintoResponse>>` y `Flux<RecintoResponse>` respectivamente (depende de T022, T023, T024, T025)
 
 **Checkpoint**: US1 completamente funcional — registro y listado de recintos operativos e independientemente testeables
 
-**Checkpoint**: At this point, User Story 1 should be fully functional and testable independently
-
 ---
 
-## Phase 4: User Story 2 - Edición de Información del Recinto (Priority: P2)
+## Phase 4: User Story 2 — Edición de Información del Recinto (Priority: P2)
 
-**Goal**:  El administrador puede editar datos descriptivos de un recinto existente; cambios estructurales como aforo
+**Goal**: El administrador puede editar datos descriptivos de un recinto existente; cambios estructurales como aforo
 máximo quedan bloqueados si hay tickets vendidos
 
 **Independent Test**: `PATCH /api/recintos/{id}` cambiando la dirección retorna HTTP 200 con datos actualizados.
-Intentar cambiar `capacidadMaxima` en un recinto con tickets vendidos retorna HTTP 409 con mensaje descriptivo.### Tests
-para User Story 2
+Intentar cambiar `capacidadMaxima` en un recinto con tickets vendidos retorna HTTP 409 con mensaje descriptivo.
+
+### Tests para User Story 2
 
 - [ ] T027 [P] [US2] Test de contrato: `PATCH /api/recintos/{id}` con campo descriptivo retorna HTTP 200 con recinto
   actualizado — `RecintoControllerTest.java`
@@ -162,13 +217,14 @@ para User Story 2
 
 - [ ] T032 [US2] Implementar `RecintoService.editar()` en `application/` implementando `EditarRecintoUseCase`: separar
   campos descriptivos (siempre editables) de estructurales (bloqueados si hay tickets), lanzar
-  `RecintoConEventosException` si corresponde (depende de T008)
+  `RecintoConEventosException` si corresponde — retornar `Mono<Recinto>` (depende de T008)
 - [ ] T033 [US2] Agregar método `tieneTicketsVendidos(UUID recintoId)` en `RecintoRepositoryPort` y su implementación en
-  `RecintoRepositoryAdapter` — retornar `false` como mock temporal si la entidad Ticket aún no existe, documentado con
-  `// TODO: integrar con entidad Ticket`
+  `RecintoRepositoryAdapter` — retornar `Mono.just(false)` como mock temporal si la entidad Ticket aún no existe,
+  documentado con `// TODO: integrar con entidad Ticket`
 - [ ] T034 [US2] Crear DTO `EditarRecintoRequest.java` con todos los campos opcionales (`@Nullable`) en
-  `infrastructure/dto/`
-- [ ] T035 [US2] Implementar endpoint `PATCH /api/recintos/{id}` en `RecintoController.java` (depende de T032, T034)
+  `infrastructure/adapter/in/rest/dto/`
+- [ ] T035 [US2] Implementar endpoint `PATCH /api/recintos/{id}` en `RecintoController.java` retornando
+  `Mono<ResponseEntity<RecintoResponse>>` (depende de T032, T034)
 
 **Checkpoint**: US1 y US2 funcionales — registro, listado y edición de recintos operativos
 
@@ -200,17 +256,13 @@ con el mensaje correspondiente.
 
 - [ ] T041 [US3] Implementar `RecintoService.desactivar()` en `application/` implementando `DesactivarRecintoUseCase`:
   consultar eventos futuros vía `RecintoRepositoryPort.tieneEventosFuturos()`, lanzar `RecintoConEventosException` si
-  existen, ejecutar soft delete si no (depende de T009)
+  existen, ejecutar soft delete si no — retornar `Mono<Recinto>` (depende de T009)
 - [ ] T042 [US3] Implementar endpoint `PATCH /api/recintos/{id}/estado` en `RecintoController.java` (depende de T041)
 - [ ] T043 [US3] Actualizar `listarRecintos()` en `RecintoService` y el query en `RecintoRepositoryAdapter` para filtrar
   `activo = true` por defecto, con parámetro opcional para incluir inactivos en vista de historial (FR-003) (depende de
   T023 de US1)
 
-**Checkpoint**: Las tres user stories son funcionales e independientemente testeables.
-
----
-
-[Add more user story phases as needed, following the same pattern]
+**Checkpoint**: Las tres user stories son funcionales e independientemente testeables
 
 ---
 
@@ -222,7 +274,7 @@ con el mensaje correspondiente.
 - [ ] T045 Documentar endpoints con SpringDoc OpenAPI (`@Operation`, `@ApiResponse`) y verificar generación correcta del
   Swagger UI
 - [ ] T046 Revisar consistencia de mensajes de error en todos los endpoints
-- [ ] T047 Verificar que ninguna clase dentro de `domain/` tiene imports de `org.springframework` o
+- [ ] T047 Verificar que ninguna clase dentro de `domain/` tiene imports de `org.springframework`, `io.r2dbc` o
   `jakarta.persistence` — el dominio debe ser Java puro sin excepciones
 - [ ] T048 Refactoring y limpieza general de código
 
@@ -259,13 +311,13 @@ con el mensaje correspondiente.
 
 - El tag `[P]` identifica tareas de prueba para distinguirlas del código productivo
 - El tag `[US1/US2/US3]` mapea cada tarea a su user story para trazabilidad
-- **Regla de oro hexagonal**: si una clase dentro de `domain/` necesita importar algo de Spring o JPA, el diseño está
+- **Regla de oro hexagonal**: si una clase dentro de `domain/` necesita importar algo de Spring o R2DBC, el diseño está
   mal — moverla a `application/` o `infrastructure/` según corresponda
 - El soft delete está en Foundational (T010, T011) y no en US3 porque FR-004 aplica desde el primer registro — dejarlo
   en US3 forzaría una migración correctiva posterior
-- Las consultas de "tickets vendidos" (US2) y "eventos futuros" (US3) dependen de entidades de otros specs; si aún no
-  existen, implementar los métodos del repositorio retornando `false` con un comentario
+- Las consultas de "tickets vendidos" (US2) y "eventos futuros" (US3) dependen de entidades de otros features; si aún no
+  existen, implementar los métodos del repositorio retornando `Mono.just(false)` con un comentario
   `// TODO: integrar con entidad Ticket/Evento` para no bloquear el avance
-- Hacer commit después de cada tarea o grupo lógico
-- Detener en cada checkpoint para validar la story de forma independiente antes de continuar
- 
+- **WebFlux**: todos los métodos de servicio retornan `Mono<T>` o `Flux<T>`, los controladores retornan
+  `Mono<ResponseEntity<T>>` o `Flux<T>`. Usar `WebTestClient` en lugar de `MockMvc` para los tests de contrato
+- Este feature es prerequisito directo de los features 002, 013 y 015 — completar antes de comenzar cualquiera de ellos
