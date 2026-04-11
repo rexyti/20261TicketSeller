@@ -1,30 +1,33 @@
 # Implementation Plan: Liquidación y Dispersión de Fondos (API para Módulo 3)
 
-**Date**: 10/04/2026
+**Date**: 10/04/2026  
 **Spec**: [014-LiquidacionYDispercionDeFondos.md](/docs/spec/014-LiquidacionYDispercionDeFondos.md)
 
 ## Summary
 
-El **Módulo 1** expone endpoints REST que el **Módulo 3** consume para ejecutar la liquidación
+El Módulo 1 expone endpoints REST que el **Módulo 3** consume para ejecutar la liquidación
 financiera al cierre de un evento. Este feature no agrega entidades nuevas al dominio —
 opera sobre `Ticket`, `Evento` y `Recinto` ya existentes — pero agrega lógica de consulta
 especializada: snapshot consolidado de estados al cierre, modelo de negocio del recinto y
-recaudo incremental en tiempo real. Es un feature de lectura con una regla de negocio crítica:
-el snapshot solo es accesible una vez que el evento está formalmente cerrado.
+recaudo incremental en tiempo real. El snapshot solo es accesible una vez que el evento
+está formalmente en estado `FINALIZADO`.
+
+La arquitectura es hexagonal respetando responsabilidad única. La BD se gestiona manualmente.
 
 ## Technical Context
 
-**Language/Version**: Java 21
-**Primary Dependencies**: Spring Boot 3.x, Spring Data R2DBC, Spring WebFlux
-**Storage**: PostgreSQL
-**Testing**: JUnit 5, Mockito, Spring Boot Test, Testcontainers
-**Target Platform**: Backend server — microservicio Módulo 1 (consumido por Módulo 3)
-**Project Type**: Web (API REST reactiva con WebFlux)
+**Language/Version**: Java 21  
+**Primary Dependencies**: Spring Boot 3.x, Spring Data R2DBC, Spring WebFlux  
+**Storage**: PostgreSQL — esquema creado y gestionado manualmente  
+**Testing**: JUnit 5, Mockito, Spring Boot Test, Testcontainers (PostgreSQL para tests de integración)  
+**Target Platform**: Backend server — microservicio Módulo 1 (consumido por Módulo 3)  
+**Project Type**: Web (API REST reactiva con WebFlux)  
 **Performance Goals**: Endpoints disponibles al 100% durante toda la duración de cada evento (SC-003). Snapshot refleja
-100% de los tickets (SC-001).
+el 100% de los tickets (SC-001).  
 **Constraints**: Snapshot solo disponible tras cierre formal del evento (FR-001, FR-002). Depende de features 002, 005 y
-015 completados.
-**Scale/Scope**: Feature de solo lectura — no modifica datos, agrega endpoints de consulta para el Módulo 3
+015 completados.  
+**Scale/Scope**: Feature de solo lectura con una regla de negocio crítica — no modifica datos, agrega endpoints de
+consulta para el Módulo 3.
 
 ## Project Structure
 
@@ -40,91 +43,98 @@ plan/
 ### Clases nuevas que agrega este feature
 
 ```text
-src/main/java/com/20261TicketSeller/
+src/main/java/com/ticketseller/
 │
 ├── domain/
 │   ├── model/
-│   │   ├── SnapshotLiquidacion.java           # Objeto de valor con el consolidado del evento
-│   │   ├── ModeloNegocio.java                 # Enum o value object: TARIFA_PLANA, REPARTO_INGRESOS
+│   │   ├── SnapshotLiquidacion.java           # Value object con el consolidado del evento
+│   │   ├── ModeloNegocio.java                 # Enum: TARIFA_PLANA, REPARTO_INGRESOS
 │   │   └── ConfiguracionLiquidacion.java      # Modelo de negocio + parámetros del recinto
 │   ├── exception/
 │   │   ├── EventoNoFinalizadoException.java
 │   │   └── LiquidacionNoConfiguradaException.java
 │   └── port/
-│       └── in/
-│           ├── ConsultarSnapshotUseCase.java
-│           ├── ConsultarModeloNegocioUseCase.java
-│           └── ConsultarRecaudoIncrementalUseCase.java
+│       └── out/
+│           └── LiquidacionQueryPort.java      # Puerto para queries de agregación
 │
 ├── application/
-│   ├── ConsultarSnapshotService.java
-│   ├── ConsultarModeloNegocioService.java
-│   └── ConsultarRecaudoIncrementalService.java
+│   ├── ConsultarSnapshotUseCase.java
+│   ├── ConsultarModeloNegocioUseCase.java
+│   ├── ConfigurarModeloNegocioUseCase.java
+│   └── ConsultarRecaudoIncrementalUseCase.java
 │
 └── infrastructure/
-    └── adapter/
-        ├── in/rest/
-        │   ├── LiquidacionController.java
-        │   └── dto/
-        │       ├── SnapshotLiquidacionResponse.java
-        │       ├── CondicionTicketResponse.java      # Conteo + valor por condición
-        │       ├── ModeloNegocioResponse.java
-        │       └── RecaudoIncrementalResponse.java
-        └── out/persistence/
-            └── LiquidacionQueryRepository.java       # Queries de agregación sobre tickets/ventas
+    ├── adapter/
+    │   ├── in/rest/
+    │   │   ├── LiquidacionController.java
+    │   │   └── dto/
+    │   │       ├── SnapshotLiquidacionResponse.java
+    │   │       ├── CondicionTicketResponse.java
+    │   │       ├── ModeloNegocioResponse.java
+    │   │       ├── ConfigurarModeloNegocioRequest.java
+    │   │       └── RecaudoIncrementalResponse.java
+    │   └── out/persistence/
+    │       └── LiquidacionQueryAdapter.java   # Queries de agregación con R2DBC DatabaseClient
+    └── config/
+        └── BeanConfiguration.java             # Actualizar con los nuevos beans
 
 tests/
 ├── application/
-│   ├── ConsultarSnapshotServiceTest.java
-│   ├── ConsultarModeloNegocioServiceTest.java
-│   └── ConsultarRecaudoIncrementalServiceTest.java
-└── infrastructure/adapter/
-    ├── in/rest/
+│   ├── ConsultarSnapshotUseCaseTest.java
+│   ├── ConsultarModeloNegocioUseCaseTest.java
+│   └── ConsultarRecaudoIncrementalUseCaseTest.java
+└── infrastructure/
+    ├── adapter/in/rest/
     │   └── LiquidacionControllerTest.java
-    └── out/persistence/
-        └── LiquidacionQueryRepositoryTest.java
+    └── adapter/out/persistence/
+        └── LiquidacionQueryAdapterTest.java
 ```
+
+**Structure Decision**: Feature exclusivamente de lectura con una excepción: `ConfigurarModeloNegocioUseCase`
+agrega un endpoint de escritura para que el Administrador pueda configurar el modelo de negocio
+del recinto, que es prerrequisito para que el Módulo 3 pueda liquidar. `LiquidacionQueryPort`
+es un puerto separado de `RecintoRepositoryPort` y `EventoRepositoryPort` para mantener
+cohesión — las queries de agregación tienen lógica propia que no mezcla bien con CRUD básico.
 
 ---
 
 ## Phase 1: Foundational (Blocking Prerequisites)
 
-**Purpose**: Modelo de dominio para liquidación y lógica de cierre de evento
+**Purpose**: Modelo de dominio para liquidación y columnas de configuración en BD
 
-**⚠️ CRITICAL**: Depende de features 002, 005 y 015 completados — `tickets`, `ventas`, `eventos` y `recintos` con su
-configuración completa deben existir en BD
+**⚠️ CRITICAL**: Depende de features 002, 005 y 015 completados — tablas `tickets`, `ventas`, `eventos` y `recintos` con
+su configuración completa deben existir en BD
 
-- [ ] T001 Crear enum/value object `ModeloNegocio.java` en `domain/model/`: TARIFA_PLANA, REPARTO_INGRESOS — con campo
-  `montoFijo` (BigDecimal, nullable) para Tarifa Plana
-- [ ] T002 Crear clase de valor `ConfiguracionLiquidacion.java` en `domain/model/`: recintoId, modeloNegocio,
-  tipoRecinto (referencia a `CategoriaRecinto` del feature 002)
-- [ ] T003 Crear clase de valor `SnapshotLiquidacion.java` en `domain/model/`: eventoId, mapa de condición → (conteo,
-  valorTotal), timestamp de generación
-- [ ] T004 Crear excepciones de dominio: `EventoNoFinalizadoException`, `LiquidacionNoConfiguradaException`
-- [ ] T005 Crear interfaces de puertos de entrada: `ConsultarSnapshotUseCase`, `ConsultarModeloNegocioUseCase`,
-  `ConsultarRecaudoIncrementalUseCase`
-- [ ] T006 Crear migración Flyway: agregar columna `modelo_negocio` y `monto_fijo` a tabla `recintos` para almacenar la
-  configuración de liquidación
-- [ ] T007 Actualizar `RecintoRepositoryPort.java` con método `buscarConfiguracionLiquidacion(UUID recintoId)`
-- [ ] T008 Implementar `LiquidacionQueryRepository.java` en persistence con queries de agregación SQL: GROUP BY
-  condición de ticket, SUM de valores, filtro por eventoId
-- [ ] T009 Actualizar `BeanConfiguration.java` con los nuevos beans
+- [ ] T001 Agregar columnas `modelo_negocio` y `monto_fijo` manualmente a la tabla `recintos` en PostgreSQL — actualizar
+  el script SQL de `src/test/resources/` para Testcontainers
+- [ ] T002 Crear enum `ModeloNegocio.java` en `domain/model/`: TARIFA_PLANA, REPARTO_INGRESOS
+- [ ] T003 Crear clase de valor `ConfiguracionLiquidacion.java` en `domain/model/`: recintoId, modeloNegocio,
+  tipoRecinto (referencia a `CategoriaRecinto` del feature 002), montoFijo (BigDecimal, nullable)
+- [ ] T004 Crear clase de valor `SnapshotLiquidacion.java` en `domain/model/`: eventoId, mapa de condición → (conteo,
+  valorTotal), timestampGeneracion
+- [ ] T005 Crear excepciones de dominio: `EventoNoFinalizadoException`, `LiquidacionNoConfiguradaException`
+- [ ] T006 Crear interfaz `LiquidacionQueryPort.java` en `domain/port/out/` con métodos:
+  `obtenerSnapshotPorEvento(eventoId)`, `obtenerRecaudoPorEvento(eventoId)` — retornando `Mono<T>`
+- [ ] T007 Implementar `LiquidacionQueryAdapter.java` en `infrastructure/adapter/out/persistence/` con queries de
+  agregación SQL usando R2DBC `DatabaseClient`: GROUP BY condición de ticket, SUM de valores, filtro por eventoId
+- [ ] T008 Actualizar `RecintoRepositoryPort.java` con método `buscarConfiguracionLiquidacion(UUID recintoId)` y su
+  implementación en `RecintoRepositoryAdapter`
+- [ ] T009 Actualizar `BeanConfiguration.java` con los beans de los nuevos casos de uso
 
-**Checkpoint**: Modelo de liquidación en dominio, columnas de configuración migradas, queries de agregación
-implementadas
+**Checkpoint**: Columnas de configuración migradas, queries de agregación implementadas, modelo de liquidación en
+dominio listo
 
 ---
 
 ## Phase 2: User Story 2 — Consulta del Modelo de Negocio de un Recinto (Priority: P1)
 
-**Goal**: El Módulo 3 puede consultar el modelo de negocio configurado para un recinto y obtener los parámetros
-necesarios para calcular la liquidación
+**Goal**: El Módulo 3 puede consultar el modelo de negocio configurado para un recinto; el Administrador puede
+configurarlo mediante un endpoint de escritura
 
-> **Nota**: Se implementa antes que US1 porque US1 (snapshot) depende de que la configuración del recinto ya esté
-> disponible en el sistema para ser consultada.
+> **Nota**: Se implementa antes que US1 porque US1 (snapshot) depende de que la configuración del recinto ya exista.
 
-**Independent Test**: `GET /api/recintos/{id}/modelo-negocio` en recinto con `TARIFA_PLANA` retorna HTTP 200 con monto
-fijo. En recinto con `REPARTO_INGRESOS` retorna HTTP 200 con tipo de recinto. En recinto sin configuración retorna HTTP
+**Independent Test**: `PATCH /api/recintos/{id}/modelo-negocio` con `{ "modelo": "TARIFA_PLANA", "montoFijo": 5000 }`
+retorna HTTP 200. `GET /api/recintos/{id}/modelo-negocio` retorna ese modelo. En recinto sin configuración retorna HTTP
 422.
 
 ### Tests para User Story 2
@@ -137,61 +147,64 @@ fijo. En recinto con `REPARTO_INGRESOS` retorna HTTP 200 con tipo de recinto. En
   `LiquidacionControllerTest.java`
 - [ ] T013 [P] [US2] Test de contrato: `GET /api/recintos/{id}/modelo-negocio` con recinto inexistente retorna HTTP
   404 — `LiquidacionControllerTest.java`
-- [ ] T014 [P] [US2] Test unitario de `ConsultarModeloNegocioService` — `ConsultarModeloNegocioServiceTest.java`
+- [ ] T014 [P] [US2] Test unitario de `ConsultarModeloNegocioUseCase` — `ConsultarModeloNegocioUseCaseTest.java`
 
 ### Implementación de User Story 2
 
-- [ ] T015 [US2] Implementar `ConsultarModeloNegocioService.java` implementando `ConsultarModeloNegocioUseCase`: buscar
-  recinto vía `RecintoRepositoryPort`, obtener `ConfiguracionLiquidacion`, lanzar `LiquidacionNoConfiguradaException` si
-  no tiene modelo configurado
-- [ ] T016 [US2] Agregar endpoint `PATCH /api/recintos/{id}/modelo-negocio` para que el Administrador pueda configurar
-  el modelo de negocio de un recinto (prerequisito para que la consulta tenga datos)
-- [ ] T017 [US2] Crear DTOs `ModeloNegocioResponse.java` con campos: modelo, tipoRecinto, montoFijo (nullable)
-- [ ] T018 [US2] Implementar endpoint `GET /api/recintos/{id}/modelo-negocio` en `LiquidacionController.java`
+- [ ] T015 [US2] Implementar `ConfigurarModeloNegocioUseCase.java` en `application/`: buscar recinto vía
+  `RecintoRepositoryPort.buscarPorId()`, validar que el modelo sea válido, si es `TARIFA_PLANA` validar que `montoFijo`
+  no sea nulo, si es `REPARTO_INGRESOS` validar que el recinto tenga `categoriaRecinto` configurado, persistir vía
+  `RecintoRepositoryPort.guardar()` — retornar `Mono<Recinto>`
+- [ ] T016 [US2] Implementar `ConsultarModeloNegocioUseCase.java` en `application/`: buscar configuración vía
+  `RecintoRepositoryPort.buscarConfiguracionLiquidacion()`, lanzar `LiquidacionNoConfiguradaException` si no tiene
+  modelo — retornar `Mono<ConfiguracionLiquidacion>`
+- [ ] T017 [US2] Crear DTOs `ModeloNegocioResponse.java` (modelo, tipoRecinto, montoFijo nullable) y
+  `ConfigurarModeloNegocioRequest.java`
+- [ ] T018 [US2] Implementar endpoints `PATCH /api/recintos/{id}/modelo-negocio` y
+  `GET /api/recintos/{id}/modelo-negocio` en `LiquidacionController.java`
 
-**Checkpoint**: US2 funcional — modelo de negocio consultable por el Módulo 3
+**Checkpoint**: US2 funcional — modelo de negocio configurable y consultable
 
 ---
 
 ## Phase 3: User Story 1 — Consulta de Snapshot al Cierre del Evento (Priority: P1)
 
-**Goal**: El Módulo 3 puede obtener el consolidado de todos los tickets del evento agrupados por condición de
-liquidación, pero solo si el evento está formalmente cerrado
+**Goal**: El Módulo 3 puede obtener el consolidado de todos los tickets agrupados por condición de liquidación, solo si
+el evento está en estado `FINALIZADO`
 
 **Independent Test**: Cambiar estado de un evento a `FINALIZADO` y hacer `GET /api/eventos/{id}/snapshot` retorna HTTP
-200 con conteos por condición. El mismo request sobre un evento en estado `ACTIVO` o `EN_PROGRESO` retorna HTTP 409.
+200 con conteos por condición. El mismo sobre un evento `ACTIVO` retorna HTTP 409.
 
-### Tests para User Story 3
+### Tests para User Story 1
 
 - [ ] T019 [P] [US1] Test de contrato: `GET /api/eventos/{id}/snapshot` sobre evento `FINALIZADO` retorna HTTP 200 con
-  conteos por condición (Validado, Vendido, Cortesía, Cancelado) — `LiquidacionControllerTest.java`
+  conteos por condición — `LiquidacionControllerTest.java`
 - [ ] T020 [P] [US1] Test de contrato: `GET /api/eventos/{id}/snapshot` sobre evento `ACTIVO` o `EN_PROGRESO` retorna
   HTTP 409 — `LiquidacionControllerTest.java`
 - [ ] T021 [P] [US1] Test de contrato: snapshot con 100% tickets validados retorna cero en demás condiciones —
   `LiquidacionControllerTest.java`
-- [ ] T022 [P] [US1] Test de contrato: snapshot incluye tickets `Cortesía` diferenciados de tickets regulares —
+- [ ] T022 [P] [US1] Test de contrato: snapshot diferencia tickets `Cortesía` de tickets regulares —
   `LiquidacionControllerTest.java`
 - [ ] T023 [P] [US1] Test de contrato: `GET /api/eventos/{id}/snapshot` con evento inexistente retorna HTTP 404 —
   `LiquidacionControllerTest.java`
-- [ ] T024 [P] [US1] Test unitario de `ConsultarSnapshotService` — `ConsultarSnapshotServiceTest.java`
-- [ ] T025 [P] [US1] Test de integración con Testcontainers: query de agregación SQL sobre datos de prueba con múltiples
-  condiciones — `LiquidacionQueryRepositoryTest.java`
+- [ ] T024 [P] [US1] Test unitario de `ConsultarSnapshotUseCase` — `ConsultarSnapshotUseCaseTest.java`
+- [ ] T025 [P] [US1] Test de integración con Testcontainers: query de agregación SQL con datos de prueba en múltiples
+  condiciones — `LiquidacionQueryAdapterTest.java`
 
 ### Implementación de User Story 1
 
-- [ ] T026 [US1] Implementar `ConsultarSnapshotService.java` implementando `ConsultarSnapshotUseCase`: verificar que el
-  evento exista y esté en estado `FINALIZADO` (lanzar `EventoNoFinalizadoException` si no), ejecutar query de agregación
-  vía `LiquidacionQueryRepository`, construir `SnapshotLiquidacion` con conteos y valores por condición
-- [ ] T027 [US1] Definir el mapeo de estados de ticket a condiciones de liquidación: `VENDIDO + check-in` → Validado,
-  `VENDIDO + sin check-in` → Vendido sin asistencia, `esCortesia=true` → Cortesía, `ANULADO` → Cancelado —
+- [ ] T026 [US1] Implementar `ConsultarSnapshotUseCase.java` en `application/`: buscar evento vía
+  `EventoRepositoryPort.buscarPorId()`, verificar que esté en estado `FINALIZADO` (lanzar `EventoNoFinalizadoException`
+  si no), ejecutar query de agregación vía `LiquidacionQueryPort.obtenerSnapshotPorEvento()`, construir
+  `SnapshotLiquidacion` — retornar `Mono<SnapshotLiquidacion>` — dejar
   `// TODO: coordinar con Módulo 2 cómo se registra el check-in en el ticket`
-- [ ] T028 [US1] Implementar query de agregación en `LiquidacionQueryRepository`: GROUP BY condición, COUNT tickets, SUM
-  precio por condición, filtrado por eventoId
-- [ ] T029 [US1] Crear DTOs `SnapshotLiquidacionResponse.java` y `CondicionTicketResponse.java` (condicion, cantidad,
+- [ ] T027 [US1] Definir el mapeo de estados a condiciones de liquidación en `LiquidacionQueryAdapter`:
+  `VENDIDO + checkIn` → Validado, `VENDIDO + sin checkIn` → Vendido sin asistencia, `esCortesia=true` → Cortesía,
+  `ANULADO` → Cancelado
+- [ ] T028 [US1] Crear DTOs `SnapshotLiquidacionResponse.java` y `CondicionTicketResponse.java` (condicion, cantidad,
   valorTotal)
-- [ ] T030 [US1] Implementar endpoint `GET /api/eventos/{id}/snapshot` en `LiquidacionController.java`
-- [ ] T031 [US1] Agregar endpoint `PATCH /api/eventos/{id}/estado` para cerrar formalmente un evento (cambiar a
-  `FINALIZADO`) si no existe ya en feature 015
+- [ ] T029 [US1] Implementar endpoint `GET /api/eventos/{id}/snapshot` en `LiquidacionController.java` inyectando
+  `ConsultarSnapshotUseCase`
 
 **Checkpoint**: US1 y US2 funcionales — snapshot y modelo de negocio consultables por el Módulo 3
 
@@ -199,32 +212,32 @@ liquidación, pero solo si el evento está formalmente cerrado
 
 ## Phase 4: User Story 3 — Consulta de Recaudo Incremental (Priority: P2)
 
-**Goal**: El Módulo 3 puede consultar el recaudo acumulado en tiempo real durante un evento en curso, con tickets
-regulares y cortesías diferenciados
+**Goal**: El Módulo 3 puede consultar el recaudo acumulado durante un evento en curso, diferenciando regulares de
+cortesías y descontando cancelaciones
 
-**Independent Test**: `GET /api/eventos/{id}/recaudo` durante un evento en curso retorna HTTP 200 con valor acumulado.
+**Independent Test**: `GET /api/eventos/{id}/recaudo` durante un evento en curso retorna HTTP 200 con recaudo acumulado.
 Agregar una cancelación y consultar de nuevo refleja el descuento en el valor neto.
 
 ### Tests para User Story 3
 
-- [ ] T032 [P] [US3] Test de contrato: `GET /api/eventos/{id}/recaudo` retorna HTTP 200 con recaudo acumulado de tickets
+- [ ] T030 [P] [US3] Test de contrato: `GET /api/eventos/{id}/recaudo` retorna HTTP 200 con recaudo acumulado de tickets
   vendidos — `LiquidacionControllerTest.java`
-- [ ] T033 [P] [US3] Test de contrato: recaudo neto descuenta tickets cancelados — `LiquidacionControllerTest.java`
-- [ ] T034 [P] [US3] Test de contrato: recaudo diferencia tickets regulares de cortesías —
+- [ ] T031 [P] [US3] Test de contrato: recaudo neto descuenta tickets cancelados — `LiquidacionControllerTest.java`
+- [ ] T032 [P] [US3] Test de contrato: recaudo diferencia tickets regulares de cortesías —
   `LiquidacionControllerTest.java`
-- [ ] T035 [P] [US3] Test unitario de `ConsultarRecaudoIncrementalService` —
-  `ConsultarRecaudoIncrementalServiceTest.java`
+- [ ] T033 [P] [US3] Test unitario de `ConsultarRecaudoIncrementalUseCase` —
+  `ConsultarRecaudoIncrementalUseCaseTest.java`
 
 ### Implementación de User Story 3
 
-- [ ] T036 [US3] Implementar `ConsultarRecaudoIncrementalService.java` implementando
-  `ConsultarRecaudoIncrementalUseCase`: sumar precios de tickets en estado `VENDIDO` no cancelados, descontar
-  cancelados, separar regulares de cortesías
-- [ ] T037 [US3] Agregar query de recaudo en `LiquidacionQueryRepository`: SUM de precios por estado y tipo de ticket
-  para un eventoId
-- [ ] T038 [US3] Crear DTO `RecaudoIncrementalResponse.java` con campos: eventoId, recaudoRegular, recaudoCortesia,
+- [ ] T034 [US3] Implementar `ConsultarRecaudoIncrementalUseCase.java` en `application/`: ejecutar query de recaudo vía
+  `LiquidacionQueryPort.obtenerRecaudoPorEvento()` — retornar `Mono<RecaudoIncrementalResponse>`
+- [ ] T035 [US3] Agregar query de recaudo en `LiquidacionQueryAdapter`: SUM de precios por estado y tipo de ticket para
+  un eventoId, retornar recaudoRegular, recaudoCortesia, cancelaciones y recaudoNeto
+- [ ] T036 [US3] Crear DTO `RecaudoIncrementalResponse.java` con campos: eventoId, recaudoRegular, recaudoCortesia,
   cancelaciones, recaudoNeto, timestamp
-- [ ] T039 [US3] Implementar endpoint `GET /api/eventos/{id}/recaudo` en `LiquidacionController.java`
+- [ ] T037 [US3] Implementar endpoint `GET /api/eventos/{id}/recaudo` en `LiquidacionController.java` inyectando
+  `ConsultarRecaudoIncrementalUseCase`
 
 **Checkpoint**: Las tres user stories son funcionales e independientemente testeables
 
@@ -232,11 +245,11 @@ Agregar una cancelación y consultar de nuevo refleja el descuento en el valor n
 
 ## Phase 5: Polish & Cross-Cutting Concerns
 
-- [ ] T040 Documentar los tres endpoints con SpringDoc OpenAPI, incluyendo los códigos de error posibles
-- [ ] T041 Verificar que `ConsultarSnapshotService`, `ConsultarModeloNegocioService` no tienen imports de R2DBC ni
+- [ ] T038 Documentar los tres endpoints con SpringDoc OpenAPI incluyendo los códigos de error posibles
+- [ ] T039 Verificar que `ConsultarSnapshotUseCase` y `ConsultarModeloNegocioUseCase` no tienen imports de R2DBC ni
   Spring
-- [ ] T042 Agregar test de disponibilidad: los endpoints deben responder correctamente bajo carga simultánea (SC-003)
-- [ ] T043 Refactoring y limpieza
+- [ ] T040 Verificar que `LiquidacionQueryPort` en `domain/` no tiene imports externos
+- [ ] T041 Refactoring y limpieza
 
 ---
 
@@ -245,21 +258,36 @@ Agregar una cancelación y consultar de nuevo refleja el descuento en el valor n
 ### Phase Dependencies
 
 - **Foundational (Phase 1)**: Depende de features 002, 005 y 015 completados
-- **US2 (Phase 2)**: Depende de Foundational — implementar antes que US1 porque configura el modelo de negocio
-- **US1 (Phase 3)**: Depende de US2 y del mecanismo de cierre de evento (feature 015 US4 o T031 de este plan)
+- **US2 (Phase 2)**: Depende de Foundational — implementar antes que US1 porque configura el modelo de negocio que US1
+  necesita
+- **US1 (Phase 3)**: Depende de US2 y del mecanismo de cierre de evento (`EstadoEvento.FINALIZADO` del feature 015)
 - **US3 (Phase 4)**: Depende de Foundational — puede ejecutarse en paralelo con US1 y US2
 - **Polish (Phase 5)**: Depende de todas las user stories
 
-### Notes
+### Dentro de cada User Story
 
-- T027 tiene un `// TODO` importante: el snapshot necesita saber si un ticket fue validado en check-in — eso lo registra
-  el Módulo 2. Coordinar con el equipo del Módulo 2 qué campo del ticket actualiza el check-in (probablemente un campo
-  `checkIn` boolean o `fechaCheckIn`) antes de implementar la query de agregación
-- T016 agrega un endpoint de escritura (`PATCH /api/recintos/{id}/modelo-negocio`) que técnicamente pertenece al dominio
-  del feature 002 — decidir si se mueve allá o se mantiene en este plan para mantener cohesión de la funcionalidad de
-  liquidación
-- Los tickets en estados intermedios (`BLOQUEADO`, `MANTENIMIENTO`, `RESERVADO`) no tienen condición en la matriz de
-  liquidación — el equipo debe decidir si se excluyen del snapshot o se mapean a alguna condición (
-  `// NEEDS CLARIFICATION`)
-- WebFlux: todos los endpoints de este feature son de solo lectura y se benefician de la naturaleza no bloqueante de
-  WebFlux para las queries de agregación
+- Puerto de salida antes que caso de uso
+- Caso de uso antes que controlador y DTOs
+- Tests escritos junto a la implementación de cada tarea
+- Verificar checkpoint antes de pasar a la siguiente fase
+
+---
+
+## Notes
+
+- El tag `[P]` identifica tareas de prueba para distinguirlas del código productivo
+- El tag `[US1/US2/US3]` mapea cada tarea a su user story para trazabilidad
+- **Gestión de BD**: las columnas `modelo_negocio` y `monto_fijo` se agregan manualmente a `recintos` — actualizar el
+  script SQL de `src/test/resources/` para Testcontainers
+- T026 tiene un `// TODO` crítico: el snapshot necesita saber si un ticket fue validado en check-in, y eso lo registra
+  el Módulo 2 — coordinar con el equipo del Módulo 2 qué campo del ticket actualiza el check-in antes de implementar la
+  query de agregación
+- Los tickets en estados intermedios (`RESERVADO`, `EXPIRADO`) no tienen condición en la matriz de liquidación —
+  excluirlos del snapshot ya que no representan ingresos ni reembolsos (
+  `// NEEDS CLARIFICATION: confirmar con el equipo`)
+- **Responsabilidad única**: `ConsultarSnapshotUseCase` solo consulta el snapshot, `ConsultarModeloNegocioUseCase` solo
+  consulta el modelo, `ConfigurarModeloNegocioUseCase` solo configura
+- **Regla de oro hexagonal**: si una clase dentro de `domain/` necesita importar algo de Spring o R2DBC, el diseño está
+  mal
+- **WebFlux**: todos los casos de uso retornan `Mono<T>`. Los endpoints son de solo lectura y se benefician de la
+  naturaleza no bloqueante de WebFlux para las queries de agregación. Usar `WebTestClient` para los tests de contrato
