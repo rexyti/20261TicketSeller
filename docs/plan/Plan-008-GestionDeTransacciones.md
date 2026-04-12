@@ -13,11 +13,13 @@ y gestionar transacciones desde un panel administrativo. La implementación exti
 nueva de auditoría, y expone endpoints de consulta y filtrado con paginación para soportar hasta
 10,000 transacciones con respuesta menor a 2 segundos (SC-004).
 
+La arquitectura es hexagonal respetando responsabilidad única. La BD se gestiona manualmente.
+
 ## Technical Context
 
 **Language/Version**: Java 21
 **Primary Dependencies**: Spring Boot 3.x, Spring Data R2DBC, Spring WebFlux, Jakarta Validation
-**Storage**: PostgreSQL
+**Storage**: PostgreSQL — esquema creado y gestionado manualmente
 **Testing**: JUnit 5, Mockito, Spring Boot Test, Testcontainers (PostgreSQL para tests de integración)
 **Target Platform**: Backend server — microservicio Módulo 1
 **Project Type**: Web (API REST reactiva con WebFlux)
@@ -54,13 +56,10 @@ src/main/java/com/ticketseller/
 │       └── out/
 │           └── HistorialEstadoVentaRepositoryPort.java
 │
-├── application/
+├── application/                                    # Casos de uso — uno por responsabilidad
 │   ├── CambiarEstadoVentaUseCase.java
 │   ├── ConsultarHistorialVentaUseCase.java
-│   ├── ListarTransaccionesUseCase.java
-│   ├── CambiarEstadoVentaService.java
-│   ├── ConsultarHistorialVentaService.java
-│   └── ListarTransaccionesService.java
+│   └── ListarTransaccionesUseCase.java
 │
 └── infrastructure/
     ├── adapter/
@@ -82,9 +81,9 @@ src/main/java/com/ticketseller/
 
 tests/
 ├── application/
-│   ├── CambiarEstadoVentaServiceTest.java
-│   ├── ConsultarHistorialVentaServiceTest.java
-│   └── ListarTransaccionesServiceTest.java
+│   ├── CambiarEstadoVentaUseCaseTest.java
+│   ├── ConsultarHistorialVentaUseCaseTest.java
+│   └── ListarTransaccionesUseCaseTest.java
 └── infrastructure/
     ├── adapter/in/rest/
     │   └── TransaccionControllerTest.java
@@ -97,8 +96,7 @@ tests/
 `ventas` — en lugar de un campo JSON en `Venta`, para permitir paginación eficiente de historiales
 extensos (edge case del spec). La matriz de transiciones válidas se modela como constante en una
 clase `TransicionesVenta` dentro de `domain/model/` para que sea reutilizable por features 006 y
-009 sin acoplarlos entre sí. Las interfaces de casos de uso residen en `application/` — en
-`domain/port/` solo permanecen los puertos de salida.
+009 sin acoplarlos entre sí. En `domain/port/` solo residen los puertos de salida.
 
 ---
 
@@ -121,14 +119,12 @@ estados `Pendiente, Reservada, Completada, Expirada, Reembolsada, Fallida` debe 
 - [ ] T003 Crear excepciones de dominio: `TransicionVentaInvalidaException` (con mensaje que lista
   los estados válidos desde el estado actual), `VentaNoEncontradaException`
 - [ ] T004 Crear interfaz `HistorialEstadoVentaRepositoryPort.java` en `domain/port/out/`
-- [ ] T005 Crear interfaces de casos de uso en `application/`: `CambiarEstadoVentaUseCase`,
-  `ConsultarHistorialVentaUseCase`, `ListarTransaccionesUseCase`
-- [ ] T006 Crear entidad R2DBC `HistorialEstadoVentaEntity.java` con anotaciones `@Table` — incluir
+- [ ] T005 Crear entidad R2DBC `HistorialEstadoVentaEntity.java` con anotaciones `@Table` — incluir
   índice en `ventaId` para consultas de historial eficientes
-- [ ] T007 Implementar `HistorialEstadoVentaRepositoryAdapter.java` y
+- [ ] T006 Implementar `HistorialEstadoVentaRepositoryAdapter.java` y
   `HistorialEstadoVentaR2dbcRepository.java`
-- [ ] T008 Implementar mapper `HistorialEstadoVentaPersistenceMapper.java`
-- [ ] T009 Actualizar `BeanConfiguration.java` con los nuevos beans de casos de uso
+- [ ] T007 Implementar mapper `HistorialEstadoVentaPersistenceMapper.java`
+- [ ] T008 Actualizar `BeanConfiguration.java` con los nuevos beans de casos de uso
 
 **Checkpoint**: Dominio extendido, historial persistible, matriz de transiciones definida
 
@@ -146,31 +142,30 @@ retorna HTTP 422 con mensaje que lista los estados válidos desde `COMPLETADA`.
 
 ### Tests para User Story 1
 
-- [ ] T010 [P] [US1] Test de contrato: `PATCH /api/admin/ventas/{id}/estado` con transición válida
+- [ ] T009 [P] [US1] Test de contrato: `PATCH /api/admin/ventas/{id}/estado` con transición válida
   retorna HTTP 200 con venta actualizada — `TransaccionControllerTest.java`
-- [ ] T011 [P] [US1] Test de contrato: `PATCH /api/admin/ventas/{id}/estado` con transición inválida
+- [ ] T010 [P] [US1] Test de contrato: `PATCH /api/admin/ventas/{id}/estado` con transición inválida
   retorna HTTP 422 con estados válidos listados — `TransaccionControllerTest.java`
-- [ ] T012 [P] [US1] Test de contrato: cambio automático por sistema queda registrado con actor
+- [ ] T011 [P] [US1] Test de contrato: cambio automático por sistema queda registrado con actor
   `SISTEMA` — `TransaccionControllerTest.java`
-- [ ] T013 [P] [US1] Test unitario de `CambiarEstadoVentaService` con Mockito —
-  `CambiarEstadoVentaServiceTest.java`
-- [ ] T014 [P] [US1] Test de integración con Testcontainers: flujo PATCH estado → venta actualizada
+- [ ] T012 [P] [US1] Test unitario de `CambiarEstadoVentaUseCase` con Mockito —
+  `CambiarEstadoVentaUseCaseTest.java`
+- [ ] T013 [P] [US1] Test de integración con Testcontainers: flujo PATCH estado → venta actualizada
   en BD → historial registrado con timestamp correcto —
   `HistorialEstadoVentaRepositoryAdapterTest.java`
 
 ### Implementación de User Story 1
 
-- [ ] T015 [US1] Implementar `CambiarEstadoVentaService.java` implementando
-  `CambiarEstadoVentaUseCase`: consultar la venta (lanzar `VentaNoEncontradaException` si no
-  existe), validar la transición contra `TransicionesVenta` (lanzar
-  `TransicionVentaInvalidaException` si no está permitida), actualizar estado de la venta, persistir
-  `HistorialEstadoVenta` con estadoAnterior, estadoNuevo, timestamp y actorResponsable — operación
-  atómica para garantizar consistencia
-- [ ] T016 [US1] Agregar optimistic locking en `CambiarEstadoVentaService` para detectar
+- [ ] T014 [US1] Implementar `CambiarEstadoVentaUseCase.java` en `application/`: consultar la venta
+  (lanzar `VentaNoEncontradaException` si no existe), validar la transición contra `TransicionesVenta`
+  (lanzar `TransicionVentaInvalidaException` si no está permitida), actualizar estado de la venta,
+  persistir `HistorialEstadoVenta` con estadoAnterior, estadoNuevo, timestamp y actorResponsable —
+  operación atómica para garantizar consistencia
+- [ ] T015 [US1] Agregar optimistic locking en `CambiarEstadoVentaUseCase` para detectar
   modificaciones concurrentes y devolver HTTP 409 si otra operación ya cambió el estado (FR-007)
-- [ ] T017 [US1] Crear DTO `CambiarEstadoVentaRequest.java` con campos: `estado` (enum),
+- [ ] T016 [US1] Crear DTO `CambiarEstadoVentaRequest.java` con campos: `estado` (enum),
   `justificacion` (obligatorio si actor es agente, nullable si es sistema)
-- [ ] T018 [US1] Implementar endpoint `PATCH /api/admin/ventas/{id}/estado` en
+- [ ] T017 [US1] Implementar endpoint `PATCH /api/admin/ventas/{id}/estado` en
   `TransaccionController.java` retornando `Mono<ResponseEntity<VentaResponse>>`
 
 **Checkpoint**: US1 funcional — cambios de estado validados, historial registrado, concurrencia
@@ -189,25 +184,24 @@ cambios retorna solo el estado inicial sin errores ni pantalla vacía.
 
 ### Tests para User Story 2
 
-- [ ] T019 [P] [US2] Test de contrato: `GET /api/admin/ventas/{id}/historial` retorna HTTP 200 con
+- [ ] T018 [P] [US2] Test de contrato: `GET /api/admin/ventas/{id}/historial` retorna HTTP 200 con
   lista cronológica de cambios — `TransaccionControllerTest.java`
-- [ ] T020 [P] [US2] Test de contrato: venta sin cambios retorna solo estado inicial sin errores —
+- [ ] T019 [P] [US2] Test de contrato: venta sin cambios retorna solo estado inicial sin errores —
   `TransaccionControllerTest.java`
-- [ ] T021 [P] [US2] Test de contrato: venta inexistente retorna HTTP 404 —
+- [ ] T020 [P] [US2] Test de contrato: venta inexistente retorna HTTP 404 —
   `TransaccionControllerTest.java`
-- [ ] T022 [P] [US2] Test unitario de `ConsultarHistorialVentaService` con Mockito —
-  `ConsultarHistorialVentaServiceTest.java`
+- [ ] T021 [P] [US2] Test unitario de `ConsultarHistorialVentaUseCase` con Mockito —
+  `ConsultarHistorialVentaUseCaseTest.java`
 
 ### Implementación de User Story 2
 
-- [ ] T023 [US2] Implementar `ConsultarHistorialVentaService.java` implementando
-  `ConsultarHistorialVentaUseCase`: verificar que la venta exista (lanzar
-  `VentaNoEncontradaException`), consultar todos los registros `HistorialEstadoVenta` asociados
-  vía `HistorialEstadoVentaRepositoryPort` ordenados por timestamp ascendente, incluir estado
-  inicial de creación si no hay entradas de historial
-- [ ] T024 [US2] Crear DTO `HistorialEstadoVentaResponse.java` con campos: `estadoAnterior`,
+- [ ] T022 [US2] Implementar `ConsultarHistorialVentaUseCase.java` en `application/`: verificar que
+  la venta exista (lanzar `VentaNoEncontradaException`), consultar todos los registros
+  `HistorialEstadoVenta` asociados vía `HistorialEstadoVentaRepositoryPort` ordenados por timestamp
+  ascendente, incluir estado inicial de creación si no hay entradas de historial
+- [ ] T023 [US2] Crear DTO `HistorialEstadoVentaResponse.java` con campos: `estadoAnterior`,
   `estadoNuevo`, `timestamp`, `actorResponsable`, `justificacion`
-- [ ] T025 [US2] Implementar endpoint `GET /api/admin/ventas/{id}/historial` en
+- [ ] T024 [US2] Implementar endpoint `GET /api/admin/ventas/{id}/historial` en
   `TransaccionController.java` retornando `Flux<HistorialEstadoVentaResponse>` con paginación para
   historiales extensos
 
@@ -226,28 +220,27 @@ lista vacía y mensaje `"No se encontraron transacciones con los filtros aplicad
 
 ### Tests para User Story 3
 
-- [ ] T026 [P] [US3] Test de contrato: `GET /api/admin/ventas?estado=FALLIDA` retorna solo ventas
+- [ ] T025 [P] [US3] Test de contrato: `GET /api/admin/ventas?estado=FALLIDA` retorna solo ventas
   en ese estado — `TransaccionControllerTest.java`
-- [ ] T027 [P] [US3] Test de contrato: `GET /api/admin/ventas?fechaDesde=X&fechaHasta=Y` retorna
+- [ ] T026 [P] [US3] Test de contrato: `GET /api/admin/ventas?fechaDesde=X&fechaHasta=Y` retorna
   ventas dentro del rango — `TransaccionControllerTest.java`
-- [ ] T028 [P] [US3] Test de contrato: `GET /api/admin/ventas?eventoId={id}` retorna ventas del
+- [ ] T027 [P] [US3] Test de contrato: `GET /api/admin/ventas?eventoId={id}` retorna ventas del
   evento filtrado — `TransaccionControllerTest.java`
-- [ ] T029 [P] [US3] Test de contrato: filtro sin resultados retorna HTTP 200 con lista vacía y
+- [ ] T028 [P] [US3] Test de contrato: filtro sin resultados retorna HTTP 200 con lista vacía y
   mensaje — `TransaccionControllerTest.java`
-- [ ] T030 [P] [US3] Test unitario de `ListarTransaccionesService` con Mockito —
-  `ListarTransaccionesServiceTest.java`
-- [ ] T031 [P] [US3] Test de integración con Testcontainers: filtro combinado estado + fecha +
+- [ ] T029 [P] [US3] Test unitario de `ListarTransaccionesUseCase` con Mockito —
+  `ListarTransaccionesUseCaseTest.java`
+- [ ] T030 [P] [US3] Test de integración con Testcontainers: filtro combinado estado + fecha +
   evento retorna resultados correctos — `HistorialEstadoVentaRepositoryAdapterTest.java`
 
 ### Implementación de User Story 3
 
-- [ ] T032 [US3] Implementar `ListarTransaccionesService.java` implementando
-  `ListarTransaccionesUseCase`: construir query dinámica con los filtros recibidos (estado, rango
-  de fechas, eventoId), aplicar ordenamiento por `fechaCreacion` descendente, devolver resultado
-  paginado vía `VentaRepositoryPort`
-- [ ] T033 [US3] Crear DTO `FiltroTransaccionRequest.java` con campos opcionales: `estado`,
+- [ ] T031 [US3] Implementar `ListarTransaccionesUseCase.java` en `application/`: construir query
+  dinámica con los filtros recibidos (estado, rango de fechas, eventoId), aplicar ordenamiento por
+  `fechaCreacion` descendente, devolver resultado paginado vía `VentaRepositoryPort`
+- [ ] T032 [US3] Crear DTO `FiltroTransaccionRequest.java` con campos opcionales: `estado`,
   `fechaDesde`, `fechaHasta`, `eventoId`, `page` (default 0), `size` (default 25)
-- [ ] T034 [US3] Implementar endpoint `GET /api/admin/ventas` en `TransaccionController.java` con
+- [ ] T033 [US3] Implementar endpoint `GET /api/admin/ventas` en `TransaccionController.java` con
   query params opcionales retornando `Mono<ResponseEntity<Page<VentaResponse>>>`
 
 **Checkpoint**: Las tres user stories son funcionales e independientemente testeables
@@ -256,11 +249,11 @@ lista vacía y mensaje `"No se encontraron transacciones con los filtros aplicad
 
 ## Phase 5: Polish & Cross-Cutting Concerns
 
-- [ ] T035 Agregar tests de casos borde: concurrencia en cambio de estado simultáneo, historial con
+- [ ] T034 Agregar tests de casos borde: concurrencia en cambio de estado simultáneo, historial con
   paginación, combinación de todos los filtros disponibles
-- [ ] T036 Documentar todos los endpoints con SpringDoc OpenAPI incluyendo todos los query params
-- [ ] T037 Verificar que ninguna clase de `domain/` importa `org.springframework` o `io.r2dbc`
-- [ ] T038 Refactoring y limpieza general
+- [ ] T035 Documentar todos los endpoints con SpringDoc OpenAPI incluyendo todos los query params
+- [ ] T036 Verificar que ninguna clase de `domain/` importa `org.springframework` o `io.r2dbc`
+- [ ] T037 Refactoring y limpieza general
 
 ---
 
@@ -282,10 +275,8 @@ lista vacía y mensaje `"No se encontraron transacciones con los filtros aplicad
 
 ### Dentro de cada User Story
 
-- Excepciones de dominio antes que servicios
-- Puerto de salida antes que adaptador de persistencia
-- Interfaz de caso de uso antes que implementación del servicio
-- Servicio antes que controlador y DTOs
+- Puerto de salida antes que caso de uso
+- Caso de uso antes que controlador y DTOs
 - Tests escritos junto a la implementación de cada tarea
 - Verificar checkpoint antes de pasar a la siguiente fase
 
@@ -293,6 +284,8 @@ lista vacía y mensaje `"No se encontraron transacciones con los filtros aplicad
 
 ## Notes
 
+- El tag `[P]` identifica tareas de prueba para distinguirlas del código productivo
+- El tag `[US1/US2/US3]` mapea cada tarea a su user story para trazabilidad
 - **Coordinación con features 006 y 009**: la clase `TransicionesVenta` debe ser la única fuente de
   verdad para transiciones de estado — features 006 y 009 deben invocarla en lugar de definir sus
   propias reglas
@@ -301,7 +294,9 @@ lista vacía y mensaje `"No se encontraron transacciones con los filtros aplicad
 - **Actor SISTEMA**: el endpoint `PATCH /api/admin/ventas/{id}/estado` también es invocado
   internamente por el sistema al confirmar pagos desde la pasarela — verificar que el actor `SISTEMA`
   quede correctamente registrado en historial sin requerir justificación
+- **Responsabilidad única**: cada caso de uso en `application/` tiene una sola razón para cambiar —
+  `CambiarEstadoVentaUseCase` solo cambia estado, `ConsultarHistorialVentaUseCase` solo consulta
 - **Regla de oro hexagonal**: si una clase dentro de `domain/` necesita importar algo de Spring o
   R2DBC, el diseño está mal
-- **WebFlux**: todos los métodos de servicio retornan `Mono<T>` o `Flux<T>`, y los controladores
-  retornan `Mono<ResponseEntity<T>>`
+- **WebFlux**: todos los casos de uso retornan `Mono<T>` o `Flux<T>`, y los controladores
+  retornan `Mono<ResponseEntity<T>>`. Usar `WebTestClient` para los tests de contrato

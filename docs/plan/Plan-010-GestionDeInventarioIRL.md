@@ -14,12 +14,14 @@ campo `expiraEn` para el hold temporal y con los estados `RESERVADO` y `OCUPADO`
 scheduler de liberación automática, y garantiza consistencia ante compras concurrentes del mismo
 asiento mediante bloqueo optimista a nivel de base de datos.
 
+La arquitectura es hexagonal respetando responsabilidad única. La BD se gestiona manualmente.
+
 ## Technical Context
 
 **Language/Version**: Java 21
 **Primary Dependencies**: Spring Boot 3.x, Spring Data R2DBC, Spring WebFlux, Jakarta Validation,
 Spring Scheduler
-**Storage**: PostgreSQL
+**Storage**: PostgreSQL — esquema creado y gestionado manualmente
 **Testing**: JUnit 5, Mockito, Spring Boot Test, Testcontainers (PostgreSQL para tests de integración)
 **Target Platform**: Backend server — microservicio Módulo 1
 **Project Type**: Web (API REST reactiva con WebFlux)
@@ -57,15 +59,11 @@ src/main/java/com/ticketseller/
 │       └── out/
 │           └── (extiende AsientoRepositoryPort existente con métodos de hold)
 │
-├── application/
+├── application/                                    # Casos de uso — uno por responsabilidad
 │   ├── VerificarDisponibilidadUseCase.java
 │   ├── ReservarAsientoUseCase.java
 │   ├── ConfirmarOcupacionUseCase.java
-│   ├── LiberarHoldsVencidosUseCase.java
-│   ├── VerificarDisponibilidadService.java
-│   ├── ReservarAsientoService.java
-│   ├── ConfirmarOcupacionService.java
-│   └── LiberarHoldsVencidosService.java
+│   └── LiberarHoldsVencidosUseCase.java
 │
 └── infrastructure/
     ├── adapter/
@@ -83,10 +81,10 @@ src/main/java/com/ticketseller/
 
 tests/
 ├── application/
-│   ├── VerificarDisponibilidadServiceTest.java
-│   ├── ReservarAsientoServiceTest.java
-│   ├── ConfirmarOcupacionServiceTest.java
-│   └── LiberarHoldsVencidosServiceTest.java
+│   ├── VerificarDisponibilidadUseCaseTest.java
+│   ├── ReservarAsientoUseCaseTest.java
+│   ├── ConfirmarOcupacionUseCaseTest.java
+│   └── LiberarHoldsVencidosUseCaseTest.java
 └── infrastructure/
     └── adapter/in/rest/
         └── InventarioControllerTest.java
@@ -96,9 +94,9 @@ tests/
 nuevas al dominio — extiende el enum `EstadoAsiento` con `RESERVADO` y `OCUPADO`, y agrega el
 campo `expiraEn` (timestamp nullable) a `AsientoEntity` para manejar el hold temporal. El puerto
 de salida `AsientoRepositoryPort` existente (feature 003) se extiende con métodos de bloqueo
-optimista y consulta de holds vencidos, sin crear un puerto nuevo. Las interfaces de casos de uso
-residen en `application/` — en `domain/port/` solo permanecen los puertos de salida. El scheduler
-vive en la capa de infraestructura como adaptador de entrada independiente del flujo de compra.
+optimista y consulta de holds vencidos, sin crear un puerto nuevo. El scheduler vive en la capa
+de infraestructura como adaptador de entrada independiente del flujo de compra. En `domain/port/`
+solo residen los puertos de salida.
 
 ---
 
@@ -120,12 +118,9 @@ estén completados — `Asiento`, `Ticket` y `Venta` deben existir en BD
   `Mono<Asiento>` o `Flux<Asiento>`
 - [ ] T004 Crear excepciones de dominio: `AsientoNoDisponibleException`,
   `AsientoReservadoPorOtroException`, `HoldExpiradoException`
-- [ ] T005 Crear interfaces de casos de uso en `application/`:
-  `VerificarDisponibilidadUseCase`, `ReservarAsientoUseCase`, `ConfirmarOcupacionUseCase`,
-  `LiberarHoldsVencidosUseCase`
-- [ ] T006 Crear `LiberacionHoldsScheduler.java` en `infrastructure/adapter/in/scheduler/`: job que
+- [ ] T005 Crear `LiberacionHoldsScheduler.java` en `infrastructure/adapter/in/scheduler/`: job que
   invoca `LiberarHoldsVencidosUseCase` cada minuto para detectar asientos con `expiraEn` pasado
-- [ ] T007 Actualizar `BeanConfiguration.java` con los nuevos beans de casos de uso
+- [ ] T006 Actualizar `BeanConfiguration.java` con los nuevos beans de casos de uso
 
 **Checkpoint**: Estados de asiento extendidos, campo `expiraEn` en BD, métodos de hold disponibles
 en repositorio, scheduler configurado
@@ -143,67 +138,66 @@ HTTP 200 con `disponible: true`. El mismo endpoint con asiento ya RESERVADO u OC
 
 ### Tests para User Story 1
 
-- [ ] T008 [P] [US1] Test de contrato: `GET /api/inventario/asientos/{id}/disponibilidad` con asiento
+- [ ] T007 [P] [US1] Test de contrato: `GET /api/inventario/asientos/{id}/disponibilidad` con asiento
   DISPONIBLE retorna HTTP 200 con `disponible: true` — `InventarioControllerTest.java`
-- [ ] T009 [P] [US1] Test de contrato: `GET /api/inventario/asientos/{id}/disponibilidad` con asiento
+- [ ] T008 [P] [US1] Test de contrato: `GET /api/inventario/asientos/{id}/disponibilidad` con asiento
   OCUPADO retorna HTTP 200 con `disponible: false` — `InventarioControllerTest.java`
-- [ ] T010 [P] [US1] Test de contrato: `GET /api/inventario/asientos/{id}/disponibilidad` con asiento
+- [ ] T009 [P] [US1] Test de contrato: `GET /api/inventario/asientos/{id}/disponibilidad` con asiento
   RESERVADO retorna HTTP 200 con `disponible: false` — `InventarioControllerTest.java`
-- [ ] T011 [P] [US1] Test unitario de `VerificarDisponibilidadService` con Mockito —
-  `VerificarDisponibilidadServiceTest.java`
-- [ ] T012 [P] [US1] Test de integración con Testcontainers: verificación sobre PostgreSQL real con
+- [ ] T010 [P] [US1] Test unitario de `VerificarDisponibilidadUseCase` con Mockito —
+  `VerificarDisponibilidadUseCaseTest.java`
+- [ ] T011 [P] [US1] Test de integración con Testcontainers: verificación sobre PostgreSQL real con
   asientos en distintos estados — `InventarioControllerTest.java`
 
 ### Implementación de User Story 1
 
-- [ ] T013 [US1] Implementar `VerificarDisponibilidadService.java` implementando
-  `VerificarDisponibilidadUseCase`: consultar el estado actual del asiento vía
-  `AsientoRepositoryPort`, retornar `disponible: true` solo si el estado es DISPONIBLE, retornar
-  `disponible: false` con mensaje descriptivo para cualquier otro estado
-- [ ] T014 [US1] Crear DTOs `DisponibilidadResponse.java` con campos: `asientoId`, `disponible
-  (boolean)`, `estado`, `mensaje (nullable)`
-- [ ] T015 [US1] Implementar endpoint `GET /api/inventario/asientos/{id}/disponibilidad` en
+- [ ] T012 [US1] Implementar `VerificarDisponibilidadUseCase.java` en `application/`: consultar el
+  estado actual del asiento vía `AsientoRepositoryPort`, retornar `disponible: true` solo si el
+  estado es DISPONIBLE — retornar `Mono<DisponibilidadResponse>`
+- [ ] T013 [US1] Crear DTO `DisponibilidadResponse.java` con campos: `asientoId`, `disponible`
+  (boolean), `mensaje` (nullable)
+- [ ] T014 [US1] Implementar endpoint `GET /api/inventario/asientos/{id}/disponibilidad` en
   `InventarioController.java` retornando `Mono<ResponseEntity<DisponibilidadResponse>>`
 
 **Checkpoint**: US1 funcional — verificación de disponibilidad operativa
 
 ---
 
-## Phase 3: User Story 2 — Verificar Asiento Reservado por Otro Usuario (Priority: P1)
+## Phase 3: User Story 2 — Bloquear Asiento Temporalmente Durante Checkout (Priority: P1)
 
-**Goal**: Al iniciar el proceso de pago, el sistema bloquea el asiento con un hold de 15 minutos y
-lo libera automáticamente si el comprador no completa la compra
+**Goal**: Al iniciar el checkout, el sistema bloquea el asiento durante 15 minutos; si el pago no
+se completa, el asiento se libera automáticamente y vuelve a estar disponible para otro comprador
 
-**Independent Test**: `POST /api/inventario/asientos/{id}/reservar` retorna HTTP 201 con estado
-`RESERVADO` y `expiraEn`. Segundo `POST` con el mismo asiento retorna HTTP 409 con mensaje
-`ASIENTO NO DISPONIBLE - OTRO USUARIO ESTÁ COMPRANDO ESTE ASIENTO`. Pasados 15 minutos sin pago,
-el asiento vuelve a estado `DISPONIBLE`.
+**Independent Test**: `POST /api/inventario/asientos/{id}/reservar` con asiento disponible retorna
+HTTP 201 con estado `RESERVADO` y `expiraEn`. Segundo `POST` sobre el mismo asiento retorna HTTP
+409 con `ASIENTO NO DISPONIBLE - OTRO USUARIO ESTÁ COMPRANDO ESTE ASIENTO`. Pasados 15 minutos
+sin pago, el asiento vuelve a estado `DISPONIBLE`.
 
 ### Tests para User Story 2
 
-- [ ] T016 [P] [US2] Test de contrato: `POST /api/inventario/asientos/{id}/reservar` con asiento
+- [ ] T015 [P] [US2] Test de contrato: `POST /api/inventario/asientos/{id}/reservar` con asiento
   disponible retorna HTTP 201 con `RESERVADO` y `expiraEn` — `InventarioControllerTest.java`
-- [ ] T017 [P] [US2] Test de contrato: segundo `POST` con asiento ya RESERVADO retorna HTTP 409 con
+- [ ] T016 [P] [US2] Test de contrato: segundo `POST` con asiento ya RESERVADO retorna HTTP 409 con
   mensaje descriptivo — `InventarioControllerTest.java`
-- [ ] T018 [P] [US2] Test de contrato: liberación automática por scheduler después de 15 minutos —
+- [ ] T017 [P] [US2] Test de contrato: liberación automática por scheduler después de 15 minutos —
   asiento vuelve a DISPONIBLE — `InventarioControllerTest.java`
-- [ ] T019 [P] [US2] Test unitario de `ReservarAsientoService` con Mockito —
-  `ReservarAsientoServiceTest.java`
-- [ ] T020 [P] [US2] Test de integración con Testcontainers: reservar → verificar `expiraEn` en BD →
+- [ ] T018 [P] [US2] Test unitario de `ReservarAsientoUseCase` con Mockito —
+  `ReservarAsientoUseCaseTest.java`
+- [ ] T019 [P] [US2] Test de integración con Testcontainers: reservar → verificar `expiraEn` en BD →
   scheduler libera hold — `InventarioControllerTest.java`
 
 ### Implementación de User Story 2
 
-- [ ] T021 [US2] Implementar `ReservarAsientoService.java` implementando `ReservarAsientoUseCase`:
-  verificar que el asiento esté DISPONIBLE (lanzar `AsientoReservadoPorOtroException` si no lo
-  está), invocar `AsientoRepositoryPort.reservarConHold(id, now().plusMinutes(15))` con bloqueo
-  optimista para manejar concurrencia, retornar asiento con nuevo estado y `expiraEn`
-- [ ] T022 [US2] Implementar `LiberarHoldsVencidosService.java` implementando
-  `LiberarHoldsVencidosUseCase`: consultar asientos RESERVADO con `expiraEn` anterior a `now()` vía
-  `AsientoRepositoryPort.findHoldsVencidos()`, actualizar cada uno a DISPONIBLE limpiando `expiraEn`
-- [ ] T023 [US2] Crear DTO `ReservarAsientoRequest.java` con campo `ventaId` para asociar la reserva
+- [ ] T020 [US2] Implementar `ReservarAsientoUseCase.java` en `application/`: verificar que el asiento
+  esté DISPONIBLE (lanzar `AsientoReservadoPorOtroException` si no lo está), invocar
+  `AsientoRepositoryPort.reservarConHold(id, now().plusMinutes(15))` con bloqueo optimista para
+  manejar concurrencia, retornar asiento con nuevo estado y `expiraEn`
+- [ ] T021 [US2] Implementar `LiberarHoldsVencidosUseCase.java` en `application/`: consultar asientos
+  RESERVADO con `expiraEn` anterior a `now()` vía `AsientoRepositoryPort.findHoldsVencidos()`,
+  actualizar cada uno a DISPONIBLE limpiando `expiraEn`
+- [ ] T022 [US2] Crear DTO `ReservarAsientoRequest.java` con campo `ventaId` para asociar la reserva
   a la venta en curso
-- [ ] T024 [US2] Implementar endpoint `POST /api/inventario/asientos/{id}/reservar` en
+- [ ] T023 [US2] Implementar endpoint `POST /api/inventario/asientos/{id}/reservar` en
   `InventarioController.java` retornando `Mono<ResponseEntity<DisponibilidadResponse>>`
 
 **Checkpoint**: US1 y US2 funcionales — verificación y reserva con hold operativas, liberación
@@ -222,27 +216,26 @@ retorna HTTP 200 con estado `DISPONIBLE`.
 
 ### Tests para User Story 3
 
-- [ ] T025 [P] [US3] Test de contrato: `POST /api/inventario/asientos/{id}/ocupar` con pago
+- [ ] T024 [P] [US3] Test de contrato: `POST /api/inventario/asientos/{id}/ocupar` con pago
   confirmado retorna HTTP 200 con estado `OCUPADO` — `InventarioControllerTest.java`
-- [ ] T026 [P] [US3] Test de contrato: `POST /api/inventario/asientos/{id}/liberar` tras pago fallido
+- [ ] T025 [P] [US3] Test de contrato: `POST /api/inventario/asientos/{id}/liberar` tras pago fallido
   retorna HTTP 200 con estado `DISPONIBLE` — `InventarioControllerTest.java`
-- [ ] T027 [P] [US3] Test unitario de `ConfirmarOcupacionService` con Mockito —
-  `ConfirmarOcupacionServiceTest.java`
-- [ ] T028 [P] [US3] Test de integración con Testcontainers: flujo reservar → confirmar → asiento
+- [ ] T026 [P] [US3] Test unitario de `ConfirmarOcupacionUseCase` con Mockito —
+  `ConfirmarOcupacionUseCaseTest.java`
+- [ ] T027 [P] [US3] Test de integración con Testcontainers: flujo reservar → confirmar → asiento
   OCUPADO en BD — `InventarioControllerTest.java`
 
 ### Implementación de User Story 3
 
-- [ ] T029 [US3] Implementar `ConfirmarOcupacionService.java` implementando
-  `ConfirmarOcupacionUseCase`: verificar que el asiento esté RESERVADO y que el hold no haya
-  expirado (lanzar `HoldExpiradoException` si expiró), invocar
-  `AsientoRepositoryPort.marcarOcupado(id)` limpiando `expiraEn`, retornar asiento con estado
-  OCUPADO — si el pago falla, invocar `AsientoRepositoryPort.liberarHold(id)` para volver a
+- [ ] T028 [US3] Implementar `ConfirmarOcupacionUseCase.java` en `application/`: verificar que el
+  asiento esté RESERVADO y que el hold no haya expirado (lanzar `HoldExpiradoException` si expiró),
+  invocar `AsientoRepositoryPort.marcarOcupado(id)` limpiando `expiraEn`, retornar asiento con
+  estado OCUPADO — si el pago falla, invocar `AsientoRepositoryPort.liberarHold(id)` para volver a
   DISPONIBLE
-- [ ] T030 [US3] Integrar llamada a `ConfirmarOcupacionUseCase` en el flujo de confirmación de pago
+- [ ] T029 [US3] Integrar llamada a `ConfirmarOcupacionUseCase` en el flujo de confirmación de pago
   del feature 005 — `// TODO: coordinar con feature 005, agregar llamada en
-  ConfirmarTransaccionService tras pago exitoso`
-- [ ] T031 [US3] Implementar endpoints `POST /api/inventario/asientos/{id}/ocupar` y
+  ConfirmarTransaccionUseCase tras pago exitoso`
+- [ ] T030 [US3] Implementar endpoints `POST /api/inventario/asientos/{id}/ocupar` y
   `POST /api/inventario/asientos/{id}/liberar` en `InventarioController.java`
 
 **Checkpoint**: US1, US2 y US3 funcionales — ciclo completo de asiento operativo
@@ -260,20 +253,20 @@ HTTP 409.
 
 ### Tests para User Story 4
 
-- [ ] T032 [P] [US4] Test de contrato: dos requests concurrentes sobre el mismo asiento — solo uno
+- [ ] T031 [P] [US4] Test de contrato: dos requests concurrentes sobre el mismo asiento — solo uno
   retorna HTTP 201, el otro HTTP 409 — `InventarioControllerTest.java`
-- [ ] T033 [P] [US4] Test unitario de `ReservarAsientoService` con simulación de conflicto optimista
-  — `ReservarAsientoServiceTest.java`
-- [ ] T034 [P] [US4] Test de integración con Testcontainers: concurrencia real con dos hilos
+- [ ] T032 [P] [US4] Test unitario de `ReservarAsientoUseCase` con simulación de conflicto optimista
+  — `ReservarAsientoUseCaseTest.java`
+- [ ] T033 [P] [US4] Test de integración con Testcontainers: concurrencia real con dos hilos
   simultáneos — verificar cero casos de sobreventa — `InventarioControllerTest.java`
 
 ### Implementación de User Story 4
 
-- [ ] T035 [US4] Agregar manejo de `OptimisticLockingFailureException` en `ReservarAsientoService`:
+- [ ] T034 [US4] Agregar manejo de `OptimisticLockingFailureException` en `ReservarAsientoUseCase`:
   capturar el error de concurrencia que R2DBC lanza cuando dos transacciones intentan actualizar
   el mismo registro, transformarlo en `AsientoReservadoPorOtroException` y retornar HTTP 409 al
   segundo comprador
-- [ ] T036 [US4] Agregar campo `version` (optimistic lock) a `AsientoEntity` y a la tabla `asientos`
+- [ ] T035 [US4] Agregar campo `version` (optimistic lock) a `AsientoEntity` y a la tabla `asientos`
   para habilitar el control de concurrencia a nivel de BD — documentar en script SQL de
   `src/test/resources/`
 
@@ -283,11 +276,11 @@ HTTP 409.
 
 ## Phase 6: Polish & Cross-Cutting Concerns
 
-- [ ] T037 Agregar tests de casos borde: hold expira exactamente durante confirmación, pago falla
+- [ ] T036 Agregar tests de casos borde: hold expira exactamente durante confirmación, pago falla
   tras marcar OCUPADO, compra de grupo de asientos (todos deben reservarse o ninguno)
-- [ ] T038 Documentar todos los endpoints con SpringDoc OpenAPI
-- [ ] T039 Verificar que ninguna clase de `domain/` importa `org.springframework` o `io.r2dbc`
-- [ ] T040 Refactoring y limpieza general
+- [ ] T037 Documentar todos los endpoints con SpringDoc OpenAPI
+- [ ] T038 Verificar que ninguna clase de `domain/` importa `org.springframework` o `io.r2dbc`
+- [ ] T039 Refactoring y limpieza general
 
 ---
 
@@ -312,10 +305,8 @@ HTTP 409.
 
 ### Dentro de cada User Story
 
-- Excepciones de dominio antes que servicios
-- Extensión de puerto de salida antes que servicio
-- Interfaz de caso de uso antes que implementación del servicio
-- Servicio antes que controlador y DTOs
+- Puerto de salida antes que caso de uso
+- Caso de uso antes que controlador y DTOs
 - Tests escritos junto a la implementación de cada tarea
 - Verificar checkpoint antes de pasar a la siguiente fase
 
@@ -323,15 +314,19 @@ HTTP 409.
 
 ## Notes
 
+- El tag `[P]` identifica tareas de prueba para distinguirlas del código productivo
+- El tag `[US1/US2/US3/US4]` mapea cada tarea a su user story para trazabilidad
 - **Hold de 15 minutos**: alineado con feature 005 (FR-004) y feature 009 — cualquier cambio en ese
   valor debe actualizarse en los tres features simultáneamente
 - **Coordinación con feature 005**: `ConfirmarOcupacionUseCase` debe ser invocado desde
-  `ConfirmarTransaccionService` (feature 005) tras pago exitoso —
+  `ConfirmarTransaccionUseCase` (feature 005) tras pago exitoso —
   `// TODO: coordinar con feature 005`
 - **Compras en grupo**: si se compran varios asientos juntos, todos deben reservarse de forma
   atómica — si alguno falla, los demás deben liberarse. Implementar como transacción reactiva en
-  `ReservarAsientoService`
+  `ReservarAsientoUseCase`
+- **Responsabilidad única**: cada caso de uso en `application/` tiene una sola razón para cambiar —
+  `ReservarAsientoUseCase` solo reserva, `ConfirmarOcupacionUseCase` solo confirma
 - **Regla de oro hexagonal**: si una clase dentro de `domain/` necesita importar algo de Spring o
   R2DBC, el diseño está mal
-- **WebFlux**: todos los métodos de servicio retornan `Mono<T>` o `Flux<T>`, y los controladores
-  retornan `Mono<ResponseEntity<T>>`
+- **WebFlux**: todos los casos de uso retornan `Mono<T>` o `Flux<T>`, y los controladores
+  retornan `Mono<ResponseEntity<T>>`. Usar `WebTestClient` para los tests de contrato

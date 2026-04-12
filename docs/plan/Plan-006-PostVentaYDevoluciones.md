@@ -13,11 +13,13 @@ trazabilidad completa. La implementación extiende las entidades `Ticket`, `Vent
 proceso de devolución, e integra con la pasarela de pagos ya existente para ejecutar reembolsos
 automáticos y manuales.
 
+La arquitectura es hexagonal respetando responsabilidad única. La BD se gestiona manualmente.
+
 ## Technical Context
 
 **Language/Version**: Java 21
 **Primary Dependencies**: Spring Boot 3.x, Spring Data R2DBC, Spring WebFlux, Jakarta Validation
-**Storage**: PostgreSQL
+**Storage**: PostgreSQL — esquema creado y gestionado manualmente
 **Testing**: JUnit 5, Mockito, Spring Boot Test, Testcontainers (PostgreSQL para tests de integración)
 **Target Platform**: Backend server — microservicio Módulo 1
 **Project Type**: Web (API REST reactiva con WebFlux)
@@ -57,17 +59,12 @@ src/main/java/com/ticketseller/
 │       └── out/
 │           └── ReembolsoRepositoryPort.java
 │
-├── application/
+├── application/                                    # Casos de uso — uno por responsabilidad
 │   ├── CancelarTicketUseCase.java
 │   ├── ProcesarReembolsoMasivoUseCase.java
 │   ├── CambiarEstadoTicketUseCase.java
 │   ├── GestionarReembolsoManualUseCase.java
-│   ├── ConsultarEstadoReembolsoUseCase.java
-│   ├── CancelarTicketService.java
-│   ├── ProcesarReembolsoMasivoService.java
-│   ├── CambiarEstadoTicketService.java
-│   ├── GestionarReembolsoManualService.java
-│   └── ConsultarEstadoReembolsoService.java
+│   └── ConsultarEstadoReembolsoUseCase.java
 │
 └── infrastructure/
     ├── adapter/
@@ -94,10 +91,10 @@ src/main/java/com/ticketseller/
 
 tests/
 ├── application/
-│   ├── CancelarTicketServiceTest.java
-│   ├── ProcesarReembolsoMasivoServiceTest.java
-│   ├── CambiarEstadoTicketServiceTest.java
-│   └── GestionarReembolsoManualServiceTest.java
+│   ├── CancelarTicketUseCaseTest.java
+│   ├── ProcesarReembolsoMasivoUseCaseTest.java
+│   ├── CambiarEstadoTicketUseCaseTest.java
+│   └── GestionarReembolsoManualUseCaseTest.java
 └── infrastructure/
     ├── adapter/in/rest/
     │   ├── CancelacionControllerTest.java
@@ -113,8 +110,8 @@ como entidad nueva de dominio para trazabilidad independiente del proceso de dev
 estados `CANCELADO`, `REEMBOLSO_PENDIENTE`, `REEMBOLSADO` y `ANULADO` se agregan al enum
 `EstadoTicket` del feature 005 en lugar de crear un enum nuevo. Los controladores se separan por
 actor (`CancelacionController` para compradores, `AdminTicketController` y
-`AdminReembolsoController` para el agente) para mantener responsabilidad única. Las interfaces de
-casos de uso residen en `application/` — en `domain/port/` solo permanecen los puertos de salida.
+`AdminReembolsoController` para el agente) para mantener responsabilidad única. En `domain/port/`
+solo residen los puertos de salida.
 
 ---
 
@@ -134,13 +131,10 @@ persistencia que deben existir antes de cualquier user story de este feature
 - [ ] T003 Crear excepciones de dominio: `CancelacionFueraDePlazoException`,
   `TicketYaUsadoException`, `ReembolsoFallidoException`, `TransicionEstadoInvalidaException`
 - [ ] T004 Crear interfaz de puerto de salida `ReembolsoRepositoryPort.java` en `domain/port/out/`
-- [ ] T005 Crear interfaces de casos de uso en `application/`: `CancelarTicketUseCase`,
-  `ProcesarReembolsoMasivoUseCase`, `CambiarEstadoTicketUseCase`,
-  `GestionarReembolsoManualUseCase`, `ConsultarEstadoReembolsoUseCase`
-- [ ] T006 Crear entidad R2DBC `ReembolsoEntity.java` con anotaciones `@Table` y mapeo de columnas
-- [ ] T007 Implementar `ReembolsoRepositoryAdapter.java` y `ReembolsoR2dbcRepository.java`
-- [ ] T008 Implementar mapper `ReembolsoPersistenceMapper.java`
-- [ ] T009 Actualizar `BeanConfiguration.java` con los nuevos beans de casos de uso
+- [ ] T005 Crear entidad R2DBC `ReembolsoEntity.java` con anotaciones `@Table` y mapeo de columnas
+- [ ] T006 Implementar `ReembolsoRepositoryAdapter.java` y `ReembolsoR2dbcRepository.java`
+- [ ] T007 Implementar mapper `ReembolsoPersistenceMapper.java`
+- [ ] T008 Actualizar `BeanConfiguration.java` con los nuevos beans de casos de uso
 
 **Checkpoint**: Dominio extendido, entidad `Reembolso` persistible, estados de `Ticket` actualizados
 
@@ -158,106 +152,100 @@ los demás.
 
 ### Tests para User Story 1
 
-- [ ] T010 [P] [US1] Test de contrato: `POST /api/tickets/{id}/cancelar` con ticket válido retorna
+- [ ] T009 [P] [US1] Test de contrato: `POST /api/tickets/{id}/cancelar` con ticket válido retorna
   HTTP 200 con estado `CANCELADO` — `CancelacionControllerTest.java`
-- [ ] T011 [P] [US1] Test de contrato: `POST /api/tickets/{id}/cancelar` con ticket ya usado retorna
+- [ ] T010 [P] [US1] Test de contrato: `POST /api/tickets/{id}/cancelar` con ticket ya usado retorna
   HTTP 409 — `CancelacionControllerTest.java`
-- [ ] T012 [P] [US1] Test de contrato: `POST /api/tickets/{id}/cancelar` con evento ya ocurrido
+- [ ] T011 [P] [US1] Test de contrato: `POST /api/tickets/{id}/cancelar` con evento ya ocurrido
   retorna HTTP 422 — `CancelacionControllerTest.java`
-- [ ] T013 [P] [US1] Test de contrato: `POST /api/tickets/cancelar-parcial` con lista de IDs cancela
-  solo los seleccionados — `CancelacionControllerTest.java`
-- [ ] T014 [P] [US1] Test unitario de `CancelarTicketService` con Mockito —
-  `CancelarTicketServiceTest.java`
-- [ ] T015 [P] [US1] Test de integración con Testcontainers: flujo POST cancelar → estado en BD →
-  asiento liberado → `Reembolso` creado en PENDIENTE — `ReembolsoRepositoryAdapterTest.java`
+- [ ] T012 [P] [US1] Test de contrato: `POST /api/tickets/cancelar-parcial` cancela solo los IDs
+  seleccionados — `CancelacionControllerTest.java`
+- [ ] T013 [P] [US1] Test unitario de `CancelarTicketUseCase` con Mockito —
+  `CancelarTicketUseCaseTest.java`
+- [ ] T014 [P] [US1] Test de integración con Testcontainers: flujo cancelar → estado `CANCELADO` en
+  BD → reembolso `PENDIENTE` creado — `ReembolsoRepositoryAdapterTest.java`
 
 ### Implementación de User Story 1
 
-- [ ] T016 [US1] Implementar `CancelarTicketService.java` implementando `CancelarTicketUseCase`:
-  verificar que el ticket no esté en estado USADO (lanzar `TicketYaUsadoException`), validar que
-  el evento no haya ocurrido (lanzar `CancelacionFueraDePlazoException`), cambiar estado del ticket
-  a CANCELADO, liberar el asiento vía `AsientoRepositoryPort`, crear registro `Reembolso` en estado
-  PENDIENTE con monto correspondiente vía `ReembolsoRepositoryPort`, notificar al comprador por email
-- [ ] T017 [US1] Agregar lógica de cancelación parcial en `CancelarTicketService`: recibir lista de
-  `ticketIds`, procesar cada uno de forma independiente, calcular monto parcial a reembolsar,
-  mantener activos los no seleccionados
-- [ ] T018 [US1] Crear DTOs `CancelarTicketRequest.java` (lista opcional de ticketIds) y
-  `CancelacionResponse.java` con campos: `reembolsoId`, `montoReembolso`, `estadoTicket`
-- [ ] T019 [US1] Implementar endpoints `POST /api/tickets/{id}/cancelar` y `POST
-  /api/tickets/cancelar-parcial` en `CancelacionController.java` retornando
+- [ ] T015 [US1] Implementar `CancelarTicketUseCase.java` en `application/`: consultar el ticket vía
+  `TicketRepositoryPort` (lanzar `TicketYaUsadoException` si estado es USADO), verificar que el
+  evento no haya ocurrido (lanzar `CancelacionFueraDePlazoException` si ya ocurrió), actualizar
+  estado a CANCELADO, liberar asiento vía `AsientoRepositoryPort`, crear registro `Reembolso` en
+  estado PENDIENTE vía `ReembolsoRepositoryPort` — retornar `Mono<Ticket>`
+- [ ] T016 [US1] Crear DTOs `CancelarTicketRequest.java` (lista de ticketIds para cancelación parcial)
+  y `CancelacionResponse.java` con campos: `ticketsCancelados`, `reembolsoId`, `montoPendiente`
+- [ ] T017 [US1] Implementar endpoints `POST /api/tickets/{id}/cancelar` y
+  `POST /api/tickets/cancelar-parcial` en `CancelacionController.java` retornando
   `Mono<ResponseEntity<CancelacionResponse>>`
 
-**Checkpoint**: US1 funcional — cancelación individual y parcial operativas, asientos liberados,
-reembolso en cola
+**Checkpoint**: US1 funcional — cancelación individual y parcial con reembolso en cola
 
 ---
 
-## Phase 3: User Story 2 — Reembolso por Cancelación del Evento (Priority: P1)
+## Phase 3: User Story 2 — Reembolso Masivo por Evento Cancelado (Priority: P1)
 
-**Goal**: Al marcar un evento como Cancelado, el sistema inicia automáticamente reembolsos para
-todos los tickets vendidos y notifica masivamente a los compradores
+**Goal**: Cuando un evento es cancelado, el sistema procesa automáticamente el reembolso de todos
+los tickets vendidos sin intervención manual del agente
 
-**Independent Test**: Al cancelar un evento desde feature 015, `ProcesarReembolsoMasivoService`
-se ejecuta automáticamente. `GET /api/admin/eventos/{id}/reembolsos` retorna todos los tickets del
-evento con estado `REEMBOLSO_PENDIENTE` y confirma emails enviados.
+**Independent Test**: Cancelar un evento dispara `ProcesarReembolsoMasivoUseCase` que cambia todos
+los tickets a `CANCELADO` y crea reembolsos `PENDIENTE` para cada venta. Tickets de cortesía
+quedan `ANULADO` sin reembolso.
 
 ### Tests para User Story 2
 
-- [ ] T020 [P] [US2] Test de contrato: trigger de reembolso masivo — todos los tickets del evento
-  pasan a `REEMBOLSO_PENDIENTE` y se crean registros `Reembolso` — `AdminReembolsoControllerTest.java`
-- [ ] T021 [P] [US2] Test unitario de `ProcesarReembolsoMasivoService` con Mockito —
-  `ProcesarReembolsoMasivoServiceTest.java`
-- [ ] T022 [P] [US2] Test de integración con Testcontainers: cancelar evento → estados en BD →
-  emails enviados — `ReembolsoRepositoryAdapterTest.java`
+- [ ] T018 [P] [US2] Test de contrato: cancelar evento retorna HTTP 200 y todos los tickets pasan a
+  `CANCELADO` — `CancelacionControllerTest.java`
+- [ ] T019 [P] [US2] Test de contrato: tickets de cortesía quedan `ANULADO` sin generar reembolso —
+  `CancelacionControllerTest.java`
+- [ ] T020 [P] [US2] Test unitario de `ProcesarReembolsoMasivoUseCase` con Mockito —
+  `ProcesarReembolsoMasivoUseCaseTest.java`
+- [ ] T021 [P] [US2] Test de integración con Testcontainers: flujo reembolso masivo → todos los
+  tickets `CANCELADO` y reembolsos `PENDIENTE` en BD — `ReembolsoRepositoryAdapterTest.java`
 
 ### Implementación de User Story 2
 
-- [ ] T023 [US2] Implementar `ProcesarReembolsoMasivoService.java` implementando
-  `ProcesarReembolsoMasivoUseCase`: consultar todos los tickets del evento vía
-  `TicketRepositoryPort`, cambiar estado de cada ticket a REEMBOLSO_PENDIENTE, crear registro
-  `Reembolso` por cada ticket con el monto de la transacción original, enviar email masivo a cada
-  comprador
-- [ ] T024 [US2] Integrar `ProcesarReembolsoMasivoUseCase` en el flujo de cancelación de evento del
-  feature 015 — `// TODO: coordinar con feature 015, agregar llamada en EventoService.cancelarEvento()`
-- [ ] T025 [US2] Crear DTO `ReembolsoMasivoResponse.java` con campos: `eventoId`, `totalTickets`,
-  `totalReembolsosCreados`, `montoTotal`
+- [ ] T022 [US2] Implementar `ProcesarReembolsoMasivoUseCase.java` en `application/`: recibir
+  `eventoId`, consultar todos los tickets `VENDIDO` vía `TicketRepositoryPort`, actualizar estado a
+  CANCELADO, crear reembolso PENDIENTE por el monto de cada ticket vía `ReembolsoRepositoryPort`,
+  marcar tickets de cortesía como ANULADO sin generar reembolso — procesar como operación atómica
+  — retornar `Mono<Void>`
+- [ ] T023 [US2] Exponer `ProcesarReembolsoMasivoUseCase` como punto de integración para que el
+  feature 015 lo invoque al cancelar un evento — `// TODO: coordinar con feature 015`
 
 **Checkpoint**: US1 y US2 funcionales
 
 ---
 
-## Phase 4: User Story 3 — Cambio de Estado de Ticket por Soporte (Priority: P2)
+## Phase 4: User Story 3 — Cambio Manual de Estado de Ticket por el Agente (Priority: P2)
 
-**Goal**: El Agente de Ventas puede cambiar manualmente el estado de un ticket con registro de
-auditoría de quién y cuándo realizó el cambio
+**Goal**: El Agente de Ventas puede cambiar el estado de un ticket individualmente con justificación
+y registro en historial de auditoría; el sistema valida que la transición sea permitida
 
-**Independent Test**: `PATCH /api/admin/tickets/{id}/estado` con
-`{ "estado": "VENDIDO", "justificacion": "Pago validado manualmente" }` retorna HTTP 200 con
-historial registrado. `PATCH` con estado `ANULADO` dispara notificación al comprador. `PATCH`
-con transición inválida retorna HTTP 422.
+**Independent Test**: `PATCH /api/admin/tickets/{id}/estado` con `{ "estado": "VENDIDO" }` retorna
+HTTP 200 con historial registrado. `PATCH` con estado `ANULADO` dispara notificación al comprador.
+`PATCH` con transición inválida retorna HTTP 422.
 
 ### Tests para User Story 3
 
-- [ ] T026 [P] [US3] Test de contrato: `PATCH /api/admin/tickets/{id}/estado` con VENDIDO retorna
+- [ ] T024 [P] [US3] Test de contrato: `PATCH /api/admin/tickets/{id}/estado` con VENDIDO retorna
   HTTP 200 con historial registrado — `AdminTicketControllerTest.java`
-- [ ] T027 [P] [US3] Test de contrato: `PATCH /api/admin/tickets/{id}/estado` con ANULADO retorna
+- [ ] T025 [P] [US3] Test de contrato: `PATCH /api/admin/tickets/{id}/estado` con ANULADO retorna
   HTTP 200 y notificación al comprador enviada — `AdminTicketControllerTest.java`
-- [ ] T028 [P] [US3] Test de contrato: `PATCH /api/admin/tickets/{id}/estado` con transición
+- [ ] T026 [P] [US3] Test de contrato: `PATCH /api/admin/tickets/{id}/estado` con transición
   inválida retorna HTTP 422 con mensaje descriptivo — `AdminTicketControllerTest.java`
-- [ ] T029 [P] [US3] Test unitario de `CambiarEstadoTicketService` con Mockito —
-  `CambiarEstadoTicketServiceTest.java`
+- [ ] T027 [P] [US3] Test unitario de `CambiarEstadoTicketUseCase` con Mockito —
+  `CambiarEstadoTicketUseCaseTest.java`
 
 ### Implementación de User Story 3
 
-- [ ] T030 [US3] Implementar `CambiarEstadoTicketService.java` implementando
-  `CambiarEstadoTicketUseCase`: validar que la transición sea permitida (lanzar
-  `TransicionEstadoInvalidaException` si no lo es), persistir nuevo estado vía
-  `TicketRepositoryPort`, registrar en historial de auditoría: agenteId, timestamp, estado
-  anterior, estado nuevo y justificación, notificar al comprador por email si el nuevo estado es
-  ANULADO
-- [ ] T031 [US3] Crear DTO `CambiarEstadoTicketRequest.java` con campos: `estado` (enum),
+- [ ] T028 [US3] Implementar `CambiarEstadoTicketUseCase.java` en `application/`: validar que la
+  transición sea permitida (lanzar `TransicionEstadoInvalidaException` si no lo es), persistir
+  nuevo estado vía `TicketRepositoryPort`, registrar en historial de auditoría: agenteId,
+  timestamp, estado anterior, estado nuevo y justificación, notificar al comprador por email si
+  el nuevo estado es ANULADO
+- [ ] T029 [US3] Crear DTO `CambiarEstadoTicketRequest.java` con campos: `estado` (enum),
   `justificacion` (obligatorio)
-- [ ] T032 [US3] Implementar endpoint `PATCH /api/admin/tickets/{id}/estado` en
+- [ ] T030 [US3] Implementar endpoint `PATCH /api/admin/tickets/{id}/estado` en
   `AdminTicketController.java` retornando `Mono<ResponseEntity<TicketConReembolsoResponse>>`
 
 **Checkpoint**: US1, US2 y US3 funcionales
@@ -275,30 +263,30 @@ HTTP 200 con estado `REEMBOLSADO` y `agenteId` registrado. `POST` con `{ "tipo":
 
 ### Tests para User Story 4
 
-- [ ] T033 [P] [US4] Test de contrato: `POST /api/admin/tickets/{id}/reembolso` tipo TOTAL retorna
+- [ ] T031 [P] [US4] Test de contrato: `POST /api/admin/tickets/{id}/reembolso` tipo TOTAL retorna
   HTTP 200 con estado `REEMBOLSADO` — `AdminReembolsoControllerTest.java`
-- [ ] T034 [P] [US4] Test de contrato: `POST /api/admin/tickets/{id}/reembolso` tipo PARCIAL con
+- [ ] T032 [P] [US4] Test de contrato: `POST /api/admin/tickets/{id}/reembolso` tipo PARCIAL con
   monto válido retorna HTTP 200 — `AdminReembolsoControllerTest.java`
-- [ ] T035 [P] [US4] Test de contrato: procesamiento de cola automática cambia reembolsos PENDIENTES
+- [ ] T033 [P] [US4] Test de contrato: procesamiento de cola automática cambia reembolsos PENDIENTES
   a COMPLETADO — `AdminReembolsoControllerTest.java`
-- [ ] T036 [P] [US4] Test unitario de `GestionarReembolsoManualService` con Mockito —
-  `GestionarReembolsoManualServiceTest.java`
-- [ ] T037 [P] [US4] Test de integración con Testcontainers: flujo POST reembolso → mock pasarela →
+- [ ] T034 [P] [US4] Test unitario de `GestionarReembolsoManualUseCase` con Mockito —
+  `GestionarReembolsoManualUseCaseTest.java`
+- [ ] T035 [P] [US4] Test de integración con Testcontainers: flujo POST reembolso → mock pasarela →
   estado REEMBOLSADO en BD — `ReembolsoRepositoryAdapterTest.java`
 
 ### Implementación de User Story 4
 
-- [ ] T038 [US4] Implementar `GestionarReembolsoManualService.java` implementando
-  `GestionarReembolsoManualUseCase`: validar que el ticket esté en CANCELADO o REEMBOLSO_PENDIENTE,
-  llamar a la pasarela vía `PasarelaRepositoryPort` para ejecutar la devolución por el mismo medio
-  de pago, actualizar estado del `Reembolso` a COMPLETADO y ticket a REEMBOLSADO, registrar
-  `agenteId`; si la pasarela falla, marcar FALLIDO y notificar a soporte
-- [ ] T039 [US4] Implementar procesamiento de cola en `GestionarReembolsoManualService`: consultar
+- [ ] T036 [US4] Implementar `GestionarReembolsoManualUseCase.java` en `application/`: validar que
+  el ticket esté en CANCELADO o REEMBOLSO_PENDIENTE, llamar a la pasarela vía `PasarelaPagoPort`
+  para ejecutar la devolución por el mismo medio de pago, actualizar estado del `Reembolso` a
+  COMPLETADO y ticket a REEMBOLSADO, registrar `agenteId`; si la pasarela falla, marcar FALLIDO
+  y notificar a soporte
+- [ ] T037 [US4] Implementar procesamiento de cola en `GestionarReembolsoManualUseCase`: consultar
   reembolsos PENDIENTES vía `ReembolsoRepositoryPort`, procesar cada uno vía pasarela, actualizar
   estados en BD
-- [ ] T040 [US4] Crear DTOs `ReembolsoManualRequest.java` (tipo TOTAL/PARCIAL, monto opcional) y
+- [ ] T038 [US4] Crear DTOs `ReembolsoManualRequest.java` (tipo TOTAL/PARCIAL, monto opcional) y
   `ReembolsoResponse.java` con campos: `reembolsoId`, `estado`, `monto`, `agenteId`, `fechaCompletado`
-- [ ] T041 [US4] Implementar endpoint `POST /api/admin/tickets/{id}/reembolso` en
+- [ ] T039 [US4] Implementar endpoint `POST /api/admin/tickets/{id}/reembolso` en
   `AdminReembolsoController.java` retornando `Mono<ResponseEntity<ReembolsoResponse>>`
 
 **Checkpoint**: US1, US2, US3 y US4 funcionales
@@ -316,24 +304,24 @@ confirmación.
 
 ### Tests para User Story 5
 
-- [ ] T042 [P] [US5] Test de contrato: `GET /api/compras/mis-compras` retorna tickets cancelados con
+- [ ] T040 [P] [US5] Test de contrato: `GET /api/compras/mis-compras` retorna tickets cancelados con
   campo `estadoReembolso` — `MisComprasControllerTest.java`
-- [ ] T043 [P] [US5] Test de contrato: cambio a COMPLETADO dispara notificación email al comprador —
+- [ ] T041 [P] [US5] Test de contrato: cambio a COMPLETADO dispara notificación email al comprador —
   `MisComprasControllerTest.java`
-- [ ] T044 [P] [US5] Test unitario de `ConsultarEstadoReembolsoService` con Mockito —
-  `CancelarTicketServiceTest.java`
+- [ ] T042 [P] [US5] Test unitario de `ConsultarEstadoReembolsoUseCase` con Mockito —
+  `CancelarTicketUseCaseTest.java`
 
 ### Implementación de User Story 5
 
-- [ ] T045 [US5] Implementar `ConsultarEstadoReembolsoService.java` implementando
-  `ConsultarEstadoReembolsoUseCase`: consultar tickets del comprador con estados CANCELADO,
-  REEMBOLSO_PENDIENTE o REEMBOLSADO vía `TicketRepositoryPort`, enriquecer cada ticket con datos
-  del `Reembolso` asociado vía `ReembolsoRepositoryPort`
-- [ ] T046 [US5] Actualizar DTO `TicketResponse.java` (feature 005) agregando campos
+- [ ] T043 [US5] Implementar `ConsultarEstadoReembolsoUseCase.java` en `application/`: consultar
+  tickets del comprador con estados CANCELADO, REEMBOLSO_PENDIENTE o REEMBOLSADO vía
+  `TicketRepositoryPort`, enriquecer cada ticket con datos del `Reembolso` asociado vía
+  `ReembolsoRepositoryPort`
+- [ ] T044 [US5] Actualizar DTO `TicketResponse.java` (feature 005) agregando campos
   `estadoReembolso` y `detalleReembolso` (nullable)
-- [ ] T047 [US5] Agregar notificación automática por email en `GestionarReembolsoManualService` al
+- [ ] T045 [US5] Agregar notificación automática por email en `GestionarReembolsoManualUseCase` al
   transicionar `Reembolso` a COMPLETADO: enviar email al comprador con monto y plazo de acreditación
-- [ ] T048 [US5] Implementar endpoint `GET /api/compras/mis-compras` en `MisComprasController.java`
+- [ ] T046 [US5] Implementar endpoint `GET /api/compras/mis-compras` en `MisComprasController.java`
   retornando `Flux<TicketConReembolsoResponse>` filtrado por comprador autenticado
 
 **Checkpoint**: Las cinco user stories son funcionales e independientemente testeables
@@ -342,11 +330,11 @@ confirmación.
 
 ## Phase 7: Polish & Cross-Cutting Concerns
 
-- [ ] T049 Agregar tests de casos borde: ticket ya usado, pasarela fallida al reembolsar, cancelación
+- [ ] T047 Agregar tests de casos borde: ticket ya usado, pasarela fallida al reembolsar, cancelación
   fuera de plazo, reembolso parcial con monto mayor al original
-- [ ] T050 Documentar todos los endpoints nuevos con SpringDoc OpenAPI
-- [ ] T051 Verificar que ninguna clase de `domain/` importa `org.springframework` o `io.r2dbc`
-- [ ] T052 Refactoring y limpieza general
+- [ ] T048 Documentar todos los endpoints nuevos con SpringDoc OpenAPI
+- [ ] T049 Verificar que ninguna clase de `domain/` importa `org.springframework` o `io.r2dbc`
+- [ ] T050 Refactoring y limpieza general
 
 ---
 
@@ -372,10 +360,8 @@ confirmación.
 
 ### Dentro de cada User Story
 
-- Excepciones de dominio antes que servicios
-- Puerto de salida antes que adaptador de persistencia
-- Interfaz de caso de uso antes que implementación del servicio
-- Servicio antes que controlador y DTOs
+- Puerto de salida antes que caso de uso
+- Caso de uso antes que controlador y DTOs
 - Tests escritos junto a la implementación de cada tarea
 - Verificar checkpoint antes de pasar a la siguiente fase
 
@@ -383,13 +369,17 @@ confirmación.
 
 ## Notes
 
-- **Coordinación con feature 015**: el reembolso masivo (US2) requiere que `EventoService.cancelarEvento()` invoque
-  `ProcesarReembolsoMasivoUseCase` — `// TODO: coordinar con feature 015`
+- El tag `[P]` identifica tareas de prueba para distinguirlas del código productivo
+- El tag `[US1/US2/US3/US4/US5]` mapea cada tarea a su user story para trazabilidad
+- **Coordinación con feature 015**: el reembolso masivo (US2) requiere que el feature 015 invoque
+  `ProcesarReembolsoMasivoUseCase` al cancelar un evento — `// TODO: coordinar con feature 015`
 - **Pasarela fallida**: si la pasarela falla al procesar un reembolso, el estado queda en FALLIDO y
   se notifica a soporte — no hay reintento automático en esta versión
 - **Endpoint Mis Compras**: puede extender el controlador existente del feature 005 si ya existe,
   en lugar de crear uno nuevo — verificar al momento de implementar
 - **Regla de oro hexagonal**: si una clase dentro de `domain/` necesita importar algo de Spring o
   R2DBC, el diseño está mal
-- **WebFlux**: todos los métodos de servicio retornan `Mono<T>` o `Flux<T>`, y los controladores
-  retornan `Mono<ResponseEntity<T>>`
+- **Responsabilidad única**: cada caso de uso en `application/` tiene una sola razón para cambiar —
+  `CancelarTicketUseCase` solo cancela, `GestionarReembolsoManualUseCase` solo gestiona reembolsos
+- **WebFlux**: todos los casos de uso retornan `Mono<T>` o `Flux<T>`, y los controladores
+  retornan `Mono<ResponseEntity<T>>`. Usar `WebTestClient` para los tests de contrato

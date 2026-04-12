@@ -13,12 +13,14 @@ extiende la entidad `TransacciónFinanciera` del feature 005 con nuevos estados 
 conciliación, garantiza idempotencia ante confirmaciones duplicadas de la pasarela, y expone un
 panel de discrepancias para resolución manual.
 
+La arquitectura es hexagonal respetando responsabilidad única. La BD se gestiona manualmente.
+
 ## Technical Context
 
 **Language/Version**: Java 21
 **Primary Dependencies**: Spring Boot 3.x, Spring Data R2DBC, Spring WebFlux, Jakarta Validation,
 Spring Scheduler
-**Storage**: PostgreSQL
+**Storage**: PostgreSQL — esquema creado y gestionado manualmente
 **Testing**: JUnit 5, Mockito, Spring Boot Test, Testcontainers (PostgreSQL para tests de integración)
 **Target Platform**: Backend server — microservicio Módulo 1
 **Project Type**: Web (API REST reactiva con WebFlux)
@@ -58,15 +60,11 @@ src/main/java/com/ticketseller/
 │       └── out/
 │           └── PagoRepositoryPort.java
 │
-├── application/
+├── application/                                    # Casos de uso — uno por responsabilidad
 │   ├── VerificarPagoUseCase.java
 │   ├── ConfirmarTransaccionUseCase.java
 │   ├── ResolverDiscrepanciaUseCase.java
-│   ├── ExpirarTransaccionesPendientesUseCase.java
-│   ├── VerificarPagoService.java
-│   ├── ConfirmarTransaccionService.java
-│   ├── ResolverDiscrepanciaService.java
-│   └── ExpirarTransaccionesPendientesService.java
+│   └── ExpirarTransaccionesPendientesUseCase.java
 │
 └── infrastructure/
     ├── adapter/
@@ -91,10 +89,10 @@ src/main/java/com/ticketseller/
 
 tests/
 ├── application/
-│   ├── VerificarPagoServiceTest.java
-│   ├── ConfirmarTransaccionServiceTest.java
-│   ├── ResolverDiscrepanciaServiceTest.java
-│   └── ExpirarTransaccionesPendientesServiceTest.java
+│   ├── VerificarPagoUseCaseTest.java
+│   ├── ConfirmarTransaccionUseCaseTest.java
+│   ├── ResolverDiscrepanciaUseCaseTest.java
+│   └── ExpirarTransaccionesPendientesUseCaseTest.java
 └── infrastructure/
     ├── adapter/in/rest/
     │   └── ConciliacionControllerTest.java
@@ -107,8 +105,8 @@ Agrega `Pago` como entidad separada que representa la respuesta externa de la pa
 de `TransacciónFinanciera` para no contaminar el modelo de dominio propio con datos del proveedor.
 Los estados `VERIFICADA`, `EN_DISCREPANCIA`, `CONFIRMADA_MANUALMENTE` y `EXPIRADA` se agregan al
 enum `EstadoTransaccion` del feature 005. El scheduler de expiración vive en infraestructura como
-adaptador de entrada independiente del flujo de confirmación. Las interfaces de casos de uso
-residen en `application/` — en `domain/port/` solo permanecen los puertos de salida.
+adaptador de entrada independiente del flujo de confirmación. En `domain/port/` solo residen los
+puertos de salida.
 
 ---
 
@@ -127,16 +125,13 @@ expiración y adaptadores de persistencia que deben existir antes de cualquier u
 - [ ] T003 Crear excepciones de dominio: `TransaccionDuplicadaException`,
   `TransaccionNoConfirmadaException`, `PagoEnDiscrepanciaException`
 - [ ] T004 Crear interfaz `PagoRepositoryPort.java` en `domain/port/out/`
-- [ ] T005 Crear interfaces de casos de uso en `application/`: `VerificarPagoUseCase`,
-  `ConfirmarTransaccionUseCase`, `ResolverDiscrepanciaUseCase`,
-  `ExpirarTransaccionesPendientesUseCase`
-- [ ] T006 Crear entidad R2DBC `PagoEntity.java` con anotaciones `@Table` y mapeo de columnas
-- [ ] T007 Implementar `PagoRepositoryAdapter.java` y `PagoR2dbcRepository.java`
-- [ ] T008 Implementar mapper `PagoPersistenceMapper.java`
-- [ ] T009 Crear `ExpiracionTransaccionesScheduler.java` en `infrastructure/adapter/in/scheduler/`:
+- [ ] T005 Crear entidad R2DBC `PagoEntity.java` con anotaciones `@Table` y mapeo de columnas
+- [ ] T006 Implementar `PagoRepositoryAdapter.java` y `PagoR2dbcRepository.java`
+- [ ] T007 Implementar mapper `PagoPersistenceMapper.java`
+- [ ] T008 Crear `ExpiracionTransaccionesScheduler.java` en `infrastructure/adapter/in/scheduler/`:
   job que invoca `ExpirarTransaccionesPendientesUseCase` cada minuto para detectar transacciones
   PENDIENTE con más de 15 minutos sin respuesta
-- [ ] T010 Actualizar `BeanConfiguration.java` con los nuevos beans de casos de uso
+- [ ] T009 Actualizar `BeanConfiguration.java` con los nuevos beans de casos de uso
 
 **Checkpoint**: Dominio extendido, entidad `Pago` persistible, estados actualizados, scheduler
 configurado
@@ -154,21 +149,23 @@ retorna HTTP 200 con estado `EN_DISCREPANCIA` y alerta generada para soporte.
 
 ### Tests para User Story 1
 
-- [ ] T011 [P] [US1] Test de contrato: `POST /api/pagos/verificar` con monto correcto retorna HTTP 200
+- [ ] T010 [P] [US1] Test de contrato: `POST /api/pagos/verificar` con monto correcto retorna HTTP 200
   con estado `VERIFICADA` — `ConciliacionControllerTest.java`
-- [ ] T012 [P] [US1] Test de contrato: `POST /api/pagos/verificar` con monto incorrecto retorna HTTP
-  200 con estado `EN_DISCREPANCIA` y alerta generada — `ConciliacionControllerTest.java`
-- [ ] T013 [P] [US1] Test unitario de `VerificarPagoService` con Mockito —
-  `VerificarPagoServiceTest.java`
+- [ ] T011 [P] [US1] Test de contrato: `POST /api/pagos/verificar` con monto incorrecto retorna HTTP
+  200 con estado `EN_DISCREPANCIA` y alerta registrada — `ConciliacionControllerTest.java`
+- [ ] T012 [P] [US1] Test de contrato: confirmación duplicada con mismo `idExternoPasarela` retorna
+  HTTP 200 idempotente — `ConciliacionControllerTest.java`
+- [ ] T013 [P] [US1] Test unitario de `VerificarPagoUseCase` con Mockito —
+  `VerificarPagoUseCaseTest.java`
 - [ ] T014 [P] [US1] Test de integración con Testcontainers: flujo verificar pago → estado correcto
   en BD → alerta registrada si discrepancia — `PagoRepositoryAdapterTest.java`
 
 ### Implementación de User Story 1
 
-- [ ] T015 [US1] Implementar `VerificarPagoService.java` implementando `VerificarPagoUseCase`:
-  consultar la `TransacciónFinanciera` por ID, comparar `montoEsperado` con `montoRecibido` de la
-  respuesta de pasarela, si coinciden actualizar estado a VERIFICADA, si no coinciden actualizar
-  estado a EN_DISCREPANCIA y registrar alerta visible para soporte —
+- [ ] T015 [US1] Implementar `VerificarPagoUseCase.java` en `application/`: consultar la
+  `TransacciónFinanciera` por ID, comparar `montoEsperado` con `montoRecibido` de la respuesta de
+  pasarela, si coinciden actualizar estado a VERIFICADA, si no coinciden actualizar estado a
+  EN_DISCREPANCIA y registrar alerta visible para soporte —
   `// TODO: definir entidad Alerta si no existe en features anteriores`
 - [ ] T016 [US1] Crear DTOs `ConfirmacionPasarelaRequest.java` con campos: `idTransaccion`,
   `idExternoPasarela`, `montoPagado`, `moneda`, `timestamp` y `TransaccionConciliadaResponse.java`
@@ -199,23 +196,21 @@ estado `FALLIDA`.
   HTTP 200 idempotente sin duplicar transacción — `ConciliacionControllerTest.java`
 - [ ] T020 [P] [US2] Test de contrato: `POST /api/pagos/confirmar` con error de pasarela retorna HTTP
   200 con estado `FALLIDA` y ticket no entregado — `ConciliacionControllerTest.java`
-- [ ] T021 [P] [US2] Test unitario de `ConfirmarTransaccionService` con Mockito —
-  `ConfirmarTransaccionServiceTest.java`
+- [ ] T021 [P] [US2] Test unitario de `ConfirmarTransaccionUseCase` con Mockito —
+  `ConfirmarTransaccionUseCaseTest.java`
 - [ ] T022 [P] [US2] Test de integración con Testcontainers: confirmar → ticket habilitado en BD →
   idempotencia verificada con segunda llamada — `PagoRepositoryAdapterTest.java`
 
 ### Implementación de User Story 2
 
-- [ ] T023 [US2] Implementar `ConfirmarTransaccionService.java` implementando
-  `ConfirmarTransaccionUseCase`: verificar idempotencia consultando si ya existe un `Pago` con el
-  mismo `idExternoPasarela` (retornar estado actual sin modificar si ya existe), si la respuesta
-  de pasarela es exitosa actualizar transacción a CONFIRMADA con fecha de confirmación y habilitar
-  el ticket vía `TicketRepositoryPort`, si la pasarela reporta error o timeout marcar como FALLIDA
-  y notificar al comprador
-- [ ] T024 [US2] Implementar `ExpirarTransaccionesPendientesService.java` implementando
-  `ExpirarTransaccionesPendientesUseCase`: consultar transacciones PENDIENTE con `fechaCreacion`
-  anterior a 15 minutos, actualizar cada una a EXPIRADA, liberar asientos reservados vía
-  `AsientoRepositoryPort`
+- [ ] T023 [US2] Implementar `ConfirmarTransaccionUseCase.java` en `application/`: verificar
+  idempotencia consultando si ya existe un `Pago` con el mismo `idExternoPasarela` (retornar estado
+  actual sin modificar si ya existe), si la respuesta de pasarela es exitosa actualizar transacción
+  a CONFIRMADA con fecha de confirmación y habilitar el ticket vía `TicketRepositoryPort`, si la
+  pasarela reporta error o timeout marcar como FALLIDA y notificar al comprador
+- [ ] T024 [US2] Implementar `ExpirarTransaccionesPendientesUseCase.java` en `application/`:
+  consultar transacciones PENDIENTE con `fechaCreacion` anterior a 15 minutos, actualizar cada una
+  a EXPIRADA, liberar asientos reservados vía `AsientoRepositoryPort`
 - [ ] T025 [US2] Registrar `ExpirarTransaccionesPendientesUseCase` en
   `ExpiracionTransaccionesScheduler.java` con `@Scheduled(fixedDelay = 60000)`
 
@@ -242,19 +237,18 @@ manualmente o iniciando un reembolso, con registro del responsable
   con estado `CONFIRMADA_MANUALMENTE` y ticket habilitado — `ConciliacionControllerTest.java`
 - [ ] T028 [P] [US3] Test de contrato: `POST /api/admin/pagos/{id}/rechazar` retorna HTTP 200 con
   estado `REEMBOLSADA` e inicio de devolución — `ConciliacionControllerTest.java`
-- [ ] T029 [P] [US3] Test unitario de `ResolverDiscrepanciaService` con Mockito —
-  `ResolverDiscrepanciaServiceTest.java`
+- [ ] T029 [P] [US3] Test unitario de `ResolverDiscrepanciaUseCase` con Mockito —
+  `ResolverDiscrepanciaUseCaseTest.java`
 - [ ] T030 [P] [US3] Test de integración con Testcontainers: confirmar manual → ticket habilitado →
   agenteId registrado en BD — `PagoRepositoryAdapterTest.java`
 
 ### Implementación de User Story 3
 
-- [ ] T031 [US3] Implementar `ResolverDiscrepanciaService.java` implementando
-  `ResolverDiscrepanciaUseCase`: para confirmación manual — validar que el pago esté EN_DISCREPANCIA,
-  actualizar estado a CONFIRMADA_MANUALMENTE, registrar `agenteId` y `justificacion`, habilitar el
-  ticket vía `TicketRepositoryPort`; para rechazo — actualizar estado a REEMBOLSADA e invocar
-  `GestionarReembolsoManualUseCase` del feature 006 para ejecutar la devolución —
-  `// TODO: coordinar con feature 006`
+- [ ] T031 [US3] Implementar `ResolverDiscrepanciaUseCase.java` en `application/`: para confirmación
+  manual — validar que el pago esté EN_DISCREPANCIA, actualizar estado a CONFIRMADA_MANUALMENTE,
+  registrar `agenteId` y `justificacion`, habilitar el ticket vía `TicketRepositoryPort`; para
+  rechazo — actualizar estado a REEMBOLSADA e invocar `GestionarReembolsoManualUseCase` del
+  feature 006 para ejecutar la devolución — `// TODO: coordinar con feature 006`
 - [ ] T032 [US3] Crear DTOs `ResolverDiscrepanciaRequest.java` (justificacion obligatorio) y
   `DiscrepanciaResponse.java` con campos: `idTransaccion`, `idTicket`, `montoEsperado`,
   `montoRecibido`, `estado`, `agenteId`
@@ -294,10 +288,8 @@ manualmente o iniciando un reembolso, con registro del responsable
 
 ### Dentro de cada User Story
 
-- Excepciones de dominio antes que servicios
-- Puerto de salida antes que adaptador de persistencia
-- Interfaz de caso de uso antes que implementación del servicio
-- Servicio antes que controlador y DTOs
+- Puerto de salida antes que caso de uso
+- Caso de uso antes que controlador y DTOs
 - Tests escritos junto a la implementación de cada tarea
 - Verificar checkpoint antes de pasar a la siguiente fase
 
@@ -305,7 +297,9 @@ manualmente o iniciando un reembolso, con registro del responsable
 
 ## Notes
 
-- **Tiempo límite de 15 minutos**: alineado con feature 005 (FR-004) y feature 010 (US2) — cualquier
+- El tag `[P]` identifica tareas de prueba para distinguirlas del código productivo
+- El tag `[US1/US2/US3]` mapea cada tarea a su user story para trazabilidad
+- **Tiempo límite de 15 minutos**: alineado con feature 005 (FR-004) y feature 010 — cualquier
   cambio en ese valor debe actualizarse en los tres features simultáneamente
 - **Coordinación con feature 006**: la resolución por rechazo en US3 invoca
   `GestionarReembolsoManualUseCase` del feature 006 — `// TODO: coordinar con feature 006`
@@ -314,7 +308,9 @@ manualmente o iniciando un reembolso, con registro del responsable
   automáticos del proveedor
 - `// TODO: Needs clarification` — definir si el scheduler de expiración debe ser un job separado
   o parte del flujo de confirmación de la pasarela
+- **Responsabilidad única**: cada caso de uso en `application/` tiene una sola razón para cambiar —
+  `VerificarPagoUseCase` solo verifica montos, `ConfirmarTransaccionUseCase` solo confirma
 - **Regla de oro hexagonal**: si una clase dentro de `domain/` necesita importar algo de Spring o
   R2DBC, el diseño está mal
-- **WebFlux**: todos los métodos de servicio retornan `Mono<T>` o `Flux<T>`, y los controladores
-  retornan `Mono<ResponseEntity<T>>`
+- **WebFlux**: todos los casos de uso retornan `Mono<T>` o `Flux<T>`, y los controladores
+  retornan `Mono<ResponseEntity<T>>`. Usar `WebTestClient` para los tests de contrato
