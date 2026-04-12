@@ -54,16 +54,15 @@ src/main/java/com/ticketseller/
 │   │   ├── ReembolsoFallidoException.java
 │   │   └── TransicionEstadoInvalidaException.java
 │   └── port/
-│       ├── in/
-│       │   ├── CancelarTicketUseCase.java
-│       │   ├── ProcesarReembolsoMasivoUseCase.java
-│       │   ├── CambiarEstadoTicketUseCase.java
-│       │   ├── GestionarReembolsoManualUseCase.java
-│       │   └── ConsultarEstadoReembolsoUseCase.java
 │       └── out/
 │           └── ReembolsoRepositoryPort.java
 │
 ├── application/
+│   ├── CancelarTicketUseCase.java
+│   ├── ProcesarReembolsoMasivoUseCase.java
+│   ├── CambiarEstadoTicketUseCase.java
+│   ├── GestionarReembolsoManualUseCase.java
+│   ├── ConsultarEstadoReembolsoUseCase.java
 │   ├── CancelarTicketService.java
 │   ├── ProcesarReembolsoMasivoService.java
 │   ├── CambiarEstadoTicketService.java
@@ -114,7 +113,8 @@ como entidad nueva de dominio para trazabilidad independiente del proceso de dev
 estados `CANCELADO`, `REEMBOLSO_PENDIENTE`, `REEMBOLSADO` y `ANULADO` se agregan al enum
 `EstadoTicket` del feature 005 en lugar de crear un enum nuevo. Los controladores se separan por
 actor (`CancelacionController` para compradores, `AdminTicketController` y
-`AdminReembolsoController` para el agente) para mantener responsabilidad única.
+`AdminReembolsoController` para el agente) para mantener responsabilidad única. Las interfaces de
+casos de uso residen en `application/` — en `domain/port/` solo permanecen los puertos de salida.
 
 ---
 
@@ -133,10 +133,10 @@ persistencia que deben existir antes de cualquier user story de este feature
   REEMBOLSO_PENDIENTE, REEMBOLSADO, ANULADO***
 - [ ] T003 Crear excepciones de dominio: `CancelacionFueraDePlazoException`,
   `TicketYaUsadoException`, `ReembolsoFallidoException`, `TransicionEstadoInvalidaException`
-- [ ] T004 Crear interfaces de puertos de entrada en `domain/port/in/`: `CancelarTicketUseCase`,
+- [ ] T004 Crear interfaz de puerto de salida `ReembolsoRepositoryPort.java` en `domain/port/out/`
+- [ ] T005 Crear interfaces de casos de uso en `application/`: `CancelarTicketUseCase`,
   `ProcesarReembolsoMasivoUseCase`, `CambiarEstadoTicketUseCase`,
   `GestionarReembolsoManualUseCase`, `ConsultarEstadoReembolsoUseCase`
-- [ ] T005 Crear interfaz de puerto de salida `ReembolsoRepositoryPort.java` en `domain/port/out/`
 - [ ] T006 Crear entidad R2DBC `ReembolsoEntity.java` con anotaciones `@Table` y mapeo de columnas
 - [ ] T007 Implementar `ReembolsoRepositoryAdapter.java` y `ReembolsoR2dbcRepository.java`
 - [ ] T008 Implementar mapper `ReembolsoPersistenceMapper.java`
@@ -374,6 +374,7 @@ confirmación.
 
 - Excepciones de dominio antes que servicios
 - Puerto de salida antes que adaptador de persistencia
+- Interfaz de caso de uso antes que implementación del servicio
 - Servicio antes que controlador y DTOs
 - Tests escritos junto a la implementación de cada tarea
 - Verificar checkpoint antes de pasar a la siguiente fase

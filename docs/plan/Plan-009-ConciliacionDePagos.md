@@ -55,15 +55,14 @@ src/main/java/com/ticketseller/
 │   │   ├── TransaccionNoConfirmadaException.java
 │   │   └── PagoEnDiscrepanciaException.java
 │   └── port/
-│       ├── in/
-│       │   ├── VerificarPagoUseCase.java
-│       │   ├── ConfirmarTransaccionUseCase.java
-│       │   ├── ResolverDiscrepanciaUseCase.java
-│       │   └── ExpirarTransaccionesPendientesUseCase.java
 │       └── out/
 │           └── PagoRepositoryPort.java
 │
 ├── application/
+│   ├── VerificarPagoUseCase.java
+│   ├── ConfirmarTransaccionUseCase.java
+│   ├── ResolverDiscrepanciaUseCase.java
+│   ├── ExpirarTransaccionesPendientesUseCase.java
 │   ├── VerificarPagoService.java
 │   ├── ConfirmarTransaccionService.java
 │   ├── ResolverDiscrepanciaService.java
@@ -108,7 +107,8 @@ Agrega `Pago` como entidad separada que representa la respuesta externa de la pa
 de `TransacciónFinanciera` para no contaminar el modelo de dominio propio con datos del proveedor.
 Los estados `VERIFICADA`, `EN_DISCREPANCIA`, `CONFIRMADA_MANUALMENTE` y `EXPIRADA` se agregan al
 enum `EstadoTransaccion` del feature 005. El scheduler de expiración vive en infraestructura como
-adaptador de entrada independiente del flujo de confirmación.
+adaptador de entrada independiente del flujo de confirmación. Las interfaces de casos de uso
+residen en `application/` — en `domain/port/` solo permanecen los puertos de salida.
 
 ---
 
@@ -126,10 +126,10 @@ expiración y adaptadores de persistencia que deben existir antes de cualquier u
   EN_DISCREPANCIA, CONFIRMADA_MANUALMENTE, EXPIRADA***
 - [ ] T003 Crear excepciones de dominio: `TransaccionDuplicadaException`,
   `TransaccionNoConfirmadaException`, `PagoEnDiscrepanciaException`
-- [ ] T004 Crear interfaces de puertos de entrada en `domain/port/in/`: `VerificarPagoUseCase`,
+- [ ] T004 Crear interfaz `PagoRepositoryPort.java` en `domain/port/out/`
+- [ ] T005 Crear interfaces de casos de uso en `application/`: `VerificarPagoUseCase`,
   `ConfirmarTransaccionUseCase`, `ResolverDiscrepanciaUseCase`,
   `ExpirarTransaccionesPendientesUseCase`
-- [ ] T005 Crear interfaz `PagoRepositoryPort.java` en `domain/port/out/`
 - [ ] T006 Crear entidad R2DBC `PagoEntity.java` con anotaciones `@Table` y mapeo de columnas
 - [ ] T007 Implementar `PagoRepositoryAdapter.java` y `PagoR2dbcRepository.java`
 - [ ] T008 Implementar mapper `PagoPersistenceMapper.java`
@@ -296,6 +296,7 @@ manualmente o iniciando un reembolso, con registro del responsable
 
 - Excepciones de dominio antes que servicios
 - Puerto de salida antes que adaptador de persistencia
+- Interfaz de caso de uso antes que implementación del servicio
 - Servicio antes que controlador y DTOs
 - Tests escritos junto a la implementación de cada tarea
 - Verificar checkpoint antes de pasar a la siguiente fase

@@ -55,16 +55,15 @@ src/main/java/com/ticketseller/
 │   │   ├── AsientoOcupadoException.java
 │   │   └── BloqueoNoEncontradoException.java
 │   └── port/
-│       ├── in/
-│       │   ├── BloquearAsientosUseCase.java
-│       │   ├── CrearCortesiaUseCase.java
-│       │   ├── GestionarBloqueoUseCase.java
-│       │   └── ConsultarPanelBloqueosUseCase.java
 │       └── out/
 │           ├── BloqueoRepositoryPort.java
 │           └── CortesiaRepositoryPort.java
 │
 ├── application/
+│   ├── BloquearAsientosUseCase.java
+│   ├── CrearCortesiaUseCase.java
+│   ├── GestionarBloqueoUseCase.java
+│   ├── ConsultarPanelBloqueosUseCase.java
 │   ├── BloquearAsientosService.java
 │   ├── CrearCortesiaService.java
 │   ├── GestionarBloqueoService.java
@@ -113,7 +112,8 @@ son entidades independientes — no subtipos de `Ticket` — porque tienen ciclo
 `Bloqueo` existe sin ticket asociado y puede liberarse sin generar reembolso, mientras que
 `Cortesia` genera un `Ticket` sin transacción financiera. El estado `BLOQUEADO` se agrega al enum
 `EstadoAsiento` del feature 003 para que el sistema de inventario en tiempo real (feature 010)
-impida automáticamente su venta pública sin lógica adicional.
+impida automáticamente su venta pública sin lógica adicional. Las interfaces de casos de uso
+residen en `application/` — en `domain/port/` solo permanecen los puertos de salida.
 
 ---
 
@@ -135,10 +135,10 @@ y adaptadores de persistencia que deben existir antes de cualquier user story
 - [ ] T003 Actualizar enum `EstadoAsiento` (feature 003) agregando estado: ***BLOQUEADO***
 - [ ] T004 Crear excepciones de dominio: `AsientoYaBloqueadoException`, `AsientoOcupadoException`,
   `BloqueoNoEncontradoException`
-- [ ] T005 Crear interfaces de puertos de entrada en `domain/port/in/`: `BloquearAsientosUseCase`,
-  `CrearCortesiaUseCase`, `GestionarBloqueoUseCase`, `ConsultarPanelBloqueosUseCase`
-- [ ] T006 Crear interfaces de puertos de salida `BloqueoRepositoryPort.java` y
+- [ ] T005 Crear interfaces de puertos de salida `BloqueoRepositoryPort.java` y
   `CortesiaRepositoryPort.java` en `domain/port/out/`
+- [ ] T006 Crear interfaces de casos de uso en `application/`: `BloquearAsientosUseCase`,
+  `CrearCortesiaUseCase`, `GestionarBloqueoUseCase`, `ConsultarPanelBloqueosUseCase`
 - [ ] T007 Crear entidades R2DBC `BloqueoEntity.java` y `CortesiaEntity.java` con anotaciones
   `@Table` y mapeo de columnas
 - [ ] T008 Implementar `BloqueoRepositoryAdapter.java`, `CortesiaRepositoryAdapter.java` y sus
@@ -308,6 +308,7 @@ libera el asiento a DISPONIBLE inmediatamente.
 
 - Excepciones de dominio antes que servicios
 - Puerto de salida antes que adaptador de persistencia
+- Interfaz de caso de uso antes que implementación del servicio
 - Servicio antes que controlador y DTOs
 - Tests escritos junto a la implementación de cada tarea
 - Verificar checkpoint antes de pasar a la siguiente fase

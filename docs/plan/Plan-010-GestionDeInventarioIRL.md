@@ -54,15 +54,14 @@ src/main/java/com/ticketseller/
 │   │   ├── AsientoReservadoPorOtroException.java
 │   │   └── HoldExpiradoException.java
 │   └── port/
-│       ├── in/
-│       │   ├── VerificarDisponibilidadUseCase.java
-│       │   ├── ReservarAsientoUseCase.java
-│       │   ├── ConfirmarOcupacionUseCase.java
-│       │   └── LiberarHoldsVencidosUseCase.java
 │       └── out/
 │           └── (extiende AsientoRepositoryPort existente con métodos de hold)
 │
 ├── application/
+│   ├── VerificarDisponibilidadUseCase.java
+│   ├── ReservarAsientoUseCase.java
+│   ├── ConfirmarOcupacionUseCase.java
+│   ├── LiberarHoldsVencidosUseCase.java
 │   ├── VerificarDisponibilidadService.java
 │   ├── ReservarAsientoService.java
 │   ├── ConfirmarOcupacionService.java
@@ -97,8 +96,9 @@ tests/
 nuevas al dominio — extiende el enum `EstadoAsiento` con `RESERVADO` y `OCUPADO`, y agrega el
 campo `expiraEn` (timestamp nullable) a `AsientoEntity` para manejar el hold temporal. El puerto
 de salida `AsientoRepositoryPort` existente (feature 003) se extiende con métodos de bloqueo
-optimista y consulta de holds vencidos, sin crear un puerto nuevo. El scheduler vive en la capa de
-infraestructura como adaptador de entrada independiente del flujo de compra.
+optimista y consulta de holds vencidos, sin crear un puerto nuevo. Las interfaces de casos de uso
+residen en `application/` — en `domain/port/` solo permanecen los puertos de salida. El scheduler
+vive en la capa de infraestructura como adaptador de entrada independiente del flujo de compra.
 
 ---
 
@@ -120,7 +120,7 @@ estén completados — `Asiento`, `Ticket` y `Venta` deben existir en BD
   `Mono<Asiento>` o `Flux<Asiento>`
 - [ ] T004 Crear excepciones de dominio: `AsientoNoDisponibleException`,
   `AsientoReservadoPorOtroException`, `HoldExpiradoException`
-- [ ] T005 Crear interfaces de puertos de entrada en `domain/port/in/`:
+- [ ] T005 Crear interfaces de casos de uso en `application/`:
   `VerificarDisponibilidadUseCase`, `ReservarAsientoUseCase`, `ConfirmarOcupacionUseCase`,
   `LiberarHoldsVencidosUseCase`
 - [ ] T006 Crear `LiberacionHoldsScheduler.java` en `infrastructure/adapter/in/scheduler/`: job que
@@ -314,6 +314,7 @@ HTTP 409.
 
 - Excepciones de dominio antes que servicios
 - Extensión de puerto de salida antes que servicio
+- Interfaz de caso de uso antes que implementación del servicio
 - Servicio antes que controlador y DTOs
 - Tests escritos junto a la implementación de cada tarea
 - Verificar checkpoint antes de pasar a la siguiente fase

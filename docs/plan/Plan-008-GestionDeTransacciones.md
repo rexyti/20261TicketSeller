@@ -51,14 +51,13 @@ src/main/java/com/ticketseller/
 │   │   ├── TransicionVentaInvalidaException.java
 │   │   └── VentaNoEncontradaException.java
 │   └── port/
-│       ├── in/
-│       │   ├── CambiarEstadoVentaUseCase.java
-│       │   ├── ConsultarHistorialVentaUseCase.java
-│       │   └── ListarTransaccionesUseCase.java
 │       └── out/
 │           └── HistorialEstadoVentaRepositoryPort.java
 │
 ├── application/
+│   ├── CambiarEstadoVentaUseCase.java
+│   ├── ConsultarHistorialVentaUseCase.java
+│   ├── ListarTransaccionesUseCase.java
 │   ├── CambiarEstadoVentaService.java
 │   ├── ConsultarHistorialVentaService.java
 │   └── ListarTransaccionesService.java
@@ -98,7 +97,8 @@ tests/
 `ventas` — en lugar de un campo JSON en `Venta`, para permitir paginación eficiente de historiales
 extensos (edge case del spec). La matriz de transiciones válidas se modela como constante en una
 clase `TransicionesVenta` dentro de `domain/model/` para que sea reutilizable por features 006 y
-009 sin acoplarlos entre sí.
+009 sin acoplarlos entre sí. Las interfaces de casos de uso residen en `application/` — en
+`domain/port/` solo permanecen los puertos de salida.
 
 ---
 
@@ -120,9 +120,9 @@ estados `Pendiente, Reservada, Completada, Expirada, Reembolsada, Fallida` debe 
   otra combinación
 - [ ] T003 Crear excepciones de dominio: `TransicionVentaInvalidaException` (con mensaje que lista
   los estados válidos desde el estado actual), `VentaNoEncontradaException`
-- [ ] T004 Crear interfaces de puertos de entrada en `domain/port/in/`: `CambiarEstadoVentaUseCase`,
+- [ ] T004 Crear interfaz `HistorialEstadoVentaRepositoryPort.java` en `domain/port/out/`
+- [ ] T005 Crear interfaces de casos de uso en `application/`: `CambiarEstadoVentaUseCase`,
   `ConsultarHistorialVentaUseCase`, `ListarTransaccionesUseCase`
-- [ ] T005 Crear interfaz `HistorialEstadoVentaRepositoryPort.java` en `domain/port/out/`
 - [ ] T006 Crear entidad R2DBC `HistorialEstadoVentaEntity.java` con anotaciones `@Table` — incluir
   índice en `ventaId` para consultas de historial eficientes
 - [ ] T007 Implementar `HistorialEstadoVentaRepositoryAdapter.java` y
@@ -284,6 +284,7 @@ lista vacía y mensaje `"No se encontraron transacciones con los filtros aplicad
 
 - Excepciones de dominio antes que servicios
 - Puerto de salida antes que adaptador de persistencia
+- Interfaz de caso de uso antes que implementación del servicio
 - Servicio antes que controlador y DTOs
 - Tests escritos junto a la implementación de cada tarea
 - Verificar checkpoint antes de pasar a la siguiente fase

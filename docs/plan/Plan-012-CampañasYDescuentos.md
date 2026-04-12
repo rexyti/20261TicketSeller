@@ -60,19 +60,18 @@ src/main/java/com/ticketseller/
 │   │   ├── PromocionNoActivaException.java
 │   │   └── UsuarioNoAutorizadoParaPreventaException.java
 │   └── port/
-│       ├── in/
-│       │   ├── CrearPromocionUseCase.java
-│       │   ├── CrearDescuentoUseCase.java
-│       │   ├── CrearCodigosPromocionalesUseCase.java
-│       │   ├── GestionarEstadoPromocionUseCase.java
-│       │   ├── AplicarDescuentoCarritoUseCase.java
-│       │   └── ValidarCodigoPromocionalUseCase.java
 │       └── out/
 │           ├── PromocionRepositoryPort.java
 │           ├── DescuentoRepositoryPort.java
 │           └── CodigoPromocionalRepositoryPort.java
 │
 ├── application/
+│   ├── CrearPromocionUseCase.java
+│   ├── CrearDescuentoUseCase.java
+│   ├── CrearCodigosPromocionalesUseCase.java
+│   ├── GestionarEstadoPromocionUseCase.java
+│   ├── AplicarDescuentoCarritoUseCase.java
+│   ├── ValidarCodigoPromocionalUseCase.java
 │   ├── CrearPromocionService.java
 │   ├── CrearDescuentoService.java
 │   ├── CrearCodigosPromocionalesService.java
@@ -132,7 +131,8 @@ entidad raíz que agrupa `Descuento` y `CodigoPromocional` como entidades hijas 
 de vida. `TipoUsuario` se define como enum en `domain/model/` — es el primer feature que establece
 este concepto; features futuros que requieran segmentación de usuarios deben referenciarlo desde
 aquí. `AplicarDescuentoCarritoService` opera como servicio de aplicación sin endpoint propio —
-es invocado directamente por el feature 005 al calcular el total del carrito.
+es invocado directamente por el feature 005 al calcular el total del carrito. Las interfaces de
+casos de uso residen en `application/` — en `domain/port/` solo permanecen los puertos de salida.
 
 ---
 
@@ -158,11 +158,11 @@ Eventos) estén completados — `Zona`, `Venta`, `Evento` y `Ticket` deben exist
 - [ ] T005 Crear excepciones de dominio: `CodigoPromoInvalidoException`,
   `CodigoPromoExpiradoException`, `CodigoPromoAgotadoException`, `PromocionNoActivaException`,
   `UsuarioNoAutorizadoParaPreventaException`
-- [ ] T006 Crear interfaces de puertos de entrada en `domain/port/in/`: `CrearPromocionUseCase`,
+- [ ] T006 Crear interfaces de puertos de salida en `domain/port/out/`: `PromocionRepositoryPort`,
+  `DescuentoRepositoryPort`, `CodigoPromocionalRepositoryPort`
+- [ ] T007 Crear interfaces de casos de uso en `application/`: `CrearPromocionUseCase`,
   `CrearDescuentoUseCase`, `CrearCodigosPromocionalesUseCase`, `GestionarEstadoPromocionUseCase`,
   `AplicarDescuentoCarritoUseCase`, `ValidarCodigoPromocionalUseCase`
-- [ ] T007 Crear interfaces de puertos de salida: `PromocionRepositoryPort`,
-  `DescuentoRepositoryPort`, `CodigoPromocionalRepositoryPort` en `domain/port/out/`
 - [ ] T008 Crear entidades R2DBC `PromocionEntity`, `DescuentoEntity`, `CodigoPromocionalEntity`
   con anotaciones `@Table` y mapeo de columnas
 - [ ] T009 Implementar adapters y R2DBC repositories para las tres entidades
@@ -414,6 +414,7 @@ al carrito, se aplica el descuento. Ticket de otra zona no recibe el descuento.
 
 - Excepciones de dominio antes que servicios
 - Puerto de salida antes que adaptador de persistencia
+- Interfaz de caso de uso antes que implementación del servicio
 - Servicio antes que controlador y DTOs
 - Tests escritos junto a la implementación de cada tarea
 - Verificar checkpoint antes de pasar a la siguiente fase
