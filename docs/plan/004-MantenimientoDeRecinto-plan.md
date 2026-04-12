@@ -8,9 +8,8 @@
 El Gestor de Inventario debe poder cambiar el estado de asientos individuales o en masa dentro
 del contexto de un evento específico, con validación de las transiciones permitidas por la
 máquina de estados del negocio. Toda operación manual queda registrada en un historial de
-auditoría consultable. La implementación agrega la máquina de estados del asiento, la tabla de
-historial de cambios, y una UI web con mapa visual de asientos. Depende de la entidad `Asiento`
-del feature 003 y del contexto de evento del feature correspondiente.
+auditoría consultable. Depende de la entidad `Asiento` del feature 003 y del contexto de
+evento del feature correspondiente.
 
 La arquitectura es hexagonal respetando responsabilidad única: cada caso de uso es una clase
 independiente y concreta en `application/`. No hay capa de servicios ni interfaces de puerto
@@ -18,18 +17,15 @@ de entrada.
 
 ## Technical Context
 
-**Language/Version**: Java 21 (backend) / NEEDS CLARIFICATION (framework frontend — React,
-Angular, Vue u otro)
-**Primary Dependencies**: Spring Boot 3.x, Spring Data R2DBC, Spring WebFlux, Bean Validation
-(Jakarta) (backend) / NEEDS CLARIFICATION (dependencias frontend)
+**Language/Version**: Java 21
+**Primary Dependencies**: Spring Boot 3.x, Spring Data R2DBC, Spring WebFlux, Bean Validation (Jakarta)
 **Storage**: PostgreSQL — esquema creado y gestionado manualmente
-**Testing**: JUnit 5, Mockito, Spring Boot Test, Testcontainers (PostgreSQL) para backend.
-NEEDS CLARIFICATION — framework de testing frontend
-**Target Platform**: Backend server — microservicio Módulo 1 / Aplicación web (frontend)
-**Project Type**: Full-stack (API REST reactiva con WebFlux + UI web)
-**Performance Goals**: Cambio individual en menos de 10 segundos desde que el gestor localiza
-el asiento en el mapa (SC-001). 95% de cambios masivos sin errores gracias a validación previa
-(SC-002). Historial disponible en menos de 2 segundos (SC-003).
+**Testing**: JUnit 5, Mockito, Spring Boot Test, Testcontainers (PostgreSQL para tests de integración)
+**Target Platform**: Backend server — microservicio Módulo 1
+**Project Type**: Web (API REST reactiva con WebFlux)
+**Performance Goals**: Cambio individual completado en menos de 10 segundos (SC-001). 95% de
+cambios masivos sin errores gracias a validación previa (SC-002). Historial disponible en menos
+de 2 segundos (SC-003).
 **Constraints**: No se puede cambiar un asiento `Vendido` a `Disponible` sin procesar la
 cancelación primero (FR-003). Los cambios masivos aplican solo a asientos modificables,
 informando de los omitidos (FR-007). Cero inconsistencias por concurrencia mediante locking
@@ -38,7 +34,7 @@ optimista (SC-004). Los cambios masivos siempre están contextualizados a un ún
 
 ## Project Structure
 
-### Clases nuevas que agrega este feature (backend)
+### Clases nuevas que agrega este feature
 
 ```text
 src/main/java/com/ticketseller/
@@ -97,29 +93,9 @@ tests/
             └── HistorialCambioEstadoRepositoryAdapterTest.java # Testcontainers
 ```
 
-### Estructura frontend (NEEDS CLARIFICATION — framework y extensión de archivos no definidos)
-
-```text
-frontend/src/
-├── components/
-│   ├── MapaAsientos/
-│   │   ├── MapaAsientos.[ext]            # Grilla de asientos con colores por estado
-│   │   ├── AsientoCell.[ext]             # Celda individual: color por EstadoAsiento, clic para editar
-│   │   └── LeyendaEstados.[ext]          # Leyenda visual de colores por estado
-│   ├── CambioEstadoModal/
-│   │   └── CambioEstadoModal.[ext]       # Modal: estado actual, estados destino válidos, motivo
-│   ├── ConfirmacionMasivaModal/
-│   │   └── ConfirmacionMasivaModal.[ext] # Modal: conteo de asientos afectados, confirmar/cancelar
-│   └── HistorialCambiosPanel/
-│       └── HistorialCambiosPanel.[ext]   # Tabla: fechaHora, usuario, estadoAnterior, estadoNuevo, motivo
-└── services/
-    └── asientoMantenimientoService.[ext] # Llamadas a los endpoints de backend
-```
-
-**Structure Decision**: Backend en arquitectura hexagonal con responsabilidad única — un use
-case concreto por operación, sin servicios ni interfaces de puerto de entrada. `domain/`
-contiene el modelo puro y los puertos de salida únicamente. Framework frontend pendiente de
-decisión (NEEDS CLARIFICATION) — resolver antes de iniciar implementación frontend.
+**Structure Decision**: Arquitectura hexagonal con responsabilidad única — un use case concreto
+por operación, sin servicios ni interfaces de puerto de entrada. `domain/` contiene el modelo
+puro y los puertos de salida únicamente.
 
 ---
 
@@ -171,16 +147,16 @@ user stories pueden comenzar
 
 ## Phase 2: User Story 1 — Cambio Individual de Estado de Asiento (Priority: P1)
 
-**Goal**: El gestor puede hacer clic en un asiento del mapa, elegir un estado destino válido,
-confirmar, y el sistema persiste el cambio registrando el historial. Las transiciones inválidas
-son rechazadas con mensaje claro.
+**Goal**: El gestor puede cambiar el estado de un asiento específico dentro de un evento. Las
+transiciones inválidas son rechazadas con mensaje claro. Cada cambio queda registrado en el
+historial de auditoría.
 
 **Independent Test**: `PATCH /api/eventos/{eventoId}/asientos/{asientoId}/estado` con
-`{ "estadoDestino": "MANTENIMIENTO" }` sobre asiento `DISPONIBLE` retorna HTTP 200. El mismo
-endpoint con `{ "estadoDestino": "DISPONIBLE" }` sobre asiento `VENDIDO` retorna HTTP 409.
-El historial del asiento refleja el cambio.
+`{ "estadoDestino": "MANTENIMIENTO" }` sobre asiento `DISPONIBLE` retorna HTTP 200 con el
+asiento actualizado. El mismo endpoint con `{ "estadoDestino": "DISPONIBLE" }` sobre asiento
+`VENDIDO` retorna HTTP 409. El historial del asiento refleja el cambio.
 
-### Tests para User Story 1 (backend)
+### Tests para User Story 1
 
 - [ ] T011 [P] [US1] Test de contrato: `PATCH /api/eventos/{eventoId}/asientos/{asientoId}/estado`
   con transición válida retorna HTTP 200 con asiento actualizado —
@@ -201,13 +177,13 @@ El historial del asiento refleja el cambio.
   nuevo estado en BD y existencia del registro en `historial_cambios_estado` —
   `AsientoMantenimientoControllerTest.java`
 
-### Implementación de User Story 1 (backend)
+### Implementación de User Story 1
 
 - [ ] T018 [US1] Implementar `CambiarEstadoAsientoUseCase.java` en `application/`: recuperar
   asiento vía `AsientoRepositoryPort`; invocar `TransicionEstadoAsiento.esPermitida()` y lanzar
   `TransicionEstadoInvalidaException` si no es válida; verificar compra activa
-  (`// TODO: integrar con carrito cuando feature 005 esté implementado` — retornar
-  `Mono.just(false)` como stub temporal); actualizar estado vía `AsientoRepositoryPort.guardar()`;
+  (`// TODO: integrar con carrito cuando feature 005 esté implementado` — stub retorna
+  `Mono.just(false)` por ahora); actualizar estado vía `AsientoRepositoryPort.guardar()`;
   persistir `HistorialCambioEstado` vía `HistorialCambioEstadoRepositoryPort.guardar()` —
   retornar `Mono<Asiento>`
 - [ ] T019 [US1] Crear DTO `CambiarEstadoRequest.java` con campo `estadoDestino (@NotNull)` y
@@ -216,81 +192,52 @@ El historial del asiento refleja el cambio.
   en `AsientoMantenimientoController.java` inyectando `CambiarEstadoAsientoUseCase` — retornar
   `Mono<ResponseEntity<AsientoResponse>>`
 
-### Implementación de User Story 1 (frontend)
-
-- [ ] T021 [US1] Implementar componente `MapaAsientos`: carga asientos del evento vía
-  `GET /api/eventos/{eventoId}/asientos`, renderiza la grilla con `AsientoCell` coloreando
-  por `EstadoAsiento`
-- [ ] T022 [US1] Implementar componente `AsientoCell`: al hacer clic abre `CambioEstadoModal`
-  pasando el asiento seleccionado como prop
-- [ ] T023 [US1] Implementar componente `CambioEstadoModal`: muestra estado actual, lista de
-  estados destino válidos para ese estado (derivada de la máquina de estados), campo opcional
-  de motivo, botones Confirmar y Cancelar
-- [ ] T024 [US1] Implementar `asientoMantenimientoService`: función `cambiarEstado(eventoId,
-  asientoId, estadoDestino, motivo)` que ejecuta el `PATCH` y maneja errores HTTP 409
-  mostrando el mensaje al gestor sin cerrar el modal
-- [ ] T025 [US1] Implementar componente `LeyendaEstados`: panel fijo con correspondencia
-  color ↔ estado
-
-**Checkpoint**: US1 completamente funcional — cambios individuales operativos desde el mapa
-con feedback correcto para transiciones inválidas
+**Checkpoint**: US1 completamente funcional — cambio individual de estado operativo con
+validaciones y registro de auditoría
 
 ---
 
 ## Phase 3: User Story 2 — Cambio Masivo de Estado de Asientos (Priority: P2)
 
-**Goal**: El gestor puede seleccionar múltiples asientos (por zona, fila o selección manual),
-elegir un estado destino, confirmar en el modal de confirmación, y el sistema aplica el cambio
-solo a los asientos modificables informando cuántos fueron omitidos y por qué.
+**Goal**: El gestor puede enviar una lista de IDs de asientos y un estado destino; el sistema
+aplica el cambio únicamente a los asientos cuya transición es válida, retornando el conteo de
+modificados y omitidos con sus razones.
 
 **Independent Test**: `PATCH /api/eventos/{eventoId}/asientos/estado-masivo` con lista de IDs
 y `estadoDestino: BLOQUEADO` retorna HTTP 200 con `{ "modificados": 8, "omitidos": 2,
-"mensajes": ["2 asientos en estado VENDIDO no pueden ser modificados"] }`. Si el gestor
-cancela el modal, no se realiza ninguna llamada al backend.
+"mensajes": ["2 asientos en estado VENDIDO no pueden ser modificados"] }`.
 
-### Tests para User Story 2 (backend)
+### Tests para User Story 2
 
-- [ ] T026 [P] [US2] Test de contrato: `PATCH /api/eventos/{eventoId}/asientos/estado-masivo`
+- [ ] T021 [P] [US2] Test de contrato: `PATCH /api/eventos/{eventoId}/asientos/estado-masivo`
   con todos los IDs modificables retorna HTTP 200 con `modificados == total` —
   `AsientoMantenimientoControllerTest.java`
-- [ ] T027 [P] [US2] Test de contrato: lista mixta de asientos modificables y no modificables
+- [ ] T022 [P] [US2] Test de contrato: lista mixta de asientos modificables y no modificables
   retorna HTTP 200 con conteos correctos y mensaje descriptivo —
   `AsientoMantenimientoControllerTest.java`
-- [ ] T028 [P] [US2] Test de contrato: lista vacía retorna HTTP 400 —
+- [ ] T023 [P] [US2] Test de contrato: lista vacía retorna HTTP 400 —
   `AsientoMantenimientoControllerTest.java`
-- [ ] T029 [P] [US2] Test unitario de `CambiarEstadoMasivoUseCase` con lista mixta de estados:
+- [ ] T024 [P] [US2] Test unitario de `CambiarEstadoMasivoUseCase` con lista mixta de estados:
   verifica que solo los modificables cambian y que el historial registra una entrada por cada
   cambio efectuado — `CambiarEstadoMasivoUseCaseTest.java`
-- [ ] T030 [P] [US2] Test de integración con Testcontainers: flujo masivo con asientos en
+- [ ] T025 [P] [US2] Test de integración con Testcontainers: flujo masivo con asientos en
   estados mixtos → verificar en BD que solo los modificables cambiaron —
   `AsientoMantenimientoControllerTest.java`
 
-### Implementación de User Story 2 (backend)
+### Implementación de User Story 2
 
-- [ ] T031 [US2] Implementar `CambiarEstadoMasivoUseCase.java` en `application/`: usar
+- [ ] T026 [US2] Implementar `CambiarEstadoMasivoUseCase.java` en `application/`: usar
   `Flux.fromIterable(asientoIds)` para recuperar cada asiento, clasificar como
   modificable/no-modificable usando `TransicionEstadoAsiento.esPermitida()`, aplicar cambio y
   registrar historial solo a los modificables — un error en un asiento individual no debe
   cancelar el resto; retornar `Mono<CambiarEstadoMasivoResponse>` con `modificados`, `omitidos`
   y `mensajes`
-- [ ] T032 [US2] Crear DTOs `CambiarEstadoMasivoRequest.java` (lista `@NotEmpty` de
+- [ ] T027 [US2] Crear DTOs `CambiarEstadoMasivoRequest.java` (lista `@NotEmpty` de
   `asientoIds`, `estadoDestino @NotNull`, `motivo nullable`) y `CambiarEstadoMasivoResponse.java`
   (`modificados int`, `omitidos int`, `mensajes List<String>`)
-- [ ] T033 [US2] Implementar endpoint `PATCH /api/eventos/{eventoId}/asientos/estado-masivo` en
+- [ ] T028 [US2] Implementar endpoint `PATCH /api/eventos/{eventoId}/asientos/estado-masivo` en
   `AsientoMantenimientoController.java` inyectando `CambiarEstadoMasivoUseCase` — retornar
   `Mono<ResponseEntity<CambiarEstadoMasivoResponse>>`
-
-### Implementación de User Story 2 (frontend)
-
-- [ ] T034 [US2] Agregar modo de selección múltiple al componente `MapaAsientos`: checkbox por
-  asiento, botones de selección rápida por zona completa y por fila; barra de acciones masivas
-  visible cuando hay al menos un asiento seleccionado
-- [ ] T035 [US2] Implementar componente `ConfirmacionMasivaModal`: muestra número de asientos
-  seleccionados, estado destino elegido, botones Confirmar y Cancelar — al confirmar llama a
-  `asientoMantenimientoService.cambiarEstadoMasivo()`
-- [ ] T036 [US2] Mostrar resultado del cambio masivo en la UI: banner/toast con desglose
-  "X asientos actualizados. Y asientos no modificados: [razones]" — actualizar estado visual
-  del mapa sin recargar la página completa
 
 **Checkpoint**: US1 y US2 funcionales — cambios individuales y masivos operativos
 
@@ -306,38 +253,30 @@ el sistema retorna lista vacía.
 200 con lista ordenada más reciente primero. Para asiento sin cambios manuales, retorna HTTP 200
 con lista vacía.
 
-### Tests para User Story 3 (backend)
+### Tests para User Story 3
 
-- [ ] T037 [P] [US3] Test de contrato: `GET /api/eventos/{eventoId}/asientos/{asientoId}/historial`
+- [ ] T029 [P] [US3] Test de contrato: `GET /api/eventos/{eventoId}/asientos/{asientoId}/historial`
   retorna HTTP 200 con lista cronológica (más reciente primero) —
   `AsientoMantenimientoControllerTest.java`
-- [ ] T038 [P] [US3] Test de contrato: asiento sin historial retorna HTTP 200 con lista vacía —
+- [ ] T030 [P] [US3] Test de contrato: asiento sin historial retorna HTTP 200 con lista vacía —
   `AsientoMantenimientoControllerTest.java`
-- [ ] T039 [P] [US3] Test unitario de `ConsultarHistorialAsientoUseCase` con mock de repositorio
+- [ ] T031 [P] [US3] Test unitario de `ConsultarHistorialAsientoUseCase` con mock de repositorio
   retornando lista ordenada y lista vacía — `ConsultarHistorialAsientoUseCaseTest.java`
-- [ ] T040 [P] [US3] Test de integración con Testcontainers: realizar dos cambios de estado →
+- [ ] T032 [P] [US3] Test de integración con Testcontainers: realizar dos cambios de estado →
   verificar que `GET historial` retorna ambas entradas en orden correcto —
   `HistorialCambioEstadoRepositoryAdapterTest.java`
 
-### Implementación de User Story 3 (backend)
+### Implementación de User Story 3
 
-- [ ] T041 [US3] Implementar `ConsultarHistorialAsientoUseCase.java` en `application/`:
+- [ ] T033 [US3] Implementar `ConsultarHistorialAsientoUseCase.java` en `application/`:
   recuperar historial ordenado por `fechaHora DESC` vía
   `HistorialCambioEstadoRepositoryPort.findByAsientoId()` — retornar
   `Flux<HistorialCambioEstado>`
-- [ ] T042 [US3] Crear DTO `HistorialCambioResponse.java` con campos: `fechaHora`, `usuario`,
+- [ ] T034 [US3] Crear DTO `HistorialCambioResponse.java` con campos: `fechaHora`, `usuario`,
   `estadoAnterior`, `estadoNuevo`, `motivo`
-- [ ] T043 [US3] Implementar endpoint `GET /api/eventos/{eventoId}/asientos/{asientoId}/historial`
+- [ ] T035 [US3] Implementar endpoint `GET /api/eventos/{eventoId}/asientos/{asientoId}/historial`
   en `AsientoMantenimientoController.java` inyectando `ConsultarHistorialAsientoUseCase` —
   retornar `Flux<HistorialCambioResponse>`
-
-### Implementación de User Story 3 (frontend)
-
-- [ ] T044 [US3] Implementar componente `HistorialCambiosPanel`: tabla con columnas Fecha y
-  hora, Usuario, Estado anterior, Estado nuevo, Motivo — activado desde el menú contextual del
-  `AsientoCell`
-- [ ] T045 [US3] Mostrar mensaje "No hay cambios registrados para este asiento" cuando la lista
-  retornada esté vacía
 
 **Checkpoint**: Las tres user stories son funcionales e independientemente testeables
 
@@ -345,12 +284,10 @@ con lista vacía.
 
 ## Phase 5: Polish & Cross-Cutting Concerns
 
-- [ ] T046 Documentar todos los endpoints nuevos con SpringDoc OpenAPI incluyendo posibles
-  códigos de error HTTP y su semántica
-- [ ] T047 Verificar que la UI frontend aplica permisos de rol — solo `GESTOR_INVENTARIO` puede
-  acceder a la pantalla de mantenimiento (coordinar con el feature de autenticación del sistema)
-- [ ] T048 Revisar que ninguna clase en `domain/` importa `org.springframework` o `io.r2dbc`
-- [ ] T049 Verificar que `CambiarEstadoMasivoUseCase` usa operaciones reactivas eficientes
+- [ ] T036 Documentar todos los endpoints con SpringDoc OpenAPI incluyendo los posibles códigos
+  de error HTTP y su semántica
+- [ ] T037 Revisar que ninguna clase en `domain/` importa `org.springframework` o `io.r2dbc`
+- [ ] T038 Verificar que `CambiarEstadoMasivoUseCase` usa operaciones reactivas eficientes
   (`Flux.fromIterable`) y no bloquea el event loop
 
 ---
@@ -362,10 +299,8 @@ con lista vacía.
 - **Foundational (Phase 1)**: Depende del feature 003 completado — bloquea todas las user
   stories. Coordinar `EstadoAsiento` con features 005 y 007 para no duplicar el enum
 - **US1 (Phase 2)**: Depende de Foundational — primera funcionalidad entregable
-- **US2 (Phase 3)**: Depende de US1 — reutiliza `TransicionEstadoAsiento` y el componente
-  `MapaAsientos` del frontend
-- **US3 (Phase 4)**: Backend puede ejecutarse en paralelo con US2; frontend de US3 depende de
-  que `MapaAsientos` y `AsientoCell` existan (US1 frontend)
+- **US2 (Phase 3)**: Depende de US1 — reutiliza `TransicionEstadoAsiento`
+- **US3 (Phase 4)**: Puede ejecutarse en paralelo con US2
 - **Polish (Phase 5)**: Depende de todas las user stories
 
 ### Dentro de cada User Story
@@ -394,7 +329,5 @@ con lista vacía.
   bloquear el avance
 - El enum `EstadoAsiento` debe coordinarse con features 005 y 007 para que exista una única
   definición en el módulo
-- Framework frontend (NEEDS CLARIFICATION): resolver antes de iniciar T021 — la estructura de
-  carpetas y extensiones quedan pendientes de esta decisión
 - **WebFlux**: todos los use cases retornan `Mono<T>` o `Flux<T>`, los controladores retornan
   `Mono<ResponseEntity<T>>` o `Flux<T>`. Usar `WebTestClient` para los tests de contrato
