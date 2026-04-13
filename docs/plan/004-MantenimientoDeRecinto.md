@@ -18,7 +18,7 @@ de entrada.
 ## Technical Context
 
 **Language/Version**: Java 21
-**Primary Dependencies**: Spring Boot 3.x, Spring Data R2DBC, Spring WebFlux, Bean Validation (Jakarta)
+**Primary Dependencies**: Spring Boot 3.x, Spring Data R2DBC, Spring WebFlux, Bean Validation (Jakarta), MapStruct, Lombok
 **Storage**: PostgreSQL — esquema creado y gestionado manualmente
 **Testing**: JUnit 5, Mockito, Spring Boot Test, Testcontainers (PostgreSQL para tests de integración)
 **Target Platform**: Backend server — microservicio Módulo 1
@@ -31,6 +31,14 @@ cancelación primero (FR-003). Los cambios masivos aplican solo a asientos modif
 informando de los omitidos (FR-007). Cero inconsistencias por concurrencia mediante locking
 optimista (SC-004). Los cambios masivos siempre están contextualizados a un único evento.
 **Scale/Scope**: Contexto de un evento específico — no se permiten cambios entre distintos eventos
+
+## Coding Standards
+
+> **⚠️ ADVERTENCIA — Reglas obligatorias de estilo de código:**
+>
+> 1. **NO crear comentarios innecesarios.** El código debe ser autoexplicativo. Solo se permiten comentarios cuando aportan contexto que el código por sí solo no puede expresar (e.g., `// TODO:`, decisiones de diseño no obvias, workarounds documentados).
+> 2. **Se DEBEN respetar los principios del código limpio (Clean Code).** Nombres descriptivos, funciones pequeñas con responsabilidad única, sin código muerto, sin duplicación, formateo consistente.
+> 3. **Para la implementación de DTOs NO SE DEBEN USAR CLASES, sino `record`.** Todos los DTOs (request y response) deben ser Java `record` en lugar de clases convencionales. Los `record` son inmutables, concisos y semánticamente correctos para objetos de transferencia de datos.
 
 ## Project Structure
 

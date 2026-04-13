@@ -16,7 +16,7 @@ La arquitectura es hexagonal respetando responsabilidad única. La BD se gestion
 ## Technical Context
 
 **Language/Version**: Java 21  
-**Primary Dependencies**: Spring Boot 3.x, Spring Data R2DBC, Spring WebFlux, Bean Validation (Jakarta), ZXing (
+**Primary Dependencies**: Spring Boot 3.x, Spring Data R2DBC, Spring WebFlux, Bean Validation (Jakarta), MapStruct, Lombok, ZXing (
 generación de QR), JavaMailSender (envío de email)  
 **Storage**: PostgreSQL — esquema creado y gestionado manualmente  
 **Testing**: JUnit 5, Mockito, Spring Boot Test, Testcontainers (PostgreSQL para tests de integración)  
@@ -28,6 +28,14 @@ SC-002). 0 discrepancias entre pagos procesados y tickets generados (SC-003).
 asiento no disponible. Pagos duplicados deben prevenirse. Depende del feature 015 completado.  
 **Scale/Scope**: Feature de mayor complejidad — introduce integración con servicios externos (pasarela de pagos, email).
 Bloquea el feature 014.
+
+## Coding Standards
+
+> **⚠️ ADVERTENCIA — Reglas obligatorias de estilo de código:**
+>
+> 1. **NO crear comentarios innecesarios.** El código debe ser autoexplicativo. Solo se permiten comentarios cuando aportan contexto que el código por sí solo no puede expresar (e.g., `// TODO:`, decisiones de diseño no obvias, workarounds documentados).
+> 2. **Se DEBEN respetar los principios del código limpio (Clean Code).** Nombres descriptivos, funciones pequeñas con responsabilidad única, sin código muerto, sin duplicación, formateo consistente.
+> 3. **Para la implementación de DTOs NO SE DEBEN USAR CLASES, sino `record`.** Todos los DTOs (request y response) deben ser Java `record` en lugar de clases convencionales. Los `record` son inmutables, concisos y semánticamente correctos para objetos de transferencia de datos.
 
 ## Project Structure
 
