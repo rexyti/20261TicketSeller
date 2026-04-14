@@ -16,7 +16,7 @@ La arquitectura es hexagonal respetando responsabilidad única. La BD se gestion
 ## Technical Context
 
 **Language/Version**: Java 21  
-**Primary Dependencies**: Spring Boot 3.x, Spring Data R2DBC, Spring WebFlux, Bean Validation (Jakarta), MapStruct, Lombok, ZXing (
+**Primary Dependencies**: Spring Boot 3.x, Spring Data R2DBC, Spring WebFlux, Bean Validation (Jakarta), MapStruct 1.5.5, Lombok 1.18.40, ZXing (
 generación de QR), JavaMailSender (envío de email)  
 **Storage**: PostgreSQL — esquema creado y gestionado manualmente  
 **Testing**: JUnit 5, Mockito, Spring Boot Test, Testcontainers (PostgreSQL para tests de integración)  
