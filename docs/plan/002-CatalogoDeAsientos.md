@@ -19,7 +19,7 @@ de entrada.
 ## Technical Context
 
 **Language/Version**: Java 21
-**Primary Dependencies**: Spring Boot 3.x, Spring Data R2DBC, Spring WebFlux, Bean Validation (Jakarta), MapStruct, Lombok
+**Primary Dependencies**: Spring Boot 3.x, Spring Data R2DBC, Spring WebFlux, Bean Validation (Jakarta), MapStruct 1.5.5, Lombok 1.18.40
 **Storage**: PostgreSQL — esquema creado y gestionado manualmente
 **Testing**: JUnit 5, Mockito, Spring Boot Test, Testcontainers (PostgreSQL para tests de integración)
 **Target Platform**: Backend server — microservicio Módulo 1
