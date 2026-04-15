@@ -1,35 +1,54 @@
+### Gradle ###
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### Maven ###
 HELP.md
 target/
 .mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
 
-### STS ###
-.apt_generated
+### IDE ###
+.idea
+*.iws
+*.iml
+*.ipr
 .classpath
 .factorypath
 .project
 .settings
 .springBeans
 .sts4-cache
+.nb-gradle/
 
-### IntelliJ IDEA ###
-.idea
-*.iws
-*.iml
-*.ipr
+### OS ###
+.DS_Store
+Thumbs.db
 
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
+### Logs ###
+*.log
 
-### VS Code ###
-.vscode/
+### Environment ###
+.env
+*.swp
+*.swo
 
-*template.md
+### Build artifacts ###
+*.jar
+*.war
+*.ear
+*.class
+
+### IntelliJ misc ###
+*.hprof
+.idea/libraries
+.idea/modules.xml
+.idea/jarRepositories.xml
+.idea/compiler.xml
+.idea/encodings.xml
+.idea/vcs.xml
+.idea/uiDesigner.xml
+.idea/shelf/
+*.template.md
