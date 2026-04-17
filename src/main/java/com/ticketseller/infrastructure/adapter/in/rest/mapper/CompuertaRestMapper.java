@@ -1,8 +1,8 @@
 package com.ticketseller.infrastructure.adapter.in.rest.mapper;
 
 import com.ticketseller.domain.model.Compuerta;
-import com.ticketseller.infrastructure.adapter.in.rest.dto.CompuertaResponse;
-import com.ticketseller.infrastructure.adapter.in.rest.dto.CrearCompuertaRequest;
+import com.ticketseller.infrastructure.adapter.in.rest.dto.compuerta.CompuertaResponse;
+import com.ticketseller.infrastructure.adapter.in.rest.dto.compuerta.CrearCompuertaRequest;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 

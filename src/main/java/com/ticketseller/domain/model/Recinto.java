@@ -23,5 +23,10 @@ public class Recinto {
     private Integer compuertasIngreso;
     private boolean activo;
     private CategoriaRecinto categoria;
+
+    public void desactivar(){
+        if (activo)
+            activo = false;
+    }
 }
 

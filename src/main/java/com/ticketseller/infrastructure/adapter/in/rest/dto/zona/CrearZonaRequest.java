@@ -1,4 +1,4 @@
-package com.ticketseller.infrastructure.adapter.in.rest.dto;
+package com.ticketseller.infrastructure.adapter.in.rest.dto.zona;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;

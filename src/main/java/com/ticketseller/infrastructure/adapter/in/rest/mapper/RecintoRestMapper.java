@@ -1,8 +1,8 @@
 package com.ticketseller.infrastructure.adapter.in.rest.mapper;
 
 import com.ticketseller.domain.model.Recinto;
-import com.ticketseller.infrastructure.adapter.in.rest.dto.CrearRecintoRequest;
-import com.ticketseller.infrastructure.adapter.in.rest.dto.RecintoResponse;
+import com.ticketseller.infrastructure.adapter.in.rest.dto.recinto.CrearRecintoRequest;
+import com.ticketseller.infrastructure.adapter.in.rest.dto.recinto.RecintoResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 

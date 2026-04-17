@@ -6,23 +6,17 @@ import com.ticketseller.domain.model.Compuerta;
 import com.ticketseller.domain.port.out.CompuertaRepositoryPort;
 import com.ticketseller.domain.port.out.RecintoRepositoryPort;
 import com.ticketseller.domain.port.out.ZonaRepositoryPort;
+import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 
 import java.util.UUID;
 
+@RequiredArgsConstructor
 public class CrearCompuertaUseCase {
 
     private final CompuertaRepositoryPort compuertaRepositoryPort;
     private final RecintoRepositoryPort recintoRepositoryPort;
     private final ZonaRepositoryPort zonaRepositoryPort;
-
-    public CrearCompuertaUseCase(CompuertaRepositoryPort compuertaRepositoryPort,
-                                 RecintoRepositoryPort recintoRepositoryPort,
-                                 ZonaRepositoryPort zonaRepositoryPort) {
-        this.compuertaRepositoryPort = compuertaRepositoryPort;
-        this.recintoRepositoryPort = recintoRepositoryPort;
-        this.zonaRepositoryPort = zonaRepositoryPort;
-    }
 
     public Mono<Compuerta> ejecutar(UUID recintoId, Compuerta request) {
         return recintoRepositoryPort.buscarPorId(recintoId)
@@ -31,20 +25,24 @@ public class CrearCompuertaUseCase {
     }
 
     private Mono<Compuerta> validarZonaYGuardar(UUID recintoId, Compuerta request) {
-        if (request.getZonaId() == null) {
-            return compuertaRepositoryPort.guardar(request.toBuilder()
-                    .id(UUID.randomUUID())
-                    .recintoId(recintoId)
-                    .esGeneral(true)
-                    .build());
+        if (compuertaSinZona(request)) {
+            return compuertaRepositoryPort.guardar(buildCompuerta(recintoId, request, true));
         }
         return zonaRepositoryPort.buscarPorId(request.getZonaId())
                 .switchIfEmpty(Mono.error(new ZonaCapacidadExcedidaException("La zona indicada no existe")))
-                .flatMap(zona -> compuertaRepositoryPort.guardar(request.toBuilder()
-                        .id(UUID.randomUUID())
-                        .recintoId(recintoId)
-                        .esGeneral(false)
-                        .build()));
+                .flatMap(zona -> compuertaRepositoryPort.guardar(buildCompuerta(recintoId, request, false)));
+    }
+
+    private boolean compuertaSinZona(Compuerta request) {
+        return request.getZonaId() == null;
+    }
+
+    private Compuerta buildCompuerta(UUID recintoId, Compuerta request, boolean esGeneral) {
+        return request.toBuilder()
+                .id(UUID.randomUUID())
+                .recintoId(recintoId)
+                .esGeneral(esGeneral)
+                .build();
     }
 }
 
