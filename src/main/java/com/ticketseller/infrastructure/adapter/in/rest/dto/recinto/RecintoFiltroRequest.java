@@ -1,4 +1,4 @@
-package com.ticketseller.infrastructure.adapter.in.rest.dto;
+package com.ticketseller.infrastructure.adapter.in.rest.dto.recinto;
 
 public record RecintoFiltroRequest(
         String nombre,

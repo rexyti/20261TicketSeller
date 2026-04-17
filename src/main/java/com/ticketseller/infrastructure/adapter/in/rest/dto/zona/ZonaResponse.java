@@ -1,4 +1,4 @@
-package com.ticketseller.infrastructure.adapter.in.rest.dto;
+package com.ticketseller.infrastructure.adapter.in.rest.dto.zona;
 
 import java.util.UUID;
 

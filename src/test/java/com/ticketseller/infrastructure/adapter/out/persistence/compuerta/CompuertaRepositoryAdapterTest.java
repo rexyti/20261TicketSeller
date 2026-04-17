@@ -74,7 +74,7 @@ class CompuertaRepositoryAdapterTest {
         Compuerta compuerta = Compuerta.builder().id(UUID.randomUUID()).recintoId(recintoId).nombre("Puerta A").esGeneral(true).build();
 
         StepVerifier.create(adapter.guardar(compuerta))
-                .expectNextMatches(c -> c.isEsGeneral())
+                .expectNextMatches(Compuerta::isEsGeneral)
                 .verifyComplete();
     }
 }

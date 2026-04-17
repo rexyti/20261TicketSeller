@@ -5,20 +5,18 @@ import com.ticketseller.domain.exception.RecintoConEventosException;
 import com.ticketseller.domain.exception.RecintoNotFoundException;
 import com.ticketseller.domain.model.Recinto;
 import com.ticketseller.domain.port.out.RecintoRepositoryPort;
+import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 
 import java.util.UUID;
 
+@RequiredArgsConstructor
 public class ConfigurarCapacidadUseCase {
 
     private final RecintoRepositoryPort recintoRepositoryPort;
 
-    public ConfigurarCapacidadUseCase(RecintoRepositoryPort recintoRepositoryPort) {
-        this.recintoRepositoryPort = recintoRepositoryPort;
-    }
-
     public Mono<Recinto> ejecutar(UUID recintoId, Integer capacidadMaxima) {
-        if (capacidadMaxima == null || capacidadMaxima < 1) {
+        if (capacidadMaximaNoValida(capacidadMaxima)) {
             return Mono.error(new CapacidadInvalidaException("La capacidad maxima debe ser mayor a cero"));
         }
         return recintoRepositoryPort.buscarPorId(recintoId)
@@ -26,19 +24,31 @@ public class ConfigurarCapacidadUseCase {
                 .flatMap(recinto -> validarTicketsYGuardar(recinto, capacidadMaxima));
     }
 
+    private boolean capacidadMaximaNoValida(Integer capacidadMaxima) {
+        return capacidadMaxima == null || capacidadMaxima < 1;
+    }
+
     private Mono<Recinto> validarTicketsYGuardar(Recinto recinto, Integer capacidadMaxima) {
-        boolean cambiaCapacidad = !capacidadMaxima.equals(recinto.getCapacidadMaxima());
-        Mono<Boolean> tieneTickets = cambiaCapacidad
-                ? recintoRepositoryPort.tieneTicketsVendidos(recinto.getId())
-                : Mono.just(false);
+        Mono<Boolean> tieneTickets = recintoTieneTicketsVendidos(recinto, capacidadMaxima);
 
         return tieneTickets.flatMap(vendidos -> {
             if (vendidos) {
                 return Mono.error(new RecintoConEventosException("No se puede cambiar la capacidad porque existen tickets vendidos"));
             }
-            Recinto actualizado = recinto.toBuilder().capacidadMaxima(capacidadMaxima).build();
+            Recinto actualizado = buildRecintoActualizado(recinto, capacidadMaxima);
             return recintoRepositoryPort.guardar(actualizado);
         });
+    }
+
+    private Mono<Boolean> recintoTieneTicketsVendidos(Recinto recinto, Integer capacidadMaxima) {
+        boolean cambiaCapacidad = !capacidadMaxima.equals(recinto.getCapacidadMaxima());
+        return cambiaCapacidad
+                ? recintoRepositoryPort.tieneTicketsVendidos(recinto.getId())
+                : Mono.just(false);
+    }
+
+    private Recinto buildRecintoActualizado(Recinto recinto, Integer capacidadMaxima){
+        return recinto.toBuilder().capacidadMaxima(capacidadMaxima).build();
     }
 }
 

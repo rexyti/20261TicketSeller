@@ -3,6 +3,7 @@ package com.ticketseller.application.recinto;
 import com.ticketseller.domain.model.CategoriaRecinto;
 import com.ticketseller.domain.model.Recinto;
 import com.ticketseller.domain.port.out.RecintoRepositoryPort;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -12,13 +13,10 @@ import reactor.core.publisher.Mono;
 import java.util.Comparator;
 import java.util.List;
 
+@RequiredArgsConstructor
 public class ListarRecintosUseCase {
 
     private final RecintoRepositoryPort recintoRepositoryPort;
-
-    public ListarRecintosUseCase(RecintoRepositoryPort recintoRepositoryPort) {
-        this.recintoRepositoryPort = recintoRepositoryPort;
-    }
 
     public Flux<Recinto> ejecutar() {
         return recintoRepositoryPort.listarTodos().filter(Recinto::isActivo);
