@@ -2,23 +2,16 @@ package com.ticketseller.infrastructure.adapter.in.rest;
 
 import com.ticketseller.application.capacidad.ConfigurarCapacidadUseCase;
 import com.ticketseller.application.capacidad.ConfigurarCategoriaUseCase;
-import com.ticketseller.application.compuerta.AsignarCompuertaAZonaUseCase;
-import com.ticketseller.application.compuerta.CrearCompuertaUseCase;
-import com.ticketseller.application.compuerta.ListarCompuertasUseCase;
 import com.ticketseller.application.recinto.DesactivarRecintoUseCase;
 import com.ticketseller.application.recinto.EditarRecintoUseCase;
 import com.ticketseller.application.recinto.ListarRecintosUseCase;
 import com.ticketseller.application.recinto.RegistrarRecintoUseCase;
-import com.ticketseller.application.zona.CrearZonaUseCase;
-import com.ticketseller.application.zona.ListarZonasUseCase;
 import com.ticketseller.domain.exception.RecintoDuplicadoException;
 import com.ticketseller.domain.exception.RecintoNotFoundException;
 import com.ticketseller.domain.model.Recinto;
 import com.ticketseller.infrastructure.adapter.in.rest.dto.recinto.CrearRecintoRequest;
 import com.ticketseller.infrastructure.adapter.in.rest.dto.recinto.RecintoResponse;
-import com.ticketseller.infrastructure.adapter.in.rest.mapper.CompuertaRestMapper;
 import com.ticketseller.infrastructure.adapter.in.rest.mapper.RecintoRestMapper;
-import com.ticketseller.infrastructure.adapter.in.rest.mapper.ZonaRestMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
@@ -64,28 +57,7 @@ class RecintoControllerTest {
     private ConfigurarCategoriaUseCase configurarCategoriaUseCase;
 
     @MockBean
-    private CrearZonaUseCase crearZonaUseCase;
-
-    @MockBean
-    private ListarZonasUseCase listarZonasUseCase;
-
-    @MockBean
-    private CrearCompuertaUseCase crearCompuertaUseCase;
-
-    @MockBean
-    private AsignarCompuertaAZonaUseCase asignarCompuertaAZonaUseCase;
-
-    @MockBean
-    private ListarCompuertasUseCase listarCompuertasUseCase;
-
-    @MockBean
     private RecintoRestMapper recintoRestMapper;
-
-    @MockBean
-    private ZonaRestMapper zonaRestMapper;
-
-    @MockBean
-    private CompuertaRestMapper compuertaRestMapper;
 
     @Test
     void postRecintoValidoRetorna201() {
@@ -112,7 +84,7 @@ class RecintoControllerTest {
         when(recintoRestMapper.toResponse(recintoSaved)).thenReturn(response);
 
         webTestClient.post()
-                .uri("/api/recintos")
+                .uri("/api/v1/recintos")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(request)
                 .exchange()
@@ -125,7 +97,7 @@ class RecintoControllerTest {
     @Test
     void postRecintoInvalidoRetorna400() {
         webTestClient.post()
-                .uri("/api/recintos")
+                .uri("/api/v1/recintos")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue("""
                         {
@@ -153,7 +125,7 @@ class RecintoControllerTest {
         when(recintoRestMapper.toResponse(recinto)).thenReturn(response);
 
         webTestClient.get()
-                .uri("/api/recintos")
+                .uri("/api/v1/recintos")
                 .exchange()
                 .expectStatus().isOk();
     }
@@ -169,7 +141,7 @@ class RecintoControllerTest {
                 .thenReturn(Mono.error(new RecintoDuplicadoException("Ya existe un recinto con el mismo nombre y ciudad")));
 
         webTestClient.post()
-                .uri("/api/recintos")
+                .uri("/api/v1/recintos")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(request)
                 .exchange()
@@ -200,7 +172,7 @@ class RecintoControllerTest {
         when(recintoRestMapper.toResponse(updated)).thenReturn(response);
 
         webTestClient.patch()
-                .uri("/api/recintos/{id}/capacidad", id)
+                .uri("/api/v1/recintos/{id}/capacidad", id)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue("""
                         {
@@ -218,7 +190,7 @@ class RecintoControllerTest {
         UUID id = UUID.randomUUID();
 
         webTestClient.patch()
-                .uri("/api/recintos/{id}/capacidad", id)
+                .uri("/api/v1/recintos/{id}/capacidad", id)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue("""
                         {
@@ -236,7 +208,7 @@ class RecintoControllerTest {
                 .thenReturn(Mono.error(new RecintoNotFoundException("Recinto no encontrado")));
 
         webTestClient.patch()
-                .uri("/api/recintos/{id}/capacidad", id)
+                .uri("/api/v1/recintos/{id}/capacidad", id)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue("""
                         {
