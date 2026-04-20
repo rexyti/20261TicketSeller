@@ -110,16 +110,23 @@ src/main/java/com/ticketseller/
     ├── adapter/
     │   ├── in/rest/
     │   │   ├── RecintoController.java
+    │   │   ├── ZonaController.java
+    │   │   ├── CompuertaController.java
     │   │   ├── dto/
-    │   │   │   ├── CrearRecintoRequest.java
-    │   │   │   ├── EditarRecintoRequest.java
-    │   │   │   ├── ConfigurarCapacidadRequest.java
-    │   │   │   ├── CrearZonaRequest.java
-    │   │   │   ├── CrearCompuertaRequest.java
-    │   │   │   ├── RecintoResponse.java
-    │   │   │   ├── ZonaResponse.java
-    │   │   │   ├── CompuertaResponse.java
-    │   │   │   └── RecintoFiltroRequest.java
+    │   │   │   ├── recinto/
+    │   │   │   │   ├── CrearRecintoRequest.java
+    │   │   │   │   ├── EditarRecintoRequest.java
+    │   │   │   │   ├── ConfigurarCapacidadRequest.java
+    │   │   │   │   ├── ConfigurarCategoriaRequest.java
+    │   │   │   │   ├── CambiarEstadoRecintoRequest.java
+    │   │   │   │   ├── RecintoResponse.java
+    │   │   │   │   └── RecintoFiltroRequest.java
+    │   │   │   ├── zona/
+    │   │   │   │   ├── CrearZonaRequest.java
+    │   │   │   │   └── ZonaResponse.java
+    │   │   │   └── compuerta/
+    │   │   │       ├── CrearCompuertaRequest.java
+    │   │   │       └── CompuertaResponse.java
     │   │   └── mapper/
     │   │       ├── RecintoRestMapper.java
     │   │       ├── ZonaRestMapper.java
@@ -168,7 +175,9 @@ tests/
 │       └── AsignarCompuertaAZonaUseCaseTest.java
 └── infrastructure/
     ├── adapter/in/rest/
-    │   └── RecintoControllerTest.java              # Tests de contrato (WebTestClient)
+    │   ├── RecintoControllerTest.java              # Tests de contrato de recinto (WebTestClient)
+    │   ├── ZonaControllerTest.java                 # Tests de contrato de zonas (WebTestClient)
+    │   └── CompuertaControllerTest.java            # Tests de contrato de compuertas (WebTestClient)
     └── adapter/out/persistence/
         ├── recinto/
         │   └── RecintoRepositoryAdapterTest.java   # Tests de integración (Testcontainers)
