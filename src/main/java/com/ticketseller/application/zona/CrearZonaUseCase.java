@@ -2,6 +2,7 @@ package com.ticketseller.application.zona;
 
 import com.ticketseller.domain.exception.RecintoNotFoundException;
 import com.ticketseller.domain.exception.ZonaCapacidadExcedidaException;
+import com.ticketseller.domain.exception.ZonaInvalidaException;
 import com.ticketseller.domain.model.Recinto;
 import com.ticketseller.domain.model.Zona;
 import com.ticketseller.domain.port.out.RecintoRepositoryPort;
@@ -18,9 +19,13 @@ public class CrearZonaUseCase {
     private final RecintoRepositoryPort recintoRepositoryPort;
 
     public Mono<Zona> ejecutar(UUID recintoId, Zona zona) {
-        return recintoRepositoryPort.buscarPorId(recintoId)
+        return Mono.justOrEmpty(zona)
+                .switchIfEmpty(Mono.error(new ZonaInvalidaException("La zona es obligatoria")))
+                .map(Zona::normalizarDatosRegistro)
+                .doOnNext(Zona::validarDatosRegistro)
+                .flatMap(zonaValida -> recintoRepositoryPort.buscarPorId(recintoId)
                 .switchIfEmpty(Mono.error(new RecintoNotFoundException("Recinto no encontrado")))
-                .flatMap(recinto -> validarYCrear(recinto, zona));
+                .flatMap(recinto -> validarYCrear(recinto, zonaValida)));
     }
 
     private Mono<Zona> validarYCrear(Recinto recinto, Zona zona) {

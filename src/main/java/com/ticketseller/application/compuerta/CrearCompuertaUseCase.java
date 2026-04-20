@@ -2,6 +2,7 @@ package com.ticketseller.application.compuerta;
 
 import com.ticketseller.domain.exception.RecintoNotFoundException;
 import com.ticketseller.domain.exception.ZonaCapacidadExcedidaException;
+import com.ticketseller.domain.exception.CompuertaInvalidaException;
 import com.ticketseller.domain.model.Compuerta;
 import com.ticketseller.domain.port.out.CompuertaRepositoryPort;
 import com.ticketseller.domain.port.out.RecintoRepositoryPort;
@@ -19,9 +20,13 @@ public class CrearCompuertaUseCase {
     private final ZonaRepositoryPort zonaRepositoryPort;
 
     public Mono<Compuerta> ejecutar(UUID recintoId, Compuerta request) {
-        return recintoRepositoryPort.buscarPorId(recintoId)
+        return Mono.justOrEmpty(request)
+                .switchIfEmpty(Mono.error(new CompuertaInvalidaException("La compuerta es obligatoria")))
+                .map(Compuerta::normalizarDatosRegistro)
+                .doOnNext(Compuerta::validarDatosRegistro)
+                .flatMap(compuertaValida -> recintoRepositoryPort.buscarPorId(recintoId)
                 .switchIfEmpty(Mono.error(new RecintoNotFoundException("Recinto no encontrado")))
-                .flatMap(recinto -> validarZonaYGuardar(recintoId, request));
+                .flatMap(recinto -> validarZonaYGuardar(recintoId, compuertaValida)));
     }
 
     private Mono<Compuerta> validarZonaYGuardar(UUID recintoId, Compuerta request) {

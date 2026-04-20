@@ -1,6 +1,7 @@
 package com.ticketseller.application.zona;
 
 import com.ticketseller.domain.exception.ZonaCapacidadExcedidaException;
+import com.ticketseller.domain.exception.ZonaInvalidaException;
 import com.ticketseller.domain.model.Recinto;
 import com.ticketseller.domain.model.Zona;
 import com.ticketseller.domain.port.out.RecintoRepositoryPort;
@@ -14,6 +15,8 @@ import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class CrearZonaUseCaseTest {
@@ -49,6 +52,20 @@ class CrearZonaUseCaseTest {
         StepVerifier.create(useCase.ejecutar(recintoId, Zona.builder().nombre("VIP").capacidad(20).build()))
                 .expectError(ZonaCapacidadExcedidaException.class)
                 .verify();
+    }
+
+    @Test
+    void deberiaFallarCuandoZonaEsInvalida() {
+        UUID recintoId = UUID.randomUUID();
+        ZonaRepositoryPort zonaPort = mock(ZonaRepositoryPort.class);
+        RecintoRepositoryPort recintoPort = mock(RecintoRepositoryPort.class);
+        CrearZonaUseCase useCase = new CrearZonaUseCase(zonaPort, recintoPort);
+
+        StepVerifier.create(useCase.ejecutar(recintoId, Zona.builder().nombre(" ").capacidad(10).build()))
+                .expectError(ZonaInvalidaException.class)
+                .verify();
+
+        verify(recintoPort, never()).buscarPorId(any());
     }
 }
 

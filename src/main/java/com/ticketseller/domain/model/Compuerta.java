@@ -1,5 +1,6 @@
 package com.ticketseller.domain.model;
 
+import com.ticketseller.domain.exception.CompuertaInvalidaException;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,5 +18,21 @@ public class Compuerta {
     private UUID zonaId;
     private String nombre;
     private boolean esGeneral;
+
+    public Compuerta normalizarDatosRegistro() {
+        return this.toBuilder()
+                .nombre(trimOrNull(nombre))
+                .build();
+    }
+
+    public void validarDatosRegistro() {
+        if (nombre == null || nombre.isBlank()) {
+            throw new CompuertaInvalidaException("El campo nombre es obligatorio");
+        }
+    }
+
+    private String trimOrNull(String valor) {
+        return valor == null ? null : valor.trim();
+    }
 }
 

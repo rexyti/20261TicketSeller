@@ -1,10 +1,13 @@
 package com.ticketseller.infrastructure.adapter.in.rest;
 
 import com.ticketseller.domain.exception.CapacidadInvalidaException;
+import com.ticketseller.domain.exception.CompuertaInvalidaException;
 import com.ticketseller.domain.exception.RecintoConEventosException;
 import com.ticketseller.domain.exception.RecintoDuplicadoException;
+import com.ticketseller.domain.exception.RecintoInvalidoException;
 import com.ticketseller.domain.exception.RecintoNotFoundException;
 import com.ticketseller.domain.exception.ZonaCapacidadExcedidaException;
+import com.ticketseller.domain.exception.ZonaInvalidaException;
 import com.ticketseller.domain.exception.ZonaConTicketsVendidosException;
 import com.ticketseller.infrastructure.adapter.in.rest.dto.ApiErrorResponse;
 import org.springframework.http.HttpStatus;
@@ -29,7 +32,8 @@ public class GlobalExceptionHandler {
         return error("RECINTO_CONFLICT", ex.getMessage(), HttpStatus.CONFLICT);
     }
 
-    @ExceptionHandler({CapacidadInvalidaException.class, ZonaCapacidadExcedidaException.class,
+    @ExceptionHandler({CapacidadInvalidaException.class, RecintoInvalidoException.class,
+            ZonaInvalidaException.class, CompuertaInvalidaException.class, ZonaCapacidadExcedidaException.class,
             ZonaConTicketsVendidosException.class, IllegalArgumentException.class})
     public ResponseEntity<ApiErrorResponse> badRequest(RuntimeException ex) {
         return error("VALIDATION_ERROR", ex.getMessage(), HttpStatus.BAD_REQUEST);

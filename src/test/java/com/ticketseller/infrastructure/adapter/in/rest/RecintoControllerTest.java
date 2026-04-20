@@ -7,6 +7,7 @@ import com.ticketseller.application.recinto.EditarRecintoUseCase;
 import com.ticketseller.application.recinto.ListarRecintosUseCase;
 import com.ticketseller.application.recinto.RegistrarRecintoUseCase;
 import com.ticketseller.domain.exception.RecintoDuplicadoException;
+import com.ticketseller.domain.exception.RecintoInvalidoException;
 import com.ticketseller.domain.exception.RecintoNotFoundException;
 import com.ticketseller.domain.model.Recinto;
 import com.ticketseller.infrastructure.adapter.in.rest.dto.recinto.CrearRecintoRequest;
@@ -148,6 +149,26 @@ class RecintoControllerTest {
                 .expectStatus().isEqualTo(409)
                 .expectBody()
                 .jsonPath("$.codigo").isEqualTo("RECINTO_CONFLICT");
+    }
+
+    @Test
+    void postRecintoConErrorDeDominioRetorna400() {
+        CrearRecintoRequest request = new CrearRecintoRequest("Movistar Arena", "Bogota", "Calle 1", 1000,
+                "3001234567", 4);
+        Recinto recintoDomain = Recinto.builder().nombre("Movistar Arena").ciudad("Bogota").build();
+
+        when(recintoRestMapper.toDomain(any(CrearRecintoRequest.class))).thenReturn(recintoDomain);
+        when(registrarRecintoUseCase.ejecutar(recintoDomain))
+                .thenReturn(Mono.error(new RecintoInvalidoException("El campo nombre es obligatorio")));
+
+        webTestClient.post()
+                .uri("/api/v1/recintos")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(request)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.codigo").isEqualTo("VALIDATION_ERROR");
     }
 
     @Test
