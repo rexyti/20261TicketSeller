@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: ticketseller
+  r2dbc:
+    url: r2dbc:postgresql://localhost:5432/ticketseller
+    username: postgres
+    password: postgres
+
+server:
+  port: 8080
+
