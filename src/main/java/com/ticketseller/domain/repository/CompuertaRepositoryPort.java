@@ -1,4 +1,4 @@
-package com.ticketseller.domain.port.out;
+package com.ticketseller.domain.repository;
 
 import com.ticketseller.domain.model.Compuerta;
 import reactor.core.publisher.Flux;

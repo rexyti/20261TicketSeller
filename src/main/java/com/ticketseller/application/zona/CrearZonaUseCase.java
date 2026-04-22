@@ -3,10 +3,11 @@ package com.ticketseller.application.zona;
 import com.ticketseller.domain.exception.RecintoNotFoundException;
 import com.ticketseller.domain.exception.ZonaCapacidadExcedidaException;
 import com.ticketseller.domain.exception.ZonaInvalidaException;
+import com.ticketseller.domain.exception.ZonaNombreDuplicadoException;
 import com.ticketseller.domain.model.Recinto;
 import com.ticketseller.domain.model.Zona;
-import com.ticketseller.domain.port.out.RecintoRepositoryPort;
-import com.ticketseller.domain.port.out.ZonaRepositoryPort;
+import com.ticketseller.domain.repository.RecintoRepositoryPort;
+import com.ticketseller.domain.repository.ZonaRepositoryPort;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 
@@ -29,22 +30,29 @@ public class CrearZonaUseCase {
     }
 
     private Mono<Zona> validarYCrear(Recinto recinto, Zona zona) {
-        return zonaRepositoryPort.buscarPorRecintoId(recinto.getId())
-                .filter(existing -> existing.getNombre().equalsIgnoreCase(zona.getNombre()))
+        return validarNombreUnico(recinto.getId(), zona.getNombre())
+                .then(validarCapacidadDisponible(recinto, zona))
+                .then(Mono.defer(() -> zonaRepositoryPort.guardar(buildZona(recinto.getId(), zona))));
+    }
+
+    private Mono<Void> validarNombreUnico(UUID recintoId, String nombreZona) {
+        return zonaRepositoryPort.buscarPorRecintoId(recintoId)
+                .filter(existing -> existing.getNombre().equalsIgnoreCase(nombreZona))
                 .hasElements()
-                .flatMap(existeNombre -> {
-                    if (existeNombre) {
-                        return Mono.error(new ZonaCapacidadExcedidaException("Ya existe una zona con ese nombre en el recinto"));
-                    }
-                    return zonaRepositoryPort.sumarCapacidadesPorRecinto(recinto.getId())
-                            .flatMap(suma -> {
-                                int nuevaSuma = suma + zona.getCapacidad();
-                                if (capacidadSuperada(nuevaSuma, recinto.getCapacidadMaxima())) {
-                                    return Mono.error(new ZonaCapacidadExcedidaException("La capacidad de zonas excede la capacidad total del recinto"));
-                                }
-                                return zonaRepositoryPort.guardar(buildZona(recinto.getId(), zona));
-                            });
-                });
+                .filter(existeNombre -> !existeNombre)
+                .switchIfEmpty(Mono.error(new ZonaNombreDuplicadoException(
+                        "Ya existe una zona con ese nombre en el recinto"
+                )))
+                .then();
+    }
+
+    private Mono<Void> validarCapacidadDisponible(Recinto recinto, Zona zona) {
+        return zonaRepositoryPort.sumarCapacidadesPorRecinto(recinto.getId())
+                .filter(suma -> !capacidadSuperada(suma + zona.getCapacidad(), recinto.getCapacidadMaxima()))
+                .switchIfEmpty(Mono.error(new ZonaCapacidadExcedidaException(
+                        "La capacidad de zonas excede la capacidad total del recinto"
+                )))
+                .then();
     }
 
     private boolean capacidadSuperada(int capacidadUsada, int capacidadMaxima) {

@@ -7,14 +7,15 @@ import com.ticketseller.application.compuerta.CrearCompuertaUseCase;
 import com.ticketseller.application.compuerta.ListarCompuertasUseCase;
 import com.ticketseller.application.recinto.DesactivarRecintoUseCase;
 import com.ticketseller.application.recinto.EditarRecintoUseCase;
+import com.ticketseller.application.recinto.ListarRecintosFiltradosUseCase;
 import com.ticketseller.application.recinto.ListarRecintosUseCase;
 import com.ticketseller.application.recinto.RegistrarRecintoUseCase;
 import com.ticketseller.application.zona.CrearZonaUseCase;
 import com.ticketseller.application.zona.ListarZonasUseCase;
 import com.ticketseller.application.zona.ValidarZonasUseCase;
-import com.ticketseller.domain.port.out.CompuertaRepositoryPort;
-import com.ticketseller.domain.port.out.RecintoRepositoryPort;
-import com.ticketseller.domain.port.out.ZonaRepositoryPort;
+import com.ticketseller.domain.repository.CompuertaRepositoryPort;
+import com.ticketseller.domain.repository.RecintoRepositoryPort;
+import com.ticketseller.domain.repository.ZonaRepositoryPort;
 import com.ticketseller.infrastructure.adapter.out.persistence.compuerta.CompuertaR2dbcRepository;
 import com.ticketseller.infrastructure.adapter.out.persistence.compuerta.CompuertaRepositoryAdapter;
 import com.ticketseller.infrastructure.adapter.out.persistence.compuerta.mapper.CompuertaPersistenceMapper;
@@ -26,14 +27,16 @@ import com.ticketseller.infrastructure.adapter.out.persistence.zona.ZonaReposito
 import com.ticketseller.infrastructure.adapter.out.persistence.zona.mapper.ZonaPersistenceMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.r2dbc.core.DatabaseClient;
 
 @Configuration
 public class BeanConfiguration {
 
     @Bean
     public RecintoRepositoryPort recintoRepositoryPort(RecintoR2dbcRepository repository,
-                                                       RecintoPersistenceMapper mapper) {
-        return new RecintoRepositoryAdapter(repository, mapper);
+                                                       RecintoPersistenceMapper mapper,
+                                                       DatabaseClient databaseClient) {
+        return new RecintoRepositoryAdapter(repository, mapper, databaseClient);
     }
 
     @Bean
@@ -56,6 +59,11 @@ public class BeanConfiguration {
     @Bean
     public ListarRecintosUseCase listarRecintosUseCase(RecintoRepositoryPort recintoRepositoryPort) {
         return new ListarRecintosUseCase(recintoRepositoryPort);
+    }
+
+    @Bean
+    public ListarRecintosFiltradosUseCase listarRecintosFiltradosUseCase(RecintoRepositoryPort recintoRepositoryPort) {
+        return new ListarRecintosFiltradosUseCase(recintoRepositoryPort);
     }
 
     @Bean

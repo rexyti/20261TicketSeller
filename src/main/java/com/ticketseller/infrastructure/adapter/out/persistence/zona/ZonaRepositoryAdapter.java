@@ -1,7 +1,7 @@
 package com.ticketseller.infrastructure.adapter.out.persistence.zona;
 
 import com.ticketseller.domain.model.Zona;
-import com.ticketseller.domain.port.out.ZonaRepositoryPort;
+import com.ticketseller.domain.repository.ZonaRepositoryPort;
 import com.ticketseller.infrastructure.adapter.out.persistence.zona.mapper.ZonaPersistenceMapper;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;

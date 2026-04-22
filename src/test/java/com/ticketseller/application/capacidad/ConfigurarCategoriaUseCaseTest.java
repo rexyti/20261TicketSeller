@@ -2,7 +2,7 @@ package com.ticketseller.application.capacidad;
 
 import com.ticketseller.domain.model.CategoriaRecinto;
 import com.ticketseller.domain.model.Recinto;
-import com.ticketseller.domain.port.out.RecintoRepositoryPort;
+import com.ticketseller.domain.repository.RecintoRepositoryPort;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;

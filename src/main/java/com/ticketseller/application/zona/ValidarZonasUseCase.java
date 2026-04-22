@@ -1,8 +1,8 @@
 package com.ticketseller.application.zona;
 
 import com.ticketseller.domain.exception.RecintoNotFoundException;
-import com.ticketseller.domain.port.out.RecintoRepositoryPort;
-import com.ticketseller.domain.port.out.ZonaRepositoryPort;
+import com.ticketseller.domain.repository.RecintoRepositoryPort;
+import com.ticketseller.domain.repository.ZonaRepositoryPort;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 

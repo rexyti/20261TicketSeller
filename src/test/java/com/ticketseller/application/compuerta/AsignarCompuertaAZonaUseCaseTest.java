@@ -2,8 +2,8 @@ package com.ticketseller.application.compuerta;
 
 import com.ticketseller.domain.model.Compuerta;
 import com.ticketseller.domain.model.Zona;
-import com.ticketseller.domain.port.out.CompuertaRepositoryPort;
-import com.ticketseller.domain.port.out.ZonaRepositoryPort;
+import com.ticketseller.domain.repository.CompuertaRepositoryPort;
+import com.ticketseller.domain.repository.ZonaRepositoryPort;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;

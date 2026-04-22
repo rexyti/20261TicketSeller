@@ -2,35 +2,24 @@ package com.ticketseller.infrastructure.adapter.in.rest;
 
 import com.ticketseller.application.capacidad.ConfigurarCapacidadUseCase;
 import com.ticketseller.application.capacidad.ConfigurarCategoriaUseCase;
-import com.ticketseller.application.compuerta.AsignarCompuertaAZonaUseCase;
-import com.ticketseller.application.compuerta.CrearCompuertaUseCase;
-import com.ticketseller.application.compuerta.ListarCompuertasUseCase;
 import com.ticketseller.application.recinto.DesactivarRecintoUseCase;
 import com.ticketseller.application.recinto.EditarRecintoUseCase;
-import com.ticketseller.application.recinto.ListarRecintosUseCase;
+import com.ticketseller.application.recinto.ListarRecintosFiltradosUseCase;
 import com.ticketseller.application.recinto.RegistrarRecintoUseCase;
-import com.ticketseller.application.zona.CrearZonaUseCase;
-import com.ticketseller.application.zona.ListarZonasUseCase;
 import com.ticketseller.domain.model.CategoriaRecinto;
-import com.ticketseller.domain.model.Compuerta;
 import com.ticketseller.domain.model.Recinto;
-import com.ticketseller.domain.model.Zona;
 import com.ticketseller.infrastructure.adapter.in.rest.dto.recinto.CambiarEstadoRecintoRequest;
-import com.ticketseller.infrastructure.adapter.in.rest.dto.compuerta.CompuertaResponse;
 import com.ticketseller.infrastructure.adapter.in.rest.dto.recinto.ConfigurarCapacidadRequest;
 import com.ticketseller.infrastructure.adapter.in.rest.dto.recinto.ConfigurarCategoriaRequest;
-import com.ticketseller.infrastructure.adapter.in.rest.dto.compuerta.CrearCompuertaRequest;
 import com.ticketseller.infrastructure.adapter.in.rest.dto.recinto.CrearRecintoRequest;
-import com.ticketseller.infrastructure.adapter.in.rest.dto.zona.CrearZonaRequest;
 import com.ticketseller.infrastructure.adapter.in.rest.dto.recinto.EditarRecintoRequest;
 import com.ticketseller.infrastructure.adapter.in.rest.dto.recinto.RecintoResponse;
-import com.ticketseller.infrastructure.adapter.in.rest.dto.zona.ZonaResponse;
-import com.ticketseller.infrastructure.adapter.in.rest.mapper.CompuertaRestMapper;
 import com.ticketseller.infrastructure.adapter.in.rest.mapper.RecintoRestMapper;
-import com.ticketseller.infrastructure.adapter.in.rest.mapper.ZonaRestMapper;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -41,7 +30,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.UUID;
@@ -52,7 +40,7 @@ import java.util.UUID;
 public class RecintoController {
 
     private final RegistrarRecintoUseCase registrarRecintoUseCase;
-    private final ListarRecintosUseCase listarRecintosUseCase;
+    private final ListarRecintosFiltradosUseCase listarRecintosFiltradosUseCase;
     private final ConfigurarCapacidadUseCase configurarCapacidadUseCase;
     private final EditarRecintoUseCase editarRecintoUseCase;
     private final DesactivarRecintoUseCase desactivarRecintoUseCase;
@@ -76,10 +64,25 @@ public class RecintoController {
             @RequestParam(required = false, defaultValue = "10") Integer size,
             @RequestParam(required = false, defaultValue = "nombre,asc") String sort) {
         CategoriaRecinto categoriaRecinto = categoria == null ? null : CategoriaRecinto.valueOf(categoria);
-        Boolean activo = estado == null || "ACTIVO".equalsIgnoreCase(estado);
-        return listarRecintosUseCase.ejecutarFiltrado(nombre, categoriaRecinto, ciudad, activo, page, size, sort)
-                .map(p -> p.map(recintoRestMapper::toResponse))
+        Boolean activo = mapearEstado(estado);
+        return listarRecintosFiltradosUseCase.ejecutar(nombre, categoriaRecinto, ciudad, activo, page, size, sort)
+                .map(resultado -> {
+                    var contenido = resultado.contenido().stream().map(recintoRestMapper::toResponse).toList();
+                    return new PageImpl<>(contenido,
+                            PageRequest.of(resultado.pagina(), resultado.size()),
+                            resultado.totalElementos());
+                })
                 .map(ResponseEntity::ok);
+    }
+
+    private Boolean mapearEstado(String estado) {
+        if (estado == null || estado.isBlank()) {
+            return true;
+        }
+        if ("TODOS".equalsIgnoreCase(estado)) {
+            return null;
+        }
+        return "ACTIVO".equalsIgnoreCase(estado);
     }
 
     @PatchMapping("/{id}")

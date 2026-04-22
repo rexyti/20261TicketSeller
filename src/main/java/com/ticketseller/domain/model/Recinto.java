@@ -50,13 +50,13 @@ public class Recinto {
 
     private void validarTextoObligatorio(String valor, String campo) {
         if (valor == null || valor.isBlank()) {
-            throw new RecintoInvalidoException("El campo " + campo + " es obligatorio");
+            throw new RecintoInvalidoException("El campo %s es obligatorio".formatted(campo));
         }
     }
 
     private void validarPositivo(Integer valor, String campo) {
         if (valor == null || valor < 1) {
-            throw new RecintoInvalidoException("El campo " + campo + " debe ser mayor a cero");
+            throw new RecintoInvalidoException("El campo %s debe ser mayor a cero".formatted(campo));
         }
     }
 

@@ -50,7 +50,7 @@ class RecintoRepositoryAdapterTest {
     @BeforeEach
     void setup() throws Exception {
         RecintoPersistenceMapper mapper = Mappers.getMapper(RecintoPersistenceMapper.class);
-        adapter = new RecintoRepositoryAdapter(repository, mapper);
+        adapter = new RecintoRepositoryAdapter(repository, mapper, databaseClient);
 
         String script = Files.readString(Path.of("src/test/resources/schema.sql"));
         Flux.fromArray(script.split(";"))

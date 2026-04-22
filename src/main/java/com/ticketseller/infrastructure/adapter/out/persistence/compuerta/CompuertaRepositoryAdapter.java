@@ -1,7 +1,7 @@
 package com.ticketseller.infrastructure.adapter.out.persistence.compuerta;
 
 import com.ticketseller.domain.model.Compuerta;
-import com.ticketseller.domain.port.out.CompuertaRepositoryPort;
+import com.ticketseller.domain.repository.CompuertaRepositoryPort;
 import com.ticketseller.infrastructure.adapter.out.persistence.compuerta.mapper.CompuertaPersistenceMapper;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;

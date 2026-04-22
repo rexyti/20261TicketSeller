@@ -1,8 +1,8 @@
 package com.ticketseller.application.zona;
 
 import com.ticketseller.domain.model.Recinto;
-import com.ticketseller.domain.port.out.RecintoRepositoryPort;
-import com.ticketseller.domain.port.out.ZonaRepositoryPort;
+import com.ticketseller.domain.repository.RecintoRepositoryPort;
+import com.ticketseller.domain.repository.ZonaRepositoryPort;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;

@@ -4,7 +4,7 @@ import com.ticketseller.domain.exception.CapacidadInvalidaException;
 import com.ticketseller.domain.exception.RecintoConEventosException;
 import com.ticketseller.domain.exception.RecintoNotFoundException;
 import com.ticketseller.domain.model.Recinto;
-import com.ticketseller.domain.port.out.RecintoRepositoryPort;
+import com.ticketseller.domain.repository.RecintoRepositoryPort;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 
@@ -31,13 +31,10 @@ public class ConfigurarCapacidadUseCase {
     private Mono<Recinto> validarTicketsYGuardar(Recinto recinto, Integer capacidadMaxima) {
         Mono<Boolean> tieneTickets = recintoTieneTicketsVendidos(recinto, capacidadMaxima);
 
-        return tieneTickets.flatMap(vendidos -> {
-            if (vendidos) {
-                return Mono.error(new RecintoConEventosException("No se puede cambiar la capacidad porque existen tickets vendidos"));
-            }
-            Recinto actualizado = buildRecintoActualizado(recinto, capacidadMaxima);
-            return recintoRepositoryPort.guardar(actualizado);
-        });
+        return tieneTickets.filter(tiene -> !tiene)
+                .switchIfEmpty(Mono.error(new RecintoConEventosException("No se puede cambiar la capacidad máxima porque hay tickets vendidos")))
+                .map(permitido -> buildRecintoActualizado(recinto, capacidadMaxima))
+                .flatMap(recintoRepositoryPort::guardar);
     }
 
     private Mono<Boolean> recintoTieneTicketsVendidos(Recinto recinto, Integer capacidadMaxima) {

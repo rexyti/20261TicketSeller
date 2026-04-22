@@ -1,7 +1,7 @@
 package com.ticketseller.application.zona;
 
 import com.ticketseller.domain.model.Zona;
-import com.ticketseller.domain.port.out.ZonaRepositoryPort;
+import com.ticketseller.domain.repository.ZonaRepositoryPort;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Flux;
 

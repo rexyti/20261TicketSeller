@@ -4,12 +4,13 @@ import com.ticketseller.application.capacidad.ConfigurarCapacidadUseCase;
 import com.ticketseller.application.capacidad.ConfigurarCategoriaUseCase;
 import com.ticketseller.application.recinto.DesactivarRecintoUseCase;
 import com.ticketseller.application.recinto.EditarRecintoUseCase;
-import com.ticketseller.application.recinto.ListarRecintosUseCase;
+import com.ticketseller.application.recinto.ListarRecintosFiltradosUseCase;
 import com.ticketseller.application.recinto.RegistrarRecintoUseCase;
 import com.ticketseller.domain.exception.RecintoDuplicadoException;
 import com.ticketseller.domain.exception.RecintoInvalidoException;
 import com.ticketseller.domain.exception.RecintoNotFoundException;
 import com.ticketseller.domain.model.Recinto;
+import com.ticketseller.domain.shared.Pagina;
 import com.ticketseller.infrastructure.adapter.in.rest.dto.recinto.CrearRecintoRequest;
 import com.ticketseller.infrastructure.adapter.in.rest.dto.recinto.RecintoResponse;
 import com.ticketseller.infrastructure.adapter.in.rest.mapper.RecintoRestMapper;
@@ -18,8 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
@@ -43,7 +42,7 @@ class RecintoControllerTest {
     private RegistrarRecintoUseCase registrarRecintoUseCase;
 
     @MockBean
-    private ListarRecintosUseCase listarRecintosUseCase;
+    private ListarRecintosFiltradosUseCase listarRecintosFiltradosUseCase;
 
     @MockBean
     private ConfigurarCapacidadUseCase configurarCapacidadUseCase;
@@ -121,8 +120,8 @@ class RecintoControllerTest {
                 recinto.getDireccion(), recinto.getCapacidadMaxima(), recinto.getTelefono(), recinto.getFechaCreacion(),
                 recinto.getCompuertasIngreso(), recinto.isActivo(), recinto.getCategoria());
 
-        when(listarRecintosUseCase.ejecutarFiltrado(any(), any(), any(), any(), anyInt(), anyInt(), any()))
-                .thenReturn(Mono.just(new PageImpl<>(List.of(recinto), PageRequest.of(0, 10), 1)));
+        when(listarRecintosFiltradosUseCase.ejecutar(any(), any(), any(), any(), anyInt(), anyInt(), any()))
+                .thenReturn(Mono.just(new Pagina<>(List.of(recinto), 1, 0, 10)));
         when(recintoRestMapper.toResponse(recinto)).thenReturn(response);
 
         webTestClient.get()

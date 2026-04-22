@@ -4,9 +4,9 @@ import com.ticketseller.domain.exception.RecintoNotFoundException;
 import com.ticketseller.domain.exception.ZonaCapacidadExcedidaException;
 import com.ticketseller.domain.exception.CompuertaInvalidaException;
 import com.ticketseller.domain.model.Compuerta;
-import com.ticketseller.domain.port.out.CompuertaRepositoryPort;
-import com.ticketseller.domain.port.out.RecintoRepositoryPort;
-import com.ticketseller.domain.port.out.ZonaRepositoryPort;
+import com.ticketseller.domain.repository.CompuertaRepositoryPort;
+import com.ticketseller.domain.repository.RecintoRepositoryPort;
+import com.ticketseller.domain.repository.ZonaRepositoryPort;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 
