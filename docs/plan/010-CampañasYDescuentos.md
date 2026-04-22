@@ -441,3 +441,4 @@ al carrito, se aplica el descuento. Ticket de otra zona no recibe el descuento.
   R2DBC, el diseño está mal
 - **WebFlux**: todos los casos de uso retornan `Mono<T>` o `Flux<T>`, y los controladores
   retornan `Mono<ResponseEntity<T>>`. Usar `WebTestClient` para los tests de contrato
+

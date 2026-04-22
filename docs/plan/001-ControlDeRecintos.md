@@ -28,30 +28,17 @@ y los puertos de salida. Los adaptadores (controladores REST, repositorios R2DBC
 **Language/Version**: Java 21  
 **Primary Dependencies**: Spring Boot 3.x, Spring Data R2DBC, Spring WebFlux, Bean Validation (Jakarta), MapStruct
 1.5.5, Lombok 1.18.40
-**Storage**: PostgreSQL — esquema creado y gestionado manualmente  
-**Testing**: JUnit 5, Mockito, Spring Boot Test, Testcontainers (PostgreSQL para tests de integración)  
-**Target Platform**: Backend server — microservicio Módulo 1  
-**Project Type**: Web (API REST reactiva con WebFlux)  
+**Storage**: PostgreSQL — esquema creado y gestionado manualmente
+**Testing**: JUnit 5, Mockito, Spring Boot Test, Testcontainers (PostgreSQL para tests de integración)
+**Target Platform**: Backend server — microservicio Módulo 1
+**Project Type**: Web (API REST reactiva con WebFlux)
 **Performance Goals**: El registro de un recinto debe completarse en respuesta menor a 500ms (SC-001). El listado debe
-cargar en menos de 2 segundos con hasta 1,000 recintos (SC-001 Catalogo).  
+cargar en menos de 2 segundos con hasta 1,000 recintos (SC-001 Catalogo).
 **Constraints**: No se permite borrado físico de recintos, solo desactivación (FR-004). Cambios estructurales como aforo
 máximo deben bloquearse si el recinto tiene tickets vendidos. El campo `activo` debe existir en la tabla desde el
-inicio. La suma de capacidades de zonas no puede exceder la capacidad total del recinto.  
+inicio. La suma de capacidades de zonas no puede exceder la capacidad total del recinto.
 **Scale/Scope**: Entidad base del módulo — debe estar disponible antes de cualquier otro feature del Módulo 1. Bloquea
 directamente los features dependientes del Módulo 1.
-
-## Coding Standards
-
-> **⚠️ ADVERTENCIA — Reglas obligatorias de estilo de código:**
->
-> 1. **NO crear comentarios innecesarios.** El código debe ser autoexplicativo. Solo se permiten comentarios cuando
-     aportan contexto que el código por sí solo no puede expresar (e.g., `// TODO:`, decisiones de diseño no obvias,
-     workarounds documentados).
-> 2. **Se DEBEN respetar los principios del código limpio (Clean Code).** Nombres descriptivos, funciones pequeñas con
-     responsabilidad única, sin código muerto, sin duplicación, formateo consistente.
-> 3. **Para la implementación de DTOs NO SE DEBEN USAR CLASES, sino `record`.** Todos los DTOs (request y response)
-     deben ser Java `record` en lugar de clases convencionales. Los `record` son inmutables, concisos y semánticamente
-     correctos para objetos de transferencia de datos.
 
 ## Project Structure
 
@@ -70,121 +57,87 @@ plan/
 
 ```text
 src/main/java/com/ticketseller/
-│
-├── domain/                                         # Núcleo — sin dependencias de Spring ni R2DBC
+├── domain/
 │   ├── model/
-│   │   ├── Recinto.java                            # Entidad de dominio pura
-│   │   ├── Zona.java                               # Entidad de dominio para zonas
-│   │   ├── Compuerta.java                          # Entidad de dominio para compuertas
-│   │   └── CategoriaRecinto.java                   # Enum para categorías
+│   │   ├── Recinto.java
+│   │   ├── Zona.java
+│   │   ├── Compuerta.java
+│   │   └── CategoriaRecinto.java
 │   ├── exception/
-│   │   ├── RecintoNotFoundException.java
+│   │   ├── CapacidadInvalidaException.java
+│   │   ├── CompuertaInvalidaException.java
 │   │   ├── RecintoConEventosException.java
 │   │   ├── RecintoDuplicadoException.java
-│   │   ├── CapacidadInvalidaException.java
+│   │   ├── RecintoInvalidoException.java
+│   │   ├── RecintoNotFoundException.java
 │   │   ├── ZonaCapacidadExcedidaException.java
-│   │   └── ZonaConTicketsVendidosException.java
-│   └── port/
-│       └── out/                                    # Puertos de salida (contratos hacia infraestructura)
-│           ├── RecintoRepositoryPort.java
-│           ├── ZonaRepositoryPort.java
-│           └── CompuertaRepositoryPort.java
-│
-├── application/                                    # Casos de uso — uno por responsabilidad
+│   │   ├── ZonaConTicketsVendidosException.java
+│   │   ├── ZonaInvalidaException.java
+│   │   ├── ZonaNombreDuplicadoException.java
+│   │   └── ZonaNotFoundException.java
+│   ├── repository/
+│   │   ├── RecintoRepositoryPort.java
+│   │   ├── ZonaRepositoryPort.java
+│   │   └── CompuertaRepositoryPort.java
+│   └── shared/
+│       └── Pagina.java
+├── application/
 │   ├── recinto/
 │   │   ├── RegistrarRecintoUseCase.java
+│   │   ├── ListarRecintosUseCase.java
+│   │   ├── ListarRecintosFiltradosUseCase.java
 │   │   ├── EditarRecintoUseCase.java
-│   │   ├── DesactivarRecintoUseCase.java
-│   │   └── ListarRecintosUseCase.java
+│   │   └── DesactivarRecintoUseCase.java
 │   ├── capacidad/
 │   │   ├── ConfigurarCapacidadUseCase.java
 │   │   └── ConfigurarCategoriaUseCase.java
 │   ├── zona/
 │   │   ├── CrearZonaUseCase.java
+│   │   ├── ListarZonasUseCase.java
 │   │   └── ValidarZonasUseCase.java
 │   └── compuerta/
 │       ├── CrearCompuertaUseCase.java
-│       └── AsignarCompuertaAZonaUseCase.java
-│
-└── infrastructure/                                 # Adaptadores — todo lo que toca el mundo exterior
-    ├── adapter/
-    │   ├── in/rest/
-    │   │   ├── RecintoController.java
-    │   │   ├── ZonaController.java
-    │   │   ├── CompuertaController.java
-    │   │   ├── dto/
-    │   │   │   ├── recinto/
-    │   │   │   │   ├── CrearRecintoRequest.java
-    │   │   │   │   ├── EditarRecintoRequest.java
-    │   │   │   │   ├── ConfigurarCapacidadRequest.java
-    │   │   │   │   ├── ConfigurarCategoriaRequest.java
-    │   │   │   │   ├── CambiarEstadoRecintoRequest.java
-    │   │   │   │   ├── RecintoResponse.java
-    │   │   │   │   └── RecintoFiltroRequest.java
-    │   │   │   ├── zona/
-    │   │   │   │   ├── CrearZonaRequest.java
-    │   │   │   │   └── ZonaResponse.java
-    │   │   │   └── compuerta/
-    │   │   │       ├── CrearCompuertaRequest.java
-    │   │   │       └── CompuertaResponse.java
-    │   │   └── mapper/
-    │   │       ├── RecintoRestMapper.java
-    │   │       ├── ZonaRestMapper.java
-    │   │       └── CompuertaRestMapper.java
-    │   └── out/persistence/
-    │       ├── recinto/
-    │       │   ├── RecintoEntity.java                  # Entidad R2DBC
-    │       │   ├── RecintoR2dbcRepository.java         # Interface Spring Data R2DBC
-    │       │   ├── RecintoRepositoryAdapter.java       # Implementa RecintoRepositoryPort
-    │       │   └── mapper/
-    │       │       └── RecintoPersistenceMapper.java
-    │       ├── zona/
-    │       │   ├── ZonaEntity.java
-    │       │   ├── ZonaR2dbcRepository.java
-    │       │   ├── ZonaRepositoryAdapter.java
-    │       │   └── mapper/
-    │       │       └── ZonaPersistenceMapper.java
-    │       └── compuerta/
-    │           ├── CompuertaEntity.java
-    │           ├── CompuertaR2dbcRepository.java
-    │           ├── CompuertaRepositoryAdapter.java
-    │           └── mapper/
-    │               └── CompuertaPersistenceMapper.java
+│       ├── AsignarCompuertaAZonaUseCase.java
+│       └── ListarCompuertasUseCase.java
+└── infrastructure/
+    ├── adapter/in/rest/
+    │   ├── RecintoController.java
+    │   ├── ZonaController.java
+    │   ├── CompuertaController.java
+    │   ├── GlobalExceptionHandler.java
+    │   ├── dto/
+    │   └── mapper/
+    ├── adapter/out/persistence/
+    │   ├── recinto/
+    │   ├── zona/
+    │   └── compuerta/
     └── config/
         └── BeanConfiguration.java                  # Inyección de dependencias hexagonal
 
 tests/
 ├── domain/
-│   ├── RecintoTest.java                            # Tests unitarios del dominio puro
+│   ├── RecintoTest.java
 │   ├── ZonaTest.java
 │   └── CompuertaTest.java
 ├── application/
 │   ├── recinto/
 │   │   ├── RegistrarRecintoUseCaseTest.java
+│   │   ├── ListarRecintosUseCaseTest.java
+│   │   ├── ListarRecintosFiltradosUseCaseTest.java
 │   │   ├── EditarRecintoUseCaseTest.java
-│   │   ├── DesactivarRecintoUseCaseTest.java
-│   │   └── ListarRecintosUseCaseTest.java
+│   │   └── DesactivarRecintoUseCaseTest.java
 │   ├── capacidad/
-│   │   ├── ConfigurarCapacidadUseCaseTest.java
-│   │   └── ConfigurarCategoriaUseCaseTest.java
 │   ├── zona/
-│   │   ├── CrearZonaUseCaseTest.java
-│   │   └── ValidarZonasUseCaseTest.java
 │   └── compuerta/
-│       ├── CrearCompuertaUseCaseTest.java
-│       └── AsignarCompuertaAZonaUseCaseTest.java
 └── infrastructure/
     ├── adapter/in/rest/
-    │   ├── RecintoControllerTest.java              # Tests de contrato de recinto (WebTestClient)
-    │   ├── ZonaControllerTest.java                 # Tests de contrato de zonas (WebTestClient)
-    │   └── CompuertaControllerTest.java            # Tests de contrato de compuertas (WebTestClient)
+    │   ├── RecintoControllerTest.java
+    │   ├── ZonaControllerTest.java
+    │   └── CompuertaControllerTest.java
     └── adapter/out/persistence/
-        ├── recinto/
-        │   └── RecintoRepositoryAdapterTest.java   # Tests de integración (Testcontainers)
-        ├── zona/
-        │   └── ZonaRepositoryAdapterTest.java
-        └── compuerta/
-            └── CompuertaRepositoryAdapterTest.java
+        ├── recinto/RecintoRepositoryAdapterTest.java
+        ├── zona/ZonaRepositoryAdapterTest.java
+        └── compuerta/CompuertaRepositoryAdapterTest.java
 ```
 
 **Structure Decision**: Arquitectura hexagonal respetando responsabilidad única. `domain/` contiene únicamente el modelo
@@ -214,30 +167,30 @@ mezclen. Las entidades de dominio `Zona` y `Compuerta` se agregan para soportar 
 **⚠️ CRITICAL**: Ninguna user story puede comenzar hasta que esta fase esté completa.
 
 - [ ] T005 Crear las tablas manualmente en PostgreSQL:
-    - `recintos`: `id` (UUID), `nombre`, `ciudad`, `direccion`, `capacidad_maxima`, `telefono`, `fecha_creacion`,
-      `compuertas_ingreso`, `activo` (boolean, default true), `categoria` (varchar nullable)
-    - `zonas`: `id` (UUID), `recinto_id` (UUID FK), `nombre`, `capacidad`
-    - `compuertas`: `id` (UUID), `recinto_id` (UUID FK), `zona_id` (UUID FK nullable), `nombre`, `es_general` (boolean)
+  - `recintos`: `id` (UUID), `nombre`, `ciudad`, `direccion`, `capacidad_maxima`, `telefono`, `fecha_creacion`,
+    `compuertas_ingreso`, `activo` (boolean, default true), `categoria` (varchar nullable)
+  - `zonas`: `id` (UUID), `recinto_id` (UUID FK), `nombre`, `capacidad`
+  - `compuertas`: `id` (UUID), `recinto_id` (UUID FK), `zona_id` (UUID FK nullable), `nombre`, `es_general` (boolean)
 - [ ] T006 Crear clases de dominio en `domain/model/`:
-    - `Recinto.java` con atributos: id (UUID), nombre, ciudad, direccion, capacidadMaxima, telefono, fechaCreacion,
-      compuertasIngreso, activo (boolean), categoria (enum nullable)
-    - `Zona.java` con atributos: id (UUID), recintoId, nombre, capacidad
-    - `Compuerta.java` con atributos: id (UUID), recintoId, zonaId (nullable), nombre, esGeneral (boolean)
-    - `CategoriaRecinto.java` como enum con valores predefinidos
+  - `Recinto.java` con atributos: id (UUID), nombre, ciudad, direccion, capacidadMaxima, telefono, fechaCreacion,
+    compuertasIngreso, activo (boolean), categoria (enum nullable)
+  - `Zona.java` con atributos: id (UUID), recintoId, nombre, capacidad
+  - `Compuerta.java` con atributos: id (UUID), recintoId, zonaId (nullable), nombre, esGeneral (boolean)
+  - `CategoriaRecinto.java` como enum con valores predefinidos
 - [ ] T007 Crear excepciones de dominio en `domain/exception/`: `RecintoNotFoundException`,
   `RecintoConEventosException`, `RecintoDuplicadoException`, `CapacidadInvalidaException`,
   `ZonaCapacidadExcedidaException`, `ZonaConTicketsVendidosException`
 - [ ] T008 Crear interfaces de puertos de salida en `domain/port/out/`:
-    - `RecintoRepositoryPort.java` con métodos: `guardar()`, `buscarPorId()`, `buscarPorNombreYCiudad()`,
-      `listarTodos()`, `tieneEventosFuturos()`, `buscarPorCategoria()`, `buscarPorCiudad()` — todos retornando
-      `Mono<T>` o `Flux<T>`
-    - `ZonaRepositoryPort.java` con métodos: `guardar()`, `buscarPorRecintoId()`, `sumarCapacidadesPorRecinto()`,
-      `buscarPorId()`
-    - `CompuertaRepositoryPort.java` con métodos: `guardar()`, `buscarPorRecintoId()`, `buscarPorZonaId()`
+  - `RecintoRepositoryPort.java` con métodos: `guardar()`, `buscarPorId()`, `buscarPorNombreYCiudad()`,
+    `listarTodos()`, `tieneEventosFuturos()`, `buscarPorCategoria()`, `buscarPorCiudad()` — todos retornando
+    `Mono<T>` o `Flux<T>`
+  - `ZonaRepositoryPort.java` con métodos: `guardar()`, `buscarPorRecintoId()`, `sumarCapacidadesPorRecinto()`,
+    `buscarPorId()`
+  - `CompuertaRepositoryPort.java` con métodos: `guardar()`, `buscarPorRecintoId()`, `buscarPorZonaId()`
 - [ ] T009 Crear entidades R2DBC en `infrastructure/adapter/out/persistence/`:
-    - `RecintoEntity.java` con anotaciones `@Table`, mapeo de columnas incluyendo campo `activo` y `categoria`
-    - `ZonaEntity.java` con relación a recinto
-    - `CompuertaEntity.java` con relación a recinto y zona (nullable)
+  - `RecintoEntity.java` con anotaciones `@Table`, mapeo de columnas incluyendo campo `activo` y `categoria`
+  - `ZonaEntity.java` con relación a recinto
+  - `CompuertaEntity.java` con relación a recinto y zona (nullable)
 - [ ] T010 Implementar adapters de repositorio que implementan los ports correspondientes usando los repositorios
   Spring Data R2DBC
 - [ ] T011 Implementar mappers de persistencia para convertir entre modelos de dominio y entidades R2DBC

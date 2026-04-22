@@ -1,10 +1,26 @@
-HELP.md
-target/
-.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
+### Gradle ###
+.gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
 
-### STS ###
+### Java ###
+*.class
+*.jar
+*.war
+*.ear
+*.orig
+*.log
+*.properties
+
+### IDE ###
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### Eclipse/STS ###
 .apt_generated
 .classpath
 .factorypath
@@ -13,23 +29,22 @@ target/
 .springBeans
 .sts4-cache
 
-### IntelliJ IDEA ###
-.idea
-*.iws
-*.iml
-*.ipr
-
 ### NetBeans ###
 /nbproject/private/
 /nbbuild/
 /dist/
 /nbdist/
 /.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
 
 ### VS Code ###
 .vscode/
 
+### OS ###
+.DS_Store
+Thumbs.db
+
+### Checkstyle config (keep in repo) ###
+!config/
+
+### Spec template ###
 *template.md
