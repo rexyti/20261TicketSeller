@@ -48,10 +48,9 @@ requests concurrentes en picos de ingreso
 src/main/java/com/ticketseller/
 │
 ├── domain/
-│   └── port/
-│       └── out/
-│           # Reutiliza TicketRepositoryPort (feature 005) y RecintoRepositoryPort (features 001/002)
-│           # Este feature no agrega puertos de salida nuevos
+│   └── repository/
+│       # Reutiliza TicketRepositoryPort (feature 005) y RecintoRepositoryPort (features 001/002)
+│       # Este feature no agrega puertos de salida nuevos
 │
 ├── application/                                           # Un caso de uso por responsabilidad — clases concretas
 │   ├── ConsultarEstadoTicketUseCase.java                  # Consulta estado + zona + categoría + metadatos del ticket
