@@ -20,7 +20,7 @@ public class EmailNotificacionAdapter implements NotificacionEmailPort {
         return Mono.fromRunnable(() -> {
             SimpleMailMessage message = new SimpleMailMessage();
             message.setTo("comprador+" + venta.getCompradorId() + "@ticketseller.local");
-            message.setSubject("Confirmacion de compra " + venta.getId());
+            message.setSubject("Confirmación de compra " + venta.getId());
             message.setText("Tu compra fue completada. Tickets generados: " + tickets.size());
             javaMailSender.send(message);
         });

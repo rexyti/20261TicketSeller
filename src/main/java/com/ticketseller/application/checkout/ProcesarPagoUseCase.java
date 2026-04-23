@@ -34,9 +34,9 @@ public class ProcesarPagoUseCase {
     private final CodigoQrPort codigoQrPort;
 
     public Mono<VentaDetalle> ejecutar(UUID ventaId, ProcesarPagoCommand command) {
-        if (command == null || command.metodoPago() == null || command.metodoPago().isBlank()) {
+        if (invalidCommand(command))
             return Mono.error(new IllegalArgumentException("El metodo de pago es obligatorio"));
-        }
+
         return ventaRepositoryPort.buscarPorId(ventaId)
                 .switchIfEmpty(Mono.error(new VentaNotFoundException("Venta no encontrada")))
                 .flatMap(venta -> validarVentaVigente(venta)
@@ -44,16 +44,28 @@ public class ProcesarPagoUseCase {
                         .flatMap(resultado -> registrarResultadoPago(venta, command, resultado)));
     }
 
+    private boolean invalidCommand(ProcesarPagoCommand command) {
+        return command == null || command.metodoPago() == null || command.metodoPago().isBlank();
+    }
+
     private Mono<Void> validarVentaVigente(Venta venta) {
-        if (!EstadoVenta.RESERVADA.equals(venta.getEstado())) {
+        if (ventaNoReservada(venta))
             return Mono.error(new ReservaExpiradaException("La venta no se encuentra reservada"));
-        }
-        if (venta.getFechaExpiracion() != null && venta.getFechaExpiracion().isBefore(LocalDateTime.now())) {
+
+        if (ventaExpirada(venta)) {
             return ventaRepositoryPort.actualizarEstado(venta.getId(), EstadoVenta.EXPIRADA)
                     .then(ticketRepositoryPort.actualizarEstadoPorVenta(venta.getId(), EstadoTicket.DISPONIBLE))
                     .then(Mono.error(new ReservaExpiradaException("La reserva ya expiro")));
         }
         return Mono.empty();
+    }
+
+    private boolean ventaNoReservada(Venta venta) {
+        return !EstadoVenta.RESERVADA.equals(venta.getEstado());
+    }
+
+    private boolean ventaExpirada(Venta venta) {
+        return venta.getFechaExpiracion() != null && venta.getFechaExpiracion().isBefore(LocalDateTime.now());
     }
 
     private Mono<VentaDetalle> registrarResultadoPago(Venta venta, ProcesarPagoCommand command, ResultadoPago resultado) {
@@ -64,11 +76,7 @@ public class ProcesarPagoUseCase {
 
     private Mono<VentaDetalle> completarVenta(Venta venta, ProcesarPagoCommand command, ResultadoPago resultado) {
         return ticketRepositoryPort.buscarPorVenta(venta.getId())
-                .map(ticket -> ticket.toBuilder()
-                        .estado(EstadoTicket.VENDIDO)
-                        .codigoQr(codigoQrPort.generarCodigo(ticket.getId().toString()))
-                        .build()
-                        .normalizarDatosRegistro())
+                .map(this::buildTicket)
                 .doOnNext(Ticket::validarDatosRegistro)
                 .collectList()
                 .flatMap(ticketsVendidos -> ticketRepositoryPort.guardarTodos(ticketsVendidos)
@@ -77,6 +85,14 @@ public class ProcesarPagoUseCase {
                                 .flatMap(ventaPagada -> guardarTransaccion(ventaPagada, command, resultado)
                                         .then(notificacionEmailPort.enviarConfirmacion(ventaPagada, savedTickets))
                                         .thenReturn(new VentaDetalle(ventaPagada, savedTickets)))));
+    }
+
+    private Ticket buildTicket(Ticket ticket) {
+        return ticket.toBuilder()
+                .estado(EstadoTicket.VENDIDO)
+                .codigoQr(codigoQrPort.generarCodigo(ticket.getId().toString()))
+                .build()
+                .normalizarDatosRegistro();
     }
 
     private Mono<VentaDetalle> rechazarPago(Venta venta, ProcesarPagoCommand command, ResultadoPago resultado) {
@@ -88,7 +104,13 @@ public class ProcesarPagoUseCase {
     }
 
     private Mono<TransaccionFinanciera> guardarTransaccion(Venta venta, ProcesarPagoCommand command, ResultadoPago resultado) {
-        TransaccionFinanciera transaccion = TransaccionFinanciera.builder()
+        TransaccionFinanciera transaccion = buildTransaccionFinanciera(venta, command, resultado);
+        transaccion.validarDatosRegistro();
+        return transaccionFinancieraRepositoryPort.guardar(transaccion);
+    }
+
+    private TransaccionFinanciera buildTransaccionFinanciera(Venta venta, ProcesarPagoCommand command, ResultadoPago resultado) {
+        return TransaccionFinanciera.builder()
                 .id(UUID.randomUUID())
                 .ventaId(venta.getId())
                 .monto(venta.getTotal())
@@ -100,8 +122,6 @@ public class ProcesarPagoUseCase {
                 .ip(command.ip())
                 .build()
                 .normalizarDatosRegistro();
-        transaccion.validarDatosRegistro();
-        return transaccionFinancieraRepositoryPort.guardar(transaccion);
     }
 }
 

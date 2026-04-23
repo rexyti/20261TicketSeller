@@ -6,14 +6,12 @@ public enum EstadoPago {
     ERROR;
 
     public static EstadoPago fromValor(String valor) {
-        if (valor == null || valor.isBlank()) {
-            return ERROR;
-        }
-        try {
-            return EstadoPago.valueOf(valor.trim().toUpperCase());
-        } catch (IllegalArgumentException ex) {
-            return ERROR;
-        }
+        if (noValue(valor)) return ERROR;
+        return EstadoPago.valueOf(valor.trim().toUpperCase());
+    }
+
+    private static boolean noValue(String valor) {
+        return valor == null || valor.isBlank();
     }
 }
 

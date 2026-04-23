@@ -6,14 +6,12 @@ public enum MetodoPago {
     OTRO;
 
     public static MetodoPago fromValor(String valor) {
-        if (valor == null || valor.isBlank()) {
-            throw new IllegalArgumentException("El metodo de pago es obligatorio");
-        }
-        try {
-            return MetodoPago.valueOf(valor.trim().toUpperCase());
-        } catch (IllegalArgumentException ex) {
-            throw new IllegalArgumentException("Metodo de pago no soportado: " + valor);
-        }
+        if (noValue(valor)) throw new IllegalArgumentException("El método de pago es obligatorio");
+        return MetodoPago.valueOf(valor.trim().toUpperCase());
+    }
+
+    private static boolean noValue(String valor) {
+        return valor == null || valor.isBlank();
     }
 }
 

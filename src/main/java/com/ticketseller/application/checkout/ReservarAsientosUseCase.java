@@ -47,10 +47,14 @@ public class ReservarAsientosUseCase {
     }
 
     private void validarCommand(ReservarAsientosCommand command) {
-        if (command == null || command.compradorId() == null || command.eventoId() == null
-                || command.zonaId() == null || command.cantidad() == null || command.cantidad() <= 0) {
+        if (solicitudReservaInvalida(command)) {
             throw new IllegalArgumentException("La solicitud de reserva es invalida");
         }
+    }
+
+    private boolean solicitudReservaInvalida(ReservarAsientosCommand command) {
+        return command == null || command.compradorId() == null || command.eventoId() == null
+                || command.zonaId() == null || command.cantidad() == null || command.cantidad() <= 0;
     }
 
     private Mono<Zona> obtenerZona(UUID zonaId) {
@@ -79,14 +83,32 @@ public class ReservarAsientosUseCase {
                                         PrecioZona precioZona,
                                         Compuerta compuerta,
                                         Long ocupados) {
-        if (ocupados + command.cantidad() > zona.getCapacidad()) {
+        if (zonaSinCuposDisponibles(ocupados, command, zona))
             return Mono.error(new AsientoNoDisponibleException("No hay cupos disponibles en la zona solicitada"));
-        }
 
-        LocalDateTime ahora = LocalDateTime.now();
         BigDecimal total = precioZona.getPrecio().multiply(BigDecimal.valueOf(command.cantidad()));
 
-        Venta venta = Venta.builder()
+        Venta venta = buildVenta(command, total);
+        venta.validarDatosRegistro();
+
+        List<Ticket> tickets = IntStream.range(0, command.cantidad())
+                .mapToObj(ignore -> buildTicket(venta, command, compuerta, precioZona))
+                .peek(Ticket::validarDatosRegistro)
+                .toList();
+
+        return ventaRepositoryPort.guardar(venta)
+                .flatMap(savedVenta -> ticketRepositoryPort.guardarTodos(tickets)
+                        .collectList()
+                        .map(savedTickets -> new VentaDetalle(savedVenta, savedTickets)));
+    }
+
+    private boolean zonaSinCuposDisponibles(Long ocupados, ReservarAsientosCommand command, Zona zona) {
+        return ocupados + command.cantidad() > zona.getCapacidad();
+    }
+
+    private Venta buildVenta(ReservarAsientosCommand command, BigDecimal total) {
+        LocalDateTime ahora = LocalDateTime.now();
+        return Venta.builder()
                 .id(UUID.randomUUID())
                 .compradorId(command.compradorId())
                 .eventoId(command.eventoId())
@@ -95,27 +117,20 @@ public class ReservarAsientosUseCase {
                 .fechaExpiracion(ahora.plusMinutes(TTL_MINUTOS))
                 .total(total)
                 .build();
-        venta.validarDatosRegistro();
+    }
 
-        List<Ticket> tickets = IntStream.range(0, command.cantidad())
-                .mapToObj(ignore -> Ticket.builder()
-                        .id(UUID.randomUUID())
-                        .ventaId(venta.getId())
-                        .eventoId(command.eventoId())
-                        .zonaId(command.zonaId())
-                        .compuertaId(compuerta.getId())
-                        .estado(EstadoTicket.RESERVADO)
-                        .precio(precioZona.getPrecio())
-                        .esCortesia(Boolean.TRUE.equals(command.esCortesia()))
-                        .build()
-                        .normalizarDatosRegistro())
-                .peek(Ticket::validarDatosRegistro)
-                .toList();
-
-        return ventaRepositoryPort.guardar(venta)
-                .flatMap(savedVenta -> ticketRepositoryPort.guardarTodos(tickets)
-                        .collectList()
-                        .map(savedTickets -> new VentaDetalle(savedVenta, savedTickets)));
+    private Ticket buildTicket(Venta venta, ReservarAsientosCommand command, Compuerta compuerta, PrecioZona precioZona){
+        return Ticket.builder()
+                .id(UUID.randomUUID())
+                .ventaId(venta.getId())
+                .eventoId(command.eventoId())
+                .zonaId(command.zonaId())
+                .compuertaId(compuerta.getId())
+                .estado(EstadoTicket.RESERVADO)
+                .precio(precioZona.getPrecio())
+                .esCortesia(Boolean.TRUE.equals(command.esCortesia()))
+                .build()
+                .normalizarDatosRegistro();
     }
 }
 
