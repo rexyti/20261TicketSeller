@@ -2,6 +2,10 @@ package com.ticketseller.infrastructure.config;
 
 import com.ticketseller.application.capacidad.ConfigurarCapacidadUseCase;
 import com.ticketseller.application.capacidad.ConfigurarCategoriaUseCase;
+import com.ticketseller.application.checkout.ConsultarVentaUseCase;
+import com.ticketseller.application.checkout.LiberarReservaUseCase;
+import com.ticketseller.application.checkout.ProcesarPagoUseCase;
+import com.ticketseller.application.checkout.ReservarAsientosUseCase;
 import com.ticketseller.application.compuerta.AsignarCompuertaAZonaUseCase;
 import com.ticketseller.application.compuerta.CrearCompuertaUseCase;
 import com.ticketseller.application.compuerta.ListarCompuertasUseCase;
@@ -21,6 +25,12 @@ import com.ticketseller.domain.repository.CompuertaRepositoryPort;
 import com.ticketseller.domain.repository.EventoRepositoryPort;
 import com.ticketseller.domain.repository.PrecioZonaRepositoryPort;
 import com.ticketseller.domain.repository.RecintoRepositoryPort;
+import com.ticketseller.domain.repository.CodigoQrPort;
+import com.ticketseller.domain.repository.NotificacionEmailPort;
+import com.ticketseller.domain.repository.PasarelaPagoPort;
+import com.ticketseller.domain.repository.TicketRepositoryPort;
+import com.ticketseller.domain.repository.TransaccionFinancieraRepositoryPort;
+import com.ticketseller.domain.repository.VentaRepositoryPort;
 import com.ticketseller.domain.repository.ZonaRepositoryPort;
 import com.ticketseller.infrastructure.adapter.out.persistence.cancelacionevento.CancelacionEventoR2dbcRepository;
 import com.ticketseller.infrastructure.adapter.out.persistence.cancelacionevento.CancelacionEventoRepositoryAdapter;
@@ -31,6 +41,15 @@ import com.ticketseller.infrastructure.adapter.out.persistence.compuerta.mapper.
 import com.ticketseller.infrastructure.adapter.out.persistence.evento.EventoR2dbcRepository;
 import com.ticketseller.infrastructure.adapter.out.persistence.evento.EventoRepositoryAdapter;
 import com.ticketseller.infrastructure.adapter.out.persistence.evento.mapper.EventoPersistenceMapper;
+import com.ticketseller.infrastructure.adapter.out.persistence.checkout.TicketR2dbcRepository;
+import com.ticketseller.infrastructure.adapter.out.persistence.checkout.TicketRepositoryAdapter;
+import com.ticketseller.infrastructure.adapter.out.persistence.checkout.TransaccionFinancieraR2dbcRepository;
+import com.ticketseller.infrastructure.adapter.out.persistence.checkout.TransaccionFinancieraRepositoryAdapter;
+import com.ticketseller.infrastructure.adapter.out.persistence.checkout.VentaR2dbcRepository;
+import com.ticketseller.infrastructure.adapter.out.persistence.checkout.VentaRepositoryAdapter;
+import com.ticketseller.infrastructure.adapter.out.persistence.checkout.mapper.TicketPersistenceMapper;
+import com.ticketseller.infrastructure.adapter.out.persistence.checkout.mapper.TransaccionFinancieraPersistenceMapper;
+import com.ticketseller.infrastructure.adapter.out.persistence.checkout.mapper.VentaPersistenceMapper;
 import com.ticketseller.infrastructure.adapter.out.persistence.preciozona.PrecioZonaR2dbcRepository;
 import com.ticketseller.infrastructure.adapter.out.persistence.preciozona.PrecioZonaRepositoryAdapter;
 import com.ticketseller.infrastructure.adapter.out.persistence.preciozona.mapper.PrecioZonaPersistenceMapper;
@@ -40,9 +59,14 @@ import com.ticketseller.infrastructure.adapter.out.persistence.recinto.mapper.Re
 import com.ticketseller.infrastructure.adapter.out.persistence.zona.ZonaR2dbcRepository;
 import com.ticketseller.infrastructure.adapter.out.persistence.zona.ZonaRepositoryAdapter;
 import com.ticketseller.infrastructure.adapter.out.persistence.zona.mapper.ZonaPersistenceMapper;
+import com.ticketseller.infrastructure.adapter.out.payment.PasarelaPagoAdapter;
+import com.ticketseller.infrastructure.adapter.out.email.EmailNotificacionAdapter;
+import com.ticketseller.infrastructure.adapter.out.qr.ZxingCodigoQrAdapter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.r2dbc.core.DatabaseClient;
+import org.springframework.mail.javamail.JavaMailSender;
 
 @Configuration
 public class BeanConfiguration {
@@ -82,6 +106,45 @@ public class BeanConfiguration {
     public PrecioZonaRepositoryPort precioZonaRepositoryPort(PrecioZonaR2dbcRepository repository,
                                                              PrecioZonaPersistenceMapper mapper) {
         return new PrecioZonaRepositoryAdapter(repository, mapper);
+    }
+
+    @Bean
+    public TicketRepositoryPort ticketRepositoryPort(TicketR2dbcRepository repository,
+                                                     TicketPersistenceMapper mapper) {
+        return new TicketRepositoryAdapter(repository, mapper);
+    }
+
+    @Bean
+    public VentaRepositoryPort ventaRepositoryPort(VentaR2dbcRepository repository,
+                                                   VentaPersistenceMapper mapper) {
+        return new VentaRepositoryAdapter(repository, mapper);
+    }
+
+    @Bean
+    public TransaccionFinancieraRepositoryPort transaccionFinancieraRepositoryPort(
+            TransaccionFinancieraR2dbcRepository repository,
+            TransaccionFinancieraPersistenceMapper mapper) {
+        return new TransaccionFinancieraRepositoryAdapter(repository, mapper);
+    }
+
+    @Bean
+    public PasarelaPagoPort pasarelaPagoPort() {
+        return new PasarelaPagoAdapter();
+    }
+
+    @Bean
+    public NotificacionEmailPort notificacionEmailPort() {
+        return new EmailNotificacionAdapter(javaMailSender());
+    }
+
+    @Bean
+    public JavaMailSender javaMailSender() {
+        return new JavaMailSenderImpl();
+    }
+
+    @Bean
+    public CodigoQrPort codigoQrPort() {
+        return new ZxingCodigoQrAdapter();
     }
 
     @Bean
@@ -187,5 +250,38 @@ public class BeanConfiguration {
     public CancelarEventoUseCase cancelarEventoUseCase(EventoRepositoryPort eventoRepositoryPort,
                                                        CancelacionEventoRepositoryPort cancelacionEventoRepositoryPort) {
         return new CancelarEventoUseCase(eventoRepositoryPort, cancelacionEventoRepositoryPort);
+    }
+
+    @Bean
+    public ReservarAsientosUseCase reservarAsientosUseCase(TicketRepositoryPort ticketRepositoryPort,
+                                                           VentaRepositoryPort ventaRepositoryPort,
+                                                           ZonaRepositoryPort zonaRepositoryPort,
+                                                           PrecioZonaRepositoryPort precioZonaRepositoryPort,
+                                                           CompuertaRepositoryPort compuertaRepositoryPort) {
+        return new ReservarAsientosUseCase(ticketRepositoryPort, ventaRepositoryPort, zonaRepositoryPort,
+                precioZonaRepositoryPort, compuertaRepositoryPort);
+    }
+
+    @Bean
+    public LiberarReservaUseCase liberarReservaUseCase(VentaRepositoryPort ventaRepositoryPort,
+                                                       TicketRepositoryPort ticketRepositoryPort) {
+        return new LiberarReservaUseCase(ventaRepositoryPort, ticketRepositoryPort);
+    }
+
+    @Bean
+    public ProcesarPagoUseCase procesarPagoUseCase(VentaRepositoryPort ventaRepositoryPort,
+                                                   TicketRepositoryPort ticketRepositoryPort,
+                                                   TransaccionFinancieraRepositoryPort transaccionFinancieraRepositoryPort,
+                                                   PasarelaPagoPort pasarelaPagoPort,
+                                                   NotificacionEmailPort notificacionEmailPort,
+                                                   CodigoQrPort codigoQrPort) {
+        return new ProcesarPagoUseCase(ventaRepositoryPort, ticketRepositoryPort,
+                transaccionFinancieraRepositoryPort, pasarelaPagoPort, notificacionEmailPort, codigoQrPort);
+    }
+
+    @Bean
+    public ConsultarVentaUseCase consultarVentaUseCase(VentaRepositoryPort ventaRepositoryPort,
+                                                       TicketRepositoryPort ticketRepositoryPort) {
+        return new ConsultarVentaUseCase(ventaRepositoryPort, ticketRepositoryPort);
     }
 }

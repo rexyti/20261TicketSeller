@@ -2,14 +2,18 @@ package com.ticketseller.infrastructure.adapter.in.rest;
 
 import com.ticketseller.domain.exception.CapacidadInvalidaException;
 import com.ticketseller.domain.exception.CompuertaInvalidaException;
+import com.ticketseller.domain.exception.AsientoNoDisponibleException;
 import com.ticketseller.domain.exception.EventoEnProgresoException;
 import com.ticketseller.domain.exception.EventoNotFoundException;
 import com.ticketseller.domain.exception.EventoSolapamientoException;
+import com.ticketseller.domain.exception.PagoRechazadoException;
 import com.ticketseller.domain.exception.RecintoConEventosException;
 import com.ticketseller.domain.exception.RecintoNoDisponibleException;
 import com.ticketseller.domain.exception.RecintoDuplicadoException;
 import com.ticketseller.domain.exception.RecintoInvalidoException;
 import com.ticketseller.domain.exception.RecintoNotFoundException;
+import com.ticketseller.domain.exception.ReservaExpiradaException;
+import com.ticketseller.domain.exception.VentaNotFoundException;
 import com.ticketseller.domain.exception.ZonaCapacidadExcedidaException;
 import com.ticketseller.domain.exception.ZonaInvalidaException;
 import com.ticketseller.domain.exception.ZonaConTicketsVendidosException;
@@ -37,10 +41,30 @@ public class GlobalExceptionHandler {
         return error("EVENTO_NOT_FOUND", ex.getMessage(), HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(VentaNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> ventaNotFound(VentaNotFoundException ex) {
+        return error("VENTA_NOT_FOUND", ex.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
     @ExceptionHandler({RecintoConEventosException.class, RecintoDuplicadoException.class,
             RecintoNoDisponibleException.class, EventoEnProgresoException.class, EventoSolapamientoException.class})
     public ResponseEntity<ApiErrorResponse> conflict(RuntimeException ex) {
         return error("RECINTO_CONFLICT", ex.getMessage(), HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler({AsientoNoDisponibleException.class, ReservaExpiradaException.class})
+    public ResponseEntity<ApiErrorResponse> checkoutConflict(RuntimeException ex) {
+        return error("CHECKOUT_CONFLICT", ex.getMessage(), HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(PagoRechazadoException.class)
+    public ResponseEntity<ApiErrorResponse> paymentRejected(PagoRechazadoException ex) {
+        return error("PAGO_RECHAZADO", ex.getMessage(), HttpStatus.PAYMENT_REQUIRED);
+    }
+
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<ApiErrorResponse> gatewayUnavailable(IllegalStateException ex) {
+        return error("PASARELA_NO_DISPONIBLE", ex.getMessage(), HttpStatus.SERVICE_UNAVAILABLE);
     }
 
     @ExceptionHandler({CapacidadInvalidaException.class, RecintoInvalidoException.class,
