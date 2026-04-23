@@ -1,6 +1,7 @@
 package com.ticketseller.infrastructure.adapter.in.rest;
 
 import com.ticketseller.application.precios.ConfigurarPreciosUseCase;
+import com.ticketseller.application.precios.ListarPreciosUseCase;
 import com.ticketseller.domain.exception.ZonaSinPrecioException;
 import com.ticketseller.domain.model.PrecioZona;
 import com.ticketseller.infrastructure.adapter.in.rest.dto.evento.ConfigurarPreciosRequest;
@@ -32,6 +33,9 @@ class PrecioEventoControllerTest {
 
     @MockBean
     private ConfigurarPreciosUseCase configurarPreciosUseCase;
+
+    @MockBean
+    private ListarPreciosUseCase listarPreciosUseCase;
 
     @MockBean
     private PrecioEventoRestMapper precioEventoRestMapper;
@@ -90,7 +94,7 @@ class PrecioEventoControllerTest {
         PrecioZona precio = PrecioZona.builder().id(UUID.randomUUID()).eventoId(eventoId).zonaId(UUID.randomUUID()).precio(BigDecimal.TEN).build();
         PrecioZonaResponse response = new PrecioZonaResponse(precio.getId(), precio.getEventoId(), precio.getZonaId(), precio.getPrecio());
 
-        when(configurarPreciosUseCase.listar(eventoId)).thenReturn(Flux.just(precio));
+        when(listarPreciosUseCase.ejecutar(eventoId)).thenReturn(Flux.just(precio));
         when(precioEventoRestMapper.toResponse(precio)).thenReturn(response);
 
         webTestClient.get()
