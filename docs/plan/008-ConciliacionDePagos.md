@@ -64,9 +64,8 @@ src/main/java/com/ticketseller/
 │   │   ├── TransaccionDuplicadaException.java
 │   │   ├── TransaccionNoConfirmadaException.java
 │   │   └── PagoEnDiscrepanciaException.java
-│   └── port/
-│       └── out/
-│           └── PagoRepositoryPort.java
+│   └── repository/
+│       └── PagoRepositoryPort.java
 │
 ├── application/                                    # Casos de uso — uno por responsabilidad
 │   ├── VerificarPagoUseCase.java

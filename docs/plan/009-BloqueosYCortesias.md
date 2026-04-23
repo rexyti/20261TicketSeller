@@ -64,10 +64,9 @@ src/main/java/com/ticketseller/
 │   │   ├── AsientoYaBloqueadoException.java
 │   │   ├── AsientoOcupadoException.java
 │   │   └── BloqueoNoEncontradoException.java
-│   └── port/
-│       └── out/
-│           ├── BloqueoRepositoryPort.java
-│           └── CortesiaRepositoryPort.java
+│   └── repository/
+│       ├── BloqueoRepositoryPort.java
+│       └── CortesiaRepositoryPort.java
 │
 ├── application/                                    # Casos de uso — uno por responsabilidad
 │   ├── BloquearAsientosUseCase.java
