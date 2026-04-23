@@ -94,7 +94,7 @@ cabo como se tenía planeado.
 **Why this priority**: Es importante para casos en los que hay motivos externos que llevan a la cancelación de eventos
 ya planeados.
 
-**Independent Test**: Un promotor busca un evento existente, cambia su estado a ***Cancelado*** y guarda. El test es
+**Independent Test**: Un promotor busca un evento existente, cambia su estado a ***Cancelado***, deja un motivo de cancelación y guarda. El test es
 exitoso si al volver a la lista, el evento ya no aparece.
 
 **Acceptance Scenarios**:
@@ -142,6 +142,9 @@ exitoso si al volver a la lista, el evento ya no aparece.
 4. **Evento**:
     - Representa la función o espectáculo para el que se compran los tickets
     - **Atributos**: ***ID único, Nombre, Fecha de Inicio, Fecha de Fin, Tipo, Recinto, Estado***
+5. **CancelacionEvento**:
+    - Representa el registro histórico de una cancelación de evento.
+    - **Atributos**: `ID único`, `Evento ID`, `Fecha/Hora de cancelación`, `Motivo`.
 
 ## Success Criteria *(mandatory)*
 
