@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.time.LocalDateTime;
 
 public class RecintoRepositoryAdapter implements RecintoRepositoryPort {
 
@@ -111,8 +112,19 @@ public class RecintoRepositoryAdapter implements RecintoRepositoryPort {
 
     @Override
     public Mono<Boolean> tieneEventosFuturos(UUID recintoId) {
-        // TODO: integrar con entidad Evento
-        return Mono.just(false);
+        return databaseClient.sql("""
+                        SELECT COUNT(*) AS total
+                        FROM eventos
+                        WHERE recinto_id = $1
+                          AND estado <> 'CANCELADO'
+                          AND fecha_inicio > $2
+                        """)
+                .bind(0, recintoId)
+                .bind(1, LocalDateTime.now())
+                .map((row, metadata) -> row.get("total", Long.class))
+                .one()
+                .defaultIfEmpty(0L)
+                .map(total -> total > 0);
     }
 
     @Override
