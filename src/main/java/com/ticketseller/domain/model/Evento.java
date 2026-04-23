@@ -1,4 +1,4 @@
-package com.ticketseller.domain.model.evento;
+package com.ticketseller.domain.model;
 
 import com.ticketseller.domain.exception.EventoEnProgresoException;
 import lombok.AllArgsConstructor;

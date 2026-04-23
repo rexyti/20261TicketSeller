@@ -1,4 +1,5 @@
 DROP TABLE IF EXISTS precios_zona;
+DROP TABLE IF EXISTS cancelaciones_evento;
 DROP TABLE IF EXISTS eventos;
 DROP TABLE IF EXISTS compuertas;
 DROP TABLE IF EXISTS zonas;
@@ -39,8 +40,14 @@ CREATE TABLE eventos (
     fecha_fin TIMESTAMP NOT NULL,
     tipo VARCHAR(100) NOT NULL,
     recinto_id UUID NOT NULL REFERENCES recintos(id),
-    estado VARCHAR(40) NOT NULL,
-    motivo_cancelacion VARCHAR(255)
+    estado VARCHAR(40) NOT NULL
+);
+
+CREATE TABLE cancelaciones_evento (
+    id UUID PRIMARY KEY,
+    evento_id UUID NOT NULL UNIQUE REFERENCES eventos(id),
+    fecha_cancelacion TIMESTAMP NOT NULL,
+    motivo VARCHAR(255) NOT NULL
 );
 
 CREATE TABLE precios_zona (

@@ -36,16 +36,15 @@ class EventoTest {
     }
 
     @Test
-    void deberiaCancelarConMotivo() {
+    void deberiaCancelarEvento() {
         Evento evento = Evento.builder()
                 .id(UUID.randomUUID())
                 .estado(EstadoEvento.ACTIVO)
                 .build();
 
-        Evento cancelado = evento.cancelarConMotivo("Fuerza mayor");
+        Evento cancelado = evento.cancelar();
 
         assertEquals(EstadoEvento.CANCELADO, cancelado.getEstado());
-        assertEquals("Fuerza mayor", cancelado.getMotivoCancelacion());
     }
 }
 

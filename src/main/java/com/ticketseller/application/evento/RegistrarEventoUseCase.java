@@ -52,7 +52,6 @@ public class RegistrarEventoUseCase {
         return request.toBuilder()
                 .id(UUID.randomUUID())
                 .estado(EstadoEvento.ACTIVO)
-                .motivoCancelacion(null)
                 .build();
     }
 }

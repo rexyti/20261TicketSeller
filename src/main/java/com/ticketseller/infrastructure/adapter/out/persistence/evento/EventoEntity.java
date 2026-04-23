@@ -28,7 +28,5 @@ public class EventoEntity {
     @Column("recinto_id")
     private UUID recintoId;
     private String estado;
-    @Column("motivo_cancelacion")
-    private String motivoCancelacion;
 }
 

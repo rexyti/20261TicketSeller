@@ -12,12 +12,10 @@ public interface EventoRestMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "estado", ignore = true)
-    @Mapping(target = "motivoCancelacion", ignore = true)
     Evento toDomain(CrearEventoRequest request);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "estado", ignore = true)
-    @Mapping(target = "motivoCancelacion", ignore = true)
     Evento toDomain(EditarEventoRequest request);
 
     EventoResponse toResponse(Evento evento);

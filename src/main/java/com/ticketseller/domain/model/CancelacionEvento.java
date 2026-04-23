@@ -1,4 +1,4 @@
-package com.ticketseller.domain.model.evento;
+package com.ticketseller.domain.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

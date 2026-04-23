@@ -1,4 +1,4 @@
-package com.ticketseller.domain.model.evento;
+package com.ticketseller.domain.model;
 
 public enum EstadoEvento {
     ACTIVO,

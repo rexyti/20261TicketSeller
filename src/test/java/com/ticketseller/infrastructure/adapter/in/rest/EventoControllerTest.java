@@ -77,8 +77,7 @@ class EventoControllerTest {
                 eventoSaved.getFechaFin(),
                 eventoSaved.getTipo(),
                 eventoSaved.getRecintoId(),
-                eventoSaved.getEstado(),
-                eventoSaved.getMotivoCancelacion()
+                eventoSaved.getEstado()
         );
 
         when(eventoRestMapper.toDomain(any(CrearEventoRequest.class))).thenReturn(eventoDomain);
@@ -99,7 +98,7 @@ class EventoControllerTest {
     void getEventosRetornaListado() {
         Evento evento = Evento.builder().id(UUID.randomUUID()).nombre("Concierto").estado(EstadoEvento.ACTIVO).build();
         EventoResponse response = new EventoResponse(evento.getId(), evento.getNombre(), evento.getFechaInicio(),
-                evento.getFechaFin(), evento.getTipo(), evento.getRecintoId(), evento.getEstado(), evento.getMotivoCancelacion());
+                evento.getFechaFin(), evento.getTipo(), evento.getRecintoId(), evento.getEstado());
 
         when(listarEventosUseCase.ejecutar(null)).thenReturn(Flux.just(evento));
         when(eventoRestMapper.toResponse(evento)).thenReturn(response);

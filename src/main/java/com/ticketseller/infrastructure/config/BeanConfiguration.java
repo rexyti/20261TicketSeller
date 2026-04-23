@@ -16,11 +16,15 @@ import com.ticketseller.application.recinto.RegistrarRecintoUseCase;
 import com.ticketseller.application.zona.CrearZonaUseCase;
 import com.ticketseller.application.zona.ListarZonasUseCase;
 import com.ticketseller.application.zona.ValidarZonasUseCase;
+import com.ticketseller.domain.repository.CancelacionEventoRepositoryPort;
 import com.ticketseller.domain.repository.CompuertaRepositoryPort;
 import com.ticketseller.domain.repository.EventoRepositoryPort;
 import com.ticketseller.domain.repository.PrecioZonaRepositoryPort;
 import com.ticketseller.domain.repository.RecintoRepositoryPort;
 import com.ticketseller.domain.repository.ZonaRepositoryPort;
+import com.ticketseller.infrastructure.adapter.out.persistence.cancelacionevento.CancelacionEventoR2dbcRepository;
+import com.ticketseller.infrastructure.adapter.out.persistence.cancelacionevento.CancelacionEventoRepositoryAdapter;
+import com.ticketseller.infrastructure.adapter.out.persistence.cancelacionevento.mapper.CancelacionEventoPersistenceMapper;
 import com.ticketseller.infrastructure.adapter.out.persistence.compuerta.CompuertaR2dbcRepository;
 import com.ticketseller.infrastructure.adapter.out.persistence.compuerta.CompuertaRepositoryAdapter;
 import com.ticketseller.infrastructure.adapter.out.persistence.compuerta.mapper.CompuertaPersistenceMapper;
@@ -66,6 +70,12 @@ public class BeanConfiguration {
     public EventoRepositoryPort eventoRepositoryPort(EventoR2dbcRepository repository,
                                                      EventoPersistenceMapper mapper) {
         return new EventoRepositoryAdapter(repository, mapper);
+    }
+
+    @Bean
+    public CancelacionEventoRepositoryPort cancelacionEventoRepositoryPort(CancelacionEventoR2dbcRepository repository,
+                                                                           CancelacionEventoPersistenceMapper mapper) {
+        return new CancelacionEventoRepositoryAdapter(repository, mapper);
     }
 
     @Bean
@@ -174,7 +184,8 @@ public class BeanConfiguration {
     }
 
     @Bean
-    public CancelarEventoUseCase cancelarEventoUseCase(EventoRepositoryPort eventoRepositoryPort) {
-        return new CancelarEventoUseCase(eventoRepositoryPort);
+    public CancelarEventoUseCase cancelarEventoUseCase(EventoRepositoryPort eventoRepositoryPort,
+                                                       CancelacionEventoRepositoryPort cancelacionEventoRepositoryPort) {
+        return new CancelarEventoUseCase(eventoRepositoryPort, cancelacionEventoRepositoryPort);
     }
 }

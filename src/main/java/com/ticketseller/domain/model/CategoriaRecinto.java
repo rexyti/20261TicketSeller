@@ -1,4 +1,4 @@
-package com.ticketseller.domain.model.recinto;
+package com.ticketseller.domain.model;
 
 public enum CategoriaRecinto {
     TEATRO,

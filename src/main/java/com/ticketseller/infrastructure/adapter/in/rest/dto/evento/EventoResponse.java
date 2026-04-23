@@ -12,8 +12,7 @@ public record EventoResponse(
         LocalDateTime fechaFin,
         String tipo,
         UUID recintoId,
-        EstadoEvento estado,
-        String motivoCancelacion
+        EstadoEvento estado
 ) {
 }
 

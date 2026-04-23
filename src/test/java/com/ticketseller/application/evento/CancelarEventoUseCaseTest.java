@@ -1,8 +1,10 @@
 package com.ticketseller.application.evento;
 
 import com.ticketseller.domain.exception.EventoNotFoundException;
+import com.ticketseller.domain.model.CancelacionEvento;
 import com.ticketseller.domain.model.EstadoEvento;
 import com.ticketseller.domain.model.Evento;
+import com.ticketseller.domain.repository.CancelacionEventoRepositoryPort;
 import com.ticketseller.domain.repository.EventoRepositoryPort;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
@@ -19,7 +21,8 @@ class CancelarEventoUseCaseTest {
     @Test
     void deberiaFallarSiNoExiste() {
         EventoRepositoryPort repositoryPort = mock(EventoRepositoryPort.class);
-        CancelarEventoUseCase useCase = new CancelarEventoUseCase(repositoryPort);
+        CancelacionEventoRepositoryPort cancelacionRepositoryPort = mock(CancelacionEventoRepositoryPort.class);
+        CancelarEventoUseCase useCase = new CancelarEventoUseCase(repositoryPort, cancelacionRepositoryPort);
 
         when(repositoryPort.buscarPorId(any(UUID.class))).thenReturn(Mono.empty());
 
@@ -31,11 +34,14 @@ class CancelarEventoUseCaseTest {
     @Test
     void deberiaCancelarEvento() {
         EventoRepositoryPort repositoryPort = mock(EventoRepositoryPort.class);
-        CancelarEventoUseCase useCase = new CancelarEventoUseCase(repositoryPort);
+        CancelacionEventoRepositoryPort cancelacionRepositoryPort = mock(CancelacionEventoRepositoryPort.class);
+        CancelarEventoUseCase useCase = new CancelarEventoUseCase(repositoryPort, cancelacionRepositoryPort);
 
         UUID id = UUID.randomUUID();
         when(repositoryPort.buscarPorId(id)).thenReturn(Mono.just(Evento.builder().id(id).estado(EstadoEvento.ACTIVO).build()));
         when(repositoryPort.guardar(any(Evento.class))).thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
+        when(cancelacionRepositoryPort.guardar(any(CancelacionEvento.class)))
+                .thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
 
         StepVerifier.create(useCase.ejecutar(id, "Fuerza mayor"))
                 .expectNextMatches(evento -> evento.getEstado() == EstadoEvento.CANCELADO)
