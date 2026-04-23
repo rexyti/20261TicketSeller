@@ -2,13 +2,18 @@ package com.ticketseller.infrastructure.adapter.in.rest;
 
 import com.ticketseller.domain.exception.CapacidadInvalidaException;
 import com.ticketseller.domain.exception.CompuertaInvalidaException;
+import com.ticketseller.domain.exception.EventoEnProgresoException;
+import com.ticketseller.domain.exception.EventoNotFoundException;
+import com.ticketseller.domain.exception.EventoSolapamientoException;
 import com.ticketseller.domain.exception.RecintoConEventosException;
+import com.ticketseller.domain.exception.RecintoNoDisponibleException;
 import com.ticketseller.domain.exception.RecintoDuplicadoException;
 import com.ticketseller.domain.exception.RecintoInvalidoException;
 import com.ticketseller.domain.exception.RecintoNotFoundException;
 import com.ticketseller.domain.exception.ZonaCapacidadExcedidaException;
 import com.ticketseller.domain.exception.ZonaInvalidaException;
 import com.ticketseller.domain.exception.ZonaConTicketsVendidosException;
+import com.ticketseller.domain.exception.ZonaSinPrecioException;
 import com.ticketseller.infrastructure.adapter.in.rest.dto.ApiErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,14 +32,20 @@ public class GlobalExceptionHandler {
         return error("RECINTO_NOT_FOUND", ex.getMessage(), HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler({RecintoConEventosException.class, RecintoDuplicadoException.class})
+    @ExceptionHandler(EventoNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> eventoNotFound(EventoNotFoundException ex) {
+        return error("EVENTO_NOT_FOUND", ex.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler({RecintoConEventosException.class, RecintoDuplicadoException.class,
+            RecintoNoDisponibleException.class, EventoEnProgresoException.class, EventoSolapamientoException.class})
     public ResponseEntity<ApiErrorResponse> conflict(RuntimeException ex) {
         return error("RECINTO_CONFLICT", ex.getMessage(), HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler({CapacidadInvalidaException.class, RecintoInvalidoException.class,
             ZonaInvalidaException.class, CompuertaInvalidaException.class, ZonaCapacidadExcedidaException.class,
-            ZonaConTicketsVendidosException.class, IllegalArgumentException.class})
+            ZonaConTicketsVendidosException.class, ZonaSinPrecioException.class, IllegalArgumentException.class})
     public ResponseEntity<ApiErrorResponse> badRequest(RuntimeException ex) {
         return error("VALIDATION_ERROR", ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
