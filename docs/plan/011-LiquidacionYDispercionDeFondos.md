@@ -61,9 +61,8 @@ src/main/java/com/ticketseller/
 │   ├── exception/
 │   │   ├── EventoNoFinalizadoException.java
 │   │   └── LiquidacionNoConfiguradaException.java
-│   └── port/
-│       └── out/
-│           └── LiquidacionQueryPort.java      # Puerto para queries de agregación
+│   └── repository/
+│       └── LiquidacionQueryPort.java      # Puerto para queries de agregación
 │
 ├── application/
 │   ├── ConsultarSnapshotUseCase.java

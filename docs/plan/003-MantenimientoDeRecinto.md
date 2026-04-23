@@ -58,10 +58,9 @@ src/main/java/com/ticketseller/
 │   ├── exception/
 │   │   ├── TransicionEstadoInvalidaException.java
 │   │   └── AsientoEnCompraException.java
-│   └── port/
-│       └── out/
-│           └── HistorialCambioEstadoRepositoryPort.java
-│           # Reutiliza AsientoRepositoryPort (feature 003)
+│   └── repository/
+│       └── HistorialCambioEstadoRepositoryPort.java
+│       # Reutiliza AsientoRepositoryPort (feature 003)
 │
 ├── application/                                          # Un caso de uso por responsabilidad — clases concretas
 │   ├── CambiarEstadoAsientoUseCase.java                  # Cambia estado de un único asiento

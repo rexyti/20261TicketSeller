@@ -69,11 +69,10 @@ src/main/java/com/ticketseller/
 │   │   ├── CodigoPromoAgotadoException.java
 │   │   ├── PromocionNoActivaException.java
 │   │   └── UsuarioNoAutorizadoParaPreventaException.java
-│   └── port/
-│       └── out/
-│           ├── PromocionRepositoryPort.java
-│           ├── DescuentoRepositoryPort.java
-│           └── CodigoPromocionalRepositoryPort.java
+│   └── repository/
+│       ├── PromocionRepositoryPort.java
+│       ├── DescuentoRepositoryPort.java
+│       └── CodigoPromocionalRepositoryPort.java
 │
 ├── application/                                    # Casos de uso — uno por responsabilidad
 │   ├── CrearPromocionUseCase.java
