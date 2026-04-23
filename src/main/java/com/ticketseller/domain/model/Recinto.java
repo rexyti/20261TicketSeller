@@ -1,6 +1,7 @@
-package com.ticketseller.domain.model;
+package com.ticketseller.domain.model.recinto;
 
 import com.ticketseller.domain.exception.RecintoInvalidoException;
+import com.ticketseller.domain.model.CategoriaRecinto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

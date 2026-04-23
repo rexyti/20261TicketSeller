@@ -1,4 +1,4 @@
-package com.ticketseller.domain.model;
+package com.ticketseller.domain.model.evento;
 
 import com.ticketseller.domain.exception.EventoEnProgresoException;
 import lombok.AllArgsConstructor;
@@ -21,13 +21,11 @@ public class Evento {
     private String tipo;
     private UUID recintoId;
     private EstadoEvento estado;
-    private String motivoCancelacion;
 
     public Evento normalizarDatosRegistro() {
         return toBuilder()
                 .nombre(trimOrNull(nombre))
                 .tipo(trimOrNull(tipo))
-                .motivoCancelacion(trimOrNull(motivoCancelacion))
                 .build();
     }
 
@@ -48,14 +46,9 @@ public class Evento {
         }
     }
 
-    public Evento cancelarConMotivo(String motivo) {
-        String motivoNormalizado = trimOrNull(motivo);
-        if (motivoNormalizado == null || motivoNormalizado.isBlank()) {
-            throw new IllegalArgumentException("El motivo de cancelacion es obligatorio");
-        }
+    public Evento cancelar() {
         return toBuilder()
                 .estado(EstadoEvento.CANCELADO)
-                .motivoCancelacion(motivoNormalizado)
                 .build();
     }
 
