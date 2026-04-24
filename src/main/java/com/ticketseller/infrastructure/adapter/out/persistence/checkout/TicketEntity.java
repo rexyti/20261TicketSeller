@@ -33,5 +33,6 @@ public class TicketEntity {
     private BigDecimal precio;
     @Column("es_cortesia")
     private boolean esCortesia;
+    @Column("asiento_id")
+    private UUID asientoId;
 }
-

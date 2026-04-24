@@ -48,7 +48,7 @@ class ProcesarPagoUseCaseTest {
                 .fechaExpiracion(LocalDateTime.now().plusMinutes(5))
                 .build();
 
-        Ticket ticket = Ticket.builder().id(UUID.randomUUID()).ventaId(ventaId).estado(EstadoTicket.RESERVADO)
+        Ticket ticket = Ticket.builder().id(UUID.randomUUID()).ventaId(ventaId)
                 .eventoId(UUID.randomUUID()).zonaId(UUID.randomUUID()).precio(BigDecimal.TEN).build();
 
         when(ventaRepositoryPort.buscarPorId(ventaId)).thenReturn(Mono.just(venta));
@@ -97,4 +97,3 @@ class ProcesarPagoUseCaseTest {
                 .verify();
     }
 }
-

@@ -77,7 +77,6 @@ class CheckoutControllerTest {
                 .id(UUID.randomUUID())
                 .zonaId(zonaId)
                 .compuertaId(compuertaId)
-                .estado(EstadoTicket.RESERVADO)
                 .precio(BigDecimal.valueOf(75))
                 .esCortesia(false)
                 .build();
@@ -91,7 +90,7 @@ class CheckoutControllerTest {
                 venta.getFechaCreacion(),
                 venta.getFechaExpiracion(),
                 venta.getTotal(),
-                List.of(new TicketResponse(ticket.getId(), zonaId, compuertaId, EstadoTicket.RESERVADO,
+                List.of(new TicketResponse(ticket.getId(), zonaId, compuertaId, null,
                         ticket.getPrecio(), null, false))
         );
 
@@ -139,4 +138,3 @@ class CheckoutControllerTest {
                 .expectStatus().isEqualTo(402);
     }
 }
-

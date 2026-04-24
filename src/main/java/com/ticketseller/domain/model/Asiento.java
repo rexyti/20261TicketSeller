@@ -1,0 +1,46 @@
+package com.ticketseller.domain.model;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.UUID;
+
+@Data
+@Builder(toBuilder = true)
+@NoArgsConstructor
+@AllArgsConstructor
+public class Asiento {
+    private UUID id;
+    private UUID zonaId;
+    private String fila;
+    private Integer columna;
+    private Integer numero;
+    private EstadoAsiento estado;
+
+    public Asiento normalizarDatosRegistro() {
+        return toBuilder()
+                .fila(trimOrNull(fila))
+                .build();
+    }
+
+    public void validarDatosRegistro() {
+        validarObligatorio(id, "id");
+        validarObligatorio(zonaId, "zonaId");
+        validarObligatorio(fila, "fila");
+        validarObligatorio(columna, "columna");
+        validarObligatorio(numero, "numero");
+        validarObligatorio(estado, "estado");
+    }
+
+    private void validarObligatorio(Object valor, String campo) {
+        if (valor == null) {
+            throw new IllegalArgumentException("El campo %s es obligatorio".formatted(campo));
+        }
+    }
+
+    private String trimOrNull(String valor) {
+        return valor == null ? null : valor.trim();
+    }
+}

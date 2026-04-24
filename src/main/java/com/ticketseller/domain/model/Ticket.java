@@ -22,6 +22,7 @@ public class Ticket {
     private EstadoTicket estado;
     private BigDecimal precio;
     private boolean esCortesia;
+    private UUID asientoId;
 
     public Ticket normalizarDatosRegistro() {
         return toBuilder()
@@ -34,13 +35,12 @@ public class Ticket {
         validarObligatorio(ventaId, "ventaId");
         validarObligatorio(eventoId, "eventoId");
         validarObligatorio(zonaId, "zonaId");
-        validarObligatorio(estado, "estado");
         validarObligatorio(precio, "precio");
         if (isPrecioInvalido()) {
             throw new IllegalArgumentException("precio debe ser mayor o igual a 0");
         }
         if (ticketVendidoSinQrGenerado()) {
-            throw new IllegalArgumentException("codigoQr es obligatorio para tickets vendidos");
+            throw new IllegalArgumentException("códigoQr es obligatorio para tickets vendidos");
         }
     }
 
@@ -62,4 +62,3 @@ public class Ticket {
         return EstadoTicket.VENDIDO.equals(estado) && (codigoQr == null || codigoQr.isBlank());
     }
 }
-

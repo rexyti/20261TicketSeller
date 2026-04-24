@@ -54,7 +54,6 @@ public class ProcesarPagoUseCase {
 
         if (ventaExpirada(venta)) {
             return ventaRepositoryPort.actualizarEstado(venta.getId(), EstadoVenta.EXPIRADA)
-                    .then(ticketRepositoryPort.actualizarEstadoPorVenta(venta.getId(), EstadoTicket.DISPONIBLE))
                     .then(Mono.error(new ReservaExpiradaException("La reserva ya expiro")));
         }
         return Mono.empty();
@@ -127,4 +126,3 @@ public class ProcesarPagoUseCase {
                 .normalizarDatosRegistro();
     }
 }
-

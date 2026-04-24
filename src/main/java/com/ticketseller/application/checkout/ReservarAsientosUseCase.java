@@ -75,7 +75,7 @@ public class ReservarAsientosUseCase {
 
     private Mono<Long> ticketsOcupados(UUID eventoId, UUID zonaId) {
         return ticketRepositoryPort.contarPorEventoYZonaYEstados(eventoId, zonaId,
-                Set.of(EstadoTicket.RESERVADO, EstadoTicket.VENDIDO));
+                Set.of(EstadoTicket.VENDIDO));
     }
 
     private Mono<VentaDetalle> reservar(ReservarAsientosCommand command,
@@ -126,11 +126,9 @@ public class ReservarAsientosUseCase {
                 .eventoId(command.eventoId())
                 .zonaId(command.zonaId())
                 .compuertaId(compuerta.getId())
-                .estado(EstadoTicket.RESERVADO)
                 .precio(precioZona.getPrecio())
                 .esCortesia(Boolean.TRUE.equals(command.esCortesia()))
                 .build()
                 .normalizarDatosRegistro();
     }
 }
-

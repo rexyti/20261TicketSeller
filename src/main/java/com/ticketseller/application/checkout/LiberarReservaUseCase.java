@@ -23,8 +23,6 @@ public class LiberarReservaUseCase {
     }
 
     private Mono<Venta> liberarVenta(Venta venta) {
-        return ticketRepositoryPort.actualizarEstadoPorVenta(venta.getId(), EstadoTicket.DISPONIBLE)
-                .then(ventaRepositoryPort.actualizarEstado(venta.getId(), EstadoVenta.EXPIRADA));
+        return ventaRepositoryPort.actualizarEstado(venta.getId(), EstadoVenta.EXPIRADA);
     }
 }
-
