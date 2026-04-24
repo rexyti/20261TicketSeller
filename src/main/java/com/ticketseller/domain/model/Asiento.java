@@ -13,14 +13,15 @@ import java.util.UUID;
 @AllArgsConstructor
 public class Asiento {
     private UUID id;
-    private UUID zonaId;
     private String fila;
     private Integer columna;
     private String numero;
+    private UUID zonaId;
+    private TipoAsiento tipoAsiento;
     private EstadoAsiento estado;
 
     public Asiento normalizarDatosRegistro() {
-        return toBuilder()
+        return this.toBuilder()
                 .fila(trimOrNull(fila))
                 .numero(fila + columna)
                 .build();

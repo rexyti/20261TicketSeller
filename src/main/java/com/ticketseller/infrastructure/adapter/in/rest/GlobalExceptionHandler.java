@@ -2,6 +2,7 @@ package com.ticketseller.infrastructure.adapter.in.rest;
 
 import com.ticketseller.domain.exception.CapacidadInvalidaException;
 import com.ticketseller.domain.exception.CompuertaInvalidaException;
+import com.ticketseller.domain.exception.NombreTipoAsientoVacioException;
 import com.ticketseller.domain.exception.AsientoNoDisponibleException;
 import com.ticketseller.domain.exception.EventoEnProgresoException;
 import com.ticketseller.domain.exception.EventoNotFoundException;
@@ -12,11 +13,15 @@ import com.ticketseller.domain.exception.RecintoNoDisponibleException;
 import com.ticketseller.domain.exception.RecintoDuplicadoException;
 import com.ticketseller.domain.exception.RecintoInvalidoException;
 import com.ticketseller.domain.exception.RecintoNotFoundException;
+import com.ticketseller.domain.exception.TipoAsientoEnUsoException;
+import com.ticketseller.domain.exception.TipoAsientoInactivoException;
+import com.ticketseller.domain.exception.TipoAsientoNotFoundException;
 import com.ticketseller.domain.exception.ReservaExpiradaException;
 import com.ticketseller.domain.exception.VentaNotFoundException;
 import com.ticketseller.domain.exception.ZonaCapacidadExcedidaException;
-import com.ticketseller.domain.exception.ZonaInvalidaException;
 import com.ticketseller.domain.exception.ZonaConTicketsVendidosException;
+import com.ticketseller.domain.exception.ZonaInvalidaException;
+import com.ticketseller.domain.exception.ZonaNotFoundException;
 import com.ticketseller.domain.exception.ZonaSinPrecioException;
 import com.ticketseller.infrastructure.adapter.in.rest.dto.ApiErrorResponse;
 import org.springframework.http.HttpStatus;
@@ -31,9 +36,9 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(RecintoNotFoundException.class)
-    public ResponseEntity<ApiErrorResponse> recintoNotFound(RecintoNotFoundException ex) {
-        return error("RECINTO_NOT_FOUND", ex.getMessage(), HttpStatus.NOT_FOUND);
+    @ExceptionHandler({RecintoNotFoundException.class, TipoAsientoNotFoundException.class, ZonaNotFoundException.class})
+    public ResponseEntity<ApiErrorResponse> notFound(RuntimeException ex) {
+        return error("NOT_FOUND", ex.getMessage(), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(EventoNotFoundException.class)
@@ -47,9 +52,10 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler({RecintoConEventosException.class, RecintoDuplicadoException.class,
-            RecintoNoDisponibleException.class, EventoEnProgresoException.class, EventoSolapamientoException.class})
+            RecintoNoDisponibleException.class, EventoEnProgresoException.class, EventoSolapamientoException.class,
+                      TipoAsientoEnUsoException.class, TipoAsientoInactivoException.class})
     public ResponseEntity<ApiErrorResponse> conflict(RuntimeException ex) {
-        return error("RECINTO_CONFLICT", ex.getMessage(), HttpStatus.CONFLICT);
+        return error("CONFLICT", ex.getMessage(), HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler({AsientoNoDisponibleException.class, ReservaExpiradaException.class})
@@ -69,7 +75,9 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler({CapacidadInvalidaException.class, RecintoInvalidoException.class,
             ZonaInvalidaException.class, CompuertaInvalidaException.class, ZonaCapacidadExcedidaException.class,
-            ZonaConTicketsVendidosException.class, ZonaSinPrecioException.class, IllegalArgumentException.class})
+            ZonaConTicketsVendidosException.class, NombreTipoAsientoVacioException.class,
+            IllegalArgumentException.class, IllegalStateException.class,
+            ZonaConTicketsVendidosException.class, ZonaSinPrecioException.class})
     public ResponseEntity<ApiErrorResponse> badRequest(RuntimeException ex) {
         return error("VALIDATION_ERROR", ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
@@ -86,4 +94,3 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(status).body(new ApiErrorResponse(code, message, LocalDateTime.now()));
     }
 }
-

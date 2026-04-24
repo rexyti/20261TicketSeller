@@ -1,4 +1,4 @@
-package com.ticketseller.infrastructure.adapter.out.persistence.zona;
+package com.ticketseller.infrastructure.adapter.out.persistence.tipoasiento;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,6 +9,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Getter
@@ -16,14 +17,13 @@ import java.util.UUID;
 @Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
-@Table("zonas")
-public class ZonaEntity {
+@Table("tipos_asiento")
+public class TipoAsientoEntity {
     @Id
     private UUID id;
-    @Column("recinto_id")
-    private UUID recintoId;
     private String nombre;
-    private Integer capacidad;
-    @Column("tipo_asiento_id")
-    private UUID tipoAsientoId;
+    private String descripcion;
+    private String estado;
+    @Column("created_at")
+    private OffsetDateTime createdAt;
 }

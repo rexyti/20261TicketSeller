@@ -1,4 +1,4 @@
-package com.ticketseller.infrastructure.adapter.out.persistence.zona;
+package com.ticketseller.infrastructure.adapter.out.persistence.asiento;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,14 +16,15 @@ import java.util.UUID;
 @Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
-@Table("zonas")
-public class ZonaEntity {
+@Table("asientos")
+public class AsientoEntity {
     @Id
     private UUID id;
-    @Column("recinto_id")
-    private UUID recintoId;
-    private String nombre;
-    private Integer capacidad;
-    @Column("tipo_asiento_id")
-    private UUID tipoAsientoId;
+    private int fila;
+    private int columna;
+    private String numero;
+    @Column("zona_id")
+    private UUID zonaId;
+    private String estado;
+    private boolean existente;
 }

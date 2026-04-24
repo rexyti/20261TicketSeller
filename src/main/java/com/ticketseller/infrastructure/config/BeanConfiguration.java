@@ -17,9 +17,29 @@ import com.ticketseller.application.recinto.EditarRecintoUseCase;
 import com.ticketseller.application.recinto.ListarRecintosFiltradosUseCase;
 import com.ticketseller.application.recinto.ListarRecintosUseCase;
 import com.ticketseller.application.recinto.RegistrarRecintoUseCase;
+import com.ticketseller.application.tipoasiento.AsignarTipoAsientoAZonaUseCase;
+import com.ticketseller.application.tipoasiento.CrearMapaAsientosUseCase;
+import com.ticketseller.application.tipoasiento.CrearTipoAsientoUseCase;
+import com.ticketseller.application.tipoasiento.DesactivarTipoAsientoUseCase;
+import com.ticketseller.application.tipoasiento.EditarTipoAsientoUseCase;
+import com.ticketseller.application.tipoasiento.ListarTiposAsientoUseCase;
+import com.ticketseller.application.tipoasiento.MarcarEspacioVacioUseCase;
 import com.ticketseller.application.zona.CrearZonaUseCase;
 import com.ticketseller.application.zona.ListarZonasUseCase;
 import com.ticketseller.application.zona.ValidarZonasUseCase;
+import com.ticketseller.domain.repository.AsientoRepositoryPort;
+import com.ticketseller.domain.repository.CompuertaRepositoryPort;
+import com.ticketseller.domain.repository.MapaAsientosRepositoryPort;
+import com.ticketseller.domain.repository.RecintoRepositoryPort;
+import com.ticketseller.domain.repository.TipoAsientoRepositoryPort;
+import com.ticketseller.domain.repository.ZonaRepositoryPort;
+import com.ticketseller.infrastructure.adapter.out.persistence.asiento.AsientoR2dbcRepository;
+import com.ticketseller.infrastructure.adapter.out.persistence.asiento.AsientoRepositoryAdapter;
+import com.ticketseller.infrastructure.adapter.out.persistence.asiento.mapper.AsientoPersistenceMapper;
+import com.ticketseller.infrastructure.adapter.out.persistence.compuerta.CompuertaR2dbcRepository;
+import com.ticketseller.infrastructure.adapter.out.persistence.compuerta.CompuertaRepositoryAdapter;
+import com.ticketseller.infrastructure.adapter.out.persistence.compuerta.mapper.CompuertaPersistenceMapper;
+import com.ticketseller.infrastructure.adapter.out.persistence.mapaasientos.MapaAsientosRepositoryAdapter;
 import com.ticketseller.domain.repository.CancelacionEventoRepositoryPort;
 import com.ticketseller.domain.repository.CompuertaRepositoryPort;
 import com.ticketseller.domain.repository.EventoRepositoryPort;
@@ -57,6 +77,9 @@ import com.ticketseller.infrastructure.adapter.out.persistence.preciozona.mapper
 import com.ticketseller.infrastructure.adapter.out.persistence.recinto.RecintoR2dbcRepository;
 import com.ticketseller.infrastructure.adapter.out.persistence.recinto.RecintoRepositoryAdapter;
 import com.ticketseller.infrastructure.adapter.out.persistence.recinto.mapper.RecintoPersistenceMapper;
+import com.ticketseller.infrastructure.adapter.out.persistence.tipoasiento.TipoAsientoR2dbcRepository;
+import com.ticketseller.infrastructure.adapter.out.persistence.tipoasiento.TipoAsientoRepositoryAdapter;
+import com.ticketseller.infrastructure.adapter.out.persistence.tipoasiento.mapper.TipoAsientoPersistenceMapper;
 import com.ticketseller.infrastructure.adapter.out.persistence.zona.ZonaR2dbcRepository;
 import com.ticketseller.infrastructure.adapter.out.persistence.zona.ZonaRepositoryAdapter;
 import com.ticketseller.infrastructure.adapter.out.persistence.zona.mapper.ZonaPersistenceMapper;
@@ -93,6 +116,20 @@ public class BeanConfiguration {
     }
 
     @Bean
+    public TipoAsientoRepositoryPort tipoAsientoRepositoryPort(TipoAsientoR2dbcRepository repository,
+                                                               TipoAsientoPersistenceMapper mapper) {
+        return new TipoAsientoRepositoryAdapter(repository, mapper);
+    }
+
+    @Bean
+    public AsientoRepositoryPort asientoRepositoryPort(AsientoR2dbcRepository repository,
+                                                       AsientoPersistenceMapper mapper) {
+        return new AsientoRepositoryAdapter(repository, mapper);
+    }
+
+    @Bean
+    public MapaAsientosRepositoryPort mapaAsientosRepositoryPort(DatabaseClient databaseClient) {
+        return new MapaAsientosRepositoryAdapter(databaseClient);
     public EventoRepositoryPort eventoRepositoryPort(EventoR2dbcRepository repository,
                                                      EventoPersistenceMapper mapper) {
         return new EventoRepositoryAdapter(repository, mapper);
@@ -220,6 +257,40 @@ public class BeanConfiguration {
     }
 
     @Bean
+    public CrearTipoAsientoUseCase crearTipoAsientoUseCase(TipoAsientoRepositoryPort tipoAsientoRepositoryPort) {
+        return new CrearTipoAsientoUseCase(tipoAsientoRepositoryPort);
+    }
+
+    @Bean
+    public EditarTipoAsientoUseCase editarTipoAsientoUseCase(TipoAsientoRepositoryPort tipoAsientoRepositoryPort) {
+        return new EditarTipoAsientoUseCase(tipoAsientoRepositoryPort);
+    }
+
+    @Bean
+    public ListarTiposAsientoUseCase listarTiposAsientoUseCase(TipoAsientoRepositoryPort tipoAsientoRepositoryPort) {
+        return new ListarTiposAsientoUseCase(tipoAsientoRepositoryPort);
+    }
+
+    @Bean
+    public DesactivarTipoAsientoUseCase desactivarTipoAsientoUseCase(TipoAsientoRepositoryPort tipoAsientoRepositoryPort) {
+        return new DesactivarTipoAsientoUseCase(tipoAsientoRepositoryPort);
+    }
+
+    @Bean
+    public AsignarTipoAsientoAZonaUseCase asignarTipoAsientoAZonaUseCase(TipoAsientoRepositoryPort tipoAsientoRepositoryPort,
+                                                                          ZonaRepositoryPort zonaRepositoryPort) {
+        return new AsignarTipoAsientoAZonaUseCase(tipoAsientoRepositoryPort, zonaRepositoryPort);
+    }
+
+    @Bean
+    public CrearMapaAsientosUseCase crearMapaAsientosUseCase(AsientoRepositoryPort asientoRepositoryPort,
+                                                             MapaAsientosRepositoryPort mapaAsientosRepositoryPort) {
+        return new CrearMapaAsientosUseCase(asientoRepositoryPort, mapaAsientosRepositoryPort);
+    }
+
+    @Bean
+    public MarcarEspacioVacioUseCase marcarEspacioVacioUseCase(AsientoRepositoryPort asientoRepositoryPort) {
+        return new MarcarEspacioVacioUseCase(asientoRepositoryPort);
     public RegistrarEventoUseCase registrarEventoUseCase(EventoRepositoryPort eventoRepositoryPort,
                                                          RecintoRepositoryPort recintoRepositoryPort) {
         return new RegistrarEventoUseCase(eventoRepositoryPort, recintoRepositoryPort);

@@ -25,6 +25,7 @@ import java.util.UUID;
 class CompuertaRepositoryAdapterTest {
 
     @Container
+    @SuppressWarnings("resource")
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16-alpine")
             .withDatabaseName("ticketseller")
             .withUsername("postgres")
