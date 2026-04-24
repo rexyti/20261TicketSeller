@@ -32,6 +32,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-mail'
     implementation 'com.google.zxing:core:3.5.3'
     implementation 'com.google.zxing:javase:3.5.3'
+    implementation 'org.springdoc:springdoc-openapi-starter-webflux-ui:2.6.0'
     runtimeOnly 'org.postgresql:r2dbc-postgresql'
 
     implementation "org.mapstruct:mapstruct:${mapstructVersion}"
@@ -41,6 +42,7 @@ dependencies {
     annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.boot:spring-boot-testcontainers'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     testImplementation 'io.projectreactor:reactor-test'
     testImplementation "org.testcontainers:junit-jupiter:${testcontainersVersion}"

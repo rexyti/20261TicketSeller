@@ -1,6 +1,5 @@
 package com.ticketseller.application.checkout;
 
-import com.ticketseller.domain.model.EstadoTicket;
 import com.ticketseller.domain.model.EstadoVenta;
 import com.ticketseller.domain.model.Venta;
 import com.ticketseller.domain.repository.TicketRepositoryPort;

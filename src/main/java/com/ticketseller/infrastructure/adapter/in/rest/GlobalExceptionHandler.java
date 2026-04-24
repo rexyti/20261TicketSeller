@@ -23,6 +23,8 @@ import com.ticketseller.domain.exception.ZonaConTicketsVendidosException;
 import com.ticketseller.domain.exception.ZonaInvalidaException;
 import com.ticketseller.domain.exception.ZonaNotFoundException;
 import com.ticketseller.domain.exception.ZonaSinPrecioException;
+import com.ticketseller.domain.exception.TransicionEstadoInvalidaException;
+import com.ticketseller.domain.exception.AsientoEnCompraException;
 import com.ticketseller.infrastructure.adapter.in.rest.dto.ApiErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -53,7 +55,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler({RecintoConEventosException.class, RecintoDuplicadoException.class,
             RecintoNoDisponibleException.class, EventoEnProgresoException.class, EventoSolapamientoException.class,
-                      TipoAsientoEnUsoException.class, TipoAsientoInactivoException.class})
+                      TipoAsientoEnUsoException.class, TipoAsientoInactivoException.class,
+                      TransicionEstadoInvalidaException.class, AsientoEnCompraException.class})
     public ResponseEntity<ApiErrorResponse> conflict(RuntimeException ex) {
         return error("CONFLICT", ex.getMessage(), HttpStatus.CONFLICT);
     }
