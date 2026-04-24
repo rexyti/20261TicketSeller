@@ -2,7 +2,7 @@ package com.ticketseller.domain.model;
 
 public enum EstadoAsiento {
     DISPONIBLE,
-    OCUPADO,
-    INACTIVO,
-    VACIO
+    RESERVADO,
+    VENDIDO,
+    EN_MANTENIMIENTO
 }
