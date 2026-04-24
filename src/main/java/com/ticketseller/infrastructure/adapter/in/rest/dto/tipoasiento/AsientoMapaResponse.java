@@ -4,7 +4,7 @@ import java.util.UUID;
 
 public record AsientoMapaResponse(
         UUID id,
-        int fila,
+        String fila,
         int columna,
         String numero,
         boolean existente,

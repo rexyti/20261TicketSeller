@@ -16,7 +16,7 @@ public class CrearMapaAsientosUseCase {
     private final AsientoRepositoryPort asientoRepositoryPort;
     private final MapaAsientosRepositoryPort mapaAsientosRepositoryPort;
 
-    public Flux<Asiento> ejecutar(UUID recintoId, int filas, int columnasPorFila) {
+    public Flux<Asiento> ejecutar(UUID recintoId, String filas, int columnasPorFila) {
         return mapaAsientosRepositoryPort.tieneZonasActivas(recintoId)
                 .flatMapMany(tieneZonas -> {
                     if (tieneZonas) {
@@ -28,14 +28,16 @@ public class CrearMapaAsientosUseCase {
                 });
     }
 
-    private List<Asiento> generarAsientos(UUID recintoId, int filas, int columnasPorFila) {
-        List<Asiento> asientos = new ArrayList<>(filas * columnasPorFila);
+    private List<Asiento> generarAsientos(UUID recintoId, String filas, int columnasPorFila) {
+        String[] filaNombres = filas.split(",");
+        List<Asiento> asientos = new ArrayList<>(filaNombres.length * columnasPorFila);
         int numero = 1;
-        for (int fila = 1; fila <= filas; fila++) {
+        for (String filaNombre : filaNombres) {
+            String filaLimpia = filaNombre.trim();
             for (int columna = 1; columna <= columnasPorFila; columna++) {
                 asientos.add(Asiento.builder()
                         .id(UUID.randomUUID())
-                        .fila(fila)
+                        .fila(filaLimpia)
                         .columna(columna)
                         .numero(String.valueOf(numero++))
                         .zonaId(null)

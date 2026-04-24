@@ -13,23 +13,25 @@ import java.util.UUID;
 @AllArgsConstructor
 public class Asiento {
     private UUID id;
-    private int fila;
-    private int columna;
+    private String fila;
+    private Integer columna;
     private String numero;
     private UUID zonaId;
+    private TipoAsiento tipoAsiento;
     private EstadoAsiento estado;
 
     public Asiento normalizarDatosRegistro() {
         return this.toBuilder()
+                .fila(trimOrNull(fila))
                 .numero(trimOrNull(numero))
                 .build();
     }
 
     public void validarDatosRegistro() {
-        if (fila < 0) {
-            throw new com.ticketseller.domain.exception.AsientoInvalidoException("La fila debe ser mayor o igual a cero");
+        if (fila == null || fila.isBlank()) {
+            throw new com.ticketseller.domain.exception.AsientoInvalidoException("La fila del asiento es obligatoria");
         }
-        if (columna < 0) {
+        if (columna == null || columna < 0) {
             throw new com.ticketseller.domain.exception.AsientoInvalidoException("La columna debe ser mayor o igual a cero");
         }
         if (numero == null || numero.isBlank()) {
