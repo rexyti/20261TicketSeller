@@ -17,13 +17,7 @@ public class EditarTipoAsientoUseCase {
         return tipoAsientoRepositoryPort.buscarPorId(id)
                 .switchIfEmpty(Mono.error(new TipoAsientoNotFoundException("Tipo de asiento no encontrado")))
                 .flatMap(existente -> validarCambioNombre(existente, nombre)
-                        .then(Mono.defer(() -> {
-                            TipoAsiento actualizado = existente.toBuilder()
-                                    .nombre(nombre != null ? nombre.trim() : existente.getNombre())
-                                    .descripcion(descripcion != null ? descripcion.trim() : existente.getDescripcion())
-                                    .build();
-                            return tipoAsientoRepositoryPort.guardar(actualizado);
-                        })));
+                        .then(Mono.defer(() -> procesarYGuardar(existente, nombre, descripcion))));
     }
 
     private Mono<Void> validarCambioNombre(TipoAsiento existente, String nuevoNombre) {
@@ -37,5 +31,17 @@ public class EditarTipoAsientoUseCase {
                     }
                     return Mono.empty();
                 });
+    }
+
+    private Mono<TipoAsiento> procesarYGuardar(TipoAsiento existente, String nombre, String descripcion) {
+        TipoAsiento actualizado = existente.toBuilder()
+                .nombre(nombre != null ? nombre : existente.getNombre())
+                .descripcion(descripcion != null ? descripcion : existente.getDescripcion())
+                .build()
+                .normalizarDatosRegistro();
+
+        actualizado.validarDatosRegistro();
+
+        return tipoAsientoRepositoryPort.guardar(actualizado);
     }
 }

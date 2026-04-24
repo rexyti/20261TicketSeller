@@ -4,6 +4,7 @@ import com.ticketseller.domain.exception.TipoAsientoInactivoException;
 import com.ticketseller.domain.exception.TipoAsientoNotFoundException;
 import com.ticketseller.domain.exception.ZonaNotFoundException;
 import com.ticketseller.domain.model.EstadoTipoAsiento;
+import com.ticketseller.domain.model.TipoAsiento;
 import com.ticketseller.domain.model.Zona;
 import com.ticketseller.domain.repository.TipoAsientoRepositoryPort;
 import com.ticketseller.domain.repository.ZonaRepositoryPort;
@@ -23,29 +24,35 @@ public class AsignarTipoAsientoAZonaUseCase {
     public Mono<Tuple2<Zona, String>> ejecutar(UUID recintoId, UUID zonaId, UUID tipoAsientoId) {
         return tipoAsientoRepositoryPort.buscarPorId(tipoAsientoId)
                 .switchIfEmpty(Mono.error(new TipoAsientoNotFoundException("Tipo de asiento no encontrado")))
-                .flatMap(tipo -> {
-                    if (tipo.getEstado() != EstadoTipoAsiento.ACTIVO) {
-                        return Mono.error(new TipoAsientoInactivoException(
-                                "No se puede asignar un tipo de asiento inactivo. Actívelo primero."));
-                    }
-                    return zonaRepositoryPort.buscarPorId(zonaId)
-                            .switchIfEmpty(Mono.error(new ZonaNotFoundException("Zona no encontrada")))
-                            .flatMap(zona -> {
-                                if (!zona.getRecintoId().equals(recintoId)) {
-                                    return Mono.error(new ZonaNotFoundException("La zona no pertenece al recinto especificado"));
-                                }
+                .doOnNext(this::validarEstadoActivo)
+                .flatMap(tipo -> zonaRepositoryPort.buscarPorId(zonaId))
+                .switchIfEmpty(Mono.error(new ZonaNotFoundException("Zona no encontrada")))
+                .doOnNext(zona -> validarPertenenciaRecinto(zona, recintoId))
+                .flatMap(zona -> asignarYGuardar(zona, tipoAsientoId));
+    }
 
-                                String advertencia = zona.getTipoAsientoId() != null
-                                        ? "Esta zona ya tenía un tipo asignado. Se ha reemplazado."
-                                        : null;
+    private void validarEstadoActivo(TipoAsiento tipo) {
+        if (tipo.getEstado() != EstadoTipoAsiento.ACTIVO) {
+            throw new TipoAsientoInactivoException("No se puede asignar un tipo de asiento inactivo. Actívelo primero.");
+        }
+    }
 
-                                Zona zonaActualizada = zona.toBuilder()
-                                        .tipoAsientoId(tipoAsientoId)
-                                        .build();
+    private void validarPertenenciaRecinto(Zona zona, UUID recintoId) {
+        if (!zona.getRecintoId().equals(recintoId)) {
+            throw new ZonaNotFoundException("La zona no pertenece al recinto especificado");
+        }
+    }
 
-                                return zonaRepositoryPort.guardar(zonaActualizada)
-                                        .map(guardada -> Tuples.of(guardada, advertencia != null ? advertencia : ""));
-                            });
-                });
+    private Mono<Tuple2<Zona, String>> asignarYGuardar(Zona zona, UUID tipoAsientoId) {
+        String advertencia = zona.getTipoAsientoId() != null
+                ? "Esta zona ya tenía un tipo asignado. Se ha reemplazado."
+                : "";
+
+        Zona zonaActualizada = zona.toBuilder()
+                .tipoAsientoId(tipoAsientoId)
+                .build();
+
+        return zonaRepositoryPort.guardar(zonaActualizada)
+                .map(guardada -> Tuples.of(guardada, advertencia));
     }
 }

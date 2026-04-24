@@ -1,6 +1,7 @@
 package com.ticketseller.application.tipoasiento;
 
 import com.ticketseller.domain.model.Asiento;
+import com.ticketseller.domain.model.EstadoAsiento;
 import com.ticketseller.domain.repository.AsientoRepositoryPort;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
@@ -15,11 +16,13 @@ public class MarcarEspacioVacioUseCase {
     public Mono<Asiento> ejecutar(UUID asientoId) {
         return asientoRepositoryPort.buscarPorId(asientoId)
                 .switchIfEmpty(Mono.error(new IllegalArgumentException("Asiento no encontrado")))
-                .flatMap(asiento -> {
-                    Asiento actualizado = asiento.toBuilder()
-                            .existente(false)
-                            .build();
-                    return asientoRepositoryPort.guardar(actualizado);
-                });
+                .flatMap(this::marcarComoVacioYGuardar);
+    }
+
+    private Mono<Asiento> marcarComoVacioYGuardar(Asiento asiento) {
+        Asiento actualizado = asiento.toBuilder()
+                .estado(EstadoAsiento.VACIO)
+                .build();
+        return asientoRepositoryPort.guardar(actualizado);
     }
 }

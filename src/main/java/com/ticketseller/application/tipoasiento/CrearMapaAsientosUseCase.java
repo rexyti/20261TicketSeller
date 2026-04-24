@@ -39,8 +39,7 @@ public class CrearMapaAsientosUseCase {
                         .columna(columna)
                         .numero(String.valueOf(numero++))
                         .zonaId(null)
-                        .estado(null)
-                        .existente(true)
+                        .estado(com.ticketseller.domain.model.EstadoAsiento.DISPONIBLE)
                         .build());
             }
         }

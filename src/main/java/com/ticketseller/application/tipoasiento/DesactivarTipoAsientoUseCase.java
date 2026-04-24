@@ -19,15 +19,22 @@ public class DesactivarTipoAsientoUseCase {
         return tipoAsientoRepositoryPort.buscarPorId(id)
                 .switchIfEmpty(Mono.error(new TipoAsientoNotFoundException("Tipo de asiento no encontrado")))
                 .flatMap(tipo -> tipoAsientoRepositoryPort.tieneEventosFuturos(tipo.getId())
-                        .flatMap(tieneEventos -> {
-                            if (tieneEventos) {
-                                return Mono.error(new TipoAsientoEnUsoException(
-                                        "No se puede desactivar el tipo de asiento porque está siendo utilizado en secciones con eventos programados."));
-                            }
-                            TipoAsiento desactivado = tipo.toBuilder()
-                                    .estado(EstadoTipoAsiento.INACTIVO)
-                                    .build();
-                            return tipoAsientoRepositoryPort.guardar(desactivado);
-                        }));
+                        .doOnNext(this::validarUsoEnEventos)
+                        .thenReturn(tipo)
+                )
+                .flatMap(this::desactivarYGuardar);
+    }
+
+    private void validarUsoEnEventos(boolean tieneEventos) {
+        if (tieneEventos) {
+            throw new TipoAsientoEnUsoException("No se puede desactivar el tipo de asiento porque está siendo utilizado en secciones con eventos programados.");
+        }
+    }
+
+    private Mono<TipoAsiento> desactivarYGuardar(TipoAsiento tipo) {
+        TipoAsiento desactivado = tipo.toBuilder()
+                .estado(EstadoTipoAsiento.INACTIVO)
+                .build();
+        return tipoAsientoRepositoryPort.guardar(desactivado);
     }
 }

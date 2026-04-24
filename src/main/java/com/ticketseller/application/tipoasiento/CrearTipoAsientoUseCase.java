@@ -1,6 +1,5 @@
 package com.ticketseller.application.tipoasiento;
 
-import com.ticketseller.domain.exception.NombreTipoAsientoVacioException;
 import com.ticketseller.domain.model.EstadoTipoAsiento;
 import com.ticketseller.domain.model.TipoAsiento;
 import com.ticketseller.domain.repository.TipoAsientoRepositoryPort;
@@ -16,27 +15,30 @@ public class CrearTipoAsientoUseCase {
     private final TipoAsientoRepositoryPort tipoAsientoRepositoryPort;
 
     public Mono<Tuple2<TipoAsiento, String>> ejecutar(String nombre, String descripcion) {
-        if (nombre == null || nombre.isBlank()) {
-            return Mono.error(new NombreTipoAsientoVacioException("El campo nombre es obligatorio"));
-        }
+        return Mono.fromCallable(() -> buildTipoAsiento(nombre, descripcion))
+                .map(TipoAsiento::normalizarDatosRegistro)
+                .doOnNext(TipoAsiento::validarDatosRegistro)
+                .flatMap(this::validarYGuardar);
+    }
 
-        String nombreNormalizado = nombre.trim();
+    private TipoAsiento buildTipoAsiento(String nombre, String descripcion) {
+        return TipoAsiento.builder()
+                .id(UUID.randomUUID())
+                .nombre(nombre)
+                .descripcion(descripcion)
+                .estado(EstadoTipoAsiento.ACTIVO)
+                .build();
+    }
 
-        return tipoAsientoRepositoryPort.buscarPorNombre(nombreNormalizado)
-                .map(existente -> true)
-                .defaultIfEmpty(false)
-                .flatMap(existe -> {
-                    TipoAsiento nuevo = TipoAsiento.builder()
-                            .id(UUID.randomUUID())
-                            .nombre(nombreNormalizado)
-                            .descripcion(descripcion != null ? descripcion.trim() : null)
-                            .estado(EstadoTipoAsiento.ACTIVO)
-                            .build();
+    private Mono<Tuple2<TipoAsiento, String>> validarYGuardar(TipoAsiento tipoAsiento) {
+        return tipoAsientoRepositoryPort.buscarPorNombre(tipoAsiento.getNombre())
+                .hasElement()
+                .flatMap(existe -> guardarConAdvertencia(tipoAsiento, existe));
+    }
 
-                    String advertencia = existe ? "Ya existe un tipo de asiento con este nombre" : null;
-
-                    return tipoAsientoRepositoryPort.guardar(nuevo)
-                            .map(guardado -> Tuples.of(guardado, advertencia != null ? advertencia : ""));
-                });
+    private Mono<Tuple2<TipoAsiento, String>> guardarConAdvertencia(TipoAsiento tipoAsiento, boolean existe) {
+        String advertencia = existe ? "Ya existe un tipo de asiento con este nombre" : "";
+        return tipoAsientoRepositoryPort.guardar(tipoAsiento)
+                .map(guardado -> Tuples.of(guardado, advertencia));
     }
 }
