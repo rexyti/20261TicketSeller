@@ -60,11 +60,10 @@ src/main/java/com/ticketseller/
 │   │   ├── TipoAsientoInactivoException.java
 │   │   ├── TipoAsientoEnUsoException.java
 │   │   └── NombreTipoAsientoVacioException.java
-│   └── port/
-│       └── out/
-│           ├── TipoAsientoRepositoryPort.java
-│           ├── AsientoRepositoryPort.java
-│           └── MapaAsientosRepositoryPort.java           # (US5)
+│   └── repository/
+│       ├── TipoAsientoRepositoryPort.java
+│       ├── AsientoRepositoryPort.java
+│       └── MapaAsientosRepositoryPort.java           # (US5)
 │
 ├── application/                                          # Un caso de uso por responsabilidad — clases concretas
 │   ├── CrearTipoAsientoUseCase.java                      # Registra un nuevo tipo de asiento

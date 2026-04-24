@@ -65,12 +65,11 @@ src/main/java/com/ticketseller/
 │   │   ├── VentaNotFoundException.java
 │   │   ├── PagoRechazadoException.java
 │   │   └── ReservaExpiradaException.java
-│   └── port/
-│       └── out/
-│           ├── TicketRepositoryPort.java
-│           ├── VentaRepositoryPort.java
-│           ├── PasarelaPagoPort.java           # Puerto hacia pasarela externa — interfaz pura
-│           └── NotificacionEmailPort.java      # Puerto hacia servicio de email — interfaz pura
+│   └── repository/
+│       ├── TicketRepositoryPort.java
+│       ├── VentaRepositoryPort.java
+│       ├── PasarelaPagoPort.java           # Puerto hacia pasarela externa — interfaz pura
+│       └── NotificacionEmailPort.java      # Puerto hacia servicio de email — interfaz pura
 │
 ├── application/
 │   ├── ReservarAsientosUseCase.java

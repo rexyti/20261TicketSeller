@@ -1,5 +1,11 @@
 DROP TABLE IF EXISTS asientos;
 DROP TABLE IF EXISTS tipos_asiento;
+DROP TABLE IF EXISTS transacciones_financieras;
+DROP TABLE IF EXISTS tickets;
+DROP TABLE IF EXISTS ventas;
+DROP TABLE IF EXISTS precios_zona;
+DROP TABLE IF EXISTS cancelaciones_evento;
+DROP TABLE IF EXISTS eventos;
 DROP TABLE IF EXISTS compuertas;
 DROP TABLE IF EXISTS zonas;
 DROP TABLE IF EXISTS recintos;
@@ -50,3 +56,61 @@ CREATE TABLE asientos (
     estado VARCHAR(20),
     existente BOOLEAN NOT NULL DEFAULT TRUE
 );
+CREATE TABLE eventos (
+    id UUID PRIMARY KEY,
+    nombre VARCHAR(150) NOT NULL,
+    fecha_inicio TIMESTAMP NOT NULL,
+    fecha_fin TIMESTAMP NOT NULL,
+    tipo VARCHAR(100) NOT NULL,
+    recinto_id UUID NOT NULL REFERENCES recintos(id),
+    estado VARCHAR(40) NOT NULL
+);
+
+CREATE TABLE cancelaciones_evento (
+    id UUID PRIMARY KEY,
+    evento_id UUID NOT NULL UNIQUE REFERENCES eventos(id),
+    fecha_cancelacion TIMESTAMP NOT NULL,
+    motivo VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE precios_zona (
+    id UUID PRIMARY KEY,
+    evento_id UUID NOT NULL REFERENCES eventos(id),
+    zona_id UUID NOT NULL REFERENCES zonas(id),
+    precio NUMERIC(12,2) NOT NULL
+);
+
+CREATE TABLE ventas (
+    id UUID PRIMARY KEY,
+    comprador_id UUID NOT NULL,
+    evento_id UUID NOT NULL REFERENCES eventos(id),
+    estado VARCHAR(40) NOT NULL,
+    fecha_creacion TIMESTAMP NOT NULL,
+    fecha_expiracion TIMESTAMP NOT NULL,
+    total NUMERIC(12,2) NOT NULL
+);
+
+CREATE TABLE tickets (
+    id UUID PRIMARY KEY,
+    venta_id UUID NOT NULL REFERENCES ventas(id),
+    evento_id UUID NOT NULL REFERENCES eventos(id),
+    zona_id UUID NOT NULL REFERENCES zonas(id),
+    compuerta_id UUID REFERENCES compuertas(id),
+    codigo_qr TEXT,
+    estado VARCHAR(40) NOT NULL,
+    precio NUMERIC(12,2) NOT NULL,
+    es_cortesia BOOLEAN NOT NULL DEFAULT FALSE
+);
+
+CREATE TABLE transacciones_financieras (
+    id UUID PRIMARY KEY,
+    venta_id UUID NOT NULL REFERENCES ventas(id),
+    monto NUMERIC(12,2) NOT NULL,
+    metodo_pago VARCHAR(60) NOT NULL,
+    estado_pago VARCHAR(40) NOT NULL,
+    codigo_autorizacion VARCHAR(80),
+    respuesta_pasarela TEXT,
+    fecha TIMESTAMP NOT NULL,
+    ip VARCHAR(80)
+);
+

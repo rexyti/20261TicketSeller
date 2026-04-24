@@ -23,25 +23,22 @@ public class Asiento {
     public Asiento normalizarDatosRegistro() {
         return this.toBuilder()
                 .fila(trimOrNull(fila))
-                .numero(trimOrNull(numero))
+                .numero(fila + columna)
                 .build();
     }
 
     public void validarDatosRegistro() {
-        if (fila == null || fila.isBlank()) {
-            throw new com.ticketseller.domain.exception.AsientoInvalidoException("La fila del asiento es obligatoria");
-        }
-        if (columna == null || columna < 0) {
-            throw new com.ticketseller.domain.exception.AsientoInvalidoException("La columna debe ser mayor o igual a cero");
-        }
-        if (numero == null || numero.isBlank()) {
-            throw new com.ticketseller.domain.exception.AsientoInvalidoException("El número del asiento es obligatorio");
-        }
-        if (zonaId == null) {
-            throw new com.ticketseller.domain.exception.AsientoInvalidoException("La zona del asiento es obligatoria");
-        }
-        if (estado == null) {
-            throw new com.ticketseller.domain.exception.AsientoInvalidoException("El estado del asiento es obligatorio");
+        validarObligatorio(id, "id");
+        validarObligatorio(zonaId, "zonaId");
+        validarObligatorio(fila, "fila");
+        validarObligatorio(columna, "columna");
+        validarObligatorio(numero, "numero");
+        validarObligatorio(estado, "estado");
+    }
+
+    private void validarObligatorio(Object valor, String campo) {
+        if (valor == null) {
+            throw new IllegalArgumentException("El campo %s es obligatorio".formatted(campo));
         }
     }
 

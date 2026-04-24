@@ -9,3 +9,8 @@ spring:
 server:
   port: 8080
 
+wompi:
+  #Dev
+  base-url: https://sandbox.wompi.co/v1
+  private-key: #Al crear la cuenta en Wompi, se genera una llave privada, esta es la que se debe colocar aquí
+

@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.time.LocalDateTime;
 
 public class RecintoRepositoryAdapter implements RecintoRepositoryPort {
 
@@ -111,8 +112,20 @@ public class RecintoRepositoryAdapter implements RecintoRepositoryPort {
 
     @Override
     public Mono<Boolean> tieneEventosFuturos(UUID recintoId) {
-        // TODO: integrar con entidad Evento
-        return Mono.just(false);
+        return databaseClient.sql("""
+                        SELECT EXISTS (
+                            SELECT 1
+                            FROM eventos
+                            WHERE recinto_id = $1
+                              AND estado <> 'CANCELADO'
+                              AND fecha_inicio > $2
+                        ) AS existe
+                        """)
+                .bind(0, recintoId)
+                .bind(1, LocalDateTime.now())
+                .map((row, metadata) -> row.get("existe", Boolean.class))
+                .one()
+                .defaultIfEmpty(false);
     }
 
     @Override
@@ -127,8 +140,19 @@ public class RecintoRepositoryAdapter implements RecintoRepositoryPort {
 
     @Override
     public Mono<Boolean> tieneTicketsVendidos(UUID recintoId) {
-        // TODO: integrar con entidad Ticket
-        return Mono.just(false);
+        return databaseClient.sql("""
+                        SELECT EXISTS (
+                            SELECT 1
+                            FROM tickets t
+                            INNER JOIN eventos e ON e.id = t.evento_id
+                            WHERE e.recinto_id = $1
+                              AND t.estado = 'VENDIDO'
+                        ) AS existe
+                        """)
+                .bind(0, recintoId)
+                .map((row, metadata) -> row.get("existe", Boolean.class))
+                .one()
+                .defaultIfEmpty(false);
     }
 
     private GenericExecuteSpec bindAll(GenericExecuteSpec spec, Map<String, Object> params) {

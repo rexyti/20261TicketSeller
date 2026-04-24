@@ -63,9 +63,8 @@ src/main/java/com/ticketseller/
 │   │   ├── AsientoNoDisponibleException.java
 │   │   ├── AsientoReservadoPorOtroException.java
 │   │   └── HoldExpiradoException.java
-│   └── port/
-│       └── out/
-│           └── (extiende AsientoRepositoryPort existente con métodos de hold)
+│   └── repository/
+│       └── (extiende AsientoRepositoryPort existente con métodos de hold)
 │
 ├── application/                                    # Casos de uso — uno por responsabilidad
 │   ├── VerificarDisponibilidadUseCase.java

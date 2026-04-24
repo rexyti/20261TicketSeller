@@ -63,9 +63,8 @@ src/main/java/com/ticketseller/
 │   │   ├── TicketYaUsadoException.java
 │   │   ├── ReembolsoFallidoException.java
 │   │   └── TransicionEstadoInvalidaException.java
-│   └── port/
-│       └── out/
-│           └── ReembolsoRepositoryPort.java
+│   └── repository/
+│       └── ReembolsoRepositoryPort.java
 │
 ├── application/                                    # Casos de uso — uno por responsabilidad
 │   ├── CancelarTicketUseCase.java

@@ -56,6 +56,7 @@ src/main/java/com/ticketseller/
 │   ├── model/
 │   │   ├── Evento.java
 │   │   ├── PrecioZona.java
+│   │   ├── CancelacionEvento.java
 │   │   └── EstadoEvento.java                  # Enum: ACTIVO, EN_PROGRESO, FINALIZADO, CANCELADO
 │   ├── exception/
 │   │   ├── EventoNotFoundException.java
@@ -63,14 +64,15 @@ src/main/java/com/ticketseller/
 │   │   ├── EventoEnProgresoException.java
 │   │   ├── EventoSolapamientoException.java
 │   │   └── ZonaSinPrecioException.java
-│   └── port/
-│       └── out/
+│   └── repository/
 │           ├── EventoRepositoryPort.java
+│           ├── CancelacionEventoRepositoryPort.java
 │           └── PrecioZonaRepositoryPort.java
 │
 ├── application/
 │   ├── RegistrarEventoUseCase.java
 │   ├── ConfigurarPreciosUseCase.java
+│   ├── ListarPreciosUseCase.java
 │   ├── EditarEventoUseCase.java
 │   ├── CancelarEventoUseCase.java
 │   └── ListarEventosUseCase.java
@@ -89,13 +91,17 @@ src/main/java/com/ticketseller/
     │   │       └── EventoResponse.java
     │   └── out/persistence/
     │       ├── EventoEntity.java
+    │       ├── CancelacionEventoEntity.java
     │       ├── PrecioZonaEntity.java
     │       ├── EventoR2dbcRepository.java
+    │       ├── CancelacionEventoR2dbcRepository.java
     │       ├── PrecioZonaR2dbcRepository.java
     │       ├── EventoRepositoryAdapter.java
+    │       ├── CancelacionEventoRepositoryAdapter.java
     │       ├── PrecioZonaRepositoryAdapter.java
     │       └── mapper/
     │           ├── EventoPersistenceMapper.java
+    │           ├── CancelacionEventoPersistenceMapper.java
     │           └── PrecioZonaPersistenceMapper.java
     └── config/
         └── BeanConfiguration.java             # Actualizar con los nuevos beans
@@ -131,7 +137,7 @@ vida y su propia tabla.
 feature bloquea los features 005 y 014.
 
 - [ ] T001 Crear las tablas manualmente en PostgreSQL: tabla `eventos` (id, nombre, fecha_inicio, fecha_fin, tipo,
-  recinto_id, estado, motivo_cancelacion), tabla `precios_zona` (id, evento_id, zona_id, precio) — incluir en el script
+  recinto_id, estado), tabla `precios_zona` (id, evento_id, zona_id, precio), tabla `cancelaciones_evento` (`id`, `evento_id`, `fecha_cancelacion`, `motivo`) — incluir en el script
   SQL de `src/test/resources/` para Testcontainers
 - [ ] T002 Crear enum `EstadoEvento.java` en `domain/model/`: ACTIVO, EN_PROGRESO, FINALIZADO, CANCELADO — documentar
   las transiciones válidas como comentario en el enum
@@ -283,8 +289,7 @@ HTTP 200 y el evento no aparece en `GET /api/eventos` pero sí en `GET /api/even
 ### Implementación de User Story 4
 
 - [ ] T042 [US4] Implementar `CancelarEventoUseCase.java` en `application/`: buscar evento, validar que se provea
-  motivo (lanzar validación si está vacío), actualizar estado a `CANCELADO` y persistir `motivoCancelacion` vía
-  `EventoRepositoryPort.guardar()` — retornar `Mono<Evento>` — dejar
+  motivo (lanzar validación si está vacío), actualizar estado a `CANCELADO` y persistir el motivo y timestamp en `cancelaciones_evento` — retornar `Mono<Evento>` — dejar
   `// TODO: disparar proceso de reembolsos cuando feature 005 esté implementado`
 - [ ] T043 [US4] Crear DTO `CancelarEventoRequest.java` con campo `motivo` obligatorio (`@NotBlank`)
 - [ ] T044 [US4] Implementar endpoint `PATCH /api/eventos/{id}/estado` en `EventoController.java` inyectando
@@ -332,7 +337,7 @@ HTTP 200 y el evento no aparece en `GET /api/eventos` pero sí en `GET /api/even
 
 - El tag `[P]` identifica tareas de prueba para distinguirlas del código productivo
 - El tag `[US1/US2/US3/US4]` mapea cada tarea a su user story para trazabilidad
-- **Gestión de BD**: tablas `eventos` y `precios_zona` se crean manualmente — incluir en el script SQL de
+- **Gestión de BD**: tablas `eventos`,  `cancelaciones_evento` y `precios_zona` se crean manualmente — incluir en el script SQL de
   `src/test/resources/` para Testcontainers
 - El campo `estado` del evento y las transiciones válidas deben documentarse en el enum `EstadoEvento` — no toda
   transición es válida (ej. un evento CANCELADO no puede volver a ACTIVO)
