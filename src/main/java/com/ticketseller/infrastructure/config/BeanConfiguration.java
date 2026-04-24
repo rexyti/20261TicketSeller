@@ -32,6 +32,7 @@ import com.ticketseller.domain.repository.TicketRepositoryPort;
 import com.ticketseller.domain.repository.TransaccionFinancieraRepositoryPort;
 import com.ticketseller.domain.repository.VentaRepositoryPort;
 import com.ticketseller.domain.repository.ZonaRepositoryPort;
+import com.ticketseller.infrastructure.adapter.out.payment.WompiAdapter;
 import com.ticketseller.infrastructure.adapter.out.persistence.cancelacionevento.CancelacionEventoR2dbcRepository;
 import com.ticketseller.infrastructure.adapter.out.persistence.cancelacionevento.CancelacionEventoRepositoryAdapter;
 import com.ticketseller.infrastructure.adapter.out.persistence.cancelacionevento.mapper.CancelacionEventoPersistenceMapper;
@@ -62,6 +63,7 @@ import com.ticketseller.infrastructure.adapter.out.persistence.zona.mapper.ZonaP
 import com.ticketseller.infrastructure.adapter.out.payment.PasarelaPagoAdapter;
 import com.ticketseller.infrastructure.adapter.out.email.EmailNotificacionAdapter;
 import com.ticketseller.infrastructure.adapter.out.qr.ZxingCodigoQrAdapter;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
@@ -283,5 +285,12 @@ public class BeanConfiguration {
     public ConsultarVentaUseCase consultarVentaUseCase(VentaRepositoryPort ventaRepositoryPort,
                                                        TicketRepositoryPort ticketRepositoryPort) {
         return new ConsultarVentaUseCase(ventaRepositoryPort, ticketRepositoryPort);
+    }
+
+    @Bean
+    public PasarelaPagoPort wompiAdapter(
+            @Value("${wompi.base-url}") String baseUrl,
+            @Value("${wompi.private-key}") String privateKey) {
+        return new WompiAdapter(baseUrl, privateKey);
     }
 }

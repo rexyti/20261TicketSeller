@@ -2,7 +2,9 @@ package com.ticketseller.domain.model;
 
 public enum MetodoPago {
     TARJETA,
-    TRANSFERENCIA,
+    PSE,
+    NEQUI,
+    DAVIPLATA,
     OTRO;
 
     public static MetodoPago fromValor(String valor) {
@@ -14,4 +16,3 @@ public enum MetodoPago {
         return valor == null || valor.isBlank();
     }
 }
-

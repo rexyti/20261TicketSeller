@@ -16,12 +16,13 @@ public class Asiento {
     private UUID zonaId;
     private String fila;
     private Integer columna;
-    private Integer numero;
+    private String numero;
     private EstadoAsiento estado;
 
     public Asiento normalizarDatosRegistro() {
         return toBuilder()
                 .fila(trimOrNull(fila))
+                .numero(fila + columna)
                 .build();
     }
 
