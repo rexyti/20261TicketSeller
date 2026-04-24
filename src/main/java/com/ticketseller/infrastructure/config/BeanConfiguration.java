@@ -10,6 +10,10 @@ import com.ticketseller.application.compuerta.AsignarCompuertaAZonaUseCase;
 import com.ticketseller.application.compuerta.CrearCompuertaUseCase;
 import com.ticketseller.application.compuerta.ListarCompuertasUseCase;
 import com.ticketseller.application.evento.*;
+import com.ticketseller.application.liquidacion.ConfigurarModeloNegocioUseCase;
+import com.ticketseller.application.liquidacion.ConsultarModeloNegocioUseCase;
+import com.ticketseller.application.liquidacion.ConsultarRecaudoIncrementalUseCase;
+import com.ticketseller.application.liquidacion.ConsultarSnapshotUseCase;
 import com.ticketseller.application.precios.ConfigurarPreciosUseCase;
 import com.ticketseller.application.precios.ListarPreciosUseCase;
 import com.ticketseller.application.recinto.DesactivarRecintoUseCase;
@@ -23,6 +27,7 @@ import com.ticketseller.application.zona.ValidarZonasUseCase;
 import com.ticketseller.domain.repository.CancelacionEventoRepositoryPort;
 import com.ticketseller.domain.repository.CompuertaRepositoryPort;
 import com.ticketseller.domain.repository.EventoRepositoryPort;
+import com.ticketseller.domain.repository.LiquidacionQueryPort;
 import com.ticketseller.domain.repository.PrecioZonaRepositoryPort;
 import com.ticketseller.domain.repository.RecintoRepositoryPort;
 import com.ticketseller.domain.repository.CodigoQrPort;
@@ -51,6 +56,7 @@ import com.ticketseller.infrastructure.adapter.out.persistence.checkout.VentaRep
 import com.ticketseller.infrastructure.adapter.out.persistence.checkout.mapper.TicketPersistenceMapper;
 import com.ticketseller.infrastructure.adapter.out.persistence.checkout.mapper.TransaccionFinancieraPersistenceMapper;
 import com.ticketseller.infrastructure.adapter.out.persistence.checkout.mapper.VentaPersistenceMapper;
+import com.ticketseller.infrastructure.adapter.out.persistence.liquidacion.LiquidacionQueryAdapter;
 import com.ticketseller.infrastructure.adapter.out.persistence.preciozona.PrecioZonaR2dbcRepository;
 import com.ticketseller.infrastructure.adapter.out.persistence.preciozona.PrecioZonaRepositoryAdapter;
 import com.ticketseller.infrastructure.adapter.out.persistence.preciozona.mapper.PrecioZonaPersistenceMapper;
@@ -292,5 +298,33 @@ public class BeanConfiguration {
             @Value("${wompi.base-url}") String baseUrl,
             @Value("${wompi.private-key}") String privateKey) {
         return new WompiAdapter(baseUrl, privateKey);
+    }
+
+    @Bean
+    public LiquidacionQueryPort liquidacionQueryPort(DatabaseClient databaseClient) {
+        return new LiquidacionQueryAdapter(databaseClient);
+    }
+
+    @Bean
+    public ConsultarSnapshotUseCase consultarSnapshotUseCase(EventoRepositoryPort eventoRepositoryPort,
+                                                             LiquidacionQueryPort liquidacionQueryPort) {
+        return new ConsultarSnapshotUseCase(eventoRepositoryPort, liquidacionQueryPort);
+    }
+
+    @Bean
+    public ConsultarModeloNegocioUseCase consultarModeloNegocioUseCase(RecintoRepositoryPort recintoRepositoryPort) {
+        return new ConsultarModeloNegocioUseCase(recintoRepositoryPort);
+    }
+
+    @Bean
+    public ConfigurarModeloNegocioUseCase configurarModeloNegocioUseCase(RecintoRepositoryPort recintoRepositoryPort) {
+        return new ConfigurarModeloNegocioUseCase(recintoRepositoryPort);
+    }
+
+    @Bean
+    public ConsultarRecaudoIncrementalUseCase consultarRecaudoIncrementalUseCase(
+            EventoRepositoryPort eventoRepositoryPort,
+            LiquidacionQueryPort liquidacionQueryPort) {
+        return new ConsultarRecaudoIncrementalUseCase(eventoRepositoryPort, liquidacionQueryPort);
     }
 }
