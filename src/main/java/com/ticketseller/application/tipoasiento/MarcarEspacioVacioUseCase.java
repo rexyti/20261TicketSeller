@@ -16,12 +16,12 @@ public class MarcarEspacioVacioUseCase {
     public Mono<Asiento> ejecutar(UUID asientoId) {
         return asientoRepositoryPort.buscarPorId(asientoId)
                 .switchIfEmpty(Mono.error(new IllegalArgumentException("Asiento no encontrado")))
-                .flatMap(this::marcarComoVacioYGuardar);
+                .flatMap(this::marcarComoEnMantenimientoYGuardar);
     }
 
-    private Mono<Asiento> marcarComoVacioYGuardar(Asiento asiento) {
+    private Mono<Asiento> marcarComoEnMantenimientoYGuardar(Asiento asiento) {
         Asiento actualizado = asiento.toBuilder()
-                .estado(EstadoAsiento.VACIO)
+                .estado(EstadoAsiento.EN_MANTENIMIENTO)
                 .build();
         return asientoRepositoryPort.guardar(actualizado);
     }
