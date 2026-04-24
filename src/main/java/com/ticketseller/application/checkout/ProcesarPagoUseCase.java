@@ -35,7 +35,7 @@ public class ProcesarPagoUseCase {
 
     public Mono<VentaDetalle> ejecutar(UUID ventaId, ProcesarPagoCommand command) {
         if (invalidCommand(command))
-            return Mono.error(new IllegalArgumentException("El metodo de pago es obligatorio"));
+            return Mono.error(new IllegalArgumentException("El método de pago es obligatorio"));
 
         return ventaRepositoryPort.buscarPorId(ventaId)
                 .switchIfEmpty(Mono.error(new VentaNotFoundException("Venta no encontrada")))
@@ -97,10 +97,13 @@ public class ProcesarPagoUseCase {
 
     private Mono<VentaDetalle> rechazarPago(Venta venta, ProcesarPagoCommand command, ResultadoPago resultado) {
         return guardarTransaccion(venta, command, resultado)
-                .then(Mono.error(new PagoRechazadoException(
-                        resultado.respuestaPasarela() == null
-                                ? "La transaccion fue rechazada por el banco"
-                                : resultado.respuestaPasarela())));
+                .then(Mono.error(pagoRechazado(resultado.respuestaPasarela())));
+    }
+
+    private PagoRechazadoException pagoRechazado(String respuestaPasarela) {
+        return new PagoRechazadoException(respuestaPasarela == null
+                ? "La transacción fue rechazada por el banco"
+                : respuestaPasarela);
     }
 
     private Mono<TransaccionFinanciera> guardarTransaccion(Venta venta, ProcesarPagoCommand command, ResultadoPago resultado) {

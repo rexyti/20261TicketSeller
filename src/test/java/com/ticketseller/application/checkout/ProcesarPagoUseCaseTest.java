@@ -48,7 +48,8 @@ class ProcesarPagoUseCaseTest {
                 .fechaExpiracion(LocalDateTime.now().plusMinutes(5))
                 .build();
 
-        Ticket ticket = Ticket.builder().id(UUID.randomUUID()).ventaId(ventaId).estado(EstadoTicket.RESERVADO).build();
+        Ticket ticket = Ticket.builder().id(UUID.randomUUID()).ventaId(ventaId).estado(EstadoTicket.RESERVADO)
+                .eventoId(UUID.randomUUID()).zonaId(UUID.randomUUID()).precio(BigDecimal.TEN).build();
 
         when(ventaRepositoryPort.buscarPorId(ventaId)).thenReturn(Mono.just(venta));
         when(pasarelaPagoPort.procesarPago(any(), any(), any())).thenReturn(Mono.just(new ResultadoPago(true, "APROBADO", "AUTH", "OK")));
