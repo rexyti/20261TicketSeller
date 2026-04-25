@@ -27,6 +27,9 @@ import com.ticketseller.domain.exception.ZonaNotFoundException;
 import com.ticketseller.domain.exception.ZonaSinPrecioException;
 import com.ticketseller.domain.exception.TransicionEstadoInvalidaException;
 import com.ticketseller.domain.exception.AsientoEnCompraException;
+import com.ticketseller.domain.exception.TicketYaUsadoException;
+import com.ticketseller.domain.exception.CancelacionFueraDePlazoException;
+import com.ticketseller.domain.exception.ReembolsoFallidoException;
 import com.ticketseller.infrastructure.adapter.in.rest.dto.ApiErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -59,7 +62,8 @@ public class GlobalExceptionHandler {
             RecintoNoDisponibleException.class, EventoEnProgresoException.class, EventoSolapamientoException.class,
             EventoNoFinalizadoException.class,
                       TipoAsientoEnUsoException.class, TipoAsientoInactivoException.class,
-                      TransicionEstadoInvalidaException.class, AsientoEnCompraException.class})
+                      TransicionEstadoInvalidaException.class, AsientoEnCompraException.class,
+                      TicketYaUsadoException.class})
     public ResponseEntity<ApiErrorResponse> conflict(RuntimeException ex) {
         return error("CONFLICT", ex.getMessage(), HttpStatus.CONFLICT);
     }
@@ -88,9 +92,9 @@ public class GlobalExceptionHandler {
         return error("VALIDATION_ERROR", ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(LiquidacionNoConfiguradaException.class)
-    public ResponseEntity<ApiErrorResponse> liquidacionNoConfigurada(LiquidacionNoConfiguradaException ex) {
-        return error("LIQUIDACION_NO_CONFIGURADA", ex.getMessage(), HttpStatus.UNPROCESSABLE_ENTITY);
+    @ExceptionHandler({LiquidacionNoConfiguradaException.class, CancelacionFueraDePlazoException.class, ReembolsoFallidoException.class})
+    public ResponseEntity<ApiErrorResponse> unprocessableEntity(RuntimeException ex) {
+        return error("UNPROCESSABLE_ENTITY", ex.getMessage(), HttpStatus.UNPROCESSABLE_ENTITY);
     }
 
     @ExceptionHandler(WebExchangeBindException.class)

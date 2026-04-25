@@ -71,6 +71,14 @@ public class WompiAdapter implements PasarelaPagoPort {
                 ));
     }
 
+    @Override
+    public Mono<ResultadoPago> procesarReembolso(UUID ventaId, BigDecimal monto) {
+        // TODO: Implementar integración real con Wompi para reversiones/reembolsos
+        // Wompi requiere el ID de la transacción original, no solo la referencia.
+        return Mono.just(new ResultadoPago(true, "APROBADO", "REF-WOMPI-" + ventaId.toString().substring(0, 8),
+                "Reembolso procesado exitosamente por Wompi (Simulado)"));
+    }
+
     private String resolverTipoWompi(String metodoPago) {
         if (noHayMetodoPago(metodoPago)) {
             throw new IllegalArgumentException("El método de pago es obligatorio");

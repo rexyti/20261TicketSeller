@@ -10,6 +10,7 @@ import com.ticketseller.infrastructure.adapter.in.rest.dto.checkout.ReservarAsie
 import com.ticketseller.infrastructure.adapter.in.rest.dto.checkout.TicketResponse;
 import com.ticketseller.infrastructure.adapter.in.rest.dto.checkout.VentaResponse;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
 import java.util.List;
 
@@ -20,6 +21,8 @@ public interface CheckoutRestMapper {
 
     ProcesarPagoCommand toCommand(ProcesarPagoRequest request);
 
+    @Mapping(target = "estadoReembolso", ignore = true)
+    @Mapping(target = "detalleReembolso", ignore = true)
     TicketResponse toTicketResponse(Ticket ticket);
 
     VentaResponse toVentaResponse(Venta venta, List<TicketResponse> tickets);

@@ -25,5 +25,16 @@ public class EmailNotificacionAdapter implements NotificacionEmailPort {
             javaMailSender.send(message);
         });
     }
+
+    @Override
+    public Mono<Void> enviarAnulacion(Venta venta, Ticket ticket, String motivo) {
+        return Mono.fromRunnable(() -> {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setTo("comprador+" + venta.getCompradorId() + "@ticketseller.local");
+            message.setSubject("Anulación de Ticket " + ticket.getId());
+            message.setText("Tu ticket ha sido anulado por el siguiente motivo: " + motivo);
+            javaMailSender.send(message);
+        });
+    }
 }
 

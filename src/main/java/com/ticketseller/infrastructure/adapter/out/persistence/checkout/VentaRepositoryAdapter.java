@@ -40,5 +40,10 @@ public class VentaRepositoryAdapter implements VentaRepositoryPort {
                 .flatMap(repository::save)
                 .map(mapper::toDomain);
     }
+
+    @Override
+    public Flux<Venta> buscarPorComprador(UUID compradorId) {
+        return repository.findByCompradorId(compradorId).map(mapper::toDomain);
+    }
 }
 

@@ -6,6 +6,11 @@ import com.ticketseller.application.checkout.ConsultarVentaUseCase;
 import com.ticketseller.application.checkout.LiberarReservaUseCase;
 import com.ticketseller.application.checkout.ProcesarPagoUseCase;
 import com.ticketseller.application.checkout.ReservarAsientosUseCase;
+import com.ticketseller.application.CancelarTicketUseCase;
+import com.ticketseller.application.ProcesarReembolsoMasivoUseCase;
+import com.ticketseller.application.CambiarEstadoTicketUseCase;
+import com.ticketseller.application.GestionarReembolsoManualUseCase;
+import com.ticketseller.application.ConsultarEstadoReembolsoUseCase;
 import com.ticketseller.application.compuerta.AsignarCompuertaAZonaUseCase;
 import com.ticketseller.application.compuerta.CrearCompuertaUseCase;
 import com.ticketseller.application.compuerta.ListarCompuertasUseCase;
@@ -98,6 +103,14 @@ import com.ticketseller.infrastructure.adapter.out.persistence.zona.mapper.ZonaP
 import com.ticketseller.infrastructure.adapter.out.persistence.HistorialCambioEstadoR2dbcRepository;
 import com.ticketseller.infrastructure.adapter.out.persistence.HistorialCambioEstadoRepositoryAdapter;
 import com.ticketseller.infrastructure.adapter.out.persistence.mapper.HistorialCambioEstadoPersistenceMapper;
+import com.ticketseller.infrastructure.adapter.out.persistence.ReembolsoR2dbcRepository;
+import com.ticketseller.infrastructure.adapter.out.persistence.ReembolsoRepositoryAdapter;
+import com.ticketseller.infrastructure.adapter.out.persistence.mapper.ReembolsoPersistenceMapper;
+import com.ticketseller.infrastructure.adapter.out.persistence.HistorialTicketR2dbcRepository;
+import com.ticketseller.infrastructure.adapter.out.persistence.HistorialTicketRepositoryAdapter;
+import com.ticketseller.infrastructure.adapter.out.persistence.mapper.HistorialTicketPersistenceMapper;
+import com.ticketseller.domain.repository.ReembolsoRepositoryPort;
+import com.ticketseller.domain.repository.HistorialTicketRepositoryPort;
 import com.ticketseller.infrastructure.adapter.out.payment.PasarelaPagoAdapter;
 import com.ticketseller.infrastructure.adapter.out.email.EmailNotificacionAdapter;
 import com.ticketseller.infrastructure.adapter.out.qr.ZxingCodigoQrAdapter;
@@ -181,6 +194,20 @@ public class BeanConfiguration {
             TransaccionFinancieraR2dbcRepository repository,
             TransaccionFinancieraPersistenceMapper mapper) {
         return new TransaccionFinancieraRepositoryAdapter(repository, mapper);
+    }
+
+    @Bean
+    public ReembolsoRepositoryPort reembolsoRepositoryPort(
+            ReembolsoR2dbcRepository repository,
+            ReembolsoPersistenceMapper mapper) {
+        return new ReembolsoRepositoryAdapter(repository, mapper);
+    }
+
+    @Bean
+    public HistorialTicketRepositoryPort historialTicketRepositoryPort(
+            HistorialTicketR2dbcRepository repository,
+            HistorialTicketPersistenceMapper mapper) {
+        return new HistorialTicketRepositoryAdapter(repository, mapper);
     }
 
     @Bean
@@ -434,6 +461,8 @@ public class BeanConfiguration {
     @Bean
     public ConsultarHistorialAsientoUseCase consultarHistorialAsientoUseCase(HistorialCambioEstadoRepositoryPort historialRepositoryPort) {
         return new ConsultarHistorialAsientoUseCase(historialRepositoryPort);
+    }
+
     @Bean
     public ConsultarEstadoTicketUseCase consultarEstadoTicketUseCase(TicketRepositoryPort ticketRepositoryPort) {
         return new ConsultarEstadoTicketUseCase(ticketRepositoryPort);
@@ -443,5 +472,41 @@ public class BeanConfiguration {
     public ConsultarEstructuraRecintoUseCase consultarEstructuraRecintoUseCase(RecintoRepositoryPort recintoRepositoryPort,
             ZonaRepositoryPort zonaRepositoryPort) {
         return new ConsultarEstructuraRecintoUseCase(recintoRepositoryPort, zonaRepositoryPort);
+    }
+
+    @Bean
+    public CancelarTicketUseCase cancelarTicketUseCase(TicketRepositoryPort ticketRepositoryPort,
+            AsientoRepositoryPort asientoRepositoryPort,
+            ReembolsoRepositoryPort reembolsoRepositoryPort,
+            EventoRepositoryPort eventoRepositoryPort) {
+        return new CancelarTicketUseCase(ticketRepositoryPort, asientoRepositoryPort, reembolsoRepositoryPort, eventoRepositoryPort);
+    }
+
+    @Bean
+    public ProcesarReembolsoMasivoUseCase procesarReembolsoMasivoUseCase(TicketRepositoryPort ticketRepositoryPort,
+            ReembolsoRepositoryPort reembolsoRepositoryPort) {
+        return new ProcesarReembolsoMasivoUseCase(ticketRepositoryPort, reembolsoRepositoryPort);
+    }
+
+    @Bean
+    public CambiarEstadoTicketUseCase cambiarEstadoTicketUseCase(TicketRepositoryPort ticketRepositoryPort,
+            HistorialTicketRepositoryPort historialRepositoryPort,
+            NotificacionEmailPort notificacionEmailPort,
+            VentaRepositoryPort ventaRepositoryPort) {
+        return new CambiarEstadoTicketUseCase(ticketRepositoryPort, historialRepositoryPort, notificacionEmailPort, ventaRepositoryPort);
+    }
+
+    @Bean
+    public GestionarReembolsoManualUseCase gestionarReembolsoManualUseCase(ReembolsoRepositoryPort reembolsoRepositoryPort,
+            TicketRepositoryPort ticketRepositoryPort,
+            PasarelaPagoPort pasarelaPagoPort) {
+        return new GestionarReembolsoManualUseCase(reembolsoRepositoryPort, ticketRepositoryPort, pasarelaPagoPort);
+    }
+
+    @Bean
+    public ConsultarEstadoReembolsoUseCase consultarEstadoReembolsoUseCase(VentaRepositoryPort ventaRepositoryPort,
+            TicketRepositoryPort ticketRepositoryPort,
+            ReembolsoRepositoryPort reembolsoRepositoryPort) {
+        return new ConsultarEstadoReembolsoUseCase(ventaRepositoryPort, ticketRepositoryPort, reembolsoRepositoryPort);
     }
 }

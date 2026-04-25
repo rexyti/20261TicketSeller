@@ -1,5 +1,6 @@
 package com.ticketseller.infrastructure.adapter.in.rest.dto.checkout;
 
+import com.ticketseller.domain.model.EstadoReembolso;
 import com.ticketseller.domain.model.EstadoTicket;
 
 import java.math.BigDecimal;
@@ -12,7 +13,9 @@ public record TicketResponse(
         EstadoTicket estado,
         BigDecimal precio,
         String codigoQr,
-        boolean esCortesia
+        boolean esCortesia,
+        EstadoReembolso estadoReembolso,
+        String detalleReembolso
 ) {
 }
 

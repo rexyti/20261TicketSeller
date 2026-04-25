@@ -42,6 +42,11 @@ public class TicketRepositoryAdapter implements TicketRepositoryPort {
     }
 
     @Override
+    public Flux<Ticket> buscarPorEvento(UUID eventoId) {
+        return repository.findByEventoId(eventoId).map(mapper::toDomain);
+    }
+
+    @Override
     public Mono<Long> contarPorEventoYZonaYEstados(UUID eventoId, UUID zonaId, Set<EstadoTicket> estados) {
         return repository.countByEventoIdAndZonaIdAndEstadoIn(eventoId, zonaId,
                 estados.stream().map(Enum::name).toList());
