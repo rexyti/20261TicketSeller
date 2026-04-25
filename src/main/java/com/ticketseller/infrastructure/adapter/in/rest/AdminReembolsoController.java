@@ -1,6 +1,6 @@
 package com.ticketseller.infrastructure.adapter.in.rest;
 
-import com.ticketseller.application.GestionarReembolsoManualUseCase;
+import com.ticketseller.application.postventa.GestionarReembolsoManualUseCase;
 import com.ticketseller.infrastructure.adapter.in.rest.dto.ReembolsoManualRequest;
 import com.ticketseller.infrastructure.adapter.in.rest.dto.ReembolsoResponse;
 import jakarta.validation.Valid;

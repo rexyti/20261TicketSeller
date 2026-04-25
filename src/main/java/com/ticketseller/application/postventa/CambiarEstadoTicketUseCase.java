@@ -1,4 +1,4 @@
-package com.ticketseller.application;
+package com.ticketseller.application.postventa;
 
 import com.ticketseller.domain.exception.TransicionEstadoInvalidaException;
 import com.ticketseller.domain.model.EstadoTicket;

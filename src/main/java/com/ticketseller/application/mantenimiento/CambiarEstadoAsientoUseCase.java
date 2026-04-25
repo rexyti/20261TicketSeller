@@ -1,4 +1,4 @@
-package com.ticketseller.application;
+package com.ticketseller.application.mantenimiento;
 
 import com.ticketseller.domain.exception.TransicionEstadoInvalidaException;
 import com.ticketseller.domain.exception.AsientoEnCompraException;
@@ -6,8 +6,10 @@ import com.ticketseller.domain.model.Asiento;
 import com.ticketseller.domain.model.EstadoAsiento;
 import com.ticketseller.domain.model.HistorialCambioEstado;
 import com.ticketseller.domain.model.TransicionEstadoAsiento;
+import com.ticketseller.domain.model.EstadoTicket;
 import com.ticketseller.domain.repository.AsientoRepositoryPort;
 import com.ticketseller.domain.repository.HistorialCambioEstadoRepositoryPort;
+import com.ticketseller.domain.repository.TicketRepositoryPort;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 
@@ -18,6 +20,7 @@ import java.util.UUID;
 public class CambiarEstadoAsientoUseCase {
     private final AsientoRepositoryPort asientoRepositoryPort;
     private final HistorialCambioEstadoRepositoryPort historialRepositoryPort;
+    private final TicketRepositoryPort ticketRepositoryPort;
 
     public Mono<Asiento> ejecutar(UUID eventoId, UUID asientoId, EstadoAsiento estadoDestino, String motivo, String usuarioId) {
         return asientoRepositoryPort.buscarPorId(asientoId)
@@ -44,8 +47,9 @@ public class CambiarEstadoAsientoUseCase {
     }
 
     private Mono<Boolean> verificarCompraActiva(UUID asientoId) {
-        // TODO: integrar con carrito cuando feature 005 esté implementado
-        return Mono.just(false);
+        return ticketRepositoryPort.buscarPorAsiento(asientoId)
+                .map(ticket -> !EstadoTicket.CANCELADO.equals(ticket.getEstado()) && !EstadoTicket.ANULADO.equals(ticket.getEstado()) && !EstadoTicket.REEMBOLSADO.equals(ticket.getEstado()))
+                .defaultIfEmpty(false);
     }
 
     private Mono<HistorialCambioEstado> guardarHistorial(UUID eventoId, Asiento asiento, EstadoAsiento estadoAnterior, String motivo, String usuarioId) {

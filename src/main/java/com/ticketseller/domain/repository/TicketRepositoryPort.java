@@ -27,5 +27,7 @@ public interface TicketRepositoryPort {
     Mono<Long> contarPorEventoYZonaYEstados(UUID eventoId, UUID zonaId, Set<EstadoTicket> estados);
 
     Mono<Void> actualizarEstadoPorVenta(UUID ventaId, EstadoTicket estado);
+
+    Mono<Ticket> buscarPorAsiento(UUID asientoId);
 }
 

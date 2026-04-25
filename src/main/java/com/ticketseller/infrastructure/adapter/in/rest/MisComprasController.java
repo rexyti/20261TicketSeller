@@ -1,6 +1,6 @@
 package com.ticketseller.infrastructure.adapter.in.rest;
 
-import com.ticketseller.application.ConsultarEstadoReembolsoUseCase;
+import com.ticketseller.application.postventa.ConsultarEstadoReembolsoUseCase;
 import com.ticketseller.infrastructure.adapter.in.rest.dto.TicketConReembolsoResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;

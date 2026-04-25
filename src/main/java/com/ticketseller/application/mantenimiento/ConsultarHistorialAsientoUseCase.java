@@ -1,4 +1,4 @@
-package com.ticketseller.application;
+package com.ticketseller.application.mantenimiento;
 
 import com.ticketseller.domain.model.HistorialCambioEstado;
 import com.ticketseller.domain.repository.HistorialCambioEstadoRepositoryPort;

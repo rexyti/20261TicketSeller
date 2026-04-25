@@ -1,4 +1,4 @@
-package com.ticketseller.application;
+package com.ticketseller.application.mantenimiento;
 
 import com.ticketseller.domain.exception.TransicionEstadoInvalidaException;
 import com.ticketseller.domain.model.Asiento;
@@ -6,6 +6,7 @@ import com.ticketseller.domain.model.EstadoAsiento;
 import com.ticketseller.domain.model.HistorialCambioEstado;
 import com.ticketseller.domain.repository.AsientoRepositoryPort;
 import com.ticketseller.domain.repository.HistorialCambioEstadoRepositoryPort;
+import com.ticketseller.domain.repository.TicketRepositoryPort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -22,13 +23,15 @@ class CambiarEstadoAsientoUseCaseTest {
 
     private AsientoRepositoryPort asientoRepositoryPort;
     private HistorialCambioEstadoRepositoryPort historialRepositoryPort;
+    private TicketRepositoryPort ticketRepositoryPort;
     private CambiarEstadoAsientoUseCase useCase;
 
     @BeforeEach
     void setUp() {
         asientoRepositoryPort = mock(AsientoRepositoryPort.class);
         historialRepositoryPort = mock(HistorialCambioEstadoRepositoryPort.class);
-        useCase = new CambiarEstadoAsientoUseCase(asientoRepositoryPort, historialRepositoryPort);
+        ticketRepositoryPort = mock(TicketRepositoryPort.class);
+        useCase = new CambiarEstadoAsientoUseCase(asientoRepositoryPort, historialRepositoryPort, ticketRepositoryPort);
     }
 
     @Test
@@ -45,6 +48,7 @@ class CambiarEstadoAsientoUseCaseTest {
         Asiento asientoActualizado = asiento.toBuilder().estado(EstadoAsiento.MANTENIMIENTO).build();
         
         when(asientoRepositoryPort.buscarPorId(asientoId)).thenReturn(Mono.just(asiento));
+        when(ticketRepositoryPort.buscarPorAsiento(asientoId)).thenReturn(Mono.empty());
         when(asientoRepositoryPort.guardar(any(Asiento.class))).thenReturn(Mono.just(asientoActualizado));
         when(historialRepositoryPort.guardar(any(HistorialCambioEstado.class))).thenAnswer(inv -> Mono.just(inv.getArgument(0)));
 

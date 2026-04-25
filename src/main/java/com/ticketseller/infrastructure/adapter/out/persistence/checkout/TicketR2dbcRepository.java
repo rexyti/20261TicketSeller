@@ -14,6 +14,8 @@ public interface TicketR2dbcRepository extends ReactiveCrudRepository<TicketEnti
     Mono<Long> countByEventoIdAndZonaIdAndEstadoIn(UUID eventoId, UUID zonaId, Collection<String> estados);
 
     Flux<TicketEntity> findByEventoId(UUID eventoId);
+
+    Mono<TicketEntity> findFirstByAsientoId(UUID asientoId);
 }
 
 

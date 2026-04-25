@@ -1,8 +1,8 @@
 package com.ticketseller.infrastructure.adapter.in.rest;
 
-import com.ticketseller.application.CambiarEstadoAsientoUseCase;
-import com.ticketseller.application.CambiarEstadoMasivoUseCase;
-import com.ticketseller.application.ConsultarHistorialAsientoUseCase;
+import com.ticketseller.application.mantenimiento.CambiarEstadoAsientoUseCase;
+import com.ticketseller.application.mantenimiento.CambiarEstadoMasivoUseCase;
+import com.ticketseller.application.mantenimiento.ConsultarHistorialAsientoUseCase;
 import com.ticketseller.domain.model.Asiento;
 import com.ticketseller.infrastructure.adapter.in.rest.dto.AsientoResponse;
 import com.ticketseller.infrastructure.adapter.in.rest.dto.CambiarEstadoMasivoRequest;

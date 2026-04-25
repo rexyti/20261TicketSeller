@@ -1,6 +1,6 @@
 package com.ticketseller.infrastructure.adapter.in.rest;
 
-import com.ticketseller.application.ConsultarEstadoTicketUseCase;
+import com.ticketseller.application.postventa.ConsultarEstadoTicketUseCase;
 import com.ticketseller.infrastructure.adapter.in.rest.dto.TicketEstadoResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;

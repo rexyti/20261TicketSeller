@@ -60,5 +60,10 @@ public class TicketRepositoryAdapter implements TicketRepositoryPort {
                 .flatMapMany(repository::saveAll)
                 .then();
     }
+
+    @Override
+    public Mono<Ticket> buscarPorAsiento(UUID asientoId) {
+        return repository.findFirstByAsientoId(asientoId).map(mapper::toDomain);
+    }
 }
 

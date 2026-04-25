@@ -1,6 +1,6 @@
 package com.ticketseller.infrastructure.adapter.in.rest;
 
-import com.ticketseller.application.GestionarReembolsoManualUseCase;
+import com.ticketseller.application.postventa.GestionarReembolsoManualUseCase;
 import com.ticketseller.domain.model.EstadoReembolso;
 import com.ticketseller.domain.model.Reembolso;
 import com.ticketseller.domain.model.TipoReembolso;

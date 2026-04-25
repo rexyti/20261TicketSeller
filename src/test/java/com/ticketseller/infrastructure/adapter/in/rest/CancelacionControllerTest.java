@@ -1,6 +1,6 @@
 package com.ticketseller.infrastructure.adapter.in.rest;
 
-import com.ticketseller.application.CancelarTicketUseCase;
+import com.ticketseller.application.postventa.CancelarTicketUseCase;
 import com.ticketseller.infrastructure.adapter.in.rest.dto.CancelacionResponse;
 import com.ticketseller.infrastructure.adapter.in.rest.dto.CancelarTicketRequest;
 import org.junit.jupiter.api.Test;
@@ -32,7 +32,8 @@ class CancelacionControllerTest {
     @Test
     void cancelarTicketIndividualRetorna200() {
         UUID ticketId = UUID.randomUUID();
-        CancelacionResponse response = new CancelacionResponse(List.of(ticketId), UUID.randomUUID(), BigDecimal.valueOf(100));
+        CancelacionResponse response = new CancelacionResponse(List.of(ticketId), UUID.randomUUID(),
+                BigDecimal.valueOf(100));
 
         when(cancelarTicketUseCase.ejecutar(anyList())).thenReturn(Mono.just(response));
 
@@ -49,7 +50,8 @@ class CancelacionControllerTest {
         UUID t1 = UUID.randomUUID();
         UUID t2 = UUID.randomUUID();
         CancelarTicketRequest request = new CancelarTicketRequest(List.of(t1, t2));
-        CancelacionResponse response = new CancelacionResponse(List.of(t1, t2), UUID.randomUUID(), BigDecimal.valueOf(200));
+        CancelacionResponse response = new CancelacionResponse(List.of(t1, t2), UUID.randomUUID(),
+                BigDecimal.valueOf(200));
 
         when(cancelarTicketUseCase.ejecutar(anyList())).thenReturn(Mono.just(response));
 

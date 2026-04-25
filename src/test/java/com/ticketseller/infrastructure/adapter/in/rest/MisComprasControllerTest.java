@@ -1,6 +1,6 @@
 package com.ticketseller.infrastructure.adapter.in.rest;
 
-import com.ticketseller.application.ConsultarEstadoReembolsoUseCase;
+import com.ticketseller.application.postventa.ConsultarEstadoReembolsoUseCase;
 import com.ticketseller.domain.model.EstadoTicket;
 import com.ticketseller.infrastructure.adapter.in.rest.dto.TicketConReembolsoResponse;
 import org.junit.jupiter.api.Test;

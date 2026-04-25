@@ -6,11 +6,11 @@ import com.ticketseller.application.checkout.ConsultarVentaUseCase;
 import com.ticketseller.application.checkout.LiberarReservaUseCase;
 import com.ticketseller.application.checkout.ProcesarPagoUseCase;
 import com.ticketseller.application.checkout.ReservarAsientosUseCase;
-import com.ticketseller.application.CancelarTicketUseCase;
-import com.ticketseller.application.ProcesarReembolsoMasivoUseCase;
-import com.ticketseller.application.CambiarEstadoTicketUseCase;
-import com.ticketseller.application.GestionarReembolsoManualUseCase;
-import com.ticketseller.application.ConsultarEstadoReembolsoUseCase;
+import com.ticketseller.application.postventa.CancelarTicketUseCase;
+import com.ticketseller.application.postventa.ProcesarReembolsoMasivoUseCase;
+import com.ticketseller.application.postventa.CambiarEstadoTicketUseCase;
+import com.ticketseller.application.postventa.GestionarReembolsoManualUseCase;
+import com.ticketseller.application.postventa.ConsultarEstadoReembolsoUseCase;
 import com.ticketseller.application.compuerta.AsignarCompuertaAZonaUseCase;
 import com.ticketseller.application.compuerta.CrearCompuertaUseCase;
 import com.ticketseller.application.compuerta.ListarCompuertasUseCase;
@@ -36,11 +36,11 @@ import com.ticketseller.application.tipoasiento.MarcarEspacioVacioUseCase;
 import com.ticketseller.application.zona.CrearZonaUseCase;
 import com.ticketseller.application.zona.ListarZonasUseCase;
 import com.ticketseller.application.zona.ValidarZonasUseCase;
-import com.ticketseller.application.CambiarEstadoAsientoUseCase;
-import com.ticketseller.application.CambiarEstadoMasivoUseCase;
-import com.ticketseller.application.ConsultarHistorialAsientoUseCase;
-import com.ticketseller.application.ConsultarEstadoTicketUseCase;
-import com.ticketseller.application.ConsultarEstructuraRecintoUseCase;
+import com.ticketseller.application.mantenimiento.CambiarEstadoAsientoUseCase;
+import com.ticketseller.application.mantenimiento.CambiarEstadoMasivoUseCase;
+import com.ticketseller.application.mantenimiento.ConsultarHistorialAsientoUseCase;
+import com.ticketseller.application.postventa.ConsultarEstadoTicketUseCase;
+import com.ticketseller.application.mantenimiento.ConsultarEstructuraRecintoUseCase;
 import com.ticketseller.domain.repository.AsientoRepositoryPort;
 import com.ticketseller.domain.repository.CompuertaRepositoryPort;
 import com.ticketseller.domain.repository.MapaAsientosRepositoryPort;
@@ -449,13 +449,13 @@ public class BeanConfiguration {
     }
 
     @Bean
-    public CambiarEstadoAsientoUseCase cambiarEstadoAsientoUseCase(AsientoRepositoryPort asientoRepositoryPort, HistorialCambioEstadoRepositoryPort historialRepositoryPort) {
-        return new CambiarEstadoAsientoUseCase(asientoRepositoryPort, historialRepositoryPort);
+    public CambiarEstadoAsientoUseCase cambiarEstadoAsientoUseCase(AsientoRepositoryPort asientoRepositoryPort, HistorialCambioEstadoRepositoryPort historialRepositoryPort, TicketRepositoryPort ticketRepositoryPort) {
+        return new CambiarEstadoAsientoUseCase(asientoRepositoryPort, historialRepositoryPort, ticketRepositoryPort);
     }
 
     @Bean
-    public CambiarEstadoMasivoUseCase cambiarEstadoMasivoUseCase(AsientoRepositoryPort asientoRepositoryPort, HistorialCambioEstadoRepositoryPort historialRepositoryPort) {
-        return new CambiarEstadoMasivoUseCase(asientoRepositoryPort, historialRepositoryPort);
+    public CambiarEstadoMasivoUseCase cambiarEstadoMasivoUseCase(AsientoRepositoryPort asientoRepositoryPort, HistorialCambioEstadoRepositoryPort historialRepositoryPort, TicketRepositoryPort ticketRepositoryPort) {
+        return new CambiarEstadoMasivoUseCase(asientoRepositoryPort, historialRepositoryPort, ticketRepositoryPort);
     }
 
     @Bean
@@ -470,8 +470,8 @@ public class BeanConfiguration {
 
     @Bean
     public ConsultarEstructuraRecintoUseCase consultarEstructuraRecintoUseCase(RecintoRepositoryPort recintoRepositoryPort,
-            ZonaRepositoryPort zonaRepositoryPort) {
-        return new ConsultarEstructuraRecintoUseCase(recintoRepositoryPort, zonaRepositoryPort);
+            ZonaRepositoryPort zonaRepositoryPort, TipoAsientoRepositoryPort tipoAsientoRepositoryPort) {
+        return new ConsultarEstructuraRecintoUseCase(recintoRepositoryPort, zonaRepositoryPort, tipoAsientoRepositoryPort);
     }
 
     @Bean

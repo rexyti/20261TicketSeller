@@ -1,6 +1,6 @@
 package com.ticketseller.infrastructure.adapter.in.rest;
 
-import com.ticketseller.application.CambiarEstadoTicketUseCase;
+import com.ticketseller.application.postventa.CambiarEstadoTicketUseCase;
 import com.ticketseller.domain.model.EstadoTicket;
 import com.ticketseller.domain.model.Ticket;
 import com.ticketseller.domain.repository.ReembolsoRepositoryPort;

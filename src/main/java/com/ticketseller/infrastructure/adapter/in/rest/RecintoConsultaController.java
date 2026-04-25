@@ -1,6 +1,6 @@
 package com.ticketseller.infrastructure.adapter.in.rest;
 
-import com.ticketseller.application.ConsultarEstructuraRecintoUseCase;
+import com.ticketseller.application.mantenimiento.ConsultarEstructuraRecintoUseCase;
 import com.ticketseller.infrastructure.adapter.in.rest.dto.RecintoEstructuraResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;

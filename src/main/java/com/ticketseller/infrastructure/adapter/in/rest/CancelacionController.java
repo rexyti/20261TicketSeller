@@ -1,6 +1,6 @@
 package com.ticketseller.infrastructure.adapter.in.rest;
 
-import com.ticketseller.application.CancelarTicketUseCase;
+import com.ticketseller.application.postventa.CancelarTicketUseCase;
 import com.ticketseller.infrastructure.adapter.in.rest.dto.CancelacionResponse;
 import com.ticketseller.infrastructure.adapter.in.rest.dto.CancelarTicketRequest;
 import lombok.RequiredArgsConstructor;
