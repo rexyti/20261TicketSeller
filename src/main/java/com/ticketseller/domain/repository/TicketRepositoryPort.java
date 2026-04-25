@@ -15,6 +15,10 @@ public interface TicketRepositoryPort {
     Flux<Ticket> guardarTodos(Iterable<Ticket> tickets);
 
     Mono<Ticket> buscarPorId(UUID id);
+    
+    default Mono<Ticket> findById(UUID ticketId) {
+        return buscarPorId(ticketId);
+    }
 
     Flux<Ticket> buscarPorVenta(UUID ventaId);
 
