@@ -147,7 +147,7 @@ class RecintoControllerTest {
                 .exchange()
                 .expectStatus().isEqualTo(409)
                 .expectBody()
-                .jsonPath("$.codigo").isEqualTo("RECINTO_CONFLICT");
+                .jsonPath("$.codigo").isEqualTo("CONFLICT");
     }
 
     @Test
