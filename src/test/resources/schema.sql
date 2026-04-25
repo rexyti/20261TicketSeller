@@ -1,5 +1,7 @@
 DROP TABLE IF EXISTS asientos;
 DROP TABLE IF EXISTS tipos_asiento;
+DROP TABLE IF EXISTS historial_tickets;
+DROP TABLE IF EXISTS reembolsos;
 DROP TABLE IF EXISTS transacciones_financieras;
 DROP TABLE IF EXISTS tickets;
 DROP TABLE IF EXISTS ventas;
@@ -126,4 +128,27 @@ CREATE TABLE historial_cambios_estado (
     estado_nuevo VARCHAR(20),
     fecha_hora TIMESTAMPTZ NOT NULL,
     motivo VARCHAR(255)
+);
+
+CREATE TABLE reembolsos (
+    id UUID PRIMARY KEY,
+    ticket_id UUID NOT NULL REFERENCES tickets(id),
+    venta_id UUID NOT NULL REFERENCES ventas(id),
+    monto NUMERIC(12,2) NOT NULL,
+    estado VARCHAR(40) NOT NULL,
+    tipo VARCHAR(40) NOT NULL,
+    fecha_solicitud TIMESTAMP NOT NULL,
+    fecha_completado TIMESTAMP,
+    agente_id UUID,
+    motivo_rechazo TEXT
+);
+
+CREATE TABLE historial_tickets (
+    id UUID PRIMARY KEY,
+    ticket_id UUID NOT NULL REFERENCES tickets(id),
+    agente_id UUID,
+    estado_anterior VARCHAR(40) NOT NULL,
+    estado_nuevo VARCHAR(40) NOT NULL,
+    motivo VARCHAR(255),
+    fecha_hora TIMESTAMP NOT NULL
 );
