@@ -27,6 +27,9 @@ import com.ticketseller.application.tipoasiento.MarcarEspacioVacioUseCase;
 import com.ticketseller.application.zona.CrearZonaUseCase;
 import com.ticketseller.application.zona.ListarZonasUseCase;
 import com.ticketseller.application.zona.ValidarZonasUseCase;
+import com.ticketseller.application.CambiarEstadoAsientoUseCase;
+import com.ticketseller.application.CambiarEstadoMasivoUseCase;
+import com.ticketseller.application.ConsultarHistorialAsientoUseCase;
 import com.ticketseller.application.ConsultarEstadoTicketUseCase;
 import com.ticketseller.application.ConsultarEstructuraRecintoUseCase;
 import com.ticketseller.domain.repository.AsientoRepositoryPort;
@@ -54,6 +57,7 @@ import com.ticketseller.domain.repository.TicketRepositoryPort;
 import com.ticketseller.domain.repository.TransaccionFinancieraRepositoryPort;
 import com.ticketseller.domain.repository.VentaRepositoryPort;
 import com.ticketseller.domain.repository.ZonaRepositoryPort;
+import com.ticketseller.domain.repository.HistorialCambioEstadoRepositoryPort;
 import com.ticketseller.infrastructure.adapter.out.payment.WompiAdapter;
 import com.ticketseller.infrastructure.adapter.out.persistence.cancelacionevento.CancelacionEventoR2dbcRepository;
 import com.ticketseller.infrastructure.adapter.out.persistence.cancelacionevento.CancelacionEventoRepositoryAdapter;
@@ -85,6 +89,9 @@ import com.ticketseller.infrastructure.adapter.out.persistence.tipoasiento.mappe
 import com.ticketseller.infrastructure.adapter.out.persistence.zona.ZonaR2dbcRepository;
 import com.ticketseller.infrastructure.adapter.out.persistence.zona.ZonaRepositoryAdapter;
 import com.ticketseller.infrastructure.adapter.out.persistence.zona.mapper.ZonaPersistenceMapper;
+import com.ticketseller.infrastructure.adapter.out.persistence.HistorialCambioEstadoR2dbcRepository;
+import com.ticketseller.infrastructure.adapter.out.persistence.HistorialCambioEstadoRepositoryAdapter;
+import com.ticketseller.infrastructure.adapter.out.persistence.mapper.HistorialCambioEstadoPersistenceMapper;
 import com.ticketseller.infrastructure.adapter.out.payment.PasarelaPagoAdapter;
 import com.ticketseller.infrastructure.adapter.out.email.EmailNotificacionAdapter;
 import com.ticketseller.infrastructure.adapter.out.qr.ZxingCodigoQrAdapter;
@@ -373,6 +380,26 @@ public class BeanConfiguration {
         return new WompiAdapter(baseUrl, privateKey);
     }
 
+    @Bean
+    public HistorialCambioEstadoRepositoryPort historialCambioEstadoRepositoryPort(
+            HistorialCambioEstadoR2dbcRepository repository,
+            HistorialCambioEstadoPersistenceMapper mapper) {
+        return new HistorialCambioEstadoRepositoryAdapter(repository, mapper);
+    }
+
+    @Bean
+    public CambiarEstadoAsientoUseCase cambiarEstadoAsientoUseCase(AsientoRepositoryPort asientoRepositoryPort, HistorialCambioEstadoRepositoryPort historialRepositoryPort) {
+        return new CambiarEstadoAsientoUseCase(asientoRepositoryPort, historialRepositoryPort);
+    }
+
+    @Bean
+    public CambiarEstadoMasivoUseCase cambiarEstadoMasivoUseCase(AsientoRepositoryPort asientoRepositoryPort, HistorialCambioEstadoRepositoryPort historialRepositoryPort) {
+        return new CambiarEstadoMasivoUseCase(asientoRepositoryPort, historialRepositoryPort);
+    }
+
+    @Bean
+    public ConsultarHistorialAsientoUseCase consultarHistorialAsientoUseCase(HistorialCambioEstadoRepositoryPort historialRepositoryPort) {
+        return new ConsultarHistorialAsientoUseCase(historialRepositoryPort);
     @Bean
     public ConsultarEstadoTicketUseCase consultarEstadoTicketUseCase(TicketRepositoryPort ticketRepositoryPort) {
         return new ConsultarEstadoTicketUseCase(ticketRepositoryPort);

@@ -54,7 +54,8 @@ CREATE TABLE asientos (
     numero VARCHAR(20) NOT NULL,
     zona_id UUID REFERENCES zonas(id),
     estado VARCHAR(20),
-    existente BOOLEAN NOT NULL DEFAULT TRUE
+    existente BOOLEAN NOT NULL DEFAULT TRUE,
+    version BIGINT NOT NULL DEFAULT 0
 );
 CREATE TABLE eventos (
     id UUID PRIMARY KEY,
@@ -114,3 +115,13 @@ CREATE TABLE transacciones_financieras (
     ip VARCHAR(80)
 );
 
+CREATE TABLE historial_cambios_estado (
+    id UUID PRIMARY KEY,
+    asiento_id UUID REFERENCES asientos(id),
+    evento_id UUID,
+    usuario_id VARCHAR(100),
+    estado_anterior VARCHAR(20),
+    estado_nuevo VARCHAR(20),
+    fecha_hora TIMESTAMPTZ NOT NULL,
+    motivo VARCHAR(255)
+);

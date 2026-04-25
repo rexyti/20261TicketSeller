@@ -21,7 +21,7 @@ public class MarcarEspacioVacioUseCase {
 
     private Mono<Asiento> marcarComoEnMantenimientoYGuardar(Asiento asiento) {
         Asiento actualizado = asiento.toBuilder()
-                .estado(EstadoAsiento.EN_MANTENIMIENTO)
+                .estado(EstadoAsiento.MANTENIMIENTO)
                 .build();
         return asientoRepositoryPort.guardar(actualizado);
     }
