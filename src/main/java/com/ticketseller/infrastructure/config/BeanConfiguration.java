@@ -113,32 +113,32 @@ public class BeanConfiguration {
 
     @Bean
     public RecintoRepositoryPort recintoRepositoryPort(RecintoR2dbcRepository repository,
-            RecintoPersistenceMapper mapper,
-            DatabaseClient databaseClient) {
+                                                       RecintoPersistenceMapper mapper,
+                                                       DatabaseClient databaseClient) {
         return new RecintoRepositoryAdapter(repository, mapper, databaseClient);
     }
 
     @Bean
     public ZonaRepositoryPort zonaRepositoryPort(ZonaR2dbcRepository repository,
-            ZonaPersistenceMapper mapper) {
+                                                 ZonaPersistenceMapper mapper) {
         return new ZonaRepositoryAdapter(repository, mapper);
     }
 
     @Bean
     public CompuertaRepositoryPort compuertaRepositoryPort(CompuertaR2dbcRepository repository,
-            CompuertaPersistenceMapper mapper) {
+                                                           CompuertaPersistenceMapper mapper) {
         return new CompuertaRepositoryAdapter(repository, mapper);
     }
 
     @Bean
     public TipoAsientoRepositoryPort tipoAsientoRepositoryPort(TipoAsientoR2dbcRepository repository,
-            TipoAsientoPersistenceMapper mapper) {
+                                                               TipoAsientoPersistenceMapper mapper) {
         return new TipoAsientoRepositoryAdapter(repository, mapper);
     }
 
     @Bean
     public AsientoRepositoryPort asientoRepositoryPort(AsientoR2dbcRepository repository,
-            AsientoPersistenceMapper mapper) {
+                                                       AsientoPersistenceMapper mapper) {
         return new AsientoRepositoryAdapter(repository, mapper);
     }
 
@@ -147,32 +147,33 @@ public class BeanConfiguration {
         return new MapaAsientosRepositoryAdapter(databaseClient);
     }
 
+    @Bean
     public EventoRepositoryPort eventoRepositoryPort(EventoR2dbcRepository repository,
-            EventoPersistenceMapper mapper) {
+                                                     EventoPersistenceMapper mapper) {
         return new EventoRepositoryAdapter(repository, mapper);
     }
 
     @Bean
     public CancelacionEventoRepositoryPort cancelacionEventoRepositoryPort(CancelacionEventoR2dbcRepository repository,
-            CancelacionEventoPersistenceMapper mapper) {
+                                                                           CancelacionEventoPersistenceMapper mapper) {
         return new CancelacionEventoRepositoryAdapter(repository, mapper);
     }
 
     @Bean
     public PrecioZonaRepositoryPort precioZonaRepositoryPort(PrecioZonaR2dbcRepository repository,
-            PrecioZonaPersistenceMapper mapper) {
+                                                             PrecioZonaPersistenceMapper mapper) {
         return new PrecioZonaRepositoryAdapter(repository, mapper);
     }
 
     @Bean
     public TicketRepositoryPort ticketRepositoryPort(TicketR2dbcRepository repository,
-            TicketPersistenceMapper mapper) {
+                                                     TicketPersistenceMapper mapper) {
         return new TicketRepositoryAdapter(repository, mapper);
     }
 
     @Bean
     public VentaRepositoryPort ventaRepositoryPort(VentaR2dbcRepository repository,
-            VentaPersistenceMapper mapper) {
+                                                   VentaPersistenceMapper mapper) {
         return new VentaRepositoryAdapter(repository, mapper);
     }
 
@@ -240,7 +241,7 @@ public class BeanConfiguration {
 
     @Bean
     public CrearZonaUseCase crearZonaUseCase(ZonaRepositoryPort zonaRepositoryPort,
-            RecintoRepositoryPort recintoRepositoryPort) {
+                                             RecintoRepositoryPort recintoRepositoryPort) {
         return new CrearZonaUseCase(zonaRepositoryPort, recintoRepositoryPort);
     }
 
@@ -251,20 +252,20 @@ public class BeanConfiguration {
 
     @Bean
     public ValidarZonasUseCase validarZonasUseCase(ZonaRepositoryPort zonaRepositoryPort,
-            RecintoRepositoryPort recintoRepositoryPort) {
+                                                   RecintoRepositoryPort recintoRepositoryPort) {
         return new ValidarZonasUseCase(zonaRepositoryPort, recintoRepositoryPort);
     }
 
     @Bean
     public CrearCompuertaUseCase crearCompuertaUseCase(CompuertaRepositoryPort compuertaRepositoryPort,
-            RecintoRepositoryPort recintoRepositoryPort,
-            ZonaRepositoryPort zonaRepositoryPort) {
+                                                       RecintoRepositoryPort recintoRepositoryPort,
+                                                       ZonaRepositoryPort zonaRepositoryPort) {
         return new CrearCompuertaUseCase(compuertaRepositoryPort, recintoRepositoryPort, zonaRepositoryPort);
     }
 
     @Bean
     public AsignarCompuertaAZonaUseCase asignarCompuertaAZonaUseCase(CompuertaRepositoryPort compuertaRepositoryPort,
-            ZonaRepositoryPort zonaRepositoryPort) {
+                                                                     ZonaRepositoryPort zonaRepositoryPort) {
         return new AsignarCompuertaAZonaUseCase(compuertaRepositoryPort, zonaRepositoryPort);
     }
 
@@ -303,7 +304,7 @@ public class BeanConfiguration {
 
     @Bean
     public CrearMapaAsientosUseCase crearMapaAsientosUseCase(AsientoRepositoryPort asientoRepositoryPort,
-            MapaAsientosRepositoryPort mapaAsientosRepositoryPort) {
+                                                             MapaAsientosRepositoryPort mapaAsientosRepositoryPort) {
         return new CrearMapaAsientosUseCase(asientoRepositoryPort, mapaAsientosRepositoryPort);
     }
 
@@ -313,7 +314,7 @@ public class BeanConfiguration {
     }
 
     public RegistrarEventoUseCase registrarEventoUseCase(EventoRepositoryPort eventoRepositoryPort,
-            RecintoRepositoryPort recintoRepositoryPort) {
+                                                         RecintoRepositoryPort recintoRepositoryPort) {
         return new RegistrarEventoUseCase(eventoRepositoryPort, recintoRepositoryPort);
     }
 
@@ -324,14 +325,14 @@ public class BeanConfiguration {
 
     @Bean
     public ConfigurarPreciosUseCase configurarPreciosUseCase(EventoRepositoryPort eventoRepositoryPort,
-            PrecioZonaRepositoryPort precioZonaRepositoryPort,
-            ZonaRepositoryPort zonaRepositoryPort) {
+                                                             PrecioZonaRepositoryPort precioZonaRepositoryPort,
+                                                             ZonaRepositoryPort zonaRepositoryPort) {
         return new ConfigurarPreciosUseCase(eventoRepositoryPort, precioZonaRepositoryPort, zonaRepositoryPort);
     }
 
     @Bean
     public ListarPreciosUseCase listarPreciosUseCase(EventoRepositoryPort eventoRepositoryPort,
-            PrecioZonaRepositoryPort precioZonaRepositoryPort) {
+                                                     PrecioZonaRepositoryPort precioZonaRepositoryPort) {
         return new ListarPreciosUseCase(eventoRepositoryPort, precioZonaRepositoryPort);
     }
 
@@ -342,40 +343,40 @@ public class BeanConfiguration {
 
     @Bean
     public CancelarEventoUseCase cancelarEventoUseCase(EventoRepositoryPort eventoRepositoryPort,
-            CancelacionEventoRepositoryPort cancelacionEventoRepositoryPort) {
+                                                       CancelacionEventoRepositoryPort cancelacionEventoRepositoryPort) {
         return new CancelarEventoUseCase(eventoRepositoryPort, cancelacionEventoRepositoryPort);
     }
 
     @Bean
     public ReservarAsientosUseCase reservarAsientosUseCase(TicketRepositoryPort ticketRepositoryPort,
-            VentaRepositoryPort ventaRepositoryPort,
-            ZonaRepositoryPort zonaRepositoryPort,
-            PrecioZonaRepositoryPort precioZonaRepositoryPort,
-            CompuertaRepositoryPort compuertaRepositoryPort) {
+                                                           VentaRepositoryPort ventaRepositoryPort,
+                                                           ZonaRepositoryPort zonaRepositoryPort,
+                                                           PrecioZonaRepositoryPort precioZonaRepositoryPort,
+                                                           CompuertaRepositoryPort compuertaRepositoryPort) {
         return new ReservarAsientosUseCase(ticketRepositoryPort, ventaRepositoryPort, zonaRepositoryPort,
                 precioZonaRepositoryPort, compuertaRepositoryPort);
     }
 
     @Bean
     public LiberarReservaUseCase liberarReservaUseCase(VentaRepositoryPort ventaRepositoryPort,
-            TicketRepositoryPort ticketRepositoryPort) {
+                                                       TicketRepositoryPort ticketRepositoryPort) {
         return new LiberarReservaUseCase(ventaRepositoryPort, ticketRepositoryPort);
     }
 
     @Bean
     public ProcesarPagoUseCase procesarPagoUseCase(VentaRepositoryPort ventaRepositoryPort,
-            TicketRepositoryPort ticketRepositoryPort,
-            TransaccionFinancieraRepositoryPort transaccionFinancieraRepositoryPort,
-            PasarelaPagoPort pasarelaPagoPort,
-            NotificacionEmailPort notificacionEmailPort,
-            CodigoQrPort codigoQrPort) {
+                                                   TicketRepositoryPort ticketRepositoryPort,
+                                                   TransaccionFinancieraRepositoryPort transaccionFinancieraRepositoryPort,
+                                                   PasarelaPagoPort pasarelaPagoPort,
+                                                   NotificacionEmailPort notificacionEmailPort,
+                                                   CodigoQrPort codigoQrPort) {
         return new ProcesarPagoUseCase(ventaRepositoryPort, ticketRepositoryPort,
                 transaccionFinancieraRepositoryPort, pasarelaPagoPort, notificacionEmailPort, codigoQrPort);
     }
 
     @Bean
     public ConsultarVentaUseCase consultarVentaUseCase(VentaRepositoryPort ventaRepositoryPort,
-            TicketRepositoryPort ticketRepositoryPort) {
+                                                       TicketRepositoryPort ticketRepositoryPort) {
         return new ConsultarVentaUseCase(ventaRepositoryPort, ticketRepositoryPort);
     }
 
@@ -413,8 +414,8 @@ public class BeanConfiguration {
             LiquidacionQueryPort liquidacionQueryPort) {
         return new ConsultarRecaudoIncrementalUseCase(eventoRepositoryPort, liquidacionQueryPort);
     }
-  
-    @Bean  
+
+    @Bean
     public HistorialCambioEstadoRepositoryPort historialCambioEstadoRepositoryPort(
             HistorialCambioEstadoR2dbcRepository repository,
             HistorialCambioEstadoPersistenceMapper mapper) {
@@ -434,6 +435,8 @@ public class BeanConfiguration {
     @Bean
     public ConsultarHistorialAsientoUseCase consultarHistorialAsientoUseCase(HistorialCambioEstadoRepositoryPort historialRepositoryPort) {
         return new ConsultarHistorialAsientoUseCase(historialRepositoryPort);
+    }
+
     @Bean
     public ConsultarEstadoTicketUseCase consultarEstadoTicketUseCase(TicketRepositoryPort ticketRepositoryPort) {
         return new ConsultarEstadoTicketUseCase(ticketRepositoryPort);
@@ -441,7 +444,7 @@ public class BeanConfiguration {
 
     @Bean
     public ConsultarEstructuraRecintoUseCase consultarEstructuraRecintoUseCase(RecintoRepositoryPort recintoRepositoryPort,
-            ZonaRepositoryPort zonaRepositoryPort) {
+                                                                               ZonaRepositoryPort zonaRepositoryPort) {
         return new ConsultarEstructuraRecintoUseCase(recintoRepositoryPort, zonaRepositoryPort);
     }
 }

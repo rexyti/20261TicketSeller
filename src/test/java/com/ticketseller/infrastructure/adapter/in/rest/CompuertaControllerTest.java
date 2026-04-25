@@ -151,7 +151,7 @@ class CompuertaControllerTest {
                 .exchange()
                 .expectStatus().isNotFound()
                 .expectBody()
-                .jsonPath("$.codigo").isEqualTo("RECINTO_NOT_FOUND");
+                .jsonPath("$.codigo").isEqualTo("NOT_FOUND");
     }
 }
 

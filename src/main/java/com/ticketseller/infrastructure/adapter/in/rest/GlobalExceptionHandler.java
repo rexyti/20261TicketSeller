@@ -58,8 +58,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({RecintoConEventosException.class, RecintoDuplicadoException.class,
             RecintoNoDisponibleException.class, EventoEnProgresoException.class, EventoSolapamientoException.class,
             EventoNoFinalizadoException.class,
-                      TipoAsientoEnUsoException.class, TipoAsientoInactivoException.class,
-                      TransicionEstadoInvalidaException.class, AsientoEnCompraException.class})
+            TipoAsientoEnUsoException.class, TipoAsientoInactivoException.class,
+            TransicionEstadoInvalidaException.class, AsientoEnCompraException.class})
     public ResponseEntity<ApiErrorResponse> conflict(RuntimeException ex) {
         return error("CONFLICT", ex.getMessage(), HttpStatus.CONFLICT);
     }
@@ -82,7 +82,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({CapacidadInvalidaException.class, RecintoInvalidoException.class,
             ZonaInvalidaException.class, CompuertaInvalidaException.class, ZonaCapacidadExcedidaException.class,
             ZonaConTicketsVendidosException.class, NombreTipoAsientoVacioException.class,
-            IllegalArgumentException.class, IllegalStateException.class,
+            IllegalArgumentException.class, //IllegalStateException.class,
             ZonaConTicketsVendidosException.class, ZonaSinPrecioException.class})
     public ResponseEntity<ApiErrorResponse> badRequest(RuntimeException ex) {
         return error("VALIDATION_ERROR", ex.getMessage(), HttpStatus.BAD_REQUEST);
