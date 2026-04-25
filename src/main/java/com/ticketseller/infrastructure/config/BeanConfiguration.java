@@ -30,6 +30,8 @@ import com.ticketseller.application.zona.ValidarZonasUseCase;
 import com.ticketseller.application.CambiarEstadoAsientoUseCase;
 import com.ticketseller.application.CambiarEstadoMasivoUseCase;
 import com.ticketseller.application.ConsultarHistorialAsientoUseCase;
+import com.ticketseller.application.ConsultarEstadoTicketUseCase;
+import com.ticketseller.application.ConsultarEstructuraRecintoUseCase;
 import com.ticketseller.domain.repository.AsientoRepositoryPort;
 import com.ticketseller.domain.repository.CompuertaRepositoryPort;
 import com.ticketseller.domain.repository.MapaAsientosRepositoryPort;
@@ -398,5 +400,14 @@ public class BeanConfiguration {
     @Bean
     public ConsultarHistorialAsientoUseCase consultarHistorialAsientoUseCase(HistorialCambioEstadoRepositoryPort historialRepositoryPort) {
         return new ConsultarHistorialAsientoUseCase(historialRepositoryPort);
+    @Bean
+    public ConsultarEstadoTicketUseCase consultarEstadoTicketUseCase(TicketRepositoryPort ticketRepositoryPort) {
+        return new ConsultarEstadoTicketUseCase(ticketRepositoryPort);
+    }
+
+    @Bean
+    public ConsultarEstructuraRecintoUseCase consultarEstructuraRecintoUseCase(RecintoRepositoryPort recintoRepositoryPort,
+            ZonaRepositoryPort zonaRepositoryPort) {
+        return new ConsultarEstructuraRecintoUseCase(recintoRepositoryPort, zonaRepositoryPort);
     }
 }
