@@ -17,6 +17,7 @@ public class Zona {
     private UUID recintoId;
     private String nombre;
     private Integer capacidad;
+    private UUID tipoAsientoId;
 
     public Zona normalizarDatosRegistro() {
         return this.toBuilder()
@@ -45,4 +46,3 @@ public class Zona {
         return valor == null ? null : valor.trim();
     }
 }
-

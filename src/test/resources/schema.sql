@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS asientos;
+DROP TABLE IF EXISTS tipos_asiento;
 DROP TABLE IF EXISTS transacciones_financieras;
 DROP TABLE IF EXISTS tickets;
 DROP TABLE IF EXISTS ventas;
@@ -23,11 +25,20 @@ CREATE TABLE recintos (
     monto_fijo NUMERIC(12,2)
 );
 
+CREATE TABLE tipos_asiento (
+    id UUID PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    descripcion VARCHAR(255),
+    estado VARCHAR(20) NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 CREATE TABLE zonas (
     id UUID PRIMARY KEY,
     recinto_id UUID NOT NULL REFERENCES recintos(id),
     nombre VARCHAR(100) NOT NULL,
-    capacidad INTEGER NOT NULL
+    capacidad INTEGER NOT NULL,
+    tipo_asiento_id UUID REFERENCES tipos_asiento(id)
 );
 
 CREATE TABLE compuertas (
@@ -38,6 +49,16 @@ CREATE TABLE compuertas (
     es_general BOOLEAN NOT NULL
 );
 
+CREATE TABLE asientos (
+    id UUID PRIMARY KEY,
+    fila INTEGER NOT NULL,
+    columna INTEGER NOT NULL,
+    numero VARCHAR(20) NOT NULL,
+    zona_id UUID REFERENCES zonas(id),
+    estado VARCHAR(20),
+    existente BOOLEAN NOT NULL DEFAULT TRUE,
+    version BIGINT NOT NULL DEFAULT 0
+);
 CREATE TABLE eventos (
     id UUID PRIMARY KEY,
     nombre VARCHAR(150) NOT NULL,
@@ -96,3 +117,13 @@ CREATE TABLE transacciones_financieras (
     ip VARCHAR(80)
 );
 
+CREATE TABLE historial_cambios_estado (
+    id UUID PRIMARY KEY,
+    asiento_id UUID REFERENCES asientos(id),
+    evento_id UUID,
+    usuario_id VARCHAR(100),
+    estado_anterior VARCHAR(20),
+    estado_nuevo VARCHAR(20),
+    fecha_hora TIMESTAMPTZ NOT NULL,
+    motivo VARCHAR(255)
+);

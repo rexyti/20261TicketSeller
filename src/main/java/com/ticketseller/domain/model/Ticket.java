@@ -23,6 +23,10 @@ public class Ticket {
     private BigDecimal precio;
     private boolean esCortesia;
     private UUID asientoId;
+    private String categoria;
+    private String bloque;
+    private String coordenadaAcceso;
+    private java.time.LocalDateTime fechaEvento;
 
     public Ticket normalizarDatosRegistro() {
         return toBuilder()
