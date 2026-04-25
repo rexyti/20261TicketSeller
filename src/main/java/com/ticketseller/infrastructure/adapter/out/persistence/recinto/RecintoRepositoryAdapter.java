@@ -1,6 +1,8 @@
 package com.ticketseller.infrastructure.adapter.out.persistence.recinto;
 
 import com.ticketseller.domain.model.CategoriaRecinto;
+import com.ticketseller.domain.model.ConfiguracionLiquidacion;
+import com.ticketseller.domain.model.ModeloNegocio;
 import com.ticketseller.domain.model.Recinto;
 import com.ticketseller.domain.shared.Pagina;
 import com.ticketseller.domain.repository.RecintoRepositoryPort;
@@ -11,6 +13,8 @@ import org.springframework.r2dbc.core.DatabaseClient.GenericExecuteSpec;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import io.r2dbc.spi.Row;
+
+import java.math.BigDecimal;
 
 import java.util.HashMap;
 import java.util.List;
@@ -155,6 +159,19 @@ public class RecintoRepositoryAdapter implements RecintoRepositoryPort {
                 .defaultIfEmpty(false);
     }
 
+    @Override
+    public Mono<ConfiguracionLiquidacion> buscarConfiguracionLiquidacion(UUID recintoId) {
+        return repository.findById(recintoId)
+                .map(mapper::toDomain)
+                .filter(recinto -> recinto.getModeloNegocio() != null)
+                .map(recinto -> ConfiguracionLiquidacion.builder()
+                        .recintoId(recinto.getId())
+                        .modeloNegocio(recinto.getModeloNegocio())
+                        .tipoRecinto(recinto.getCategoria())
+                        .montoFijo(recinto.getMontoFijo())
+                        .build());
+    }
+
     private GenericExecuteSpec bindAll(GenericExecuteSpec spec, Map<String, Object> params) {
         GenericExecuteSpec current = spec;
         for (Map.Entry<String, Object> entry : params.entrySet()) {
@@ -175,6 +192,8 @@ public class RecintoRepositoryAdapter implements RecintoRepositoryPort {
                 .compuertasIngreso(row.get("compuertas_ingreso", Integer.class))
                 .activo(row.get("activo", Boolean.class))
                 .categoria(row.get("categoria", String.class))
+                .modeloNegocio(row.get("modelo_negocio", String.class))
+                .montoFijo(row.get("monto_fijo", BigDecimal.class))
                 .build();
     }
 

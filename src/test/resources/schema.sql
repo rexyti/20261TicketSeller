@@ -20,7 +20,9 @@ CREATE TABLE recintos (
     fecha_creacion TIMESTAMP NOT NULL,
     compuertas_ingreso INTEGER NOT NULL,
     activo BOOLEAN NOT NULL DEFAULT TRUE,
-    categoria VARCHAR(50)
+    categoria VARCHAR(50),
+    modelo_negocio VARCHAR(30),
+    monto_fijo NUMERIC(12,2)
 );
 
 CREATE TABLE tipos_asiento (

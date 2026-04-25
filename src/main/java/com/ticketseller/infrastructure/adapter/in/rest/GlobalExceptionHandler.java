@@ -5,8 +5,10 @@ import com.ticketseller.domain.exception.CompuertaInvalidaException;
 import com.ticketseller.domain.exception.NombreTipoAsientoVacioException;
 import com.ticketseller.domain.exception.AsientoNoDisponibleException;
 import com.ticketseller.domain.exception.EventoEnProgresoException;
+import com.ticketseller.domain.exception.EventoNoFinalizadoException;
 import com.ticketseller.domain.exception.EventoNotFoundException;
 import com.ticketseller.domain.exception.EventoSolapamientoException;
+import com.ticketseller.domain.exception.LiquidacionNoConfiguradaException;
 import com.ticketseller.domain.exception.PagoRechazadoException;
 import com.ticketseller.domain.exception.RecintoConEventosException;
 import com.ticketseller.domain.exception.RecintoNoDisponibleException;
@@ -55,6 +57,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler({RecintoConEventosException.class, RecintoDuplicadoException.class,
             RecintoNoDisponibleException.class, EventoEnProgresoException.class, EventoSolapamientoException.class,
+            EventoNoFinalizadoException.class,
                       TipoAsientoEnUsoException.class, TipoAsientoInactivoException.class,
                       TransicionEstadoInvalidaException.class, AsientoEnCompraException.class})
     public ResponseEntity<ApiErrorResponse> conflict(RuntimeException ex) {
@@ -83,6 +86,11 @@ public class GlobalExceptionHandler {
             ZonaConTicketsVendidosException.class, ZonaSinPrecioException.class})
     public ResponseEntity<ApiErrorResponse> badRequest(RuntimeException ex) {
         return error("VALIDATION_ERROR", ex.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(LiquidacionNoConfiguradaException.class)
+    public ResponseEntity<ApiErrorResponse> liquidacionNoConfigurada(LiquidacionNoConfiguradaException ex) {
+        return error("LIQUIDACION_NO_CONFIGURADA", ex.getMessage(), HttpStatus.UNPROCESSABLE_ENTITY);
     }
 
     @ExceptionHandler(WebExchangeBindException.class)

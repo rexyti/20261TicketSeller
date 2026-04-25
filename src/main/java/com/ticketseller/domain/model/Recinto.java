@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -24,6 +25,8 @@ public class Recinto {
     private Integer compuertasIngreso;
     private boolean activo;
     private CategoriaRecinto categoria;
+    private ModeloNegocio modeloNegocio;
+    private BigDecimal montoFijo;
 
     public void desactivar(){
         if (activo)
