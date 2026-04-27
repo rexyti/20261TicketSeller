@@ -9,6 +9,9 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
+import org.springframework.data.annotation.Version;
+
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Getter
@@ -27,4 +30,8 @@ public class AsientoEntity {
     private UUID zonaId;
     private String estado;
     private boolean existente;
+    @Version
+    private Long version;
+    @Column("expira_en")
+    private LocalDateTime expiraEn;
 }

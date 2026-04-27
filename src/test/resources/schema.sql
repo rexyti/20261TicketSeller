@@ -57,7 +57,8 @@ CREATE TABLE asientos (
     zona_id UUID REFERENCES zonas(id),
     estado VARCHAR(20),
     existente BOOLEAN NOT NULL DEFAULT TRUE,
-    version BIGINT NOT NULL DEFAULT 0
+    version BIGINT NOT NULL DEFAULT 0,
+    expira_en TIMESTAMP
 );
 CREATE TABLE eventos (
     id UUID PRIMARY KEY,

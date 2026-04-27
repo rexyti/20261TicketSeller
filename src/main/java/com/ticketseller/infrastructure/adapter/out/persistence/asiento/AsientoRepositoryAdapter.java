@@ -6,6 +6,7 @@ import com.ticketseller.infrastructure.adapter.out.persistence.asiento.mapper.As
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -39,5 +40,46 @@ public class AsientoRepositoryAdapter implements AsientoRepositoryPort {
     @Override
     public Flux<Asiento> buscarPorZonaId(UUID zonaId) {
         return repository.findByZonaId(zonaId).map(mapper::toDomain);
+    }
+
+    @Override
+    public Mono<Asiento> reservarConHold(UUID id, LocalDateTime expiraEn) {
+        return repository.findById(id)
+                .flatMap(entity -> {
+                    if (!com.ticketseller.domain.model.EstadoAsiento.DISPONIBLE.name().equals(entity.getEstado())) {
+                        return Mono.error(new com.ticketseller.domain.exception.AsientoReservadoPorOtroException("ASIENTO NO DISPONIBLE - OTRO USUARIO ESTÁ COMPRANDO ESTE ASIENTO"));
+                    }
+                    entity.setEstado(com.ticketseller.domain.model.EstadoAsiento.RESERVADO.name());
+                    entity.setExpiraEn(expiraEn);
+                    return repository.save(entity);
+                })
+                .map(mapper::toDomain);
+    }
+
+    @Override
+    public Mono<Asiento> liberarHold(UUID id) {
+        return repository.findById(id)
+                .flatMap(entity -> {
+                    entity.setEstado(com.ticketseller.domain.model.EstadoAsiento.DISPONIBLE.name());
+                    entity.setExpiraEn(null);
+                    return repository.save(entity);
+                })
+                .map(mapper::toDomain);
+    }
+
+    @Override
+    public Mono<Asiento> marcarOcupado(UUID id) {
+        return repository.findById(id)
+                .flatMap(entity -> {
+                    entity.setEstado(com.ticketseller.domain.model.EstadoAsiento.OCUPADO.name());
+                    entity.setExpiraEn(null);
+                    return repository.save(entity);
+                })
+                .map(mapper::toDomain);
+    }
+
+    @Override
+    public Flux<Asiento> findHoldsVencidos(LocalDateTime ahora) {
+        return repository.findHoldsVencidos(ahora).map(mapper::toDomain);
     }
 }

@@ -4,6 +4,7 @@ import com.ticketseller.domain.exception.CapacidadInvalidaException;
 import com.ticketseller.domain.exception.CompuertaInvalidaException;
 import com.ticketseller.domain.exception.NombreTipoAsientoVacioException;
 import com.ticketseller.domain.exception.AsientoNoDisponibleException;
+import com.ticketseller.domain.exception.AsientoReservadoPorOtroException;
 import com.ticketseller.domain.exception.EventoEnProgresoException;
 import com.ticketseller.domain.exception.EventoNoFinalizadoException;
 import com.ticketseller.domain.exception.EventoNotFoundException;
@@ -27,6 +28,7 @@ import com.ticketseller.domain.exception.ZonaNotFoundException;
 import com.ticketseller.domain.exception.ZonaSinPrecioException;
 import com.ticketseller.domain.exception.TransicionEstadoInvalidaException;
 import com.ticketseller.domain.exception.AsientoEnCompraException;
+import com.ticketseller.domain.exception.HoldExpiradoException;
 import com.ticketseller.infrastructure.adapter.in.rest.dto.ApiErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -64,7 +66,12 @@ public class GlobalExceptionHandler {
         return error("CONFLICT", ex.getMessage(), HttpStatus.CONFLICT);
     }
 
-    @ExceptionHandler({AsientoNoDisponibleException.class, ReservaExpiradaException.class})
+    @ExceptionHandler({
+            AsientoNoDisponibleException.class,
+            ReservaExpiradaException.class,
+            AsientoReservadoPorOtroException.class,
+            HoldExpiradoException.class
+    })
     public ResponseEntity<ApiErrorResponse> checkoutConflict(RuntimeException ex) {
         return error("CHECKOUT_CONFLICT", ex.getMessage(), HttpStatus.CONFLICT);
     }

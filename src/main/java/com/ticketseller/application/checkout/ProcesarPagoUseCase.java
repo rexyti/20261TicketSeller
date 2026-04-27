@@ -20,6 +20,10 @@ import com.ticketseller.domain.repository.VentaRepositoryPort;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 
+import com.ticketseller.application.ConfirmarOcupacionUseCase;
+import com.ticketseller.application.LiberarAsientoUseCase;
+import reactor.core.publisher.Flux;
+
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -32,6 +36,8 @@ public class ProcesarPagoUseCase {
     private final PasarelaPagoPort pasarelaPagoPort;
     private final NotificacionEmailPort notificacionEmailPort;
     private final CodigoQrPort codigoQrPort;
+    private final ConfirmarOcupacionUseCase confirmarOcupacionUseCase;
+    private final LiberarAsientoUseCase liberarAsientoUseCase;
 
     public Mono<VentaDetalle> ejecutar(UUID ventaId, ProcesarPagoCommand command) {
         if (invalidCommand(command))
@@ -78,8 +84,10 @@ public class ProcesarPagoUseCase {
                 .map(this::buildTicket)
                 .doOnNext(Ticket::validarDatosRegistro)
                 .collectList()
-                .flatMap(ticketsVendidos -> ticketRepositoryPort.guardarTodos(ticketsVendidos)
-                        .collectList()
+                .flatMap(ticketsVendidos -> Flux.fromIterable(ticketsVendidos)
+                        .filter(t -> t.getAsientoId() != null)
+                        .flatMap(t -> confirmarOcupacionUseCase.ejecutar(t.getAsientoId()))
+                        .then(ticketRepositoryPort.guardarTodos(ticketsVendidos).collectList())
                         .flatMap(savedTickets -> ventaRepositoryPort.actualizarEstado(venta.getId(), EstadoVenta.COMPLETADA)
                                 .flatMap(ventaPagada -> guardarTransaccion(ventaPagada, command, resultado)
                                         .then(notificacionEmailPort.enviarConfirmacion(ventaPagada, savedTickets))
@@ -96,6 +104,10 @@ public class ProcesarPagoUseCase {
 
     private Mono<VentaDetalle> rechazarPago(Venta venta, ProcesarPagoCommand command, ResultadoPago resultado) {
         return guardarTransaccion(venta, command, resultado)
+                .then(ticketRepositoryPort.buscarPorVenta(venta.getId())
+                        .filter(t -> t.getAsientoId() != null)
+                        .flatMap(t -> liberarAsientoUseCase.ejecutar(t.getAsientoId()))
+                        .then())
                 .then(Mono.error(pagoRechazado(resultado.respuestaPasarela())));
     }
 

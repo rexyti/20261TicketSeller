@@ -36,6 +36,11 @@ import com.ticketseller.application.CambiarEstadoMasivoUseCase;
 import com.ticketseller.application.ConsultarHistorialAsientoUseCase;
 import com.ticketseller.application.ConsultarEstadoTicketUseCase;
 import com.ticketseller.application.ConsultarEstructuraRecintoUseCase;
+import com.ticketseller.application.VerificarDisponibilidadUseCase;
+import com.ticketseller.application.ReservarAsientoUseCase;
+import com.ticketseller.application.ConfirmarOcupacionUseCase;
+import com.ticketseller.application.LiberarHoldsVencidosUseCase;
+import com.ticketseller.application.LiberarAsientoUseCase;
 import com.ticketseller.domain.repository.AsientoRepositoryPort;
 import com.ticketseller.domain.repository.CompuertaRepositoryPort;
 import com.ticketseller.domain.repository.MapaAsientosRepositoryPort;
@@ -369,9 +374,12 @@ public class BeanConfiguration {
                                                    TransaccionFinancieraRepositoryPort transaccionFinancieraRepositoryPort,
                                                    PasarelaPagoPort pasarelaPagoPort,
                                                    NotificacionEmailPort notificacionEmailPort,
-                                                   CodigoQrPort codigoQrPort) {
+                                                   CodigoQrPort codigoQrPort,
+                                                   ConfirmarOcupacionUseCase confirmarOcupacionUseCase,
+                                                   LiberarAsientoUseCase liberarAsientoUseCase) {
         return new ProcesarPagoUseCase(ventaRepositoryPort, ticketRepositoryPort,
-                transaccionFinancieraRepositoryPort, pasarelaPagoPort, notificacionEmailPort, codigoQrPort);
+                transaccionFinancieraRepositoryPort, pasarelaPagoPort, notificacionEmailPort, codigoQrPort,
+                confirmarOcupacionUseCase, liberarAsientoUseCase);
     }
 
     @Bean
@@ -446,5 +454,30 @@ public class BeanConfiguration {
     public ConsultarEstructuraRecintoUseCase consultarEstructuraRecintoUseCase(RecintoRepositoryPort recintoRepositoryPort,
                                                                                ZonaRepositoryPort zonaRepositoryPort) {
         return new ConsultarEstructuraRecintoUseCase(recintoRepositoryPort, zonaRepositoryPort);
+    }
+
+    @Bean
+    public VerificarDisponibilidadUseCase verificarDisponibilidadUseCase(AsientoRepositoryPort asientoRepositoryPort) {
+        return new VerificarDisponibilidadUseCase(asientoRepositoryPort);
+    }
+
+    @Bean
+    public ReservarAsientoUseCase reservarAsientoUseCase(AsientoRepositoryPort asientoRepositoryPort) {
+        return new ReservarAsientoUseCase(asientoRepositoryPort);
+    }
+
+    @Bean
+    public ConfirmarOcupacionUseCase confirmarOcupacionUseCase(AsientoRepositoryPort asientoRepositoryPort) {
+        return new ConfirmarOcupacionUseCase(asientoRepositoryPort);
+    }
+
+    @Bean
+    public LiberarHoldsVencidosUseCase liberarHoldsVencidosUseCase(AsientoRepositoryPort asientoRepositoryPort) {
+        return new LiberarHoldsVencidosUseCase(asientoRepositoryPort);
+    }
+
+    @Bean
+    public LiberarAsientoUseCase liberarAsientoUseCase(AsientoRepositoryPort asientoRepositoryPort) {
+        return new LiberarAsientoUseCase(asientoRepositoryPort);
     }
 }

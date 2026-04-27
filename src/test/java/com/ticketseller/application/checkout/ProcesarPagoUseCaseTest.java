@@ -1,5 +1,7 @@
 package com.ticketseller.application.checkout;
 
+import com.ticketseller.application.ConfirmarOcupacionUseCase;
+import com.ticketseller.application.LiberarAsientoUseCase;
 import com.ticketseller.domain.exception.PagoRechazadoException;
 import com.ticketseller.domain.model.EstadoTicket;
 import com.ticketseller.domain.model.EstadoVenta;
@@ -36,9 +38,12 @@ class ProcesarPagoUseCaseTest {
         PasarelaPagoPort pasarelaPagoPort = mock(PasarelaPagoPort.class);
         NotificacionEmailPort notificacionEmailPort = mock(NotificacionEmailPort.class);
         CodigoQrPort codigoQrPort = mock(CodigoQrPort.class);
+        ConfirmarOcupacionUseCase confirmarOcupacionUseCase = mock(ConfirmarOcupacionUseCase.class);
+        LiberarAsientoUseCase liberarAsientoUseCase = mock(LiberarAsientoUseCase.class);
 
         ProcesarPagoUseCase useCase = new ProcesarPagoUseCase(ventaRepositoryPort, ticketRepositoryPort,
-                transaccionRepository, pasarelaPagoPort, notificacionEmailPort, codigoQrPort);
+                transaccionRepository, pasarelaPagoPort, notificacionEmailPort, codigoQrPort,
+                confirmarOcupacionUseCase, liberarAsientoUseCase);
 
         UUID ventaId = UUID.randomUUID();
         Venta venta = Venta.builder()
@@ -75,9 +80,12 @@ class ProcesarPagoUseCaseTest {
         PasarelaPagoPort pasarelaPagoPort = mock(PasarelaPagoPort.class);
         NotificacionEmailPort notificacionEmailPort = mock(NotificacionEmailPort.class);
         CodigoQrPort codigoQrPort = mock(CodigoQrPort.class);
+        ConfirmarOcupacionUseCase confirmarOcupacionUseCase = mock(ConfirmarOcupacionUseCase.class);
+        LiberarAsientoUseCase liberarAsientoUseCase = mock(LiberarAsientoUseCase.class);
 
         ProcesarPagoUseCase useCase = new ProcesarPagoUseCase(ventaRepositoryPort, ticketRepositoryPort,
-                transaccionRepository, pasarelaPagoPort, notificacionEmailPort, codigoQrPort);
+                transaccionRepository, pasarelaPagoPort, notificacionEmailPort, codigoQrPort,
+                confirmarOcupacionUseCase, liberarAsientoUseCase);
 
         UUID ventaId = UUID.randomUUID();
         Venta venta = Venta.builder()
@@ -91,6 +99,7 @@ class ProcesarPagoUseCaseTest {
         when(pasarelaPagoPort.procesarPago(any(), any(), any()))
                 .thenReturn(Mono.just(new ResultadoPago(false, "RECHAZADO", null, "Sin fondos")));
         when(transaccionRepository.guardar(any())).thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
+        when(ticketRepositoryPort.buscarPorVenta(ventaId)).thenReturn(Flux.empty());
 
         StepVerifier.create(useCase.ejecutar(ventaId, new ProcesarPagoCommand("TARJETA", "127.0.0.1")))
                 .expectError(PagoRechazadoException.class)

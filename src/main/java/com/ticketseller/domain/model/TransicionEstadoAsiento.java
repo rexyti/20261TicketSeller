@@ -8,7 +8,8 @@ public class TransicionEstadoAsiento {
     private static final Map<EstadoAsiento, Set<EstadoAsiento>> TRANSICIONES_PERMITIDAS = Map.of(
             EstadoAsiento.DISPONIBLE, Set.of(EstadoAsiento.BLOQUEADO, EstadoAsiento.RESERVADO, EstadoAsiento.MANTENIMIENTO),
             EstadoAsiento.BLOQUEADO, Set.of(EstadoAsiento.DISPONIBLE, EstadoAsiento.MANTENIMIENTO),
-            EstadoAsiento.RESERVADO, Set.of(EstadoAsiento.DISPONIBLE, EstadoAsiento.VENDIDO),
+            EstadoAsiento.RESERVADO, Set.of(EstadoAsiento.DISPONIBLE, EstadoAsiento.OCUPADO, EstadoAsiento.VENDIDO),
+            EstadoAsiento.OCUPADO, Set.of(),
             EstadoAsiento.VENDIDO, Set.of(),
             EstadoAsiento.MANTENIMIENTO, Set.of(EstadoAsiento.DISPONIBLE, EstadoAsiento.BLOQUEADO),
             EstadoAsiento.ANULADO, Set.of()

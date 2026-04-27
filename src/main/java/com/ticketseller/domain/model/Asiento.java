@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
@@ -19,6 +20,7 @@ public class Asiento {
     private UUID zonaId;
     private TipoAsiento tipoAsiento;
     private EstadoAsiento estado;
+    private LocalDateTime expiraEn;
 
     public Asiento normalizarDatosRegistro() {
         return this.toBuilder()
