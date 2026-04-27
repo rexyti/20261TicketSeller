@@ -29,6 +29,10 @@ import com.ticketseller.domain.exception.ZonaSinPrecioException;
 import com.ticketseller.domain.exception.TransicionEstadoInvalidaException;
 import com.ticketseller.domain.exception.AsientoEnCompraException;
 import com.ticketseller.domain.exception.HoldExpiradoException;
+import com.ticketseller.domain.exception.AsientoYaBloqueadoException;
+import com.ticketseller.domain.exception.AsientoOcupadoException;
+import com.ticketseller.domain.exception.BloqueoNoEncontradoException;
+import com.ticketseller.domain.exception.CortesiaNoEncontradaException;
 import com.ticketseller.infrastructure.adapter.in.rest.dto.ApiErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -42,7 +46,8 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler({RecintoNotFoundException.class, TipoAsientoNotFoundException.class, ZonaNotFoundException.class})
+    @ExceptionHandler({RecintoNotFoundException.class, TipoAsientoNotFoundException.class, ZonaNotFoundException.class,
+            BloqueoNoEncontradoException.class, CortesiaNoEncontradaException.class})
     public ResponseEntity<ApiErrorResponse> notFound(RuntimeException ex) {
         return error("NOT_FOUND", ex.getMessage(), HttpStatus.NOT_FOUND);
     }
@@ -61,7 +66,8 @@ public class GlobalExceptionHandler {
             RecintoNoDisponibleException.class, EventoEnProgresoException.class, EventoSolapamientoException.class,
             EventoNoFinalizadoException.class,
             TipoAsientoEnUsoException.class, TipoAsientoInactivoException.class,
-            TransicionEstadoInvalidaException.class, AsientoEnCompraException.class})
+            TransicionEstadoInvalidaException.class, AsientoEnCompraException.class,
+            AsientoYaBloqueadoException.class, AsientoOcupadoException.class})
     public ResponseEntity<ApiErrorResponse> conflict(RuntimeException ex) {
         return error("CONFLICT", ex.getMessage(), HttpStatus.CONFLICT);
     }

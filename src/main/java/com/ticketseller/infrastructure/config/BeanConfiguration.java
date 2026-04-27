@@ -41,6 +41,19 @@ import com.ticketseller.application.ReservarAsientoUseCase;
 import com.ticketseller.application.ConfirmarOcupacionUseCase;
 import com.ticketseller.application.LiberarHoldsVencidosUseCase;
 import com.ticketseller.application.LiberarAsientoUseCase;
+import com.ticketseller.application.BloquearAsientosUseCase;
+import com.ticketseller.application.CrearCortesiaUseCase;
+import com.ticketseller.application.GestionarBloqueoUseCase;
+import com.ticketseller.application.GestionarCortesiaUseCase;
+import com.ticketseller.application.ConsultarPanelBloqueosUseCase;
+import com.ticketseller.domain.repository.BloqueoRepositoryPort;
+import com.ticketseller.domain.repository.CortesiaRepositoryPort;
+import com.ticketseller.infrastructure.adapter.out.persistence.bloqueo.BloqueoR2dbcRepository;
+import com.ticketseller.infrastructure.adapter.out.persistence.bloqueo.BloqueoRepositoryAdapter;
+import com.ticketseller.infrastructure.adapter.out.persistence.bloqueo.mapper.BloqueoPersistenceMapper;
+import com.ticketseller.infrastructure.adapter.out.persistence.cortesia.CortesiaR2dbcRepository;
+import com.ticketseller.infrastructure.adapter.out.persistence.cortesia.CortesiaRepositoryAdapter;
+import com.ticketseller.infrastructure.adapter.out.persistence.cortesia.mapper.CortesiaPersistenceMapper;
 import com.ticketseller.domain.repository.AsientoRepositoryPort;
 import com.ticketseller.domain.repository.CompuertaRepositoryPort;
 import com.ticketseller.domain.repository.MapaAsientosRepositoryPort;
@@ -479,5 +492,49 @@ public class BeanConfiguration {
     @Bean
     public LiberarAsientoUseCase liberarAsientoUseCase(AsientoRepositoryPort asientoRepositoryPort) {
         return new LiberarAsientoUseCase(asientoRepositoryPort);
+    }
+
+    @Bean
+    public BloqueoRepositoryPort bloqueoRepositoryPort(BloqueoR2dbcRepository repository,
+                                                       BloqueoPersistenceMapper mapper) {
+        return new BloqueoRepositoryAdapter(repository, mapper);
+    }
+
+    @Bean
+    public CortesiaRepositoryPort cortesiaRepositoryPort(CortesiaR2dbcRepository repository,
+                                                         CortesiaPersistenceMapper mapper) {
+        return new CortesiaRepositoryAdapter(repository, mapper);
+    }
+
+    @Bean
+    public BloquearAsientosUseCase bloquearAsientosUseCase(AsientoRepositoryPort asientoRepositoryPort,
+                                                           BloqueoRepositoryPort bloqueoRepositoryPort) {
+        return new BloquearAsientosUseCase(asientoRepositoryPort, bloqueoRepositoryPort);
+    }
+
+    @Bean
+    public CrearCortesiaUseCase crearCortesiaUseCase(AsientoRepositoryPort asientoRepositoryPort,
+                                                     CortesiaRepositoryPort cortesiaRepositoryPort,
+                                                     TicketRepositoryPort ticketRepositoryPort,
+                                                     CodigoQrPort codigoQrPort) {
+        return new CrearCortesiaUseCase(asientoRepositoryPort, cortesiaRepositoryPort,
+                ticketRepositoryPort, codigoQrPort);
+    }
+
+    @Bean
+    public GestionarBloqueoUseCase gestionarBloqueoUseCase(BloqueoRepositoryPort bloqueoRepositoryPort,
+                                                           AsientoRepositoryPort asientoRepositoryPort) {
+        return new GestionarBloqueoUseCase(bloqueoRepositoryPort, asientoRepositoryPort);
+    }
+
+    @Bean
+    public GestionarCortesiaUseCase gestionarCortesiaUseCase(CortesiaRepositoryPort cortesiaRepositoryPort) {
+        return new GestionarCortesiaUseCase(cortesiaRepositoryPort);
+    }
+
+    @Bean
+    public ConsultarPanelBloqueosUseCase consultarPanelBloqueosUseCase(BloqueoRepositoryPort bloqueoRepositoryPort,
+                                                                       CortesiaRepositoryPort cortesiaRepositoryPort) {
+        return new ConsultarPanelBloqueosUseCase(bloqueoRepositoryPort, cortesiaRepositoryPort);
     }
 }

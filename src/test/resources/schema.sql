@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS cortesias;
+DROP TABLE IF EXISTS bloqueos;
 DROP TABLE IF EXISTS asientos;
 DROP TABLE IF EXISTS tipos_asiento;
 DROP TABLE IF EXISTS transacciones_financieras;
@@ -127,4 +129,25 @@ CREATE TABLE historial_cambios_estado (
     estado_nuevo VARCHAR(20),
     fecha_hora TIMESTAMPTZ NOT NULL,
     motivo VARCHAR(255)
+);
+
+CREATE TABLE bloqueos (
+    id UUID PRIMARY KEY,
+    asiento_id UUID REFERENCES asientos(id),
+    evento_id UUID NOT NULL REFERENCES eventos(id),
+    destinatario VARCHAR(200) NOT NULL,
+    fecha_creacion TIMESTAMP NOT NULL,
+    fecha_expiracion TIMESTAMP,
+    estado VARCHAR(20) NOT NULL
+);
+
+CREATE TABLE cortesias (
+    id UUID PRIMARY KEY,
+    asiento_id UUID REFERENCES asientos(id),
+    evento_id UUID NOT NULL REFERENCES eventos(id),
+    destinatario VARCHAR(200) NOT NULL,
+    categoria VARCHAR(30) NOT NULL,
+    codigo_unico VARCHAR(50) NOT NULL UNIQUE,
+    ticket_id UUID REFERENCES tickets(id),
+    estado VARCHAR(20) NOT NULL
 );
