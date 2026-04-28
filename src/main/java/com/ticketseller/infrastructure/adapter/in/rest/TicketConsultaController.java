@@ -1,6 +1,6 @@
 package com.ticketseller.infrastructure.adapter.in.rest;
 
-import com.ticketseller.application.ConsultarEstadoTicketUseCase;
+import com.ticketseller.application.checkout.ConsultarEstadoTicketUseCase;
 import com.ticketseller.infrastructure.adapter.in.rest.dto.checkout.TicketEstadoResponse;
 import com.ticketseller.infrastructure.adapter.in.rest.mapper.CheckoutRestMapper;
 import io.swagger.v3.oas.annotations.Operation;

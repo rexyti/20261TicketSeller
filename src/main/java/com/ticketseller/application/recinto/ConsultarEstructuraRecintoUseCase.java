@@ -1,4 +1,4 @@
-package com.ticketseller.application;
+package com.ticketseller.application.recinto;
 
 import com.ticketseller.domain.exception.recinto.RecintoNotFoundException;
 import com.ticketseller.domain.model.recinto.Recinto;

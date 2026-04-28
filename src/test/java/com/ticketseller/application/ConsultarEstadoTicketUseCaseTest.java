@@ -1,5 +1,6 @@
 package com.ticketseller.application;
 
+import com.ticketseller.application.checkout.ConsultarEstadoTicketUseCase;
 import com.ticketseller.domain.exception.venta.TicketNotFoundException;
 import com.ticketseller.domain.model.ticket.EstadoTicket;
 import com.ticketseller.domain.model.ticket.Ticket;

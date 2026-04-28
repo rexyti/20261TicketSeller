@@ -1,4 +1,4 @@
-package com.ticketseller.application;
+package com.ticketseller.application.checkout;
 
 import com.ticketseller.domain.exception.venta.TicketNotFoundException;
 import com.ticketseller.domain.model.ticket.Ticket;

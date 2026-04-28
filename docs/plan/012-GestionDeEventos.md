@@ -54,28 +54,34 @@ src/main/java/com/ticketseller/
 │
 ├── domain/
 │   ├── model/
-│   │   ├── Evento.java
-│   │   ├── PrecioZona.java
-│   │   ├── CancelacionEvento.java
-│   │   └── EstadoEvento.java                  # Enum: ACTIVO, EN_PROGRESO, FINALIZADO, CANCELADO
+│   │   └── evento/
+│   │       ├── Evento.java
+│   │       ├── PrecioZona.java
+│   │       ├── CancelacionEvento.java
+│   │       └── EstadoEvento.java
 │   ├── exception/
-│   │   ├── EventoNotFoundException.java
-│   │   ├── RecintoNoDisponibleException.java
-│   │   ├── EventoEnProgresoException.java
-│   │   ├── EventoSolapamientoException.java
-│   │   └── ZonaSinPrecioException.java
+│   │   ├── evento/
+│   │   │   ├── EventoNotFoundException.java
+│   │   │   ├── EventoEnProgresoException.java
+│   │   │   └── EventoSolapamientoException.java
+│   │   ├── recinto/
+│   │   │   └── RecintoNoDisponibleException.java
+│   │   └── zona/
+│   │       └── ZonaSinPrecioException.java
 │   └── repository/
-│           ├── EventoRepositoryPort.java
-│           ├── CancelacionEventoRepositoryPort.java
-│           └── PrecioZonaRepositoryPort.java
+│       ├── EventoRepositoryPort.java
+│       ├── CancelacionEventoRepositoryPort.java
+│       └── PrecioZonaRepositoryPort.java
 │
 ├── application/
-│   ├── RegistrarEventoUseCase.java
-│   ├── ConfigurarPreciosUseCase.java
-│   ├── ListarPreciosUseCase.java
-│   ├── EditarEventoUseCase.java
-│   ├── CancelarEventoUseCase.java
-│   └── ListarEventosUseCase.java
+│   ├── evento/
+│   │   ├── RegistrarEventoUseCase.java
+│   │   ├── EditarEventoUseCase.java
+│   │   ├── CancelarEventoUseCase.java
+│   │   └── ListarEventosUseCase.java
+│   └── precios/
+│       ├── ConfigurarPreciosUseCase.java
+│       └── ListarPreciosUseCase.java
 │
 └── infrastructure/
     ├── adapter/
@@ -83,43 +89,25 @@ src/main/java/com/ticketseller/
     │   │   ├── EventoController.java
     │   │   ├── PrecioEventoController.java
     │   │   └── dto/
-    │   │       ├── CrearEventoRequest.java
-    │   │       ├── EditarEventoRequest.java
-    │   │       ├── CancelarEventoRequest.java
-    │   │       ├── ConfigurarPreciosRequest.java
-    │   │       ├── PrecioZonaRequest.java
-    │   │       └── EventoResponse.java
+    │   │       └── evento/
     │   └── out/persistence/
-    │       ├── EventoEntity.java
-    │       ├── CancelacionEventoEntity.java
-    │       ├── PrecioZonaEntity.java
-    │       ├── EventoR2dbcRepository.java
-    │       ├── CancelacionEventoR2dbcRepository.java
-    │       ├── PrecioZonaR2dbcRepository.java
-    │       ├── EventoRepositoryAdapter.java
-    │       ├── CancelacionEventoRepositoryAdapter.java
-    │       ├── PrecioZonaRepositoryAdapter.java
-    │       └── mapper/
-    │           ├── EventoPersistenceMapper.java
-    │           ├── CancelacionEventoPersistenceMapper.java
-    │           └── PrecioZonaPersistenceMapper.java
+    │       ├── evento/
+    │       └── preciozona/
     └── config/
-        └── BeanConfiguration.java             # Actualizar con los nuevos beans
+        └── BeanConfiguration.java
 
-tests/
+src/test/java/com/ticketseller/
 ├── domain/
 │   └── EventoTest.java
 ├── application/
-│   ├── RegistrarEventoUseCaseTest.java
-│   ├── ConfigurarPreciosUseCaseTest.java
-│   ├── EditarEventoUseCaseTest.java
-│   └── CancelarEventoUseCaseTest.java
+│   ├── evento/
+│   └── precios/
 └── infrastructure/
     ├── adapter/in/rest/
     │   ├── EventoControllerTest.java
     │   └── PrecioEventoControllerTest.java
     └── adapter/out/persistence/
-        └── EventoRepositoryAdapterTest.java
+        └── evento/
 ```
 
 **Structure Decision**: Misma arquitectura hexagonal con responsabilidad única. `EstadoEvento`

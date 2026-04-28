@@ -60,41 +60,37 @@ src/main/java/com/ticketseller/
 │
 ├── domain/
 │   ├── exception/
-│   │   ├── AsientoNoDisponibleException.java
-│   │   ├── AsientoReservadoPorOtroException.java
-│   │   └── HoldExpiradoException.java
+│   │   └── inventario/
+│   │       ├── AsientoNoDisponibleException.java
+│   │       ├── AsientoReservadoPorOtroException.java
+│   │       └── HoldExpiradoException.java
 │   └── repository/
 │       └── (extiende AsientoRepositoryPort existente con métodos de hold)
 │
 ├── application/                                    # Casos de uso — uno por responsabilidad
-│   ├── VerificarDisponibilidadUseCase.java
-│   ├── ReservarAsientoUseCase.java
-│   ├── ConfirmarOcupacionUseCase.java
-│   └── LiberarHoldsVencidosUseCase.java
+│   └── inventario/
+│       ├── VerificarDisponibilidadUseCase.java
+│       ├── ReservarAsientoUseCase.java
+│       ├── ConfirmarOcupacionUseCase.java
+│       └── LiberarHoldsVencidosUseCase.java
 │
 └── infrastructure/
     ├── adapter/
-    │   ├── in/
-    │   │   ├── rest/
-    │   │   │   ├── InventarioController.java
-    │   │   │   └── dto/
-    │   │   │       ├── ReservarAsientoRequest.java
-    │   │   │       ├── DisponibilidadResponse.java
-    │   │   │       └── ConfirmarOcupacionRequest.java
-    │   │   └── scheduler/
+    │   ├── in/rest/
+    │   │   └── inventario/
+    │   │       └── dto/
+    │   ├── in/scheduler/
+    │   │   └── inventario/
     │   │       └── LiberacionHoldsScheduler.java
     └── config/
         └── BeanConfiguration.java             # Actualizar con los nuevos beans
 
-tests/
+src/test/java/com/ticketseller/
 ├── application/
-│   ├── VerificarDisponibilidadUseCaseTest.java
-│   ├── ReservarAsientoUseCaseTest.java
-│   ├── ConfirmarOcupacionUseCaseTest.java
-│   └── LiberarHoldsVencidosUseCaseTest.java
+│   └── inventario/
 └── infrastructure/
     └── adapter/in/rest/
-        └── InventarioControllerTest.java
+        └── inventario/
 ```
 
 **Structure Decision**: Feature de extensión de comportamiento sobre `Asiento`. No agrega entidades

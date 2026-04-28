@@ -64,15 +64,19 @@ src/main/java/com/ticketseller/
 │
 ├── domain/
 │   ├── model/
-│   │   ├── HistorialEstadoVenta.java
-│   │   ├── TransicionesVenta.java
-│   │   └── Pago.java
+│   │   ├── transaccion/
+│   │   │   ├── HistorialEstadoVenta.java
+│   │   │   └── TransicionesVenta.java
+│   │   └── conciliacion/
+│   │       └── Pago.java
 │   ├── exception/
-│   │   ├── TransicionVentaInvalidaException.java
-│   │   ├── VentaNoEncontradaException.java
-│   │   ├── TransaccionDuplicadaException.java
-│   │   ├── TransaccionNoConfirmadaException.java
-│   │   └── PagoEnDiscrepanciaException.java
+│   │   ├── transaccion/
+│   │   │   ├── TransicionVentaInvalidaException.java
+│   │   │   └── VentaNoEncontradaException.java
+│   │   └── conciliacion/
+│   │       ├── TransaccionDuplicadaException.java
+│   │       ├── TransaccionNoConfirmadaException.java
+│   │       └── PagoEnDiscrepanciaException.java
 │   └── repository/
 │       ├── HistorialEstadoVentaRepositoryPort.java
 │       └── PagoRepositoryPort.java
@@ -90,24 +94,31 @@ src/main/java/com/ticketseller/
 │
 └── infrastructure/
     ├── adapter/in/rest/
-    │   ├── TransaccionController.java
-    │   ├── ConciliacionController.java
-    │   └── dto/
+    │   ├── transaccion/
+    │   └── conciliacion/
+    │       └── dto/
     ├── adapter/in/scheduler/
-    │   └── ExpiracionTransaccionesScheduler.java
+    │   └── conciliacion/
+    │       └── ExpiracionTransaccionesScheduler.java
     ├── adapter/out/persistence/
-    │   ├── historial/
-    │   └── pago/
+    │   ├── transaccion/
+    │   │   └── historial/
+    │   └── conciliacion/
+    │       └── pago/
     └── config/
         └── BeanConfiguration.java
 
-tests/
+src/test/java/com/ticketseller/
 ├── application/
 │   ├── transaccion/
 │   └── conciliacion/
 └── infrastructure/
     ├── adapter/in/rest/
+    │   ├── transaccion/
+    │   └── conciliacion/
     └── adapter/out/persistence/
+        ├── transaccion/
+        └── conciliacion/
 ```
 
 **Structure Decision**: Se unifica el ciclo transaccional y de conciliacion en un plan unico para

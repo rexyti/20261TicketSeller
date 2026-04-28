@@ -1,5 +1,6 @@
 package com.ticketseller.application;
 
+import com.ticketseller.application.recinto.ConsultarEstructuraRecintoUseCase;
 import com.ticketseller.domain.exception.recinto.RecintoNotFoundException;
 import com.ticketseller.domain.model.recinto.Recinto;
 import com.ticketseller.domain.model.zona.Zona;

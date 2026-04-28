@@ -1,6 +1,6 @@
 package com.ticketseller.infrastructure.adapter.in.rest;
 
-import com.ticketseller.application.ConsultarEstadoTicketUseCase;
+import com.ticketseller.application.checkout.ConsultarEstadoTicketUseCase;
 import com.ticketseller.domain.model.ticket.EstadoTicket;
 import com.ticketseller.domain.model.ticket.Ticket;
 import com.ticketseller.infrastructure.adapter.in.rest.dto.checkout.TicketEstadoResponse;
