@@ -1,16 +1,16 @@
 package com.ticketseller.application.checkout;
 
-import com.ticketseller.domain.exception.PagoRechazadoException;
-import com.ticketseller.domain.exception.ReservaExpiradaException;
-import com.ticketseller.domain.exception.VentaNotFoundException;
-import com.ticketseller.domain.model.EstadoTicket;
-import com.ticketseller.domain.model.EstadoVenta;
-import com.ticketseller.domain.model.EstadoPago;
-import com.ticketseller.domain.model.MetodoPago;
-import com.ticketseller.domain.model.ResultadoPago;
-import com.ticketseller.domain.model.Ticket;
-import com.ticketseller.domain.model.TransaccionFinanciera;
-import com.ticketseller.domain.model.Venta;
+import com.ticketseller.domain.exception.venta.PagoRechazadoException;
+import com.ticketseller.domain.exception.venta.ReservaExpiradaException;
+import com.ticketseller.domain.exception.venta.VentaNotFoundException;
+import com.ticketseller.domain.model.ticket.EstadoTicket;
+import com.ticketseller.domain.model.venta.EstadoVenta;
+import com.ticketseller.domain.model.venta.EstadoPago;
+import com.ticketseller.domain.model.venta.MetodoPago;
+import com.ticketseller.domain.model.venta.ResultadoPago;
+import com.ticketseller.domain.model.ticket.Ticket;
+import com.ticketseller.domain.model.venta.TransaccionFinanciera;
+import com.ticketseller.domain.model.venta.Venta;
 import com.ticketseller.domain.repository.CodigoQrPort;
 import com.ticketseller.domain.repository.NotificacionEmailPort;
 import com.ticketseller.domain.repository.PasarelaPagoPort;

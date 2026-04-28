@@ -1,8 +1,8 @@
 package com.ticketseller.application;
 
-import com.ticketseller.domain.exception.TicketNotFoundException;
-import com.ticketseller.domain.model.EstadoTicket;
-import com.ticketseller.domain.model.Ticket;
+import com.ticketseller.domain.exception.venta.TicketNotFoundException;
+import com.ticketseller.domain.model.ticket.EstadoTicket;
+import com.ticketseller.domain.model.ticket.Ticket;
 import com.ticketseller.domain.repository.TicketRepositoryPort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

@@ -1,7 +1,7 @@
 package com.ticketseller.infrastructure.adapter.out.persistence.tipoasiento.mapper;
 
-import com.ticketseller.domain.model.EstadoTipoAsiento;
-import com.ticketseller.domain.model.TipoAsiento;
+import com.ticketseller.domain.model.asiento.EstadoTipoAsiento;
+import com.ticketseller.domain.model.asiento.TipoAsiento;
 import com.ticketseller.infrastructure.adapter.out.persistence.tipoasiento.TipoAsientoEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

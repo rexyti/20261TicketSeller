@@ -1,7 +1,7 @@
 package com.ticketseller.application.recinto;
 
-import com.ticketseller.domain.exception.RecintoConEventosException;
-import com.ticketseller.domain.model.Recinto;
+import com.ticketseller.domain.exception.recinto.RecintoConEventosException;
+import com.ticketseller.domain.model.recinto.Recinto;
 import com.ticketseller.domain.repository.RecintoRepositoryPort;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;

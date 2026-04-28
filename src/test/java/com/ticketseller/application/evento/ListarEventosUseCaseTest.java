@@ -1,7 +1,7 @@
 package com.ticketseller.application.evento;
 
-import com.ticketseller.domain.model.EstadoEvento;
-import com.ticketseller.domain.model.Evento;
+import com.ticketseller.domain.model.evento.EstadoEvento;
+import com.ticketseller.domain.model.evento.Evento;
 import com.ticketseller.domain.repository.EventoRepositoryPort;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;

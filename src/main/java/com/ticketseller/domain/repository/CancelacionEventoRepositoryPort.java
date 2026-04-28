@@ -1,6 +1,6 @@
 package com.ticketseller.domain.repository;
 
-import com.ticketseller.domain.model.CancelacionEvento;
+import com.ticketseller.domain.model.evento.CancelacionEvento;
 import reactor.core.publisher.Mono;
 
 public interface CancelacionEventoRepositoryPort {

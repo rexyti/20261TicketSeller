@@ -1,7 +1,7 @@
 package com.ticketseller.application.checkout;
 
-import com.ticketseller.domain.model.Ticket;
-import com.ticketseller.domain.model.Venta;
+import com.ticketseller.domain.model.ticket.Ticket;
+import com.ticketseller.domain.model.venta.Venta;
 
 import java.util.List;
 

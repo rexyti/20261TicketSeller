@@ -1,13 +1,17 @@
 package com.ticketseller.application;
 
-import com.ticketseller.domain.exception.RecintoNotFoundException;
+import com.ticketseller.domain.exception.recinto.RecintoNotFoundException;
+import com.ticketseller.domain.model.recinto.Recinto;
+import com.ticketseller.domain.model.zona.Zona;
 import com.ticketseller.domain.repository.RecintoRepositoryPort;
 import com.ticketseller.domain.repository.ZonaRepositoryPort;
-import com.ticketseller.infrastructure.adapter.in.rest.dto.RecintoEstructuraResponse;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple2;
+import reactor.util.function.Tuples;
 
-import java.util.stream.Collectors;
+import java.util.List;
+import java.util.UUID;
 
 @RequiredArgsConstructor
 public class ConsultarEstructuraRecintoUseCase {
@@ -15,24 +19,11 @@ public class ConsultarEstructuraRecintoUseCase {
     private final RecintoRepositoryPort recintoRepositoryPort;
     private final ZonaRepositoryPort zonaRepositoryPort;
 
-    public Mono<RecintoEstructuraResponse> ejecutar(java.util.UUID recintoId) {
+    public Mono<Tuple2<Recinto, List<Zona>>> ejecutar(UUID recintoId) {
         return recintoRepositoryPort.buscarPorId(recintoId)
                 .switchIfEmpty(Mono.error(new RecintoNotFoundException("Recinto no encontrado: " + recintoId)))
                 .flatMap(recinto -> zonaRepositoryPort.buscarPorRecintoId(recintoId)
                         .collectList()
-                        .map(zonas -> {
-                            var bloques = zonas.stream()
-                                    .map(zona -> new RecintoEstructuraResponse.BloqueResponse(
-                                            zona.getNombre(), // Usamos el nombre de la zona como bloque por ahora
-                                            java.util.List.of(new RecintoEstructuraResponse.ZonaResponse(
-                                                    zona.getNombre(),
-                                                    "GENERAL", // TODO: Obtener categoría real del TipoAsiento
-                                                    "N/A"      // TODO: Obtener coordenada de acceso real
-                                            ))
-                                    ))
-                                    .collect(Collectors.toList());
-                            
-                            return new RecintoEstructuraResponse(recinto.getId(), bloques);
-                        }));
+                        .map(zonas -> Tuples.of(recinto, zonas)));
     }
 }

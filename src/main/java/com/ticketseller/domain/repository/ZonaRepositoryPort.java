@@ -1,6 +1,6 @@
 package com.ticketseller.domain.repository;
 
-import com.ticketseller.domain.model.Zona;
+import com.ticketseller.domain.model.zona.Zona;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 

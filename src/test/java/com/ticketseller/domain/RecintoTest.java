@@ -1,8 +1,8 @@
 package com.ticketseller.domain;
 
-import com.ticketseller.domain.exception.RecintoInvalidoException;
-import com.ticketseller.domain.model.CategoriaRecinto;
-import com.ticketseller.domain.model.Recinto;
+import com.ticketseller.domain.exception.recinto.RecintoInvalidoException;
+import com.ticketseller.domain.model.recinto.CategoriaRecinto;
+import com.ticketseller.domain.model.recinto.Recinto;
 import org.junit.jupiter.api.Test;
 
 import java.util.UUID;

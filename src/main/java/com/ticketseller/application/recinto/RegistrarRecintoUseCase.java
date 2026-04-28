@@ -1,8 +1,8 @@
 package com.ticketseller.application.recinto;
 
-import com.ticketseller.domain.exception.RecintoDuplicadoException;
-import com.ticketseller.domain.exception.RecintoInvalidoException;
-import com.ticketseller.domain.model.Recinto;
+import com.ticketseller.domain.exception.recinto.RecintoDuplicadoException;
+import com.ticketseller.domain.exception.recinto.RecintoInvalidoException;
+import com.ticketseller.domain.model.recinto.Recinto;
 import com.ticketseller.domain.repository.RecintoRepositoryPort;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;

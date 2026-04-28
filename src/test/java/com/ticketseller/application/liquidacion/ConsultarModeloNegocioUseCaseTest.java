@@ -1,11 +1,11 @@
 package com.ticketseller.application.liquidacion;
 
 import com.ticketseller.domain.exception.LiquidacionNoConfiguradaException;
-import com.ticketseller.domain.exception.RecintoNotFoundException;
-import com.ticketseller.domain.model.CategoriaRecinto;
-import com.ticketseller.domain.model.ConfiguracionLiquidacion;
-import com.ticketseller.domain.model.ModeloNegocio;
-import com.ticketseller.domain.model.Recinto;
+import com.ticketseller.domain.exception.recinto.RecintoNotFoundException;
+import com.ticketseller.domain.model.recinto.CategoriaRecinto;
+import com.ticketseller.domain.model.recinto.ConfiguracionLiquidacion;
+import com.ticketseller.domain.model.recinto.ModeloNegocio;
+import com.ticketseller.domain.model.recinto.Recinto;
 import com.ticketseller.domain.repository.RecintoRepositoryPort;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;

@@ -1,7 +1,7 @@
 package com.ticketseller.application.compuerta;
 
-import com.ticketseller.domain.model.Compuerta;
-import com.ticketseller.domain.model.Zona;
+import com.ticketseller.domain.model.zona.Compuerta;
+import com.ticketseller.domain.model.zona.Zona;
 import com.ticketseller.domain.repository.CompuertaRepositoryPort;
 import com.ticketseller.domain.repository.ZonaRepositoryPort;
 import org.junit.jupiter.api.Test;

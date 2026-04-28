@@ -1,14 +1,14 @@
 package com.ticketseller.application.checkout;
 
-import com.ticketseller.domain.exception.AsientoNoDisponibleException;
-import com.ticketseller.domain.exception.ZonaSinPrecioException;
-import com.ticketseller.domain.model.Compuerta;
-import com.ticketseller.domain.model.EstadoTicket;
-import com.ticketseller.domain.model.EstadoVenta;
-import com.ticketseller.domain.model.PrecioZona;
-import com.ticketseller.domain.model.Ticket;
-import com.ticketseller.domain.model.Venta;
-import com.ticketseller.domain.model.Zona;
+import com.ticketseller.domain.exception.asiento.AsientoNoDisponibleException;
+import com.ticketseller.domain.exception.zona.ZonaSinPrecioException;
+import com.ticketseller.domain.model.zona.Compuerta;
+import com.ticketseller.domain.model.ticket.EstadoTicket;
+import com.ticketseller.domain.model.venta.EstadoVenta;
+import com.ticketseller.domain.model.zona.PrecioZona;
+import com.ticketseller.domain.model.ticket.Ticket;
+import com.ticketseller.domain.model.venta.Venta;
+import com.ticketseller.domain.model.zona.Zona;
 import com.ticketseller.domain.repository.CompuertaRepositoryPort;
 import com.ticketseller.domain.repository.PrecioZonaRepositoryPort;
 import com.ticketseller.domain.repository.TicketRepositoryPort;

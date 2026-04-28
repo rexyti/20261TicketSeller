@@ -1,6 +1,6 @@
 package com.ticketseller.infrastructure.adapter.out.persistence.liquidacion;
 
-import com.ticketseller.domain.model.SnapshotLiquidacion;
+import com.ticketseller.domain.model.evento.SnapshotLiquidacion;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

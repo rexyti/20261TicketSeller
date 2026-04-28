@@ -1,20 +1,27 @@
 package com.ticketseller.infrastructure.adapter.in.rest;
 
+import com.ticketseller.application.ConsultarEstructuraRecintoUseCase;
 import com.ticketseller.application.capacidad.ConfigurarCapacidadUseCase;
 import com.ticketseller.application.capacidad.ConfigurarCategoriaUseCase;
 import com.ticketseller.application.recinto.DesactivarRecintoUseCase;
 import com.ticketseller.application.recinto.EditarRecintoUseCase;
 import com.ticketseller.application.recinto.ListarRecintosFiltradosUseCase;
 import com.ticketseller.application.recinto.RegistrarRecintoUseCase;
-import com.ticketseller.domain.model.CategoriaRecinto;
-import com.ticketseller.domain.model.Recinto;
+import com.ticketseller.domain.model.recinto.CategoriaRecinto;
+import com.ticketseller.domain.model.recinto.Recinto;
 import com.ticketseller.infrastructure.adapter.in.rest.dto.recinto.CambiarEstadoRecintoRequest;
 import com.ticketseller.infrastructure.adapter.in.rest.dto.recinto.ConfigurarCapacidadRequest;
 import com.ticketseller.infrastructure.adapter.in.rest.dto.recinto.ConfigurarCategoriaRequest;
 import com.ticketseller.infrastructure.adapter.in.rest.dto.recinto.CrearRecintoRequest;
 import com.ticketseller.infrastructure.adapter.in.rest.dto.recinto.EditarRecintoRequest;
+import com.ticketseller.infrastructure.adapter.in.rest.dto.recinto.RecintoEstructuraResponse;
 import com.ticketseller.infrastructure.adapter.in.rest.dto.recinto.RecintoResponse;
 import com.ticketseller.infrastructure.adapter.in.rest.mapper.RecintoRestMapper;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -34,6 +41,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.UUID;
 
+@Tag(name = "Recintos", description = "Gestión de recintos")
 @RestController
 @RequestMapping("/api/v1/recintos")
 @RequiredArgsConstructor
@@ -45,8 +53,10 @@ public class RecintoController {
     private final EditarRecintoUseCase editarRecintoUseCase;
     private final DesactivarRecintoUseCase desactivarRecintoUseCase;
     private final ConfigurarCategoriaUseCase configurarCategoriaUseCase;
+    private final ConsultarEstructuraRecintoUseCase consultarEstructuraRecintoUseCase;
     private final RecintoRestMapper recintoRestMapper;
 
+    @Operation(summary = "Registrar un nuevo recinto")
     @PostMapping
     public Mono<ResponseEntity<RecintoResponse>> crear(@Valid @RequestBody CrearRecintoRequest request) {
         return registrarRecintoUseCase.ejecutar(recintoRestMapper.toDomain(request))
@@ -54,6 +64,7 @@ public class RecintoController {
                 .map(response -> ResponseEntity.status(HttpStatus.CREATED).body(response));
     }
 
+    @Operation(summary = "Listar recintos con filtros y paginación")
     @GetMapping
     public Mono<ResponseEntity<Page<RecintoResponse>>> listar(
             @RequestParam(required = false) String nombre,
@@ -85,6 +96,7 @@ public class RecintoController {
         return "ACTIVO".equalsIgnoreCase(estado);
     }
 
+    @Operation(summary = "Editar información de un recinto")
     @PatchMapping("/{id}")
     public Mono<ResponseEntity<RecintoResponse>> editar(@PathVariable UUID id,
                                                         @RequestBody EditarRecintoRequest request) {
@@ -101,6 +113,7 @@ public class RecintoController {
                 .map(ResponseEntity::ok);
     }
 
+    @Operation(summary = "Desactivar un recinto")
     @PatchMapping("/{id}/estado")
     public Mono<ResponseEntity<RecintoResponse>> cambiarEstado(@PathVariable UUID id,
                                                                @Valid @RequestBody CambiarEstadoRecintoRequest request) {
@@ -112,6 +125,7 @@ public class RecintoController {
                 .map(ResponseEntity::ok);
     }
 
+    @Operation(summary = "Configurar capacidad máxima del recinto")
     @PatchMapping("/{id}/capacidad")
     public Mono<ResponseEntity<RecintoResponse>> configurarCapacidad(@PathVariable UUID id,
                                                                      @Valid @RequestBody ConfigurarCapacidadRequest request) {
@@ -120,11 +134,23 @@ public class RecintoController {
                 .map(ResponseEntity::ok);
     }
 
+    @Operation(summary = "Configurar categoría del recinto")
     @PatchMapping("/{id}/categoria")
     public Mono<ResponseEntity<RecintoResponse>> configurarCategoria(@PathVariable UUID id,
                                                                      @Valid @RequestBody ConfigurarCategoriaRequest request) {
         return configurarCategoriaUseCase.ejecutar(id, request.categoria())
                 .map(recintoRestMapper::toResponse)
+                .map(ResponseEntity::ok);
+    }
+
+    @Operation(summary = "Consultar estructura del recinto", description = "Retorna la lista de bloques y zonas del recinto para validación de coherencia.")
+    @ApiResponse(responseCode = "200", description = "Estructura del recinto recuperada exitosamente",
+            content = @Content(schema = @Schema(implementation = RecintoEstructuraResponse.class)))
+    @ApiResponse(responseCode = "404", description = "Recinto no encontrado")
+    @GetMapping("/{id}")
+    public Mono<ResponseEntity<RecintoEstructuraResponse>> consultarEstructura(@PathVariable UUID id) {
+        return consultarEstructuraRecintoUseCase.ejecutar(id)
+                .map(tuple -> recintoRestMapper.toEstructuraResponse(tuple.getT1(), tuple.getT2()))
                 .map(ResponseEntity::ok);
     }
 }

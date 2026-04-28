@@ -1,7 +1,7 @@
 package com.ticketseller.infrastructure.adapter.out.persistence.evento.mapper;
 
-import com.ticketseller.domain.model.EstadoEvento;
-import com.ticketseller.domain.model.Evento;
+import com.ticketseller.domain.model.evento.EstadoEvento;
+import com.ticketseller.domain.model.evento.Evento;
 import com.ticketseller.infrastructure.adapter.out.persistence.evento.EventoEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

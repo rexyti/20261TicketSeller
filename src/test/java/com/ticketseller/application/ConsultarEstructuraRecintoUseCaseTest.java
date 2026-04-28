@@ -1,8 +1,8 @@
 package com.ticketseller.application;
 
-import com.ticketseller.domain.exception.RecintoNotFoundException;
-import com.ticketseller.domain.model.Recinto;
-import com.ticketseller.domain.model.Zona;
+import com.ticketseller.domain.exception.recinto.RecintoNotFoundException;
+import com.ticketseller.domain.model.recinto.Recinto;
+import com.ticketseller.domain.model.zona.Zona;
 import com.ticketseller.domain.repository.RecintoRepositoryPort;
 import com.ticketseller.domain.repository.ZonaRepositoryPort;
 import org.junit.jupiter.api.BeforeEach;

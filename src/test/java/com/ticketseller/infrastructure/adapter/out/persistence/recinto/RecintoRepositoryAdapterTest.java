@@ -1,6 +1,6 @@
 package com.ticketseller.infrastructure.adapter.out.persistence.recinto;
 
-import com.ticketseller.domain.model.Recinto;
+import com.ticketseller.domain.model.recinto.Recinto;
 import com.ticketseller.infrastructure.adapter.out.persistence.recinto.mapper.RecintoPersistenceMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

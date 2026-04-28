@@ -2,8 +2,8 @@ package com.ticketseller.infrastructure.adapter.in.rest;
 
 import com.ticketseller.application.zona.CrearZonaUseCase;
 import com.ticketseller.application.zona.ListarZonasUseCase;
-import com.ticketseller.domain.exception.ZonaCapacidadExcedidaException;
-import com.ticketseller.domain.model.Zona;
+import com.ticketseller.domain.exception.zona.ZonaCapacidadExcedidaException;
+import com.ticketseller.domain.model.zona.Zona;
 import com.ticketseller.infrastructure.adapter.in.rest.dto.zona.CrearZonaRequest;
 import com.ticketseller.infrastructure.adapter.in.rest.dto.zona.ZonaResponse;
 import com.ticketseller.infrastructure.adapter.in.rest.mapper.ZonaRestMapper;

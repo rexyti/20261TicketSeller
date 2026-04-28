@@ -1,8 +1,8 @@
 package com.ticketseller.application.evento;
 
-import com.ticketseller.domain.exception.EventoNotFoundException;
-import com.ticketseller.domain.exception.EventoSolapamientoException;
-import com.ticketseller.domain.model.Evento;
+import com.ticketseller.domain.exception.evento.EventoNotFoundException;
+import com.ticketseller.domain.exception.evento.EventoSolapamientoException;
+import com.ticketseller.domain.model.evento.Evento;
 import com.ticketseller.domain.repository.EventoRepositoryPort;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;

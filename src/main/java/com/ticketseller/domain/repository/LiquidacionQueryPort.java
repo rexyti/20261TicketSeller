@@ -1,6 +1,6 @@
 package com.ticketseller.domain.repository;
 
-import com.ticketseller.domain.model.SnapshotLiquidacion;
+import com.ticketseller.domain.model.evento.SnapshotLiquidacion;
 import reactor.core.publisher.Mono;
 
 import java.math.BigDecimal;

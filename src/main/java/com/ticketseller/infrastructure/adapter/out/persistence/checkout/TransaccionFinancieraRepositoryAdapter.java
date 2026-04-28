@@ -1,6 +1,6 @@
 package com.ticketseller.infrastructure.adapter.out.persistence.checkout;
 
-import com.ticketseller.domain.model.TransaccionFinanciera;
+import com.ticketseller.domain.model.venta.TransaccionFinanciera;
 import com.ticketseller.domain.repository.TransaccionFinancieraRepositoryPort;
 import com.ticketseller.infrastructure.adapter.out.persistence.checkout.mapper.TransaccionFinancieraPersistenceMapper;
 import lombok.RequiredArgsConstructor;

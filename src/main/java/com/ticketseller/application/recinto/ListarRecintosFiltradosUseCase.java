@@ -1,7 +1,7 @@
 package com.ticketseller.application.recinto;
 
-import com.ticketseller.domain.model.CategoriaRecinto;
-import com.ticketseller.domain.model.Recinto;
+import com.ticketseller.domain.model.recinto.CategoriaRecinto;
+import com.ticketseller.domain.model.recinto.Recinto;
 import com.ticketseller.domain.shared.Pagina;
 import com.ticketseller.domain.repository.RecintoRepositoryPort;
 import lombok.RequiredArgsConstructor;

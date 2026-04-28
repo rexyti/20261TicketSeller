@@ -1,9 +1,9 @@
 package com.ticketseller.application.capacidad;
 
 import com.ticketseller.domain.exception.CapacidadInvalidaException;
-import com.ticketseller.domain.exception.RecintoConEventosException;
-import com.ticketseller.domain.exception.RecintoNotFoundException;
-import com.ticketseller.domain.model.Recinto;
+import com.ticketseller.domain.exception.recinto.RecintoConEventosException;
+import com.ticketseller.domain.exception.recinto.RecintoNotFoundException;
+import com.ticketseller.domain.model.recinto.Recinto;
 import com.ticketseller.domain.repository.RecintoRepositoryPort;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;

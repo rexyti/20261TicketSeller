@@ -5,6 +5,8 @@ import com.ticketseller.application.precios.ListarPreciosUseCase;
 import com.ticketseller.infrastructure.adapter.in.rest.dto.evento.ConfigurarPreciosRequest;
 import com.ticketseller.infrastructure.adapter.in.rest.dto.evento.PrecioZonaResponse;
 import com.ticketseller.infrastructure.adapter.in.rest.mapper.PrecioEventoRestMapper;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,6 +19,7 @@ import reactor.core.publisher.Flux;
 
 import java.util.UUID;
 
+@Tag(name = "Precios de Evento", description = "Configuración de precios por zona para un evento")
 @RestController
 @RequestMapping("/api/v1/eventos")
 @RequiredArgsConstructor
@@ -26,6 +29,7 @@ public class PrecioEventoController {
     private final ListarPreciosUseCase listarPreciosUseCase;
     private final PrecioEventoRestMapper precioEventoRestMapper;
 
+    @Operation(summary = "Configurar precios de zonas para un evento")
     @PostMapping("/{eventoId}/precios")
     public Flux<PrecioZonaResponse> configurarPrecios(@PathVariable UUID eventoId,
                                                       @Valid @RequestBody ConfigurarPreciosRequest request) {
@@ -34,6 +38,7 @@ public class PrecioEventoController {
                 .map(precioEventoRestMapper::toResponse);
     }
 
+    @Operation(summary = "Listar precios configurados para un evento")
     @GetMapping("/{eventoId}/precios")
     public Flux<PrecioZonaResponse> listarPrecios(@PathVariable UUID eventoId) {
         return listarPreciosUseCase.ejecutar(eventoId).map(precioEventoRestMapper::toResponse);

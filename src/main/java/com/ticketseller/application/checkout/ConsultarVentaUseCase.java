@@ -1,6 +1,6 @@
 package com.ticketseller.application.checkout;
 
-import com.ticketseller.domain.exception.VentaNotFoundException;
+import com.ticketseller.domain.exception.venta.VentaNotFoundException;
 import com.ticketseller.domain.repository.TicketRepositoryPort;
 import com.ticketseller.domain.repository.VentaRepositoryPort;
 import lombok.RequiredArgsConstructor;

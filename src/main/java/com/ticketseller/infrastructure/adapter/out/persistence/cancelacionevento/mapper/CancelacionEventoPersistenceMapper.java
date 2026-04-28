@@ -1,6 +1,6 @@
 package com.ticketseller.infrastructure.adapter.out.persistence.cancelacionevento.mapper;
 
-import com.ticketseller.domain.model.CancelacionEvento;
+import com.ticketseller.domain.model.evento.CancelacionEvento;
 import com.ticketseller.infrastructure.adapter.out.persistence.cancelacionevento.CancelacionEventoEntity;
 import org.mapstruct.Mapper;
 

@@ -1,6 +1,6 @@
 package com.ticketseller.infrastructure.adapter.out.persistence.liquidacion;
 
-import com.ticketseller.domain.model.SnapshotLiquidacion;
+import com.ticketseller.domain.model.evento.SnapshotLiquidacion;
 import com.ticketseller.domain.repository.LiquidacionQueryPort;
 import org.springframework.r2dbc.core.DatabaseClient;
 import reactor.core.publisher.Mono;

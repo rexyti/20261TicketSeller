@@ -1,6 +1,6 @@
 package com.ticketseller.infrastructure.adapter.out.persistence.preciozona.mapper;
 
-import com.ticketseller.domain.model.PrecioZona;
+import com.ticketseller.domain.model.zona.PrecioZona;
 import com.ticketseller.infrastructure.adapter.out.persistence.preciozona.PrecioZonaEntity;
 import org.mapstruct.Mapper;
 

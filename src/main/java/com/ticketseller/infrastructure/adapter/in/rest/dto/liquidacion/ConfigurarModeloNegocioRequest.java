@@ -1,6 +1,6 @@
 package com.ticketseller.infrastructure.adapter.in.rest.dto.liquidacion;
 
-import com.ticketseller.domain.model.ModeloNegocio;
+import com.ticketseller.domain.model.recinto.ModeloNegocio;
 import jakarta.validation.constraints.NotNull;
 
 import java.math.BigDecimal;

@@ -1,6 +1,6 @@
 package com.ticketseller.infrastructure.adapter.in.rest.dto.checkout;
 
-import com.ticketseller.domain.model.EstadoVenta;
+import com.ticketseller.domain.model.venta.EstadoVenta;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

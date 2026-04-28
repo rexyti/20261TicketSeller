@@ -1,7 +1,7 @@
 package com.ticketseller.infrastructure.adapter.out.persistence.checkout;
 
-import com.ticketseller.domain.model.EstadoVenta;
-import com.ticketseller.domain.model.Venta;
+import com.ticketseller.domain.model.venta.EstadoVenta;
+import com.ticketseller.domain.model.venta.Venta;
 import com.ticketseller.domain.repository.VentaRepositoryPort;
 import com.ticketseller.infrastructure.adapter.out.persistence.checkout.mapper.VentaPersistenceMapper;
 import lombok.RequiredArgsConstructor;

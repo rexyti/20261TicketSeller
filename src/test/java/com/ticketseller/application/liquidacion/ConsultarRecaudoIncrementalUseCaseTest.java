@@ -1,8 +1,8 @@
 package com.ticketseller.application.liquidacion;
 
-import com.ticketseller.domain.exception.EventoNotFoundException;
-import com.ticketseller.domain.model.Evento;
-import com.ticketseller.domain.model.EstadoEvento;
+import com.ticketseller.domain.exception.evento.EventoNotFoundException;
+import com.ticketseller.domain.model.evento.Evento;
+import com.ticketseller.domain.model.evento.EstadoEvento;
 import com.ticketseller.domain.repository.EventoRepositoryPort;
 import com.ticketseller.domain.repository.LiquidacionQueryPort;
 import org.junit.jupiter.api.Test;

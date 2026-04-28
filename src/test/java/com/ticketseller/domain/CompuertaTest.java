@@ -1,7 +1,7 @@
 package com.ticketseller.domain;
 
 import com.ticketseller.domain.exception.CompuertaInvalidaException;
-import com.ticketseller.domain.model.Compuerta;
+import com.ticketseller.domain.model.zona.Compuerta;
 import org.junit.jupiter.api.Test;
 
 import java.util.UUID;

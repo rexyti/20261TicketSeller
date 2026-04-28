@@ -1,6 +1,6 @@
 package com.ticketseller.application.liquidacion;
 
-import com.ticketseller.domain.exception.EventoNotFoundException;
+import com.ticketseller.domain.exception.evento.EventoNotFoundException;
 import com.ticketseller.domain.repository.EventoRepositoryPort;
 import com.ticketseller.domain.repository.LiquidacionQueryPort;
 import lombok.RequiredArgsConstructor;

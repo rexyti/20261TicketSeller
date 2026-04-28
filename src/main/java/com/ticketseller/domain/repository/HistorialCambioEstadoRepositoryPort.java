@@ -1,6 +1,6 @@
 package com.ticketseller.domain.repository;
 
-import com.ticketseller.domain.model.HistorialCambioEstado;
+import com.ticketseller.domain.model.asiento.HistorialCambioEstado;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 

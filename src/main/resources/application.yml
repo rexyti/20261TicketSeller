@@ -2,15 +2,35 @@ spring:
   application:
     name: ticketseller
   r2dbc:
-    url: r2dbc:postgresql://localhost:5432/ticketseller
-    username: postgres
-    password: postgres
+    url: ${SPRING_R2DBC_URL:r2dbc:postgresql://localhost:5432/ticketseller}
+    username: ${SPRING_R2DBC_USERNAME:postgres}
+    password: ${SPRING_R2DBC_PASSWORD:postgres}
+  mail:
+    host: ${SPRING_MAIL_HOST:localhost}
+    port: ${SPRING_MAIL_PORT:1025}
+    username: ${SPRING_MAIL_USERNAME:}
+    password: ${SPRING_MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: false
+          starttls:
+            enable: false
 
 server:
-  port: 8080
+  port: ${SERVER_PORT:8080}
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
 
 wompi:
-  #Dev
-  base-url: https://sandbox.wompi.co/v1
-  private-key: #Al crear la cuenta en Wompi, se genera una llave privada, esta es la que se debe colocar aquí
+  base-url: ${WOMPI_BASE_URL:https://sandbox.wompi.co/v1}
+  private-key: ${WOMPI_PRIVATE_KEY:}
 
+logging:
+  level:
+    com.ticketseller: INFO
+    org.springframework.r2dbc: WARN
