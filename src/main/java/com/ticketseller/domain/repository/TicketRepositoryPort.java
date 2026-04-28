@@ -1,7 +1,7 @@
 package com.ticketseller.domain.repository;
 
-import com.ticketseller.domain.model.EstadoTicket;
-import com.ticketseller.domain.model.Ticket;
+import com.ticketseller.domain.model.ticket.EstadoTicket;
+import com.ticketseller.domain.model.ticket.Ticket;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 

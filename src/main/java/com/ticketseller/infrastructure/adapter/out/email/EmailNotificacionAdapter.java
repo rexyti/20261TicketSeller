@@ -1,7 +1,7 @@
 package com.ticketseller.infrastructure.adapter.out.email;
 
-import com.ticketseller.domain.model.Ticket;
-import com.ticketseller.domain.model.Venta;
+import com.ticketseller.domain.model.ticket.Ticket;
+import com.ticketseller.domain.model.venta.Venta;
 import com.ticketseller.domain.repository.NotificacionEmailPort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.SimpleMailMessage;

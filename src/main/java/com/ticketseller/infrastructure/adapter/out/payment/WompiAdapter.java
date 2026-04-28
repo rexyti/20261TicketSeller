@@ -2,7 +2,7 @@ package com.ticketseller.infrastructure.adapter.out.payment;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.ticketseller.domain.model.ResultadoPago;
+import com.ticketseller.domain.model.venta.ResultadoPago;
 import com.ticketseller.domain.repository.PasarelaPagoPort;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;

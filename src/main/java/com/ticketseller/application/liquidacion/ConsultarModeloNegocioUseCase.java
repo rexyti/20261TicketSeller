@@ -1,8 +1,8 @@
 package com.ticketseller.application.liquidacion;
 
 import com.ticketseller.domain.exception.LiquidacionNoConfiguradaException;
-import com.ticketseller.domain.exception.RecintoNotFoundException;
-import com.ticketseller.domain.model.ConfiguracionLiquidacion;
+import com.ticketseller.domain.exception.recinto.RecintoNotFoundException;
+import com.ticketseller.domain.model.recinto.ConfiguracionLiquidacion;
 import com.ticketseller.domain.repository.RecintoRepositoryPort;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;

@@ -1,5 +1,7 @@
 package com.ticketseller.domain.model;
 
+import com.ticketseller.domain.model.asiento.EstadoAsiento;
+import com.ticketseller.domain.model.asiento.TransicionEstadoAsiento;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 

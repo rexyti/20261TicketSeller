@@ -57,59 +57,49 @@ src/main/java/com/ticketseller/
 │
 ├── domain/
 │   ├── model/
-│   │   └── Reembolso.java
+│   │   └── postventa/
+│   │       └── Reembolso.java
 │   ├── exception/
-│   │   ├── CancelacionFueraDePlazoException.java
-│   │   ├── TicketYaUsadoException.java
-│   │   ├── ReembolsoFallidoException.java
-│   │   └── TransicionEstadoInvalidaException.java
+│   │   └── postventa/
+│   │       ├── CancelacionFueraDePlazoException.java
+│   │       ├── TicketYaUsadoException.java
+│   │       ├── ReembolsoFallidoException.java
+│   │       └── TransicionEstadoInvalidaException.java
 │   └── repository/
 │       └── ReembolsoRepositoryPort.java
 │
 ├── application/                                    # Casos de uso — uno por responsabilidad
-│   ├── CancelarTicketUseCase.java
-│   ├── ProcesarReembolsoMasivoUseCase.java
-│   ├── CambiarEstadoTicketUseCase.java
-│   ├── GestionarReembolsoManualUseCase.java
-│   └── ConsultarEstadoReembolsoUseCase.java
+│   └── postventa/
+│       ├── CancelarTicketUseCase.java
+│       ├── ProcesarReembolsoMasivoUseCase.java
+│       ├── CambiarEstadoTicketUseCase.java
+│       ├── GestionarReembolsoManualUseCase.java
+│       └── ConsultarEstadoReembolsoUseCase.java
 │
 └── infrastructure/
     ├── adapter/
     │   ├── in/rest/
-    │   │   ├── CancelacionController.java
-    │   │   ├── AdminTicketController.java
-    │   │   ├── AdminReembolsoController.java
-    │   │   ├── MisComprasController.java
-    │   │   └── dto/
-    │   │       ├── CancelarTicketRequest.java
-    │   │       ├── CancelacionResponse.java
-    │   │       ├── CambiarEstadoTicketRequest.java
-    │   │       ├── ReembolsoManualRequest.java
-    │   │       ├── ReembolsoResponse.java
-    │   │       └── TicketConReembolsoResponse.java
+    │   │   └── postventa/
+    │   │       ├── CancelacionController.java
+    │   │       ├── AdminTicketController.java
+    │   │       ├── AdminReembolsoController.java
+    │   │       ├── MisComprasController.java
+    │   │       └── dto/
+    │   │           └── postventa/
     │   └── out/persistence/
-    │       ├── ReembolsoEntity.java
-    │       ├── ReembolsoR2dbcRepository.java
-    │       ├── ReembolsoRepositoryAdapter.java
-    │       └── mapper/
-    │           └── ReembolsoPersistenceMapper.java
+    │       └── postventa/
+    │           └── mapper/
     └── config/
         └── BeanConfiguration.java             # Actualizar con los nuevos beans
 
-tests/
+src/test/java/com/ticketseller/
 ├── application/
-│   ├── CancelarTicketUseCaseTest.java
-│   ├── ProcesarReembolsoMasivoUseCaseTest.java
-│   ├── CambiarEstadoTicketUseCaseTest.java
-│   └── GestionarReembolsoManualUseCaseTest.java
+│   └── postventa/
 └── infrastructure/
     ├── adapter/in/rest/
-    │   ├── CancelacionControllerTest.java
-    │   ├── AdminTicketControllerTest.java
-    │   ├── AdminReembolsoControllerTest.java
-    │   └── MisComprasControllerTest.java
+    │   └── postventa/
     └── adapter/out/persistence/
-        └── ReembolsoRepositoryAdapterTest.java
+        └── postventa/
 ```
 
 **Structure Decision**: Feature de extensión de comportamiento post-compra. Agrega `Reembolso`

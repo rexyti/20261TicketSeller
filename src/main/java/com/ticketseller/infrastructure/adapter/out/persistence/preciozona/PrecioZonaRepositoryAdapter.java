@@ -1,6 +1,6 @@
 package com.ticketseller.infrastructure.adapter.out.persistence.preciozona;
 
-import com.ticketseller.domain.model.PrecioZona;
+import com.ticketseller.domain.model.zona.PrecioZona;
 import com.ticketseller.domain.repository.PrecioZonaRepositoryPort;
 import com.ticketseller.infrastructure.adapter.out.persistence.preciozona.mapper.PrecioZonaPersistenceMapper;
 import lombok.RequiredArgsConstructor;

@@ -1,11 +1,11 @@
 package com.ticketseller.application.zona;
 
-import com.ticketseller.domain.exception.RecintoNotFoundException;
-import com.ticketseller.domain.exception.ZonaCapacidadExcedidaException;
-import com.ticketseller.domain.exception.ZonaInvalidaException;
-import com.ticketseller.domain.exception.ZonaNombreDuplicadoException;
-import com.ticketseller.domain.model.Recinto;
-import com.ticketseller.domain.model.Zona;
+import com.ticketseller.domain.exception.recinto.RecintoNotFoundException;
+import com.ticketseller.domain.exception.zona.ZonaCapacidadExcedidaException;
+import com.ticketseller.domain.exception.zona.ZonaInvalidaException;
+import com.ticketseller.domain.exception.zona.ZonaNombreDuplicadoException;
+import com.ticketseller.domain.model.recinto.Recinto;
+import com.ticketseller.domain.model.zona.Zona;
 import com.ticketseller.domain.repository.RecintoRepositoryPort;
 import com.ticketseller.domain.repository.ZonaRepositoryPort;
 import lombok.RequiredArgsConstructor;

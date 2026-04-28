@@ -4,12 +4,15 @@ import com.ticketseller.application.liquidacion.ConfigurarModeloNegocioUseCase;
 import com.ticketseller.application.liquidacion.ConsultarModeloNegocioUseCase;
 import com.ticketseller.application.liquidacion.ConsultarRecaudoIncrementalUseCase;
 import com.ticketseller.application.liquidacion.ConsultarSnapshotUseCase;
-import com.ticketseller.infrastructure.adapter.in.rest.dto.liquidacion.CondicionTicketResponse;
 import com.ticketseller.infrastructure.adapter.in.rest.dto.liquidacion.ConfigurarModeloNegocioRequest;
 import com.ticketseller.infrastructure.adapter.in.rest.dto.liquidacion.ModeloNegocioResponse;
 import com.ticketseller.infrastructure.adapter.in.rest.dto.liquidacion.RecaudoIncrementalResponse;
 import com.ticketseller.infrastructure.adapter.in.rest.dto.liquidacion.SnapshotLiquidacionResponse;
-import com.ticketseller.infrastructure.adapter.in.rest.dto.ApiErrorResponse;
+import com.ticketseller.infrastructure.adapter.in.rest.mapper.LiquidacionRestMapper;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -21,9 +24,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
+@Tag(name = "Liquidación", description = "Consulta de liquidación y recaudo de eventos")
 @RestController
 @RequestMapping("/api/v1")
 @RequiredArgsConstructor
@@ -33,56 +36,39 @@ public class LiquidacionController {
     private final ConsultarModeloNegocioUseCase consultarModeloNegocioUseCase;
     private final ConfigurarModeloNegocioUseCase configurarModeloNegocioUseCase;
     private final ConsultarRecaudoIncrementalUseCase consultarRecaudoIncrementalUseCase;
+    private final LiquidacionRestMapper liquidacionRestMapper;
 
+    @Operation(summary = "Consultar el modelo de negocio de un recinto")
     @GetMapping("/recintos/{id}/modelo-negocio")
     public Mono<ResponseEntity<ModeloNegocioResponse>> consultarModeloNegocio(@PathVariable UUID id) {
         return consultarModeloNegocioUseCase.ejecutar(id)
-                .map(config -> new ModeloNegocioResponse(
-                        config.getRecintoId(),
-                        config.getModeloNegocio(),
-                        config.getTipoRecinto(),
-                        config.getMontoFijo()))
+                .map(liquidacionRestMapper::toModeloNegocioResponse)
                 .map(ResponseEntity::ok);
     }
 
+    @Operation(summary = "Configurar el modelo de negocio de un recinto")
     @PatchMapping("/recintos/{id}/modelo-negocio")
     public Mono<ResponseEntity<ModeloNegocioResponse>> configurarModeloNegocio(
             @PathVariable UUID id,
             @Valid @RequestBody ConfigurarModeloNegocioRequest request) {
         return configurarModeloNegocioUseCase.ejecutar(id, request.modelo(), request.montoFijo())
-                .map(recinto -> new ModeloNegocioResponse(
-                        recinto.getId(),
-                        recinto.getModeloNegocio(),
-                        recinto.getCategoria(),
-                        recinto.getMontoFijo()))
+                .map(liquidacionRestMapper::toModeloNegocioResponseFromRecinto)
                 .map(ResponseEntity::ok);
     }
 
+    @Operation(summary = "Consultar snapshot de liquidación de un evento")
     @GetMapping("/eventos/{id}/snapshot")
     public Mono<ResponseEntity<SnapshotLiquidacionResponse>> consultarSnapshot(@PathVariable UUID id) {
         return consultarSnapshotUseCase.ejecutar(id)
-                .map(snapshot -> {
-                    var condiciones = snapshot.getCondiciones().values().stream()
-                            .map(c -> new CondicionTicketResponse(c.getCondicion(), c.getCantidad(), c.getValorTotal()))
-                            .toList();
-                    return new SnapshotLiquidacionResponse(
-                            snapshot.getEventoId(),
-                            condiciones,
-                            snapshot.getTimestampGeneracion());
-                })
+                .map(liquidacionRestMapper::toSnapshotResponse)
                 .map(ResponseEntity::ok);
     }
 
+    @Operation(summary = "Consultar recaudo incremental de un evento")
     @GetMapping("/eventos/{id}/recaudo")
     public Mono<ResponseEntity<RecaudoIncrementalResponse>> consultarRecaudo(@PathVariable UUID id) {
         return consultarRecaudoIncrementalUseCase.ejecutar(id)
-                .map(recaudo -> new RecaudoIncrementalResponse(
-                        id,
-                        recaudo.get("recaudoRegular"),
-                        recaudo.get("recaudoCortesia"),
-                        recaudo.get("cancelaciones"),
-                        recaudo.get("recaudoNeto"),
-                        LocalDateTime.now()))
+                .map(recaudo -> liquidacionRestMapper.toRecaudoResponse(id, recaudo))
                 .map(ResponseEntity::ok);
     }
 }

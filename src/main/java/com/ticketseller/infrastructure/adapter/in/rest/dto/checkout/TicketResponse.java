@@ -1,6 +1,6 @@
 package com.ticketseller.infrastructure.adapter.in.rest.dto.checkout;
 
-import com.ticketseller.domain.model.EstadoTicket;
+import com.ticketseller.domain.model.ticket.EstadoTicket;
 
 import java.math.BigDecimal;
 import java.util.UUID;

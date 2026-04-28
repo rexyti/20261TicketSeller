@@ -1,7 +1,7 @@
 package com.ticketseller.infrastructure.adapter.out.persistence.checkout.mapper;
 
-import com.ticketseller.domain.model.EstadoVenta;
-import com.ticketseller.domain.model.Venta;
+import com.ticketseller.domain.model.venta.EstadoVenta;
+import com.ticketseller.domain.model.venta.Venta;
 import com.ticketseller.infrastructure.adapter.out.persistence.checkout.VentaEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

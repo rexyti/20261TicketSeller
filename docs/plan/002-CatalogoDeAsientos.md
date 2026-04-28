@@ -179,77 +179,64 @@ bloqueante) per spec.
 **Independent Test**: `POST /api/tipos-asiento` con `{ "nombre": "VIP" }` retorna HTTP 201 y
 el tipo aparece en `GET /api/tipos-asiento`. `POST` sin `nombre` retorna HTTP 400.
 
-### Tests para User Story 1
+```text
+src/main/java/com/ticketseller/
+│
+├── domain/
+│   ├── model/
+│   │   └── asiento/
+│   │       ├── TipoAsiento.java                          # id, nombre, descripcion, estado
+│   │       ├── Asiento.java                              # id, fila, columna, numero, zonaId
+│   │       └── MapaAsientos.java                         # (US5) recintoId, filas, columnas
+│   ├── exception/
+│   │   └── asiento/
+│   │       ├── TipoAsientoNotFoundException.java
+│   │       ├── TipoAsientoInactivoException.java
+│   │       ├── TipoAsientoEnUsoException.java
+│   │       └── NombreTipoAsientoVacioException.java
+│   └── repository/
+│       ├── TipoAsientoRepositoryPort.java
+│       ├── AsientoRepositoryPort.java
+│       └── MapaAsientosRepositoryPort.java               # (US5)
+│
+├── application/
+│   ├── tipoasiento/
+│   │   ├── CrearTipoAsientoUseCase.java
+│   │   ├── EditarTipoAsientoUseCase.java
+│   │   ├── ListarTiposAsientoUseCase.java
+│   │   ├── DesactivarTipoAsientoUseCase.java
+│   │   └── AsignarTipoAsientoAZonaUseCase.java
+│   └── asiento/
+│       ├── CrearMapaAsientosUseCase.java                 # (US5)
+│       └── MarcarEspacioVacioUseCase.java                # (US5)
+│
+└── infrastructure/
+    ├── adapter/
+    │   ├── in/rest/
+    │   │   ├── TipoAsientoController.java
+    │   │   ├── MapaAsientosController.java               # (US5)
+    │   │   └── dto/
+    │   │       ├── tipoasiento/
+    │   │       └── asiento/                              # (US5)
+    │   └── out/persistence/
+    │       ├── tipoasiento/
+    │       ├── asiento/
+    │       └── mapaasientos/
+    └── config/
+        └── BeanConfiguration.java                        # Registrar los nuevos beans de use case
 
-- [ ] T011 [P] [US1] Test de contrato: `POST /api/tipos-asiento` con nombre válido retorna
-  HTTP 201 con tipo creado — `TipoAsientoControllerTest.java` (WebTestClient)
-- [ ] T012 [P] [US1] Test de contrato: `POST /api/tipos-asiento` sin campo `nombre` retorna
-  HTTP 400 con mensaje "El campo nombre es obligatorio" — `TipoAsientoControllerTest.java`
-- [ ] T013 [P] [US1] Test de contrato: `GET /api/tipos-asiento` retorna lista con el tipo
-  recién creado — `TipoAsientoControllerTest.java`
-- [ ] T014 [P] [US1] Test de contrato: `POST /api/tipos-asiento` con nombre ya existente
-  retorna HTTP 201 con campo `advertencia: "Ya existe un tipo de asiento con este nombre"` —
-  `TipoAsientoControllerTest.java`
-- [ ] T015 [P] [US1] Test unitario de `CrearTipoAsientoUseCase`: nombre vacío lanza excepción,
-  nombre duplicado retorna tipo con advertencia, nombre nuevo persiste con estado `ACTIVO` —
-  `CrearTipoAsientoUseCaseTest.java`
-- [ ] T016 [P] [US1] Test unitario de `ListarTiposAsientoUseCase`: retorna todos los tipos con
-  campo `enUso` calculado — `ListarTiposAsientoUseCaseTest.java`
-- [ ] T017 [P] [US1] Test de integración con Testcontainers: flujo POST → verificación en BD —
-  `TipoAsientoRepositoryAdapterTest.java`
-
-### Implementación de User Story 1
-
-- [ ] T018 [US1] Implementar `CrearTipoAsientoUseCase.java` en `application/`: validar que
-  `nombre` no esté vacío (lanzar `NombreTipoAsientoVacioException`); verificar si ya existe un
-  tipo con ese nombre vía `TipoAsientoRepositoryPort.buscarPorNombre()` — si existe, persistir
-  igualmente pero incluir campo `advertencia` en la respuesta; persistir con estado `ACTIVO` vía
-  `TipoAsientoRepositoryPort.guardar()` — retornar `Mono<TipoAsiento>`
-- [ ] T019 [US1] Implementar `ListarTiposAsientoUseCase.java` en `application/`: recuperar
-  todos los tipos vía `TipoAsientoRepositoryPort.listarTodos()`; calcular campo `enUso`
-  (`// TODO: calcular enUso cuando US3 esté implementada` — retornar `false` como stub temporal)
-  — retornar `Flux<TipoAsiento>`
-- [ ] T020 [US1] Crear DTOs `CrearTipoAsientoRequest.java` (`nombre @NotBlank`,
-  `descripcion nullable`) y `TipoAsientoResponse.java` (`id`, `nombre`, `descripcion`,
-  `estado`, `enUso boolean`, `advertencia nullable`)
-- [ ] T021 [US1] Implementar endpoints `POST /api/tipos-asiento` y `GET /api/tipos-asiento` en
-  `TipoAsientoController.java` inyectando `CrearTipoAsientoUseCase` y
-  `ListarTiposAsientoUseCase` respectivamente — retornar
-  `Mono<ResponseEntity<TipoAsientoResponse>>` y `Flux<TipoAsientoResponse>`
-
-**Checkpoint**: US1 funcional — tipos de asiento creables y listables
-
----
-
-## Phase 3: User Story 2 — Edición de Tipo de Asiento (Priority: P2)
-
-**Goal**: El gestor puede editar la descripción de un tipo existente. El nombre solo es editable
-si el tipo no tiene asignaciones activas (per spec edge case), para mantener consistencia en
-reportes y tickets ya vendidos.
-
-**Independent Test**: `PUT /api/tipos-asiento/{id}` con `{ "descripcion": "Zona premium" }`
-retorna HTTP 200 con datos actualizados. Cambiar `nombre` en tipo con asignaciones activas
-retorna HTTP 409.
-
-### Tests para User Story 2
-
-- [ ] T022 [P] [US2] Test de contrato: `PUT /api/tipos-asiento/{id}` con descripción válida
-  retorna HTTP 200 con tipo actualizado — `TipoAsientoControllerTest.java`
-- [ ] T023 [P] [US2] Test de contrato: intentar cambiar `nombre` de tipo con asignaciones
-  activas retorna HTTP 409 — `TipoAsientoControllerTest.java`
-- [ ] T024 [P] [US2] Test de contrato: `PUT /api/tipos-asiento/{id-inexistente}` retorna
-  HTTP 404 — `TipoAsientoControllerTest.java`
-- [ ] T025 [P] [US2] Test unitario de `EditarTipoAsientoUseCase`: tipo no encontrado lanza
-  excepción, cambio de nombre con asignaciones lanza excepción, edición de descripción persiste
-  — `EditarTipoAsientoUseCaseTest.java`
-
-### Implementación de User Story 2
-
-- [ ] T026 [US2] Implementar `EditarTipoAsientoUseCase.java` en `application/`: buscar tipo vía
-  `TipoAsientoRepositoryPort.buscarPorId()` (lanzar `TipoAsientoNotFoundException` si no
-  existe); si se intenta cambiar el nombre, verificar ausencia de asignaciones activas vía
-  `TipoAsientoRepositoryPort.tieneAsignacionEnZona()` — lanzar `TipoAsientoEnUsoException` si
-  tiene; aplicar cambios y persistir vía `guardar()` — retornar `Mono<TipoAsiento>`
+src/test/java/com/ticketseller/
+├── application/
+│   ├── tipoasiento/
+│   └── asiento/                                          # (US5)
+└── infrastructure/
+    ├── adapter/in/rest/
+    │   ├── TipoAsientoControllerTest.java
+    │   └── MapaAsientosControllerTest.java               # (US5)
+    └── adapter/out/persistence/
+        ├── tipoasiento/
+        └── asiento/
+```
 - [ ] T027 [US2] Crear DTO `EditarTipoAsientoRequest.java` (`nombre nullable`, `descripcion nullable`)
 - [ ] T028 [US2] Implementar endpoint `PUT /api/tipos-asiento/{id}` en `TipoAsientoController.java`
   inyectando `EditarTipoAsientoUseCase`

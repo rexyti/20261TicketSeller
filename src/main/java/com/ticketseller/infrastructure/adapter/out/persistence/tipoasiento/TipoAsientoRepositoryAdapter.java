@@ -1,6 +1,6 @@
 package com.ticketseller.infrastructure.adapter.out.persistence.tipoasiento;
 
-import com.ticketseller.domain.model.TipoAsiento;
+import com.ticketseller.domain.model.asiento.TipoAsiento;
 import com.ticketseller.domain.repository.TipoAsientoRepositoryPort;
 import com.ticketseller.infrastructure.adapter.out.persistence.tipoasiento.mapper.TipoAsientoPersistenceMapper;
 import reactor.core.publisher.Flux;

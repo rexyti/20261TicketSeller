@@ -1,7 +1,7 @@
 package com.ticketseller.domain;
 
-import com.ticketseller.domain.exception.ZonaInvalidaException;
-import com.ticketseller.domain.model.Zona;
+import com.ticketseller.domain.exception.zona.ZonaInvalidaException;
+import com.ticketseller.domain.model.zona.Zona;
 import org.junit.jupiter.api.Test;
 
 import java.util.UUID;

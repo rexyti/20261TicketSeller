@@ -49,55 +49,47 @@ src/main/java/com/ticketseller/
 │
 ├── domain/
 │   ├── model/
-│   │   ├── EstadoAsiento.java                            # Enum: DISPONIBLE, BLOQUEADO, RESERVADO,
-│   │   │                                                 #   VENDIDO, MANTENIMIENTO, ANULADO
-│   │   ├── TransicionEstadoAsiento.java                  # Mapa inmutable de transiciones permitidas
-│   │   └── HistorialCambioEstado.java                    # Entidad de dominio: id, asientoId, eventoId,
-│   │                                                     #   usuarioId, estadoAnterior, estadoNuevo,
-│   │                                                     #   fechaHora, motivo (nullable)
+│   │   └── asiento/
+│   │       ├── EstadoAsiento.java                        # Enum: DISPONIBLE, BLOQUEADO, RESERVADO, VENDIDO,
+│   │       │                                             #   MANTENIMIENTO, ANULADO
+│   │       ├── TransicionEstadoAsiento.java              # Mapa inmutable de transiciones permitidas
+│   │       └── HistorialCambioEstado.java                # id, asientoId, eventoId, usuarioId, estados, fechaHora
 │   ├── exception/
-│   │   ├── TransicionEstadoInvalidaException.java
-│   │   └── AsientoEnCompraException.java
+│   │   └── asiento/
+│   │       ├── TransicionEstadoInvalidaException.java
+│   │       └── AsientoEnCompraException.java
 │   └── repository/
 │       └── HistorialCambioEstadoRepositoryPort.java
 │       # Reutiliza AsientoRepositoryPort (feature 003)
 │
-├── application/                                          # Un caso de uso por responsabilidad — clases concretas
-│   ├── CambiarEstadoAsientoUseCase.java                  # Cambia estado de un único asiento
-│   ├── CambiarEstadoMasivoUseCase.java                   # Cambia estado de múltiples asientos en lote
-│   └── ConsultarHistorialAsientoUseCase.java             # Consulta historial de cambios de un asiento
+├── application/
+│   └── asiento/
+│       ├── CambiarEstadoAsientoUseCase.java
+│       ├── CambiarEstadoMasivoUseCase.java
+│       └── ConsultarHistorialAsientoUseCase.java
 │
 └── infrastructure/
     ├── adapter/
     │   ├── in/rest/
-    │   │   ├── AsientoMantenimientoController.java        # Inyecta cada use case según el endpoint
+    │   │   ├── AsientoMantenimientoController.java
     │   │   └── dto/
-    │   │       ├── CambiarEstadoRequest.java              # estadoDestino (not null), motivo (nullable)
-    │   │       ├── CambiarEstadoMasivoRequest.java        # lista asientoIds, estadoDestino, motivo (nullable)
-    │   │       ├── CambiarEstadoMasivoResponse.java       # modificados (int), omitidos (int), mensajes (List)
-    │   │       └── HistorialCambioResponse.java           # fechaHora, usuario, estadoAnterior, estadoNuevo, motivo
+    │   │       └── asiento/
     │   └── out/persistence/
-    │       ├── HistorialCambioEstadoEntity.java
-    │       ├── HistorialCambioEstadoR2dbcRepository.java
-    │       ├── HistorialCambioEstadoRepositoryAdapter.java
-    │       └── mapper/
-    │           └── HistorialCambioEstadoPersistenceMapper.java
+    │       └── historialestadoasiento/
     └── config/
         └── BeanConfiguration.java                        # Registrar los tres nuevos beans de use case
 
-tests/
+src/test/java/com/ticketseller/
 ├── domain/
-│   └── TransicionEstadoAsientoTest.java                  # Tests unitarios de la máquina de estados pura
+│   └── TransicionEstadoAsientoTest.java
 ├── application/
-│   ├── CambiarEstadoAsientoUseCaseTest.java
-│   ├── CambiarEstadoMasivoUseCaseTest.java
-│   └── ConsultarHistorialAsientoUseCaseTest.java
+│   └── asiento/
 └── infrastructure/
     └── adapter/
         ├── in/rest/
-        │   └── AsientoMantenimientoControllerTest.java   # WebTestClient
+        │   └── AsientoMantenimientoControllerTest.java
         └── out/persistence/
-            └── HistorialCambioEstadoRepositoryAdapterTest.java # Testcontainers
+            └── historialestadoasiento/
 ```
 
 **Structure Decision**: Arquitectura hexagonal con responsabilidad única — un use case concreto

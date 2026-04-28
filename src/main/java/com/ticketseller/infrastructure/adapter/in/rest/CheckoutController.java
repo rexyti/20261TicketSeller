@@ -7,6 +7,10 @@ import com.ticketseller.infrastructure.adapter.in.rest.dto.checkout.ProcesarPago
 import com.ticketseller.infrastructure.adapter.in.rest.dto.checkout.ReservarAsientosRequest;
 import com.ticketseller.infrastructure.adapter.in.rest.dto.checkout.VentaResponse;
 import com.ticketseller.infrastructure.adapter.in.rest.mapper.CheckoutRestMapper;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -21,6 +25,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.UUID;
 
+@Tag(name = "Checkout", description = "Reserva y pago de tickets")
 @RestController
 @RequestMapping("/api/v1/checkout")
 @RequiredArgsConstructor
@@ -31,6 +36,7 @@ public class CheckoutController {
     private final ConsultarVentaUseCase consultarVentaUseCase;
     private final CheckoutRestMapper checkoutRestMapper;
 
+    @Operation(summary = "Reservar asientos para un evento")
     @PostMapping("/reservar")
     public Mono<ResponseEntity<VentaResponse>> reservar(@Valid @RequestBody ReservarAsientosRequest request) {
         return reservarAsientosUseCase.ejecutar(checkoutRestMapper.toCommand(request))
@@ -38,6 +44,7 @@ public class CheckoutController {
                 .map(response -> ResponseEntity.status(HttpStatus.CREATED).body(response));
     }
 
+    @Operation(summary = "Procesar el pago de una reserva activa")
     @PostMapping("/{ventaId}/pagar")
     public Mono<ResponseEntity<VentaResponse>> pagar(@PathVariable UUID ventaId,
                                                      @Valid @RequestBody ProcesarPagoRequest request) {
@@ -46,6 +53,7 @@ public class CheckoutController {
                 .map(ResponseEntity::ok);
     }
 
+    @Operation(summary = "Consultar el estado de una venta")
     @GetMapping("/{ventaId}")
     public Mono<ResponseEntity<VentaResponse>> consultar(@PathVariable UUID ventaId) {
         return consultarVentaUseCase.ejecutar(ventaId)

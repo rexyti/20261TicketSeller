@@ -55,68 +55,60 @@ src/main/java/com/ticketseller/
 │
 ├── domain/
 │   ├── model/
-│   │   ├── Ticket.java
-│   │   ├── Venta.java
-│   │   ├── TransaccionFinanciera.java
-│   │   ├── EstadoVenta.java                   # Enum: PENDIENTE, RESERVADA, COMPLETADA, EXPIRADA, REEMBOLSADA, FALLIDA
-│   │   └── EstadoTicket.java                  # Enum: DISPONIBLE, RESERVADO, VENDIDO, ANULADO
+│   │   ├── ticket/
+│   │   │   ├── Ticket.java
+│   │   │   └── EstadoTicket.java
+│   │   └── venta/
+│   │       ├── Venta.java
+│   │       ├── TransaccionFinanciera.java
+│   │       ├── EstadoVenta.java
+│   │       ├── EstadoPago.java
+│   │       └── MetodoPago.java
 │   ├── exception/
-│   │   ├── AsientoNoDisponibleException.java
-│   │   ├── VentaNotFoundException.java
-│   │   ├── PagoRechazadoException.java
-│   │   └── ReservaExpiradaException.java
+│   │   ├── asiento/
+│   │   │   └── AsientoNoDisponibleException.java
+│   │   └── venta/
+│   │       ├── VentaNotFoundException.java
+│   │       ├── PagoRechazadoException.java
+│   │       └── ReservaExpiradaException.java
 │   └── repository/
 │       ├── TicketRepositoryPort.java
 │       ├── VentaRepositoryPort.java
-│       ├── PasarelaPagoPort.java           # Puerto hacia pasarela externa — interfaz pura
-│       └── NotificacionEmailPort.java      # Puerto hacia servicio de email — interfaz pura
+│       ├── PasarelaPagoPort.java
+│       └── NotificacionEmailPort.java
 │
 ├── application/
-│   ├── ReservarAsientosUseCase.java
-│   ├── ProcesarPagoUseCase.java
-│   ├── LiberarReservaUseCase.java
-│   └── ConsultarVentaUseCase.java
+│   └── checkout/
+│       ├── ReservarAsientosUseCase.java
+│       ├── ProcesarPagoUseCase.java
+│       ├── LiberarReservaUseCase.java
+│       └── ConsultarVentaUseCase.java
 │
 └── infrastructure/
     ├── adapter/
     │   ├── in/rest/
     │   │   ├── CheckoutController.java
     │   │   └── dto/
-    │   │       ├── ReservarAsientosRequest.java
-    │   │       ├── ProcesarPagoRequest.java
-    │   │       ├── VentaResponse.java
-    │   │       └── TicketResponse.java
+    │   │       └── checkout/
     │   └── out/
     │       ├── persistence/
-    │       │   ├── TicketEntity.java
-    │       │   ├── VentaEntity.java
-    │       │   ├── TransaccionFinancieraEntity.java
-    │       │   ├── TicketR2dbcRepository.java
-    │       │   ├── VentaR2dbcRepository.java
-    │       │   ├── TicketRepositoryAdapter.java
-    │       │   ├── VentaRepositoryAdapter.java
-    │       │   └── mapper/
-    │       │       ├── TicketPersistenceMapper.java
-    │       │       └── VentaPersistenceMapper.java
+    │       │   └── checkout/
     │       ├── payment/
-    │       │   └── PasarelaPagoAdapter.java    # Implementa PasarelaPagoPort
-    │       └── email/
-    │           └── EmailNotificacionAdapter.java # Implementa NotificacionEmailPort
+    │       ├── email/
+    │       └── qr/
     └── config/
         └── BeanConfiguration.java             # Actualizar con los nuevos beans
 
-tests/
+src/test/java/com/ticketseller/
 ├── domain/
 │   └── VentaTest.java
 ├── application/
-│   ├── ReservarAsientosUseCaseTest.java
-│   ├── ProcesarPagoUseCaseTest.java
-│   └── LiberarReservaUseCaseTest.java
+│   └── checkout/
 └── infrastructure/
     ├── adapter/in/rest/
     │   └── CheckoutControllerTest.java
     ├── adapter/out/persistence/
-    │   └── TicketRepositoryAdapterTest.java
+    │   └── checkout/
     └── adapter/out/payment/
         └── PasarelaPagoAdapterTest.java
 ```

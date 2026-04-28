@@ -1,14 +1,14 @@
 package com.ticketseller.infrastructure.adapter.in.rest;
 
-import com.ticketseller.application.CambiarEstadoAsientoUseCase;
-import com.ticketseller.application.CambiarEstadoMasivoUseCase;
-import com.ticketseller.application.ConsultarHistorialAsientoUseCase;
-import com.ticketseller.domain.model.Asiento;
-import com.ticketseller.infrastructure.adapter.in.rest.dto.AsientoResponse;
-import com.ticketseller.infrastructure.adapter.in.rest.dto.CambiarEstadoMasivoRequest;
-import com.ticketseller.infrastructure.adapter.in.rest.dto.CambiarEstadoMasivoResponse;
-import com.ticketseller.infrastructure.adapter.in.rest.dto.CambiarEstadoRequest;
-import com.ticketseller.infrastructure.adapter.in.rest.dto.HistorialCambioResponse;
+import com.ticketseller.application.asiento.CambiarEstadoAsientoUseCase;
+import com.ticketseller.application.asiento.CambiarEstadoMasivoUseCase;
+import com.ticketseller.application.asiento.ConsultarHistorialAsientoUseCase;
+import com.ticketseller.infrastructure.adapter.in.rest.dto.asiento.AsientoResponse;
+import com.ticketseller.infrastructure.adapter.in.rest.dto.asiento.CambiarEstadoMasivoRequest;
+import com.ticketseller.infrastructure.adapter.in.rest.dto.asiento.CambiarEstadoMasivoResponse;
+import com.ticketseller.infrastructure.adapter.in.rest.dto.asiento.CambiarEstadoRequest;
+import com.ticketseller.infrastructure.adapter.in.rest.dto.asiento.HistorialCambioResponse;
+import com.ticketseller.infrastructure.adapter.in.rest.mapper.AsientoRestMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -31,6 +31,7 @@ public class AsientoMantenimientoController {
     private final CambiarEstadoAsientoUseCase cambiarEstadoAsientoUseCase;
     private final CambiarEstadoMasivoUseCase cambiarEstadoMasivoUseCase;
     private final ConsultarHistorialAsientoUseCase consultarHistorialAsientoUseCase;
+    private final AsientoRestMapper asientoRestMapper;
 
     @Operation(summary = "Cambiar el estado de un asiento individual")
     @ApiResponses(value = {
@@ -49,7 +50,7 @@ public class AsientoMantenimientoController {
         String usuarioId = "user-123";
 
         return cambiarEstadoAsientoUseCase.ejecutar(eventoId, asientoId, request.estadoDestino(), request.motivo(), usuarioId)
-                .map(this::toResponse)
+                .map(asientoRestMapper::toAsientoResponse)
                 .map(ResponseEntity::ok);
     }
 
@@ -77,23 +78,6 @@ public class AsientoMantenimientoController {
             @PathVariable UUID asientoId) {
         
         return consultarHistorialAsientoUseCase.ejecutar(eventoId, asientoId)
-                .map(h -> new HistorialCambioResponse(
-                        h.getFechaHora(),
-                        h.getUsuarioId(),
-                        h.getEstadoAnterior(),
-                        h.getEstadoNuevo(),
-                        h.getMotivo()
-                ));
-    }
-
-    private AsientoResponse toResponse(Asiento asiento) {
-        return new AsientoResponse(
-                asiento.getId(),
-                asiento.getFila(),
-                asiento.getColumna(),
-                asiento.getNumero(),
-                asiento.getZonaId(),
-                asiento.getEstado()
-        );
+                .map(asientoRestMapper::toHistorialResponse);
     }
 }

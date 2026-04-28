@@ -3,13 +3,15 @@ package com.ticketseller.infrastructure.adapter.in.rest.mapper;
 import com.ticketseller.application.checkout.ProcesarPagoCommand;
 import com.ticketseller.application.checkout.ReservarAsientosCommand;
 import com.ticketseller.application.checkout.VentaDetalle;
-import com.ticketseller.domain.model.Ticket;
-import com.ticketseller.domain.model.Venta;
+import com.ticketseller.domain.model.ticket.Ticket;
+import com.ticketseller.domain.model.venta.Venta;
 import com.ticketseller.infrastructure.adapter.in.rest.dto.checkout.ProcesarPagoRequest;
 import com.ticketseller.infrastructure.adapter.in.rest.dto.checkout.ReservarAsientosRequest;
+import com.ticketseller.infrastructure.adapter.in.rest.dto.checkout.TicketEstadoResponse;
 import com.ticketseller.infrastructure.adapter.in.rest.dto.checkout.TicketResponse;
 import com.ticketseller.infrastructure.adapter.in.rest.dto.checkout.VentaResponse;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
 import java.util.List;
 
@@ -21,6 +23,9 @@ public interface CheckoutRestMapper {
     ProcesarPagoCommand toCommand(ProcesarPagoRequest request);
 
     TicketResponse toTicketResponse(Ticket ticket);
+
+    @Mapping(source = "id", target = "ticketId")
+    TicketEstadoResponse toEstadoResponse(Ticket ticket);
 
     VentaResponse toVentaResponse(Venta venta, List<TicketResponse> tickets);
 

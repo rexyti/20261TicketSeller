@@ -58,58 +58,47 @@ src/main/java/com/ticketseller/
 │
 ├── domain/
 │   ├── model/
-│   │   ├── Bloqueo.java
-│   │   └── Cortesia.java
+│   │   └── bloqueos/
+│   │       ├── Bloqueo.java
+│   │       └── Cortesia.java
 │   ├── exception/
-│   │   ├── AsientoYaBloqueadoException.java
-│   │   ├── AsientoOcupadoException.java
-│   │   └── BloqueoNoEncontradoException.java
+│   │   └── bloqueos/
+│   │       ├── AsientoYaBloqueadoException.java
+│   │       ├── AsientoOcupadoException.java
+│   │       └── BloqueoNoEncontradoException.java
 │   └── repository/
 │       ├── BloqueoRepositoryPort.java
 │       └── CortesiaRepositoryPort.java
 │
 ├── application/                                    # Casos de uso — uno por responsabilidad
-│   ├── BloquearAsientosUseCase.java
-│   ├── CrearCortesiaUseCase.java
-│   ├── GestionarBloqueoUseCase.java
-│   └── ConsultarPanelBloqueosUseCase.java
+│   └── bloqueos/
+│       ├── BloquearAsientosUseCase.java
+│       ├── CrearCortesiaUseCase.java
+│       ├── GestionarBloqueoUseCase.java
+│       └── ConsultarPanelBloqueosUseCase.java
 │
 └── infrastructure/
     ├── adapter/
     │   ├── in/rest/
-    │   │   ├── BloqueoController.java
-    │   │   ├── CortesiaController.java
-    │   │   └── dto/
-    │   │       ├── BloquearAsientosRequest.java
-    │   │       ├── BloqueoResponse.java
-    │   │       ├── EditarBloqueoRequest.java
-    │   │       ├── CrearCortesiaRequest.java
-    │   │       └── CortesiaResponse.java
+    │   │   └── bloqueos/
+    │   │       ├── BloqueoController.java
+    │   │       ├── CortesiaController.java
+    │   │       └── dto/
+    │   │           └── bloqueos/
     │   └── out/persistence/
-    │       ├── BloqueoEntity.java
-    │       ├── BloqueoR2dbcRepository.java
-    │       ├── BloqueoRepositoryAdapter.java
-    │       ├── CortesiaEntity.java
-    │       ├── CortesiaR2dbcRepository.java
-    │       ├── CortesiaRepositoryAdapter.java
-    │       └── mapper/
-    │           ├── BloqueoPersistenceMapper.java
-    │           └── CortesiaPersistenceMapper.java
+    │       └── bloqueos/
+    │           └── mapper/
     └── config/
         └── BeanConfiguration.java             # Actualizar con los nuevos beans
 
-tests/
+src/test/java/com/ticketseller/
 ├── application/
-│   ├── BloquearAsientosUseCaseTest.java
-│   ├── CrearCortesiaUseCaseTest.java
-│   └── GestionarBloqueoUseCaseTest.java
+│   └── bloqueos/
 └── infrastructure/
     ├── adapter/in/rest/
-    │   ├── BloqueoControllerTest.java
-    │   └── CortesiaControllerTest.java
+    │   └── bloqueos/
     └── adapter/out/persistence/
-        ├── BloqueoRepositoryAdapterTest.java
-        └── CortesiaRepositoryAdapterTest.java
+        └── bloqueos/
 ```
 
 **Structure Decision**: Feature de administración de inventario especial. `Bloqueo` y `Cortesia`

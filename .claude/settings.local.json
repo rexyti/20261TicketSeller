@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(./gradlew tasks *)",
-      "Bash(./gradlew test *)"
+      "Bash(./gradlew test *)",
+      "Bash(./gradlew compileJava --no-daemon)",
+      "Bash(./gradlew check *)"
     ]
   }
 }

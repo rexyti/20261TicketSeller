@@ -1,8 +1,8 @@
 package com.ticketseller.domain;
 
-import com.ticketseller.domain.exception.EventoEnProgresoException;
-import com.ticketseller.domain.model.EstadoEvento;
-import com.ticketseller.domain.model.Evento;
+import com.ticketseller.domain.exception.evento.EventoEnProgresoException;
+import com.ticketseller.domain.model.evento.EstadoEvento;
+import com.ticketseller.domain.model.evento.Evento;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;

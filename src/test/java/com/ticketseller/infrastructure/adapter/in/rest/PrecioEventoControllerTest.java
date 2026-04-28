@@ -2,8 +2,8 @@ package com.ticketseller.infrastructure.adapter.in.rest;
 
 import com.ticketseller.application.precios.ConfigurarPreciosUseCase;
 import com.ticketseller.application.precios.ListarPreciosUseCase;
-import com.ticketseller.domain.exception.ZonaSinPrecioException;
-import com.ticketseller.domain.model.PrecioZona;
+import com.ticketseller.domain.exception.zona.ZonaSinPrecioException;
+import com.ticketseller.domain.model.zona.PrecioZona;
 import com.ticketseller.infrastructure.adapter.in.rest.dto.evento.ConfigurarPreciosRequest;
 import com.ticketseller.infrastructure.adapter.in.rest.dto.evento.PrecioZonaRequest;
 import com.ticketseller.infrastructure.adapter.in.rest.dto.evento.PrecioZonaResponse;

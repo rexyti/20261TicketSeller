@@ -1,6 +1,6 @@
 package com.ticketseller.infrastructure.adapter.out.persistence.compuerta.mapper;
 
-import com.ticketseller.domain.model.Compuerta;
+import com.ticketseller.domain.model.zona.Compuerta;
 import com.ticketseller.infrastructure.adapter.out.persistence.compuerta.CompuertaEntity;
 import org.mapstruct.Mapper;
 

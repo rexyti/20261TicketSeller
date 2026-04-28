@@ -1,15 +1,16 @@
 package com.ticketseller.infrastructure.adapter.in.rest;
 
+import com.ticketseller.application.recinto.ConsultarEstructuraRecintoUseCase;
 import com.ticketseller.application.capacidad.ConfigurarCapacidadUseCase;
 import com.ticketseller.application.capacidad.ConfigurarCategoriaUseCase;
 import com.ticketseller.application.recinto.DesactivarRecintoUseCase;
 import com.ticketseller.application.recinto.EditarRecintoUseCase;
 import com.ticketseller.application.recinto.ListarRecintosFiltradosUseCase;
 import com.ticketseller.application.recinto.RegistrarRecintoUseCase;
-import com.ticketseller.domain.exception.RecintoDuplicadoException;
-import com.ticketseller.domain.exception.RecintoInvalidoException;
-import com.ticketseller.domain.exception.RecintoNotFoundException;
-import com.ticketseller.domain.model.Recinto;
+import com.ticketseller.domain.exception.recinto.RecintoDuplicadoException;
+import com.ticketseller.domain.exception.recinto.RecintoInvalidoException;
+import com.ticketseller.domain.exception.recinto.RecintoNotFoundException;
+import com.ticketseller.domain.model.recinto.Recinto;
 import com.ticketseller.domain.shared.Pagina;
 import com.ticketseller.infrastructure.adapter.in.rest.dto.recinto.CrearRecintoRequest;
 import com.ticketseller.infrastructure.adapter.in.rest.dto.recinto.RecintoResponse;
@@ -55,6 +56,9 @@ class RecintoControllerTest {
 
     @MockBean
     private ConfigurarCategoriaUseCase configurarCategoriaUseCase;
+
+    @MockBean
+    private ConsultarEstructuraRecintoUseCase consultarEstructuraRecintoUseCase;
 
     @MockBean
     private RecintoRestMapper recintoRestMapper;

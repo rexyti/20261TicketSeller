@@ -60,22 +60,22 @@ src/main/java/com/ticketseller/
     ├── adapter/
     │   └── in/rest/
     │       ├── TicketConsultaController.java              # Inyecta ConsultarEstadoTicketUseCase
-    │       ├── RecintoConsultaController.java             # Inyecta ConsultarEstructuraRecintoUseCase
+    │       ├── RecintoController.java                     # Expone GET /recintos/{id} para estructura
     │       └── dto/
-    │           ├── TicketEstadoResponse.java              # estado, categoria, bloque, coordenadaAcceso,
-    │           │                                          #   eventoId, fechaEvento
-    │           └── RecintoEstructuraResponse.java         # bloques, categorías por bloque, coordenadas
+    │           ├── checkout/
+    │           │   └── TicketEstadoResponse.java
+    │           └── recinto/
+    │               └── RecintoEstructuraResponse.java
     └── config/
         └── BeanConfiguration.java                        # Registrar los dos nuevos beans de use case
 
-tests/
+src/test/java/com/ticketseller/
 ├── application/
 │   ├── ConsultarEstadoTicketUseCaseTest.java
 │   └── ConsultarEstructuraRecintoUseCaseTest.java
 └── infrastructure/
     └── adapter/in/rest/
-        ├── TicketConsultaControllerTest.java              # WebTestClient
-        └── RecintoConsultaControllerTest.java            # WebTestClient
+        └── TicketConsultaControllerTest.java             # WebTestClient
 ```
 
 **Structure Decision**: Feature exclusivamente de lectura — no agrega nuevas entidades de

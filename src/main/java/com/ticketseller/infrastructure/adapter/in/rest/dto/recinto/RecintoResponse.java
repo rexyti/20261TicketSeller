@@ -1,6 +1,6 @@
 package com.ticketseller.infrastructure.adapter.in.rest.dto.recinto;
 
-import com.ticketseller.domain.model.CategoriaRecinto;
+import com.ticketseller.domain.model.recinto.CategoriaRecinto;
 
 import java.time.LocalDateTime;
 import java.util.UUID;

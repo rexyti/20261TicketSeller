@@ -22,20 +22,20 @@ import com.ticketseller.application.recinto.ListarRecintosFiltradosUseCase;
 import com.ticketseller.application.recinto.ListarRecintosUseCase;
 import com.ticketseller.application.recinto.RegistrarRecintoUseCase;
 import com.ticketseller.application.tipoasiento.AsignarTipoAsientoAZonaUseCase;
-import com.ticketseller.application.tipoasiento.CrearMapaAsientosUseCase;
+import com.ticketseller.application.asiento.CrearMapaAsientosUseCase;
 import com.ticketseller.application.tipoasiento.CrearTipoAsientoUseCase;
 import com.ticketseller.application.tipoasiento.DesactivarTipoAsientoUseCase;
 import com.ticketseller.application.tipoasiento.EditarTipoAsientoUseCase;
 import com.ticketseller.application.tipoasiento.ListarTiposAsientoUseCase;
-import com.ticketseller.application.tipoasiento.MarcarEspacioVacioUseCase;
+import com.ticketseller.application.asiento.MarcarEspacioVacioUseCase;
 import com.ticketseller.application.zona.CrearZonaUseCase;
 import com.ticketseller.application.zona.ListarZonasUseCase;
 import com.ticketseller.application.zona.ValidarZonasUseCase;
-import com.ticketseller.application.CambiarEstadoAsientoUseCase;
-import com.ticketseller.application.CambiarEstadoMasivoUseCase;
-import com.ticketseller.application.ConsultarHistorialAsientoUseCase;
-import com.ticketseller.application.ConsultarEstadoTicketUseCase;
-import com.ticketseller.application.ConsultarEstructuraRecintoUseCase;
+import com.ticketseller.application.asiento.CambiarEstadoAsientoUseCase;
+import com.ticketseller.application.asiento.CambiarEstadoMasivoUseCase;
+import com.ticketseller.application.asiento.ConsultarHistorialAsientoUseCase;
+import com.ticketseller.application.checkout.ConsultarEstadoTicketUseCase;
+import com.ticketseller.application.recinto.ConsultarEstructuraRecintoUseCase;
 import com.ticketseller.domain.repository.AsientoRepositoryPort;
 import com.ticketseller.domain.repository.CompuertaRepositoryPort;
 import com.ticketseller.domain.repository.MapaAsientosRepositoryPort;
@@ -50,26 +50,20 @@ import com.ticketseller.infrastructure.adapter.out.persistence.compuerta.Compuer
 import com.ticketseller.infrastructure.adapter.out.persistence.compuerta.mapper.CompuertaPersistenceMapper;
 import com.ticketseller.infrastructure.adapter.out.persistence.mapaasientos.MapaAsientosRepositoryAdapter;
 import com.ticketseller.domain.repository.CancelacionEventoRepositoryPort;
-import com.ticketseller.domain.repository.CompuertaRepositoryPort;
 import com.ticketseller.domain.repository.EventoRepositoryPort;
 import com.ticketseller.domain.repository.LiquidacionQueryPort;
 import com.ticketseller.domain.repository.PrecioZonaRepositoryPort;
-import com.ticketseller.domain.repository.RecintoRepositoryPort;
 import com.ticketseller.domain.repository.CodigoQrPort;
 import com.ticketseller.domain.repository.NotificacionEmailPort;
 import com.ticketseller.domain.repository.PasarelaPagoPort;
 import com.ticketseller.domain.repository.TicketRepositoryPort;
 import com.ticketseller.domain.repository.TransaccionFinancieraRepositoryPort;
 import com.ticketseller.domain.repository.VentaRepositoryPort;
-import com.ticketseller.domain.repository.ZonaRepositoryPort;
 import com.ticketseller.domain.repository.HistorialCambioEstadoRepositoryPort;
 import com.ticketseller.infrastructure.adapter.out.payment.WompiAdapter;
 import com.ticketseller.infrastructure.adapter.out.persistence.cancelacionevento.CancelacionEventoR2dbcRepository;
 import com.ticketseller.infrastructure.adapter.out.persistence.cancelacionevento.CancelacionEventoRepositoryAdapter;
 import com.ticketseller.infrastructure.adapter.out.persistence.cancelacionevento.mapper.CancelacionEventoPersistenceMapper;
-import com.ticketseller.infrastructure.adapter.out.persistence.compuerta.CompuertaR2dbcRepository;
-import com.ticketseller.infrastructure.adapter.out.persistence.compuerta.CompuertaRepositoryAdapter;
-import com.ticketseller.infrastructure.adapter.out.persistence.compuerta.mapper.CompuertaPersistenceMapper;
 import com.ticketseller.infrastructure.adapter.out.persistence.evento.EventoR2dbcRepository;
 import com.ticketseller.infrastructure.adapter.out.persistence.evento.EventoRepositoryAdapter;
 import com.ticketseller.infrastructure.adapter.out.persistence.evento.mapper.EventoPersistenceMapper;
@@ -95,9 +89,9 @@ import com.ticketseller.infrastructure.adapter.out.persistence.tipoasiento.mappe
 import com.ticketseller.infrastructure.adapter.out.persistence.zona.ZonaR2dbcRepository;
 import com.ticketseller.infrastructure.adapter.out.persistence.zona.ZonaRepositoryAdapter;
 import com.ticketseller.infrastructure.adapter.out.persistence.zona.mapper.ZonaPersistenceMapper;
-import com.ticketseller.infrastructure.adapter.out.persistence.HistorialCambioEstadoR2dbcRepository;
-import com.ticketseller.infrastructure.adapter.out.persistence.HistorialCambioEstadoRepositoryAdapter;
-import com.ticketseller.infrastructure.adapter.out.persistence.mapper.HistorialCambioEstadoPersistenceMapper;
+import com.ticketseller.infrastructure.adapter.out.persistence.historialestadoasiento.HistorialCambioEstadoR2dbcRepository;
+import com.ticketseller.infrastructure.adapter.out.persistence.historialestadoasiento.HistorialCambioEstadoRepositoryAdapter;
+import com.ticketseller.infrastructure.adapter.out.persistence.historialestadoasiento.mapper.HistorialCambioEstadoPersistenceMapper;
 import com.ticketseller.infrastructure.adapter.out.payment.PasarelaPagoAdapter;
 import com.ticketseller.infrastructure.adapter.out.email.EmailNotificacionAdapter;
 import com.ticketseller.infrastructure.adapter.out.qr.ZxingCodigoQrAdapter;
@@ -313,6 +307,7 @@ public class BeanConfiguration {
         return new MarcarEspacioVacioUseCase(asientoRepositoryPort);
     }
 
+    @Bean
     public RegistrarEventoUseCase registrarEventoUseCase(EventoRepositoryPort eventoRepositoryPort,
                                                          RecintoRepositoryPort recintoRepositoryPort) {
         return new RegistrarEventoUseCase(eventoRepositoryPort, recintoRepositoryPort);

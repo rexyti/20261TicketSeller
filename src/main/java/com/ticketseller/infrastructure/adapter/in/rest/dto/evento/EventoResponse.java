@@ -1,6 +1,6 @@
 package com.ticketseller.infrastructure.adapter.in.rest.dto.evento;
 
-import com.ticketseller.domain.model.EstadoEvento;
+import com.ticketseller.domain.model.evento.EstadoEvento;
 
 import java.time.LocalDateTime;
 import java.util.UUID;

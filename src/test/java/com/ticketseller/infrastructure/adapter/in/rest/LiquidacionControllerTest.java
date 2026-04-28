@@ -4,31 +4,33 @@ import com.ticketseller.application.liquidacion.ConfigurarModeloNegocioUseCase;
 import com.ticketseller.application.liquidacion.ConsultarModeloNegocioUseCase;
 import com.ticketseller.application.liquidacion.ConsultarRecaudoIncrementalUseCase;
 import com.ticketseller.application.liquidacion.ConsultarSnapshotUseCase;
-import com.ticketseller.domain.exception.EventoNoFinalizadoException;
-import com.ticketseller.domain.exception.EventoNotFoundException;
+import com.ticketseller.domain.exception.evento.EventoNoFinalizadoException;
+import com.ticketseller.domain.exception.evento.EventoNotFoundException;
 import com.ticketseller.domain.exception.LiquidacionNoConfiguradaException;
-import com.ticketseller.domain.exception.RecintoNotFoundException;
-import com.ticketseller.domain.model.CategoriaRecinto;
-import com.ticketseller.domain.model.ConfiguracionLiquidacion;
-import com.ticketseller.domain.model.ModeloNegocio;
-import com.ticketseller.domain.model.Recinto;
-import com.ticketseller.domain.model.SnapshotLiquidacion;
+import com.ticketseller.domain.exception.recinto.RecintoNotFoundException;
+import com.ticketseller.domain.model.recinto.CategoriaRecinto;
+import com.ticketseller.domain.model.recinto.ConfiguracionLiquidacion;
+import com.ticketseller.domain.model.recinto.ModeloNegocio;
+import com.ticketseller.domain.model.evento.SnapshotLiquidacion;
+import com.ticketseller.infrastructure.adapter.in.rest.dto.liquidacion.CondicionTicketResponse;
+import com.ticketseller.infrastructure.adapter.in.rest.dto.liquidacion.ModeloNegocioResponse;
+import com.ticketseller.infrastructure.adapter.in.rest.dto.liquidacion.RecaudoIncrementalResponse;
+import com.ticketseller.infrastructure.adapter.in.rest.dto.liquidacion.SnapshotLiquidacionResponse;
+import com.ticketseller.infrastructure.adapter.in.rest.mapper.LiquidacionRestMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
-import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @WebFluxTest(controllers = LiquidacionController.class)
@@ -50,6 +52,9 @@ class LiquidacionControllerTest {
     @MockBean
     private ConsultarRecaudoIncrementalUseCase consultarRecaudoIncrementalUseCase;
 
+    @MockBean
+    private LiquidacionRestMapper liquidacionRestMapper;
+
     // ======================== US2: Modelo de Negocio ========================
 
     @Test
@@ -60,8 +65,15 @@ class LiquidacionControllerTest {
                 .modeloNegocio(ModeloNegocio.TARIFA_PLANA)
                 .montoFijo(BigDecimal.valueOf(5000))
                 .build();
+        ModeloNegocioResponse response = new ModeloNegocioResponse(
+                recintoId,
+                ModeloNegocio.TARIFA_PLANA,
+                null,
+                BigDecimal.valueOf(5000)
+        );
 
         when(consultarModeloNegocioUseCase.ejecutar(recintoId)).thenReturn(Mono.just(config));
+        when(liquidacionRestMapper.toModeloNegocioResponse(config)).thenReturn(response);
 
         webTestClient.get()
                 .uri("/api/v1/recintos/{id}/modelo-negocio", recintoId)
@@ -80,8 +92,15 @@ class LiquidacionControllerTest {
                 .modeloNegocio(ModeloNegocio.REPARTO_INGRESOS)
                 .tipoRecinto(CategoriaRecinto.ESTADIO)
                 .build();
+        ModeloNegocioResponse response = new ModeloNegocioResponse(
+                recintoId,
+                ModeloNegocio.REPARTO_INGRESOS,
+                CategoriaRecinto.ESTADIO,
+                null
+        );
 
         when(consultarModeloNegocioUseCase.ejecutar(recintoId)).thenReturn(Mono.just(config));
+        when(liquidacionRestMapper.toModeloNegocioResponse(config)).thenReturn(response);
 
         webTestClient.get()
                 .uri("/api/v1/recintos/{id}/modelo-negocio", recintoId)
@@ -135,8 +154,18 @@ class LiquidacionControllerTest {
                 ))
                 .timestampGeneracion(LocalDateTime.now())
                 .build();
+        SnapshotLiquidacionResponse response = new SnapshotLiquidacionResponse(
+                eventoId,
+                List.of(
+                        new CondicionTicketResponse("VENDIDO_SIN_ASISTENCIA", 50, BigDecimal.valueOf(2500000)),
+                        new CondicionTicketResponse("CORTESIA", 10, BigDecimal.ZERO),
+                        new CondicionTicketResponse("CANCELADO", 5, BigDecimal.valueOf(250000))
+                ),
+                snapshot.getTimestampGeneracion()
+        );
 
         when(consultarSnapshotUseCase.ejecutar(eventoId)).thenReturn(Mono.just(snapshot));
+        when(liquidacionRestMapper.toSnapshotResponse(snapshot)).thenReturn(response);
 
         webTestClient.get()
                 .uri("/api/v1/eventos/{id}/snapshot", eventoId)
@@ -172,8 +201,14 @@ class LiquidacionControllerTest {
                 ))
                 .timestampGeneracion(LocalDateTime.now())
                 .build();
+        SnapshotLiquidacionResponse response = new SnapshotLiquidacionResponse(
+                eventoId,
+                List.of(new CondicionTicketResponse("VENDIDO_SIN_ASISTENCIA", 100, BigDecimal.valueOf(5000000))),
+                snapshot.getTimestampGeneracion()
+        );
 
         when(consultarSnapshotUseCase.ejecutar(eventoId)).thenReturn(Mono.just(snapshot));
+        when(liquidacionRestMapper.toSnapshotResponse(snapshot)).thenReturn(response);
 
         webTestClient.get()
                 .uri("/api/v1/eventos/{id}/snapshot", eventoId)
@@ -197,8 +232,17 @@ class LiquidacionControllerTest {
                 ))
                 .timestampGeneracion(LocalDateTime.now())
                 .build();
+        SnapshotLiquidacionResponse response = new SnapshotLiquidacionResponse(
+                eventoId,
+                List.of(
+                        new CondicionTicketResponse("VENDIDO_SIN_ASISTENCIA", 80, BigDecimal.valueOf(4000000)),
+                        new CondicionTicketResponse("CORTESIA", 20, BigDecimal.ZERO)
+                ),
+                snapshot.getTimestampGeneracion()
+        );
 
         when(consultarSnapshotUseCase.ejecutar(eventoId)).thenReturn(Mono.just(snapshot));
+        when(liquidacionRestMapper.toSnapshotResponse(snapshot)).thenReturn(response);
 
         webTestClient.get()
                 .uri("/api/v1/eventos/{id}/snapshot", eventoId)
@@ -232,8 +276,17 @@ class LiquidacionControllerTest {
                 "cancelaciones", BigDecimal.ZERO,
                 "recaudoNeto", BigDecimal.valueOf(1000000)
         );
+        RecaudoIncrementalResponse response = new RecaudoIncrementalResponse(
+                eventoId,
+                BigDecimal.valueOf(1000000),
+                BigDecimal.ZERO,
+                BigDecimal.ZERO,
+                BigDecimal.valueOf(1000000),
+                LocalDateTime.now()
+        );
 
         when(consultarRecaudoIncrementalUseCase.ejecutar(eventoId)).thenReturn(Mono.just(recaudo));
+        when(liquidacionRestMapper.toRecaudoResponse(eventoId, recaudo)).thenReturn(response);
 
         webTestClient.get()
                 .uri("/api/v1/eventos/{id}/recaudo", eventoId)
@@ -254,8 +307,17 @@ class LiquidacionControllerTest {
                 "cancelaciones", BigDecimal.valueOf(200000),
                 "recaudoNeto", BigDecimal.valueOf(800000)
         );
+        RecaudoIncrementalResponse response = new RecaudoIncrementalResponse(
+                eventoId,
+                BigDecimal.valueOf(1000000),
+                BigDecimal.ZERO,
+                BigDecimal.valueOf(200000),
+                BigDecimal.valueOf(800000),
+                LocalDateTime.now()
+        );
 
         when(consultarRecaudoIncrementalUseCase.ejecutar(eventoId)).thenReturn(Mono.just(recaudo));
+        when(liquidacionRestMapper.toRecaudoResponse(eventoId, recaudo)).thenReturn(response);
 
         webTestClient.get()
                 .uri("/api/v1/eventos/{id}/recaudo", eventoId)
@@ -275,8 +337,17 @@ class LiquidacionControllerTest {
                 "cancelaciones", BigDecimal.ZERO,
                 "recaudoNeto", BigDecimal.valueOf(1000000)
         );
+        RecaudoIncrementalResponse response = new RecaudoIncrementalResponse(
+                eventoId,
+                BigDecimal.valueOf(800000),
+                BigDecimal.valueOf(200000),
+                BigDecimal.ZERO,
+                BigDecimal.valueOf(1000000),
+                LocalDateTime.now()
+        );
 
         when(consultarRecaudoIncrementalUseCase.ejecutar(eventoId)).thenReturn(Mono.just(recaudo));
+        when(liquidacionRestMapper.toRecaudoResponse(eventoId, recaudo)).thenReturn(response);
 
         webTestClient.get()
                 .uri("/api/v1/eventos/{id}/recaudo", eventoId)

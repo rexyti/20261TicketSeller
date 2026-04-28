@@ -55,46 +55,47 @@ src/main/java/com/ticketseller/
 │
 ├── domain/
 │   ├── model/
-│   │   ├── SnapshotLiquidacion.java           # Value object con el consolidado del evento
-│   │   ├── ModeloNegocio.java                 # Enum: TARIFA_PLANA, REPARTO_INGRESOS
-│   │   └── ConfiguracionLiquidacion.java      # Modelo de negocio + parámetros del recinto
+│   │   ├── evento/
+│   │   │   └── SnapshotLiquidacion.java
+│   │   └── recinto/
+│   │       ├── ModeloNegocio.java
+│   │       └── ConfiguracionLiquidacion.java
 │   ├── exception/
-│   │   ├── EventoNoFinalizadoException.java
+│   │   ├── evento/
+│   │   │   └── EventoNoFinalizadoException.java
 │   │   └── LiquidacionNoConfiguradaException.java
 │   └── repository/
-│       └── LiquidacionQueryPort.java      # Puerto para queries de agregación
+│       └── LiquidacionQueryPort.java
 │
 ├── application/
-│   ├── ConsultarSnapshotUseCase.java
-│   ├── ConsultarModeloNegocioUseCase.java
-│   ├── ConfigurarModeloNegocioUseCase.java
-│   └── ConsultarRecaudoIncrementalUseCase.java
+│   └── liquidacion/
+│       ├── ConsultarSnapshotUseCase.java
+│       ├── ConsultarModeloNegocioUseCase.java
+│       ├── ConfigurarModeloNegocioUseCase.java
+│       └── ConsultarRecaudoIncrementalUseCase.java
 │
 └── infrastructure/
     ├── adapter/
     │   ├── in/rest/
     │   │   ├── LiquidacionController.java
-    │   │   └── dto/
-    │   │       ├── SnapshotLiquidacionResponse.java
-    │   │       ├── CondicionTicketResponse.java
-    │   │       ├── ModeloNegocioResponse.java
-    │   │       ├── ConfigurarModeloNegocioRequest.java
-    │   │       └── RecaudoIncrementalResponse.java
+    │   │   ├── dto/
+    │   │   │   └── liquidacion/
+    │   │   └── mapper/
+    │   │       └── LiquidacionRestMapper.java
     │   └── out/persistence/
-    │       └── LiquidacionQueryAdapter.java   # Queries de agregación con R2DBC DatabaseClient
+    │       └── liquidacion/
+    │           └── LiquidacionQueryAdapter.java
     └── config/
-        └── BeanConfiguration.java             # Actualizar con los nuevos beans
+        └── BeanConfiguration.java
 
-tests/
+src/test/java/com/ticketseller/
 ├── application/
-│   ├── ConsultarSnapshotUseCaseTest.java
-│   ├── ConsultarModeloNegocioUseCaseTest.java
-│   └── ConsultarRecaudoIncrementalUseCaseTest.java
+│   └── liquidacion/
 └── infrastructure/
     ├── adapter/in/rest/
     │   └── LiquidacionControllerTest.java
     └── adapter/out/persistence/
-        └── LiquidacionQueryAdapterTest.java
+        └── liquidacion/
 ```
 
 **Structure Decision**: Feature exclusivamente de lectura con una excepción: `ConfigurarModeloNegocioUseCase`

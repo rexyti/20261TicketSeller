@@ -1,8 +1,8 @@
 package com.ticketseller.infrastructure.adapter.out.persistence.recinto.mapper;
 
-import com.ticketseller.domain.model.CategoriaRecinto;
-import com.ticketseller.domain.model.ModeloNegocio;
-import com.ticketseller.domain.model.Recinto;
+import com.ticketseller.domain.model.recinto.CategoriaRecinto;
+import com.ticketseller.domain.model.recinto.ModeloNegocio;
+import com.ticketseller.domain.model.recinto.Recinto;
 import com.ticketseller.infrastructure.adapter.out.persistence.recinto.RecintoEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

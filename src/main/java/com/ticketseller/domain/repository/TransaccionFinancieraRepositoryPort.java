@@ -1,6 +1,6 @@
 package com.ticketseller.domain.repository;
 
-import com.ticketseller.domain.model.TransaccionFinanciera;
+import com.ticketseller.domain.model.venta.TransaccionFinanciera;
 import reactor.core.publisher.Mono;
 
 public interface TransaccionFinancieraRepositoryPort {

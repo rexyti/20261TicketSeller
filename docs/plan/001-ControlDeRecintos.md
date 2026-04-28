@@ -59,22 +59,26 @@ plan/
 src/main/java/com/ticketseller/
 ├── domain/
 │   ├── model/
-│   │   ├── Recinto.java
-│   │   ├── Zona.java
-│   │   ├── Compuerta.java
-│   │   └── CategoriaRecinto.java
+│   │   ├── recinto/
+│   │   │   ├── Recinto.java
+│   │   │   └── CategoriaRecinto.java
+│   │   └── zona/
+│   │       ├── Zona.java
+│   │       └── Compuerta.java
 │   ├── exception/
 │   │   ├── CapacidadInvalidaException.java
 │   │   ├── CompuertaInvalidaException.java
-│   │   ├── RecintoConEventosException.java
-│   │   ├── RecintoDuplicadoException.java
-│   │   ├── RecintoInvalidoException.java
-│   │   ├── RecintoNotFoundException.java
-│   │   ├── ZonaCapacidadExcedidaException.java
-│   │   ├── ZonaConTicketsVendidosException.java
-│   │   ├── ZonaInvalidaException.java
-│   │   ├── ZonaNombreDuplicadoException.java
-│   │   └── ZonaNotFoundException.java
+│   │   ├── recinto/
+│   │   │   ├── RecintoConEventosException.java
+│   │   │   ├── RecintoDuplicadoException.java
+│   │   │   ├── RecintoInvalidoException.java
+│   │   │   └── RecintoNotFoundException.java
+│   │   └── zona/
+│   │       ├── ZonaCapacidadExcedidaException.java
+│   │       ├── ZonaConTicketsVendidosException.java
+│   │       ├── ZonaInvalidaException.java
+│   │       ├── ZonaNombreDuplicadoException.java
+│   │       └── ZonaNotFoundException.java
 │   ├── repository/
 │   │   ├── RecintoRepositoryPort.java
 │   │   ├── ZonaRepositoryPort.java
@@ -105,8 +109,10 @@ src/main/java/com/ticketseller/
     │   ├── ZonaController.java
     │   ├── CompuertaController.java
     │   ├── GlobalExceptionHandler.java
-    │   ├── dto/
-    │   └── mapper/
+    │   └── dto/
+    │       ├── recinto/
+    │       ├── zona/
+    │       └── compuerta/
     ├── adapter/out/persistence/
     │   ├── recinto/
     │   ├── zona/
@@ -114,7 +120,7 @@ src/main/java/com/ticketseller/
     └── config/
         └── BeanConfiguration.java                  # Inyección de dependencias hexagonal
 
-tests/
+src/test/java/com/ticketseller/
 ├── domain/
 │   ├── RecintoTest.java
 │   ├── ZonaTest.java

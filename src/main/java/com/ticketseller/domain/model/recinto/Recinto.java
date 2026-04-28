@@ -1,0 +1,70 @@
+package com.ticketseller.domain.model.recinto;
+
+import com.ticketseller.domain.exception.recinto.RecintoInvalidoException;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.UUID;
+
+@Data
+@Builder(toBuilder = true)
+@NoArgsConstructor
+@AllArgsConstructor
+public class Recinto {
+    private UUID id;
+    private String nombre;
+    private String ciudad;
+    private String direccion;
+    private Integer capacidadMaxima;
+    private String telefono;
+    private LocalDateTime fechaCreacion;
+    private Integer compuertasIngreso;
+    private boolean activo;
+    private CategoriaRecinto categoria;
+    private ModeloNegocio modeloNegocio;
+    private BigDecimal montoFijo;
+
+    public void desactivar(){
+        if (activo)
+            activo = false;
+    }
+
+    public Recinto normalizarDatosRegistro() {
+        return this.toBuilder()
+                .nombre(trimOrNull(nombre))
+                .ciudad(trimOrNull(ciudad))
+                .direccion(trimOrNull(direccion))
+                .telefono(trimOrNull(telefono))
+                .build();
+    }
+
+    public void validarDatosRegistro() {
+        validarTextoObligatorio(nombre, "nombre");
+        validarTextoObligatorio(ciudad, "ciudad");
+        validarTextoObligatorio(direccion, "direccion");
+        validarTextoObligatorio(telefono, "telefono");
+        validarPositivo(capacidadMaxima, "capacidadMaxima");
+        validarPositivo(compuertasIngreso, "compuertasIngreso");
+    }
+
+    private void validarTextoObligatorio(String valor, String campo) {
+        if (valor == null || valor.isBlank()) {
+            throw new RecintoInvalidoException("El campo %s es obligatorio".formatted(campo));
+        }
+    }
+
+    private void validarPositivo(Integer valor, String campo) {
+        if (valor == null || valor < 1) {
+            throw new RecintoInvalidoException("El campo %s debe ser mayor a cero".formatted(campo));
+        }
+    }
+
+    private String trimOrNull(String valor) {
+        return valor == null ? null : valor.trim();
+    }
+}
+

@@ -1,6 +1,6 @@
 package com.ticketseller.infrastructure.adapter.in.rest.mapper;
 
-import com.ticketseller.domain.model.Evento;
+import com.ticketseller.domain.model.evento.Evento;
 import com.ticketseller.infrastructure.adapter.in.rest.dto.evento.CrearEventoRequest;
 import com.ticketseller.infrastructure.adapter.in.rest.dto.evento.EditarEventoRequest;
 import com.ticketseller.infrastructure.adapter.in.rest.dto.evento.EventoResponse;

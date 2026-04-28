@@ -1,7 +1,7 @@
 package com.ticketseller.application.precios;
 
-import com.ticketseller.domain.exception.EventoNotFoundException;
-import com.ticketseller.domain.model.PrecioZona;
+import com.ticketseller.domain.exception.evento.EventoNotFoundException;
+import com.ticketseller.domain.model.zona.PrecioZona;
 import com.ticketseller.domain.repository.EventoRepositoryPort;
 import com.ticketseller.domain.repository.PrecioZonaRepositoryPort;
 import lombok.RequiredArgsConstructor;

@@ -1,6 +1,6 @@
 package com.ticketseller.infrastructure.adapter.out.payment;
 
-import com.ticketseller.domain.model.ResultadoPago;
+import com.ticketseller.domain.model.venta.ResultadoPago;
 import com.ticketseller.domain.repository.PasarelaPagoPort;
 import reactor.core.publisher.Mono;
 

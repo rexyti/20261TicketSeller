@@ -1,11 +1,11 @@
 package com.ticketseller.application.tipoasiento;
 
-import com.ticketseller.domain.exception.TipoAsientoInactivoException;
-import com.ticketseller.domain.exception.TipoAsientoNotFoundException;
-import com.ticketseller.domain.exception.ZonaNotFoundException;
-import com.ticketseller.domain.model.EstadoTipoAsiento;
-import com.ticketseller.domain.model.TipoAsiento;
-import com.ticketseller.domain.model.Zona;
+import com.ticketseller.domain.exception.asiento.TipoAsientoInactivoException;
+import com.ticketseller.domain.exception.asiento.TipoAsientoNotFoundException;
+import com.ticketseller.domain.exception.zona.ZonaNotFoundException;
+import com.ticketseller.domain.model.asiento.EstadoTipoAsiento;
+import com.ticketseller.domain.model.asiento.TipoAsiento;
+import com.ticketseller.domain.model.zona.Zona;
 import com.ticketseller.domain.repository.TipoAsientoRepositoryPort;
 import com.ticketseller.domain.repository.ZonaRepositoryPort;
 import lombok.RequiredArgsConstructor;

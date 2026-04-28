@@ -1,9 +1,10 @@
 package com.ticketseller.application;
 
-import com.ticketseller.domain.exception.TransicionEstadoInvalidaException;
-import com.ticketseller.domain.model.Asiento;
-import com.ticketseller.domain.model.EstadoAsiento;
-import com.ticketseller.domain.model.HistorialCambioEstado;
+import com.ticketseller.application.asiento.CambiarEstadoAsientoUseCase;
+import com.ticketseller.domain.exception.asiento.TransicionEstadoInvalidaException;
+import com.ticketseller.domain.model.asiento.Asiento;
+import com.ticketseller.domain.model.asiento.EstadoAsiento;
+import com.ticketseller.domain.model.asiento.HistorialCambioEstado;
 import com.ticketseller.domain.repository.AsientoRepositoryPort;
 import com.ticketseller.domain.repository.HistorialCambioEstadoRepositoryPort;
 import org.junit.jupiter.api.BeforeEach;

@@ -1,11 +1,11 @@
 package com.ticketseller.application.evento;
 
 import com.ticketseller.application.precios.ConfigurarPreciosUseCase;
-import com.ticketseller.domain.exception.EventoNotFoundException;
-import com.ticketseller.domain.exception.ZonaSinPrecioException;
-import com.ticketseller.domain.model.Evento;
-import com.ticketseller.domain.model.PrecioZona;
-import com.ticketseller.domain.model.Zona;
+import com.ticketseller.domain.exception.evento.EventoNotFoundException;
+import com.ticketseller.domain.exception.zona.ZonaSinPrecioException;
+import com.ticketseller.domain.model.evento.Evento;
+import com.ticketseller.domain.model.zona.PrecioZona;
+import com.ticketseller.domain.model.zona.Zona;
 import com.ticketseller.domain.repository.EventoRepositoryPort;
 import com.ticketseller.domain.repository.PrecioZonaRepositoryPort;
 import com.ticketseller.domain.repository.ZonaRepositoryPort;

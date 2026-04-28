@@ -1,9 +1,9 @@
 package com.ticketseller.application.compuerta;
 
-import com.ticketseller.domain.exception.RecintoNotFoundException;
-import com.ticketseller.domain.exception.ZonaCapacidadExcedidaException;
+import com.ticketseller.domain.exception.recinto.RecintoNotFoundException;
+import com.ticketseller.domain.exception.zona.ZonaCapacidadExcedidaException;
 import com.ticketseller.domain.exception.CompuertaInvalidaException;
-import com.ticketseller.domain.model.Compuerta;
+import com.ticketseller.domain.model.zona.Compuerta;
 import com.ticketseller.domain.repository.CompuertaRepositoryPort;
 import com.ticketseller.domain.repository.RecintoRepositoryPort;
 import com.ticketseller.domain.repository.ZonaRepositoryPort;

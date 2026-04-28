@@ -1,6 +1,6 @@
 package com.ticketseller.infrastructure.adapter.out.persistence.cancelacionevento;
 
-import com.ticketseller.domain.model.CancelacionEvento;
+import com.ticketseller.domain.model.evento.CancelacionEvento;
 import com.ticketseller.domain.repository.CancelacionEventoRepositoryPort;
 import com.ticketseller.infrastructure.adapter.out.persistence.cancelacionevento.mapper.CancelacionEventoPersistenceMapper;
 import lombok.RequiredArgsConstructor;
