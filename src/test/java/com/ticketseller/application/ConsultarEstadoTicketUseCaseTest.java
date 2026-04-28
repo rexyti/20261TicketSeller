@@ -46,12 +46,12 @@ class ConsultarEstadoTicketUseCaseTest {
         when(ticketRepositoryPort.findById(ticketId)).thenReturn(Mono.just(ticket));
 
         StepVerifier.create(useCase.ejecutar(ticketId))
-                .expectNextMatches(response -> 
-                        response.ticketId().equals(ticketId) &&
-                        response.estado().equals(EstadoTicket.VENDIDO) &&
-                        response.categoria().equals("VIP") &&
-                        response.bloque().equals("A") &&
-                        response.coordenadaAcceso().equals("Norte")
+                .expectNextMatches(response ->
+                        response.getId().equals(ticketId)
+                                && response.getEstado().equals(EstadoTicket.VENDIDO)
+                                && response.getCategoria().equals("VIP")
+                                && response.getBloque().equals("A")
+                                && response.getCoordenadaAcceso().equals("Norte")
                 )
                 .verifyComplete();
     }

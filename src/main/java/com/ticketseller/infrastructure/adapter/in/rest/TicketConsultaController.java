@@ -1,7 +1,8 @@
 package com.ticketseller.infrastructure.adapter.in.rest;
 
 import com.ticketseller.application.ConsultarEstadoTicketUseCase;
-import com.ticketseller.infrastructure.adapter.in.rest.dto.TicketEstadoResponse;
+import com.ticketseller.infrastructure.adapter.in.rest.dto.checkout.TicketEstadoResponse;
+import com.ticketseller.infrastructure.adapter.in.rest.mapper.CheckoutRestMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -24,6 +25,7 @@ import java.util.UUID;
 public class TicketConsultaController {
 
     private final ConsultarEstadoTicketUseCase consultarEstadoTicketUseCase;
+    private final CheckoutRestMapper checkoutRestMapper;
 
     @Operation(summary = "Consultar estado del ticket", description = "Retorna el estado actual, zona, categoría y metadatos del ticket para validación de acceso.")
     @ApiResponse(responseCode = "200", description = "Estado del ticket recuperado exitosamente",
@@ -32,6 +34,7 @@ public class TicketConsultaController {
     @GetMapping("/{id}")
     public Mono<ResponseEntity<TicketEstadoResponse>> consultarEstado(@PathVariable UUID id) {
         return consultarEstadoTicketUseCase.ejecutar(id)
+                .map(checkoutRestMapper::toEstadoResponse)
                 .map(ResponseEntity::ok);
     }
 }

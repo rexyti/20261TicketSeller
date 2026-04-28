@@ -43,10 +43,10 @@ class ConsultarEstructuraRecintoUseCaseTest {
         when(zonaRepositoryPort.buscarPorRecintoId(recintoId)).thenReturn(Flux.just(zona));
 
         StepVerifier.create(useCase.ejecutar(recintoId))
-                .expectNextMatches(response -> 
-                        response.recintoId().equals(recintoId) &&
-                        response.bloques().size() == 1 &&
-                        response.bloques().get(0).nombre().equals("Zona A")
+                .expectNextMatches(tuple ->
+                        tuple.getT1().getId().equals(recintoId)
+                                && tuple.getT2().size() == 1
+                                && tuple.getT2().getFirst().getNombre().equals("Zona A")
                 )
                 .verifyComplete();
     }
