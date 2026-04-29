@@ -22,6 +22,12 @@ public interface TicketRepositoryPort {
 
     Flux<Ticket> buscarPorVenta(UUID ventaId);
 
+    Flux<Ticket> buscarPorVentaIds(Iterable<UUID> ventaIds);
+
+    Flux<Ticket> buscarPorEvento(UUID eventoId);
+
+    Flux<Ticket> buscarPorEventoYEstados(UUID eventoId, Set<EstadoTicket> estados);
+
     Mono<Long> contarPorEventoYZonaYEstados(UUID eventoId, UUID zonaId, Set<EstadoTicket> estados);
 
     Mono<Void> actualizarEstadoPorVenta(UUID ventaId, EstadoTicket estado);

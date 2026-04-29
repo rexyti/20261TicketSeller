@@ -16,6 +16,8 @@ public interface VentaRepositoryPort {
 
     Flux<Venta> buscarVentasExpiradas(LocalDateTime fechaCorte);
 
+    Flux<Venta> buscarPorCompradorId(UUID compradorId);
+
     Mono<Venta> actualizarEstado(UUID id, EstadoVenta estado);
 }
 

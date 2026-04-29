@@ -34,6 +34,11 @@ public class VentaRepositoryAdapter implements VentaRepositoryPort {
     }
 
     @Override
+    public Flux<Venta> buscarPorCompradorId(UUID compradorId) {
+        return repository.findByCompradorId(compradorId).map(mapper::toDomain);
+    }
+
+    @Override
     public Mono<Venta> actualizarEstado(UUID id, EstadoVenta estado) {
         return repository.findById(id)
                 .map(entity -> entity.toBuilder().estado(estado.name()).build())

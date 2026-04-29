@@ -22,5 +22,14 @@ public class PasarelaPagoAdapter implements PasarelaPagoPort {
         return Mono.just(new ResultadoPago(true, "APROBADO", "AUTH-" + ventaId.toString().substring(0, 8),
                 "Pago aprobado"));
     }
+
+    @Override
+    public Mono<ResultadoPago> procesarReembolso(UUID ventaId, BigDecimal monto, String metodoPago) {
+        if ("ERROR_PASARELA".equalsIgnoreCase(metodoPago)) {
+            return Mono.error(new IllegalStateException("Error temporal procesando el reembolso"));
+        }
+        return Mono.just(new ResultadoPago(true, "APROBADO", "REF-" + ventaId.toString().substring(0, 8),
+                "Reembolso aprobado"));
+    }
 }
 

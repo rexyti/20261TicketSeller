@@ -9,5 +9,7 @@ import java.util.UUID;
 public interface VentaR2dbcRepository extends ReactiveCrudRepository<VentaEntity, UUID> {
 
     Flux<VentaEntity> findByEstadoAndFechaExpiracionBefore(String estado, LocalDateTime fechaCorte);
+
+    Flux<VentaEntity> findByCompradorId(UUID compradorId);
 }
 
