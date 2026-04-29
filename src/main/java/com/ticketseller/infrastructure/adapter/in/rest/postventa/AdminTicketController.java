@@ -19,7 +19,7 @@ import reactor.core.publisher.Mono;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/admin/tickets")
+@RequestMapping("/api/v1/admin/tickets")
 @RequiredArgsConstructor
 @Tag(name = "Postventa - Admin Tickets", description = "Cambio manual de estado de tickets")
 public class AdminTicketController {

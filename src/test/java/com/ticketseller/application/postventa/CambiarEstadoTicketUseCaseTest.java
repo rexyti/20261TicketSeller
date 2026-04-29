@@ -8,6 +8,10 @@ import com.ticketseller.domain.repository.HistorialEstadoTicketRepositoryPort;
 import com.ticketseller.domain.repository.NotificacionEmailPort;
 import com.ticketseller.domain.repository.TicketRepositoryPort;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -15,61 +19,65 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 class CambiarEstadoTicketUseCaseTest {
+
+    @Mock
+    private TicketRepositoryPort ticketRepositoryPort;
+    @Mock
+    private HistorialEstadoTicketRepositoryPort historialEstadoTicketRepositoryPort;
+    @Mock
+    private NotificacionEmailPort notificacionEmailPort;
+    @InjectMocks
+    private CambiarEstadoTicketUseCase useCase;
 
     @Test
     void deberiaCambiarEstadoYGuardarHistorial() {
-        TicketRepositoryPort ticketRepositoryPort = mock(TicketRepositoryPort.class);
-        HistorialEstadoTicketRepositoryPort historialRepositoryPort = mock(HistorialEstadoTicketRepositoryPort.class);
-        NotificacionEmailPort notificacionEmailPort = mock(NotificacionEmailPort.class);
-        CambiarEstadoTicketUseCase useCase = new CambiarEstadoTicketUseCase(ticketRepositoryPort, historialRepositoryPort,
-                notificacionEmailPort);
-
         UUID ticketId = UUID.randomUUID();
-        Ticket ticket = Ticket.builder()
-                .id(ticketId)
-                .ventaId(UUID.randomUUID())
-                .eventoId(UUID.randomUUID())
-                .zonaId(UUID.randomUUID())
-                .estado(EstadoTicket.VENDIDO)
-                .precio(BigDecimal.TEN)
-                .build();
+        Ticket ticket = ticketVendido(ticketId);
 
         when(ticketRepositoryPort.buscarPorId(ticketId)).thenReturn(Mono.just(ticket));
-        when(ticketRepositoryPort.guardar(any(Ticket.class))).thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
-        when(historialRepositoryPort.guardar(any(HistorialEstadoTicket.class))).thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
-        when(notificacionEmailPort.enviarCancelacionTicket(any(), any())).thenReturn(Mono.empty());
+        when(ticketRepositoryPort.guardar(any(Ticket.class))).thenAnswer(i -> Mono.just(i.getArgument(0)));
+        when(historialEstadoTicketRepositoryPort.guardar(any(HistorialEstadoTicket.class))).thenAnswer(i -> Mono.just(i.getArgument(0)));
 
         StepVerifier.create(useCase.ejecutar(ticketId, EstadoTicket.CANCELADO, "Cliente solicitó devolución", UUID.randomUUID()))
-                .expectNextMatches(actualizado -> EstadoTicket.CANCELADO.equals(actualizado.getEstado()))
+                .expectNextMatches(t -> EstadoTicket.CANCELADO.equals(t.getEstado()))
                 .verifyComplete();
     }
 
     @Test
     void deberiaFallarConTransicionInvalida() {
-        TicketRepositoryPort ticketRepositoryPort = mock(TicketRepositoryPort.class);
-        HistorialEstadoTicketRepositoryPort historialRepositoryPort = mock(HistorialEstadoTicketRepositoryPort.class);
-        NotificacionEmailPort notificacionEmailPort = mock(NotificacionEmailPort.class);
-        CambiarEstadoTicketUseCase useCase = new CambiarEstadoTicketUseCase(ticketRepositoryPort, historialRepositoryPort,
-                notificacionEmailPort);
-
         UUID ticketId = UUID.randomUUID();
-        Ticket ticket = Ticket.builder()
-                .id(ticketId)
-                .ventaId(UUID.randomUUID())
-                .eventoId(UUID.randomUUID())
-                .zonaId(UUID.randomUUID())
-                .estado(EstadoTicket.REEMBOLSADO)
-                .precio(BigDecimal.TEN)
-                .build();
+        Ticket ticket = ticketReembolsado(ticketId);
+
         when(ticketRepositoryPort.buscarPorId(ticketId)).thenReturn(Mono.just(ticket));
 
         StepVerifier.create(useCase.ejecutar(ticketId, EstadoTicket.VENDIDO, "Revertir", UUID.randomUUID()))
                 .expectError(TransicionEstadoInvalidaException.class)
                 .verify();
     }
-}
 
+    private Ticket ticketVendido(UUID id) {
+        return Ticket.builder()
+                .id(id)
+                .ventaId(UUID.randomUUID())
+                .eventoId(UUID.randomUUID())
+                .zonaId(UUID.randomUUID())
+                .estado(EstadoTicket.VENDIDO)
+                .precio(BigDecimal.TEN)
+                .build();
+    }
+
+    private Ticket ticketReembolsado(UUID id) {
+        return Ticket.builder()
+                .id(id)
+                .ventaId(UUID.randomUUID())
+                .eventoId(UUID.randomUUID())
+                .zonaId(UUID.randomUUID())
+                .estado(EstadoTicket.REEMBOLSADO)
+                .precio(BigDecimal.TEN)
+                .build();
+    }
+}

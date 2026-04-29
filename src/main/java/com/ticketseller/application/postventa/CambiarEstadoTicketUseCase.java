@@ -1,6 +1,5 @@
 package com.ticketseller.application.postventa;
 
-import com.ticketseller.domain.exception.postventa.TransicionEstadoInvalidaException;
 import com.ticketseller.domain.exception.venta.TicketNotFoundException;
 import com.ticketseller.domain.model.postventa.HistorialEstadoTicket;
 import com.ticketseller.domain.model.ticket.EstadoTicket;
@@ -12,7 +11,6 @@ import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
-import java.util.Set;
 import java.util.UUID;
 
 @RequiredArgsConstructor
@@ -28,30 +26,13 @@ public class CambiarEstadoTicketUseCase {
         if (justificacion == null || justificacion.isBlank()) {
             return Mono.error(new IllegalArgumentException("justificacion es obligatoria"));
         }
+        String justificacionNormalizada = justificacion.trim();
         return ticketRepositoryPort.buscarPorId(ticketId)
                 .switchIfEmpty(Mono.error(new TicketNotFoundException("Ticket no encontrado: " + ticketId)))
-                .flatMap(ticket -> validarTransicion(ticket.getEstado(), nuevoEstado).thenReturn(ticket))
-                .flatMap(ticket -> persistirCambio(ticket, nuevoEstado, justificacion.trim(), agenteId));
-    }
-
-    private Mono<Void> validarTransicion(EstadoTicket actual, EstadoTicket destino) {
-        if (actual == destino) {
-            return Mono.error(new TransicionEstadoInvalidaException(actual, destino));
-        }
-        if (!estadoPermitido(actual).contains(destino)) {
-            return Mono.error(new TransicionEstadoInvalidaException(actual, destino));
-        }
-        return Mono.empty();
-    }
-
-    private Set<EstadoTicket> estadoPermitido(EstadoTicket actual) {
-        return switch (actual) {
-            case VENDIDO -> Set.of(EstadoTicket.CANCELADO, EstadoTicket.ANULADO, EstadoTicket.REEMBOLSO_PENDIENTE);
-            case CANCELADO -> Set.of(EstadoTicket.REEMBOLSO_PENDIENTE, EstadoTicket.REEMBOLSADO, EstadoTicket.ANULADO, EstadoTicket.VENDIDO);
-            case REEMBOLSO_PENDIENTE -> Set.of(EstadoTicket.REEMBOLSADO, EstadoTicket.ANULADO);
-            case ANULADO -> Set.of(EstadoTicket.VENDIDO);
-            default -> Set.of();
-        };
+                .flatMap(ticket -> {
+                    ticket.validarTransicionA(nuevoEstado);
+                    return persistirCambio(ticket, nuevoEstado, justificacionNormalizada, agenteId);
+                });
     }
 
     private Mono<Ticket> persistirCambio(Ticket ticket, EstadoTicket nuevoEstado, String justificacion, UUID agenteId) {
@@ -78,4 +59,3 @@ public class CambiarEstadoTicketUseCase {
         return notificacionEmailPort.enviarCancelacionTicket(ticket, justificacion);
     }
 }
-

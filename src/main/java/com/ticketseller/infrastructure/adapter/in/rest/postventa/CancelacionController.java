@@ -20,7 +20,7 @@ import reactor.core.publisher.Mono;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/tickets")
+@RequestMapping("/api/v1/tickets")
 @RequiredArgsConstructor
 @Tag(name = "Postventa - Cancelaciones", description = "Cancelación de tickets por comprador")
 public class CancelacionController {

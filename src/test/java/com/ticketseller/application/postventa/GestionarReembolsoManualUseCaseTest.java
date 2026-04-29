@@ -13,7 +13,12 @@ import com.ticketseller.domain.repository.PasarelaPagoPort;
 import com.ticketseller.domain.repository.ReembolsoRepositoryPort;
 import com.ticketseller.domain.repository.TicketRepositoryPort;
 import com.ticketseller.domain.repository.VentaRepositoryPort;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -22,31 +27,44 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 class GestionarReembolsoManualUseCaseTest {
 
-    @Test
-    void deberiaReembolsarManualTotal() {
-        TicketRepositoryPort ticketRepositoryPort = mock(TicketRepositoryPort.class);
-        ReembolsoRepositoryPort reembolsoRepositoryPort = mock(ReembolsoRepositoryPort.class);
-        PasarelaPagoPort pasarelaPagoPort = mock(PasarelaPagoPort.class);
-        NotificacionEmailPort notificacionEmailPort = mock(NotificacionEmailPort.class);
-        VentaRepositoryPort ventaRepositoryPort = mock(VentaRepositoryPort.class);
-        GestionarReembolsoManualUseCase useCase = new GestionarReembolsoManualUseCase(
-                ticketRepositoryPort, reembolsoRepositoryPort, pasarelaPagoPort, notificacionEmailPort, ventaRepositoryPort);
+    @Mock
+    private TicketRepositoryPort ticketRepositoryPort;
+    @Mock
+    private ReembolsoRepositoryPort reembolsoRepositoryPort;
+    @Mock
+    private PasarelaPagoPort pasarelaPagoPort;
+    @Mock
+    private NotificacionEmailPort notificacionEmailPort;
+    @Mock
+    private VentaRepositoryPort ventaRepositoryPort;
+    @InjectMocks
+    private GestionarReembolsoManualUseCase useCase;
 
-        UUID ticketId = UUID.randomUUID();
-        UUID ventaId = UUID.randomUUID();
-        Ticket ticket = Ticket.builder()
+    private UUID ticketId;
+    private Ticket ticket;
+
+    @BeforeEach
+    void setUp() {
+        ticketId = UUID.randomUUID();
+        ticket = Ticket.builder()
                 .id(ticketId)
-                .ventaId(ventaId)
+                .ventaId(UUID.randomUUID())
                 .eventoId(UUID.randomUUID())
                 .zonaId(UUID.randomUUID())
                 .estado(EstadoTicket.CANCELADO)
                 .precio(BigDecimal.valueOf(100))
                 .build();
+        when(ticketRepositoryPort.buscarPorId(ticketId)).thenReturn(Mono.just(ticket));
+    }
+
+    @Test
+    void deberiaReembolsarManualTotal() {
+        UUID ventaId = ticket.getVentaId();
         Venta venta = Venta.builder()
                 .id(ventaId)
                 .compradorId(UUID.randomUUID())
@@ -56,43 +74,23 @@ class GestionarReembolsoManualUseCaseTest {
                 .total(BigDecimal.valueOf(100))
                 .build();
 
-        when(ticketRepositoryPort.buscarPorId(ticketId)).thenReturn(Mono.just(ticket));
         when(reembolsoRepositoryPort.buscarPorTicketId(ticketId)).thenReturn(Mono.empty());
-        when(reembolsoRepositoryPort.guardar(any(Reembolso.class))).thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
+        when(reembolsoRepositoryPort.guardar(any(Reembolso.class))).thenAnswer(i -> Mono.just(i.getArgument(0)));
         when(pasarelaPagoPort.procesarReembolso(any(), any(), any()))
                 .thenReturn(Mono.just(new ResultadoPago(true, "APROBADO", "REF", "OK")));
-        when(ticketRepositoryPort.guardar(any(Ticket.class))).thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
+        when(ticketRepositoryPort.guardar(any(Ticket.class))).thenAnswer(i -> Mono.just(i.getArgument(0)));
         when(ventaRepositoryPort.buscarPorId(ventaId)).thenReturn(Mono.just(venta));
         when(notificacionEmailPort.enviarReembolsoCompletado(any(), any(), any(), any())).thenReturn(Mono.empty());
 
         StepVerifier.create(useCase.ejecutar(ticketId, TipoReembolso.TOTAL, null, UUID.randomUUID()))
-                .expectNextMatches(reembolso -> EstadoReembolso.COMPLETADO.equals(reembolso.getEstado()))
+                .expectNextMatches(r -> EstadoReembolso.COMPLETADO.equals(r.getEstado()))
                 .verifyComplete();
     }
 
     @Test
     void deberiaMarcarFalloSiPasarelaRechaza() {
-        TicketRepositoryPort ticketRepositoryPort = mock(TicketRepositoryPort.class);
-        ReembolsoRepositoryPort reembolsoRepositoryPort = mock(ReembolsoRepositoryPort.class);
-        PasarelaPagoPort pasarelaPagoPort = mock(PasarelaPagoPort.class);
-        NotificacionEmailPort notificacionEmailPort = mock(NotificacionEmailPort.class);
-        VentaRepositoryPort ventaRepositoryPort = mock(VentaRepositoryPort.class);
-        GestionarReembolsoManualUseCase useCase = new GestionarReembolsoManualUseCase(
-                ticketRepositoryPort, reembolsoRepositoryPort, pasarelaPagoPort, notificacionEmailPort, ventaRepositoryPort);
-
-        UUID ticketId = UUID.randomUUID();
-        Ticket ticket = Ticket.builder()
-                .id(ticketId)
-                .ventaId(UUID.randomUUID())
-                .eventoId(UUID.randomUUID())
-                .zonaId(UUID.randomUUID())
-                .estado(EstadoTicket.CANCELADO)
-                .precio(BigDecimal.valueOf(100))
-                .build();
-
-        when(ticketRepositoryPort.buscarPorId(ticketId)).thenReturn(Mono.just(ticket));
         when(reembolsoRepositoryPort.buscarPorTicketId(ticketId)).thenReturn(Mono.empty());
-        when(reembolsoRepositoryPort.guardar(any(Reembolso.class))).thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
+        when(reembolsoRepositoryPort.guardar(any(Reembolso.class))).thenAnswer(i -> Mono.just(i.getArgument(0)));
         when(pasarelaPagoPort.procesarReembolso(any(), any(), any()))
                 .thenReturn(Mono.just(new ResultadoPago(false, "RECHAZADO", null, "Error")));
         when(notificacionEmailPort.enviarAlertaSoporteReembolsoFallido(any(), any())).thenReturn(Mono.empty());
@@ -104,29 +102,8 @@ class GestionarReembolsoManualUseCaseTest {
 
     @Test
     void deberiaFallarSiMontoParcialEsMayorAlOriginal() {
-        TicketRepositoryPort ticketRepositoryPort = mock(TicketRepositoryPort.class);
-        ReembolsoRepositoryPort reembolsoRepositoryPort = mock(ReembolsoRepositoryPort.class);
-        PasarelaPagoPort pasarelaPagoPort = mock(PasarelaPagoPort.class);
-        NotificacionEmailPort notificacionEmailPort = mock(NotificacionEmailPort.class);
-        VentaRepositoryPort ventaRepositoryPort = mock(VentaRepositoryPort.class);
-        GestionarReembolsoManualUseCase useCase = new GestionarReembolsoManualUseCase(
-                ticketRepositoryPort, reembolsoRepositoryPort, pasarelaPagoPort, notificacionEmailPort, ventaRepositoryPort);
-
-        UUID ticketId = UUID.randomUUID();
-        Ticket ticket = Ticket.builder()
-                .id(ticketId)
-                .ventaId(UUID.randomUUID())
-                .eventoId(UUID.randomUUID())
-                .zonaId(UUID.randomUUID())
-                .estado(EstadoTicket.CANCELADO)
-                .precio(BigDecimal.valueOf(100))
-                .build();
-
-        when(ticketRepositoryPort.buscarPorId(ticketId)).thenReturn(Mono.just(ticket));
-
         StepVerifier.create(useCase.ejecutar(ticketId, TipoReembolso.PARCIAL, BigDecimal.valueOf(150), UUID.randomUUID()))
                 .expectError(IllegalArgumentException.class)
                 .verify();
     }
 }
-

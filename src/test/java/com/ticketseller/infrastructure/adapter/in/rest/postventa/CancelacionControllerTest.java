@@ -51,7 +51,7 @@ class CancelacionControllerTest {
         when(postVentaRestMapper.toCancelacionResponse(resultado)).thenReturn(response);
 
         webTestClient.post()
-                .uri("/api/tickets/{id}/cancelar", ticketId)
+                .uri("/api/v1/tickets/{id}/cancelar", ticketId)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
@@ -66,7 +66,7 @@ class CancelacionControllerTest {
                 .thenReturn(Mono.error(new TicketYaUsadoException("usado")));
 
         webTestClient.post()
-                .uri("/api/tickets/{id}/cancelar", ticketId)
+                .uri("/api/v1/tickets/{id}/cancelar", ticketId)
                 .exchange()
                 .expectStatus().isEqualTo(409);
     }
@@ -78,7 +78,7 @@ class CancelacionControllerTest {
                 .thenReturn(Mono.error(new CancelacionFueraDePlazoException("fuera de plazo")));
 
         webTestClient.post()
-                .uri("/api/tickets/{id}/cancelar", ticketId)
+                .uri("/api/v1/tickets/{id}/cancelar", ticketId)
                 .exchange()
                 .expectStatus().isEqualTo(422);
     }
@@ -95,7 +95,7 @@ class CancelacionControllerTest {
         when(postVentaRestMapper.toCancelacionResponse(resultado)).thenReturn(response);
 
         webTestClient.post()
-                .uri("/api/tickets/cancelar-parcial")
+                .uri("/api/v1/tickets/cancelar-parcial")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(request)
                 .exchange()
@@ -110,7 +110,7 @@ class CancelacionControllerTest {
         when(procesarReembolsoMasivoUseCase.ejecutar(eq(eventoId))).thenReturn(Mono.empty());
 
         webTestClient.post()
-                .uri("/api/tickets/eventos/{eventoId}/cancelar", eventoId)
+                .uri("/api/v1/tickets/eventos/{eventoId}/cancelar", eventoId)
                 .exchange()
                 .expectStatus().isOk();
     }

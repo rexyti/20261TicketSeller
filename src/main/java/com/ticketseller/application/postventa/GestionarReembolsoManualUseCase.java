@@ -1,6 +1,7 @@
 package com.ticketseller.application.postventa;
 
 import com.ticketseller.domain.exception.postventa.ReembolsoFallidoException;
+import com.ticketseller.domain.exception.postventa.TicketNoAptoParaReembolsoException;
 import com.ticketseller.domain.exception.venta.TicketNotFoundException;
 import com.ticketseller.domain.exception.venta.VentaNotFoundException;
 import com.ticketseller.domain.model.postventa.EstadoReembolso;
@@ -9,14 +10,12 @@ import com.ticketseller.domain.model.postventa.TipoReembolso;
 import com.ticketseller.domain.model.ticket.EstadoTicket;
 import com.ticketseller.domain.model.ticket.Ticket;
 import com.ticketseller.domain.model.venta.ResultadoPago;
-import com.ticketseller.domain.model.venta.Venta;
 import com.ticketseller.domain.repository.NotificacionEmailPort;
 import com.ticketseller.domain.repository.PasarelaPagoPort;
 import com.ticketseller.domain.repository.ReembolsoRepositoryPort;
 import com.ticketseller.domain.repository.TicketRepositoryPort;
 import com.ticketseller.domain.repository.VentaRepositoryPort;
 import lombok.RequiredArgsConstructor;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.math.BigDecimal;
@@ -51,7 +50,7 @@ public class GestionarReembolsoManualUseCase {
         if (EstadoTicket.CANCELADO.equals(ticket.getEstado()) || EstadoTicket.REEMBOLSO_PENDIENTE.equals(ticket.getEstado())) {
             return Mono.just(ticket);
         }
-        return Mono.error(new IllegalArgumentException("El ticket no está en estado válido para reembolso"));
+        return Mono.error(new TicketNoAptoParaReembolsoException("El ticket no está en estado válido para reembolso"));
     }
 
     private Mono<Reembolso> procesarReembolso(Ticket ticket, TipoReembolso tipo, BigDecimal monto, UUID agenteId) {

@@ -57,7 +57,7 @@ class MisComprasControllerTest {
         when(postVentaRestMapper.toTicketConReembolsoResponse(item)).thenReturn(response);
 
         webTestClient.get()
-                .uri("/api/compras/mis-compras")
+                .uri("/api/v1/compras/mis-compras")
                 .header("X-Comprador-Id", compradorId.toString())
                 .exchange()
                 .expectStatus().isOk()

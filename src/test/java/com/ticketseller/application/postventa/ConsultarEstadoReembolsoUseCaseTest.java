@@ -8,7 +8,12 @@ import com.ticketseller.domain.model.venta.Venta;
 import com.ticketseller.domain.repository.ReembolsoRepositoryPort;
 import com.ticketseller.domain.repository.TicketRepositoryPort;
 import com.ticketseller.domain.repository.VentaRepositoryPort;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -19,24 +24,33 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 class ConsultarEstadoReembolsoUseCaseTest {
 
-    @Test
-    void deberiaConsultarTicketsConEstadoDeReembolso() {
-        VentaRepositoryPort ventaRepositoryPort = mock(VentaRepositoryPort.class);
-        TicketRepositoryPort ticketRepositoryPort = mock(TicketRepositoryPort.class);
-        ReembolsoRepositoryPort reembolsoRepositoryPort = mock(ReembolsoRepositoryPort.class);
-        ConsultarEstadoReembolsoUseCase useCase = new ConsultarEstadoReembolsoUseCase(ventaRepositoryPort,
-                ticketRepositoryPort, reembolsoRepositoryPort);
+    @Mock
+    private VentaRepositoryPort ventaRepositoryPort;
+    @Mock
+    private TicketRepositoryPort ticketRepositoryPort;
+    @Mock
+    private ReembolsoRepositoryPort reembolsoRepositoryPort;
+    @InjectMocks
+    private ConsultarEstadoReembolsoUseCase useCase;
 
-        UUID compradorId = UUID.randomUUID();
-        UUID ventaId = UUID.randomUUID();
-        UUID ticketId = UUID.randomUUID();
+    private UUID compradorId;
+    private UUID ventaId;
+    private UUID ticketId;
+    private Venta venta;
+    private Ticket ticket;
+    private Reembolso reembolso;
 
-        Venta venta = Venta.builder()
+    @BeforeEach
+    void setUp() {
+        compradorId = UUID.randomUUID();
+        ventaId = UUID.randomUUID();
+        ticketId = UUID.randomUUID();
+        venta = Venta.builder()
                 .id(ventaId)
                 .compradorId(compradorId)
                 .eventoId(UUID.randomUUID())
@@ -44,7 +58,7 @@ class ConsultarEstadoReembolsoUseCaseTest {
                 .fechaExpiracion(LocalDateTime.now().plusDays(1))
                 .total(BigDecimal.TEN)
                 .build();
-        Ticket ticket = Ticket.builder()
+        ticket = Ticket.builder()
                 .id(ticketId)
                 .ventaId(ventaId)
                 .eventoId(UUID.randomUUID())
@@ -52,14 +66,17 @@ class ConsultarEstadoReembolsoUseCaseTest {
                 .estado(EstadoTicket.CANCELADO)
                 .precio(BigDecimal.TEN)
                 .build();
-        Reembolso reembolso = Reembolso.builder()
+        reembolso = Reembolso.builder()
                 .id(UUID.randomUUID())
                 .ticketId(ticketId)
                 .ventaId(ventaId)
                 .monto(BigDecimal.TEN)
                 .estado(EstadoReembolso.PENDIENTE)
                 .build();
+    }
 
+    @Test
+    void deberiaConsultarTicketsConEstadoDeReembolso() {
         when(ventaRepositoryPort.buscarPorCompradorId(compradorId)).thenReturn(Flux.just(venta));
         when(ticketRepositoryPort.buscarPorVentaIds(any())).thenReturn(Flux.fromIterable(List.of(ticket)));
         when(reembolsoRepositoryPort.buscarPorTicketId(ticketId)).thenReturn(Mono.just(reembolso));
@@ -69,4 +86,3 @@ class ConsultarEstadoReembolsoUseCaseTest {
                 .verifyComplete();
     }
 }
-

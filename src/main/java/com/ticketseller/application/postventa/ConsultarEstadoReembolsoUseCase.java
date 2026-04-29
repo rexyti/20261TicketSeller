@@ -1,6 +1,8 @@
 package com.ticketseller.application.postventa;
 
 import com.ticketseller.domain.model.ticket.EstadoTicket;
+import com.ticketseller.domain.model.ticket.Ticket;
+import com.ticketseller.domain.model.venta.Venta;
 import com.ticketseller.domain.repository.ReembolsoRepositoryPort;
 import com.ticketseller.domain.repository.TicketRepositoryPort;
 import com.ticketseller.domain.repository.VentaRepositoryPort;
@@ -19,17 +21,19 @@ public class ConsultarEstadoReembolsoUseCase {
 
     public Flux<TicketConReembolso> ejecutar(UUID compradorId) {
         return ventaRepositoryPort.buscarPorCompradorId(compradorId)
-                .map(venta -> venta.getId())
+                .map(Venta::getId)
                 .collectList()
                 .flatMapMany(ticketRepositoryPort::buscarPorVentaIds)
-                .filter(ticket -> Set.of(
-                        EstadoTicket.CANCELADO,
-                        EstadoTicket.REEMBOLSO_PENDIENTE,
-                        EstadoTicket.REEMBOLSADO
-                ).contains(ticket.getEstado()))
+                .filter(this::isTicketCanceladoOReembolsado)
                 .flatMap(ticket -> reembolsoRepositoryPort.buscarPorTicketId(ticket.getId())
                         .map(reembolso -> new TicketConReembolso(ticket, reembolso))
                         .switchIfEmpty(Mono.just(new TicketConReembolso(ticket, null))));
+    }
+
+    private boolean isTicketCanceladoOReembolsado(Ticket ticket){
+        var estadoActual = ticket.getEstado();
+        return EstadoTicket.CANCELADO.equals(estadoActual) || EstadoTicket.REEMBOLSADO.equals(estadoActual)
+                || EstadoTicket.REEMBOLSO_PENDIENTE.equals(estadoActual);
     }
 }
 

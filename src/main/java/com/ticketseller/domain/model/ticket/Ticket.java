@@ -1,5 +1,7 @@
 package com.ticketseller.domain.model.ticket;
 
+import com.ticketseller.domain.exception.postventa.TransicionEstadoInvalidaException;
+import com.ticketseller.domain.model.asiento.EstadoAsiento;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -27,6 +29,16 @@ public class Ticket {
     private String bloque;
     private String coordenadaAcceso;
     private java.time.LocalDateTime fechaEvento;
+
+    public void validarTransicionA(EstadoTicket destino) {
+        if (transicionInvalida(destino)) {
+            throw new TransicionEstadoInvalidaException(estado, destino);
+        }
+    }
+
+    private boolean transicionInvalida(EstadoTicket destino) {
+        return estado.equals(destino) || !estado.transicionesPermitidas().contains(destino);
+    }
 
     public Ticket normalizarDatosRegistro() {
         return toBuilder()

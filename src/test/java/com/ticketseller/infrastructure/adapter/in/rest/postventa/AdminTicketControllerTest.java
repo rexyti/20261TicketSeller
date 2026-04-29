@@ -46,7 +46,7 @@ class AdminTicketControllerTest {
         when(cambiarEstadoTicketUseCase.ejecutar(any(), any(), any(), any())).thenReturn(Mono.just(ticket));
 
         webTestClient.patch()
-                .uri("/api/admin/tickets/{id}/estado", ticketId)
+                .uri("/api/v1/admin/tickets/{id}/estado", ticketId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(request)
                 .exchange()
@@ -63,7 +63,7 @@ class AdminTicketControllerTest {
                 .thenReturn(Mono.error(new TransicionEstadoInvalidaException(EstadoTicket.REEMBOLSADO, EstadoTicket.VENDIDO)));
 
         webTestClient.patch()
-                .uri("/api/admin/tickets/{id}/estado", ticketId)
+                .uri("/api/v1/admin/tickets/{id}/estado", ticketId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(request)
                 .exchange()

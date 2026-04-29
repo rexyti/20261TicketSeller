@@ -32,6 +32,10 @@ public class Reembolso {
         validarObligatorio(tipo, "tipo");
         validarObligatorio(estado, "estado");
         validarObligatorio(fechaSolicitud, "fechaSolicitud");
+        validarMonto(monto);
+    }
+
+    private void validarMonto(BigDecimal monto){
         if (monto.compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("monto debe ser mayor a 0");
         }

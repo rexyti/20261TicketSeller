@@ -19,7 +19,7 @@ import reactor.core.publisher.Mono;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/admin")
+@RequestMapping("/api/v1/admin")
 @RequiredArgsConstructor
 @Tag(name = "Postventa - Admin Reembolsos", description = "Gestión manual y automática de reembolsos")
 public class AdminReembolsoController {

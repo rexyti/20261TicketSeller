@@ -52,7 +52,7 @@ class AdminReembolsoControllerTest {
         when(postVentaRestMapper.toReembolsoResponse(reembolso)).thenReturn(response);
 
         webTestClient.post()
-                .uri("/api/admin/tickets/{id}/reembolso", ticketId)
+                .uri("/api/v1/admin/tickets/{id}/reembolso", ticketId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(request)
                 .exchange()
@@ -77,7 +77,7 @@ class AdminReembolsoControllerTest {
         when(postVentaRestMapper.toReembolsoResponse(reembolso)).thenReturn(response);
 
         webTestClient.post()
-                .uri("/api/admin/tickets/{id}/reembolso", ticketId)
+                .uri("/api/v1/admin/tickets/{id}/reembolso", ticketId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(request)
                 .exchange()
@@ -89,7 +89,7 @@ class AdminReembolsoControllerTest {
         when(gestionarReembolsoManualUseCase.procesarColaPendiente()).thenReturn(Mono.empty());
 
         webTestClient.post()
-                .uri("/api/admin/reembolsos/procesar-cola")
+                .uri("/api/v1/admin/reembolsos/procesar-cola")
                 .exchange()
                 .expectStatus().isOk();
     }

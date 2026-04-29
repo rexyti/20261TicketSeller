@@ -15,7 +15,7 @@ import reactor.core.publisher.Flux;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/compras")
+@RequestMapping("/api/v1/compras")
 @RequiredArgsConstructor
 @Tag(name = "Postventa - Mis Compras", description = "Consulta del estado de reembolsos del comprador")
 public class MisComprasController {

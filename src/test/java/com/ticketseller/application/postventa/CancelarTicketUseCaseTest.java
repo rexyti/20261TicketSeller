@@ -10,6 +10,10 @@ import com.ticketseller.domain.repository.EventoRepositoryPort;
 import com.ticketseller.domain.repository.ReembolsoRepositoryPort;
 import com.ticketseller.domain.repository.TicketRepositoryPort;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -18,20 +22,24 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 class CancelarTicketUseCaseTest {
+
+    @Mock
+    private TicketRepositoryPort ticketRepositoryPort;
+    @Mock
+    private AsientoRepositoryPort asientoRepositoryPort;
+    @Mock
+    private EventoRepositoryPort eventoRepositoryPort;
+    @Mock
+    private ReembolsoRepositoryPort reembolsoRepositoryPort;
+    @InjectMocks
+    private CancelarTicketUseCase useCase;
 
     @Test
     void deberiaCancelarTicketYCrearReembolsoPendiente() {
-        TicketRepositoryPort ticketRepositoryPort = mock(TicketRepositoryPort.class);
-        AsientoRepositoryPort asientoRepositoryPort = mock(AsientoRepositoryPort.class);
-        EventoRepositoryPort eventoRepositoryPort = mock(EventoRepositoryPort.class);
-        ReembolsoRepositoryPort reembolsoRepositoryPort = mock(ReembolsoRepositoryPort.class);
-        CancelarTicketUseCase useCase = new CancelarTicketUseCase(ticketRepositoryPort, asientoRepositoryPort,
-                eventoRepositoryPort, reembolsoRepositoryPort);
-
         UUID ticketId = UUID.randomUUID();
         UUID eventoId = UUID.randomUUID();
         Ticket ticket = Ticket.builder()
@@ -46,8 +54,8 @@ class CancelarTicketUseCaseTest {
 
         when(ticketRepositoryPort.buscarPorId(ticketId)).thenReturn(Mono.just(ticket));
         when(eventoRepositoryPort.buscarPorId(eventoId)).thenReturn(Mono.just(evento));
-        when(ticketRepositoryPort.guardar(any(Ticket.class))).thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
-        when(reembolsoRepositoryPort.guardar(any(Reembolso.class))).thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
+        when(ticketRepositoryPort.guardar(any(Ticket.class))).thenAnswer(i -> Mono.just(i.getArgument(0)));
+        when(reembolsoRepositoryPort.guardar(any(Reembolso.class))).thenAnswer(i -> Mono.just(i.getArgument(0)));
 
         StepVerifier.create(useCase.cancelarTicket(ticketId))
                 .assertNext(resultado -> {
@@ -59,22 +67,16 @@ class CancelarTicketUseCaseTest {
 
     @Test
     void deberiaFallarSiTicketYaFueUsado() {
-        TicketRepositoryPort ticketRepositoryPort = mock(TicketRepositoryPort.class);
-        AsientoRepositoryPort asientoRepositoryPort = mock(AsientoRepositoryPort.class);
-        EventoRepositoryPort eventoRepositoryPort = mock(EventoRepositoryPort.class);
-        ReembolsoRepositoryPort reembolsoRepositoryPort = mock(ReembolsoRepositoryPort.class);
-        CancelarTicketUseCase useCase = new CancelarTicketUseCase(ticketRepositoryPort, asientoRepositoryPort,
-                eventoRepositoryPort, reembolsoRepositoryPort);
-
         UUID ticketId = UUID.randomUUID();
         Ticket ticket = Ticket.builder()
                 .id(ticketId)
-                .eventoId(UUID.randomUUID())
                 .ventaId(UUID.randomUUID())
+                .eventoId(UUID.randomUUID())
                 .zonaId(UUID.randomUUID())
                 .estado(EstadoTicket.USADO)
                 .precio(BigDecimal.TEN)
                 .build();
+
         when(ticketRepositoryPort.buscarPorId(ticketId)).thenReturn(Mono.just(ticket));
 
         StepVerifier.create(useCase.cancelarTicket(ticketId))
@@ -82,4 +84,3 @@ class CancelarTicketUseCaseTest {
                 .verify();
     }
 }
-
