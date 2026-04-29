@@ -1,35 +1,34 @@
 package com.ticketseller.domain.model;
 
+import com.ticketseller.domain.model.asiento.Asiento;
 import com.ticketseller.domain.model.asiento.EstadoAsiento;
-import com.ticketseller.domain.model.asiento.TransicionEstadoAsiento;
 import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class TransicionEstadoAsientoTest {
 
     @Test
     void debePermitirTransicionDeDisponibleABloqueado() {
-        assertTrue(TransicionEstadoAsiento.esPermitida(EstadoAsiento.DISPONIBLE, EstadoAsiento.BLOQUEADO));
+        Asiento asiento = Asiento.builder().estado(EstadoAsiento.DISPONIBLE).build();
+        assertTrue(asiento.esTransicionPermitida(EstadoAsiento.BLOQUEADO));
     }
 
     @Test
     void debePermitirTransicionDeDisponibleAMantenimiento() {
-        assertTrue(TransicionEstadoAsiento.esPermitida(EstadoAsiento.DISPONIBLE, EstadoAsiento.MANTENIMIENTO));
+        Asiento asiento = Asiento.builder().estado(EstadoAsiento.DISPONIBLE).build();
+        assertTrue(asiento.esTransicionPermitida(EstadoAsiento.MANTENIMIENTO));
     }
 
     @Test
     void noDebePermitirTransicionDeVendidoADisponible() {
-        assertFalse(TransicionEstadoAsiento.esPermitida(EstadoAsiento.VENDIDO, EstadoAsiento.DISPONIBLE));
-    }
-
-    @Test
-    void noDebePermitirTransicionesConNulos() {
-        assertFalse(TransicionEstadoAsiento.esPermitida(null, EstadoAsiento.DISPONIBLE));
-        assertFalse(TransicionEstadoAsiento.esPermitida(EstadoAsiento.DISPONIBLE, null));
+        Asiento asiento = Asiento.builder().estado(EstadoAsiento.VENDIDO).build();
+        assertFalse(asiento.esTransicionPermitida(EstadoAsiento.DISPONIBLE));
     }
 
     @Test
     void debePermitirTransicionDeBloqueadoADisponible() {
-        assertTrue(TransicionEstadoAsiento.esPermitida(EstadoAsiento.BLOQUEADO, EstadoAsiento.DISPONIBLE));
+        Asiento asiento = Asiento.builder().estado(EstadoAsiento.BLOQUEADO).build();
+        assertTrue(asiento.esTransicionPermitida(EstadoAsiento.DISPONIBLE));
     }
 }

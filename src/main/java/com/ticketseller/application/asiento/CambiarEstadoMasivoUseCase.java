@@ -3,7 +3,6 @@ package com.ticketseller.application.asiento;
 import com.ticketseller.domain.model.asiento.Asiento;
 import com.ticketseller.domain.model.asiento.EstadoAsiento;
 import com.ticketseller.domain.model.asiento.HistorialCambioEstado;
-import com.ticketseller.domain.model.asiento.TransicionEstadoAsiento;
 import com.ticketseller.domain.repository.AsientoRepositoryPort;
 import com.ticketseller.domain.repository.HistorialCambioEstadoRepositoryPort;
 import com.ticketseller.infrastructure.adapter.in.rest.dto.asiento.CambiarEstadoMasivoResponse;
@@ -46,7 +45,7 @@ public class CambiarEstadoMasivoUseCase {
                                        String motivo, String usuarioId, List<String> mensajes,
                                        AtomicInteger modificados, AtomicInteger omitidos) {
         return Mono.just(asiento)
-                .filter(a -> TransicionEstadoAsiento.esPermitida(a.getEstado(), estadoDestino))
+                .filter(a -> a.esTransicionPermitida(estadoDestino))
                 .switchIfEmpty(Mono.defer(() -> {
                     mensajes.add(String.format("Asiento %s en estado %s no puede ser modificado a %s",
                             asiento.getId(), asiento.getEstado(), estadoDestino));

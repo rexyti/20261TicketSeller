@@ -18,6 +18,5 @@ CREATE TABLE IF NOT EXISTS asientos
     numero   VARCHAR(20) NOT NULL,
     zona_id  UUID REFERENCES zonas (id),
     estado   VARCHAR(20),
-    existente BOOLEAN     NOT NULL DEFAULT TRUE,
-    version  BIGINT      NOT NULL DEFAULT 0
+    tipo VARCHAR(20)
 );

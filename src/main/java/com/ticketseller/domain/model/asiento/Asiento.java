@@ -45,4 +45,50 @@ public class Asiento {
     private String trimOrNull(String valor) {
         return valor == null ? null : valor.trim();
     }
+
+    public boolean esTransicionPermitida(EstadoAsiento nuevoEstado){
+        return transicionPermitida(this.estado, nuevoEstado);
+    }
+
+    private boolean transicionPermitida(EstadoAsiento actual, EstadoAsiento nuevo) {
+        validarEstados(actual, nuevo);
+        return switch (actual){
+            case DISPONIBLE -> validoFromDisponible(nuevo);
+            case BLOQUEADO -> validoFromBloqueado(nuevo);
+            case RESERVADO -> validoFromReservado(nuevo);
+            case VENDIDO -> validoFromVendido(nuevo);
+            case MANTENIMIENTO -> validoFromMantenimiento(nuevo);
+            default -> false;
+        };
+    }
+
+    private void validarEstados(EstadoAsiento actual, EstadoAsiento nuevo) {
+        if (actual == null || nuevo == null) {
+            throw new IllegalArgumentException("Los estados no pueden ser nulos");
+        }
+        if (actual.equals(nuevo)) {
+            throw new IllegalArgumentException("El nuevo estado debe ser diferente al actual");
+        }
+    }
+
+    private boolean validoFromMantenimiento(EstadoAsiento nuevo) {
+        return EstadoAsiento.DISPONIBLE.equals(nuevo) || EstadoAsiento.BLOQUEADO.equals(nuevo);
+    }
+
+    private boolean validoFromVendido(EstadoAsiento nuevo) {
+        return EstadoAsiento.ANULADO.equals(nuevo);
+    }
+
+    private boolean validoFromReservado(EstadoAsiento nuevo) {
+        return EstadoAsiento.DISPONIBLE.equals(nuevo) || EstadoAsiento.VENDIDO.equals(nuevo);
+    }
+
+    private boolean validoFromBloqueado(EstadoAsiento nuevo) {
+        return EstadoAsiento.DISPONIBLE.equals(nuevo) || EstadoAsiento.MANTENIMIENTO.equals(nuevo);
+    }
+
+    private boolean validoFromDisponible(EstadoAsiento nuevo) {
+        return EstadoAsiento.RESERVADO.equals(nuevo) || EstadoAsiento.BLOQUEADO.equals(nuevo)
+                || EstadoAsiento.MANTENIMIENTO.equals(nuevo);
+    }
 }

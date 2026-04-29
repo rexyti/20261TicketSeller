@@ -5,7 +5,6 @@ import com.ticketseller.domain.exception.asiento.AsientoEnCompraException;
 import com.ticketseller.domain.model.asiento.Asiento;
 import com.ticketseller.domain.model.asiento.EstadoAsiento;
 import com.ticketseller.domain.model.asiento.HistorialCambioEstado;
-import com.ticketseller.domain.model.asiento.TransicionEstadoAsiento;
 import com.ticketseller.domain.repository.AsientoRepositoryPort;
 import com.ticketseller.domain.repository.HistorialCambioEstadoRepositoryPort;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +28,7 @@ public class CambiarEstadoAsientoUseCase {
 
     private Mono<Asiento> validarTransicion(Asiento asiento, EstadoAsiento estadoDestino) {
         return Mono.just(asiento)
-                .filter(a -> TransicionEstadoAsiento.esPermitida(a.getEstado(), estadoDestino))
+                .filter(a -> a.esTransicionPermitida(estadoDestino))
                 .switchIfEmpty(Mono.error(new TransicionEstadoInvalidaException(asiento.getEstado(), estadoDestino)));
     }
 
