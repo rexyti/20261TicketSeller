@@ -20,11 +20,11 @@ import java.util.UUID;
 public class AsientoEntity {
     @Id
     private UUID id;
-    private int fila;
+    private String fila;
     private int columna;
     private String numero;
     @Column("zona_id")
     private UUID zonaId;
+    private String tipo;
     private String estado;
-    private boolean existente;
 }
