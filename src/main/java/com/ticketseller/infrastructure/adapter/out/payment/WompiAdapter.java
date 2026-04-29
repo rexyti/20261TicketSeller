@@ -71,6 +71,11 @@ public class WompiAdapter implements PasarelaPagoPort {
                 ));
     }
 
+    @Override
+    public Mono<ResultadoPago> procesarReembolso(UUID ventaId, BigDecimal monto, String metodoPago) {
+        return procesarPago(ventaId, monto, metodoPago);
+    }
+
     private String resolverTipoWompi(String metodoPago) {
         if (noHayMetodoPago(metodoPago)) {
             throw new IllegalArgumentException("El método de pago es obligatorio");

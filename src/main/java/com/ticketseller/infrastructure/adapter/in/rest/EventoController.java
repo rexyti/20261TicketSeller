@@ -71,6 +71,7 @@ public class EventoController {
     @PatchMapping("/{id}/estado")
     public Mono<ResponseEntity<EventoResponse>> cancelar(@PathVariable UUID id,
                                                          @Valid @RequestBody CancelarEventoRequest request) {
+        // TODO: coordinar con feature 015 para invocar ProcesarReembolsoMasivoUseCase al cancelar evento
         return cancelarEventoUseCase.ejecutar(id, request.motivo())
                 .map(eventoRestMapper::toResponse)
                 .map(ResponseEntity::ok);

@@ -99,6 +99,7 @@ CREATE TABLE tickets (
     evento_id UUID NOT NULL REFERENCES eventos(id),
     zona_id UUID NOT NULL REFERENCES zonas(id),
     compuerta_id UUID REFERENCES compuertas(id),
+    asiento_id UUID REFERENCES asientos(id),
     codigo_qr TEXT,
     estado VARCHAR(40) NOT NULL,
     precio NUMERIC(12,2) NOT NULL,
@@ -115,6 +116,28 @@ CREATE TABLE transacciones_financieras (
     respuesta_pasarela TEXT,
     fecha TIMESTAMP NOT NULL,
     ip VARCHAR(80)
+);
+
+CREATE TABLE reembolsos (
+    id UUID PRIMARY KEY,
+    ticket_id UUID NOT NULL REFERENCES tickets(id),
+    venta_id UUID NOT NULL REFERENCES ventas(id),
+    monto NUMERIC(12,2) NOT NULL,
+    tipo VARCHAR(20) NOT NULL,
+    estado VARCHAR(20) NOT NULL,
+    fecha_solicitud TIMESTAMP NOT NULL,
+    fecha_completado TIMESTAMP,
+    agente_id UUID
+);
+
+CREATE TABLE historial_estado_ticket (
+    id UUID PRIMARY KEY,
+    ticket_id UUID NOT NULL REFERENCES tickets(id),
+    agente_id UUID,
+    estado_anterior VARCHAR(40) NOT NULL,
+    estado_nuevo VARCHAR(40) NOT NULL,
+    justificacion VARCHAR(255) NOT NULL,
+    fecha_cambio TIMESTAMP NOT NULL
 );
 
 CREATE TABLE historial_cambios_estado (

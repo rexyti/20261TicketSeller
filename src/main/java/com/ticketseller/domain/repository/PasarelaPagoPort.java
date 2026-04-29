@@ -9,5 +9,7 @@ import java.util.UUID;
 public interface PasarelaPagoPort {
 
     Mono<ResultadoPago> procesarPago(UUID ventaId, BigDecimal monto, String metodoPago);
+
+    Mono<ResultadoPago> procesarReembolso(UUID ventaId, BigDecimal monto, String metodoPago);
 }
 

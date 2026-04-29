@@ -4,12 +4,16 @@ import com.ticketseller.domain.exception.CapacidadInvalidaException;
 import com.ticketseller.domain.exception.CompuertaInvalidaException;
 import com.ticketseller.domain.exception.asiento.NombreTipoAsientoVacioException;
 import com.ticketseller.domain.exception.asiento.AsientoNoDisponibleException;
+import com.ticketseller.domain.exception.postventa.CancelacionFueraDePlazoException;
+import com.ticketseller.domain.exception.postventa.ReembolsoFallidoException;
+import com.ticketseller.domain.exception.postventa.TicketYaUsadoException;
 import com.ticketseller.domain.exception.evento.EventoEnProgresoException;
 import com.ticketseller.domain.exception.evento.EventoNoFinalizadoException;
 import com.ticketseller.domain.exception.evento.EventoNotFoundException;
 import com.ticketseller.domain.exception.evento.EventoSolapamientoException;
 import com.ticketseller.domain.exception.LiquidacionNoConfiguradaException;
 import com.ticketseller.domain.exception.venta.PagoRechazadoException;
+import com.ticketseller.domain.exception.venta.TicketNotFoundException;
 import com.ticketseller.domain.exception.recinto.RecintoConEventosException;
 import com.ticketseller.domain.exception.recinto.RecintoNoDisponibleException;
 import com.ticketseller.domain.exception.recinto.RecintoDuplicadoException;
@@ -45,6 +49,11 @@ public class GlobalExceptionHandler {
         return error("NOT_FOUND", ex.getMessage(), HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(TicketNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> ticketNotFound(TicketNotFoundException ex) {
+        return error("TICKET_NOT_FOUND", ex.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
     @ExceptionHandler(EventoNotFoundException.class)
     public ResponseEntity<ApiErrorResponse> eventoNotFound(EventoNotFoundException ex) {
         return error("EVENTO_NOT_FOUND", ex.getMessage(), HttpStatus.NOT_FOUND);
@@ -69,6 +78,11 @@ public class GlobalExceptionHandler {
         return error("CHECKOUT_CONFLICT", ex.getMessage(), HttpStatus.CONFLICT);
     }
 
+    @ExceptionHandler({TicketYaUsadoException.class})
+    public ResponseEntity<ApiErrorResponse> ticketConflict(RuntimeException ex) {
+        return error("TICKET_CONFLICT", ex.getMessage(), HttpStatus.CONFLICT);
+    }
+
     @ExceptionHandler(PagoRechazadoException.class)
     public ResponseEntity<ApiErrorResponse> paymentRejected(PagoRechazadoException ex) {
         return error("PAGO_RECHAZADO", ex.getMessage(), HttpStatus.PAYMENT_REQUIRED);
@@ -91,6 +105,17 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(LiquidacionNoConfiguradaException.class)
     public ResponseEntity<ApiErrorResponse> liquidacionNoConfigurada(LiquidacionNoConfiguradaException ex) {
         return error("LIQUIDACION_NO_CONFIGURADA", ex.getMessage(), HttpStatus.UNPROCESSABLE_ENTITY);
+    }
+
+    @ExceptionHandler({CancelacionFueraDePlazoException.class,
+            com.ticketseller.domain.exception.postventa.TransicionEstadoInvalidaException.class})
+    public ResponseEntity<ApiErrorResponse> unprocessable(RuntimeException ex) {
+        return error("UNPROCESSABLE_ENTITY", ex.getMessage(), HttpStatus.UNPROCESSABLE_ENTITY);
+    }
+
+    @ExceptionHandler(ReembolsoFallidoException.class)
+    public ResponseEntity<ApiErrorResponse> refundFailed(ReembolsoFallidoException ex) {
+        return error("REEMBOLSO_FALLIDO", ex.getMessage(), HttpStatus.BAD_GATEWAY);
     }
 
     @ExceptionHandler(WebExchangeBindException.class)
