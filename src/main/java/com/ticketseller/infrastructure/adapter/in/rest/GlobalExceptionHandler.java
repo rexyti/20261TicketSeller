@@ -10,6 +10,11 @@ import com.ticketseller.domain.exception.evento.EventoNotFoundException;
 import com.ticketseller.domain.exception.evento.EventoSolapamientoException;
 import com.ticketseller.domain.exception.LiquidacionNoConfiguradaException;
 import com.ticketseller.domain.exception.venta.PagoRechazadoException;
+import com.ticketseller.domain.exception.promocion.CodigoPromoAgotadoException;
+import com.ticketseller.domain.exception.promocion.CodigoPromoExpiradoException;
+import com.ticketseller.domain.exception.promocion.CodigoPromoInvalidoException;
+import com.ticketseller.domain.exception.promocion.PromocionNoActivaException;
+import com.ticketseller.domain.exception.promocion.UsuarioNoAutorizadoParaPreventaException;
 import com.ticketseller.domain.exception.recinto.RecintoConEventosException;
 import com.ticketseller.domain.exception.recinto.RecintoNoDisponibleException;
 import com.ticketseller.domain.exception.recinto.RecintoDuplicadoException;
@@ -67,6 +72,21 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({AsientoNoDisponibleException.class, ReservaExpiradaException.class})
     public ResponseEntity<ApiErrorResponse> checkoutConflict(RuntimeException ex) {
         return error("CHECKOUT_CONFLICT", ex.getMessage(), HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler({
+            CodigoPromoAgotadoException.class,
+            CodigoPromoExpiradoException.class,
+            PromocionNoActivaException.class,
+            UsuarioNoAutorizadoParaPreventaException.class
+    })
+    public ResponseEntity<ApiErrorResponse> promocionConflict(RuntimeException ex) {
+        return error("PROMOCION_CONFLICT", ex.getMessage(), HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(CodigoPromoInvalidoException.class)
+    public ResponseEntity<ApiErrorResponse> codigoInvalido(CodigoPromoInvalidoException ex) {
+        return error("CODIGO_INVALIDO", ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(PagoRechazadoException.class)

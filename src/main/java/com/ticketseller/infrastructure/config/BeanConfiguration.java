@@ -16,6 +16,13 @@ import com.ticketseller.application.liquidacion.ConsultarRecaudoIncrementalUseCa
 import com.ticketseller.application.liquidacion.ConsultarSnapshotUseCase;
 import com.ticketseller.application.precios.ConfigurarPreciosUseCase;
 import com.ticketseller.application.precios.ListarPreciosUseCase;
+import com.ticketseller.application.promocion.AplicarCodigoPromocionalCarritoUseCase;
+import com.ticketseller.application.promocion.AplicarDescuentoCarritoUseCase;
+import com.ticketseller.application.promocion.CrearCodigosPromocionalesUseCase;
+import com.ticketseller.application.promocion.CrearDescuentoUseCase;
+import com.ticketseller.application.promocion.CrearPromocionUseCase;
+import com.ticketseller.application.promocion.GestionarEstadoPromocionUseCase;
+import com.ticketseller.application.promocion.ValidarCodigoPromocionalUseCase;
 import com.ticketseller.application.recinto.DesactivarRecintoUseCase;
 import com.ticketseller.application.recinto.EditarRecintoUseCase;
 import com.ticketseller.application.recinto.ListarRecintosFiltradosUseCase;
@@ -38,7 +45,10 @@ import com.ticketseller.application.checkout.ConsultarEstadoTicketUseCase;
 import com.ticketseller.application.recinto.ConsultarEstructuraRecintoUseCase;
 import com.ticketseller.domain.repository.AsientoRepositoryPort;
 import com.ticketseller.domain.repository.CompuertaRepositoryPort;
+import com.ticketseller.domain.repository.CodigoPromocionalRepositoryPort;
+import com.ticketseller.domain.repository.DescuentoRepositoryPort;
 import com.ticketseller.domain.repository.MapaAsientosRepositoryPort;
+import com.ticketseller.domain.repository.PromocionRepositoryPort;
 import com.ticketseller.domain.repository.RecintoRepositoryPort;
 import com.ticketseller.domain.repository.TipoAsientoRepositoryPort;
 import com.ticketseller.domain.repository.ZonaRepositoryPort;
@@ -80,6 +90,15 @@ import com.ticketseller.infrastructure.adapter.out.persistence.liquidacion.Liqui
 import com.ticketseller.infrastructure.adapter.out.persistence.preciozona.PrecioZonaR2dbcRepository;
 import com.ticketseller.infrastructure.adapter.out.persistence.preciozona.PrecioZonaRepositoryAdapter;
 import com.ticketseller.infrastructure.adapter.out.persistence.preciozona.mapper.PrecioZonaPersistenceMapper;
+import com.ticketseller.infrastructure.adapter.out.persistence.promocion.CodigoPromocionalR2dbcRepository;
+import com.ticketseller.infrastructure.adapter.out.persistence.promocion.CodigoPromocionalRepositoryAdapter;
+import com.ticketseller.infrastructure.adapter.out.persistence.promocion.DescuentoR2dbcRepository;
+import com.ticketseller.infrastructure.adapter.out.persistence.promocion.DescuentoRepositoryAdapter;
+import com.ticketseller.infrastructure.adapter.out.persistence.promocion.PromocionR2dbcRepository;
+import com.ticketseller.infrastructure.adapter.out.persistence.promocion.PromocionRepositoryAdapter;
+import com.ticketseller.infrastructure.adapter.out.persistence.promocion.mapper.CodigoPromocionalPersistenceMapper;
+import com.ticketseller.infrastructure.adapter.out.persistence.promocion.mapper.DescuentoPersistenceMapper;
+import com.ticketseller.infrastructure.adapter.out.persistence.promocion.mapper.PromocionPersistenceMapper;
 import com.ticketseller.infrastructure.adapter.out.persistence.recinto.RecintoR2dbcRepository;
 import com.ticketseller.infrastructure.adapter.out.persistence.recinto.RecintoRepositoryAdapter;
 import com.ticketseller.infrastructure.adapter.out.persistence.recinto.mapper.RecintoPersistenceMapper;
@@ -176,6 +195,24 @@ public class BeanConfiguration {
             TransaccionFinancieraR2dbcRepository repository,
             TransaccionFinancieraPersistenceMapper mapper) {
         return new TransaccionFinancieraRepositoryAdapter(repository, mapper);
+    }
+
+    @Bean
+    public PromocionRepositoryPort promocionRepositoryPort(PromocionR2dbcRepository repository,
+                                                           PromocionPersistenceMapper mapper) {
+        return new PromocionRepositoryAdapter(repository, mapper);
+    }
+
+    @Bean
+    public DescuentoRepositoryPort descuentoRepositoryPort(DescuentoR2dbcRepository repository,
+                                                           DescuentoPersistenceMapper mapper) {
+        return new DescuentoRepositoryAdapter(repository, mapper);
+    }
+
+    @Bean
+    public CodigoPromocionalRepositoryPort codigoPromocionalRepositoryPort(CodigoPromocionalR2dbcRepository repository,
+                                                                           CodigoPromocionalPersistenceMapper mapper) {
+        return new CodigoPromocionalRepositoryAdapter(repository, mapper);
     }
 
     @Bean
@@ -344,12 +381,13 @@ public class BeanConfiguration {
 
     @Bean
     public ReservarAsientosUseCase reservarAsientosUseCase(TicketRepositoryPort ticketRepositoryPort,
-                                                           VentaRepositoryPort ventaRepositoryPort,
-                                                           ZonaRepositoryPort zonaRepositoryPort,
-                                                           PrecioZonaRepositoryPort precioZonaRepositoryPort,
-                                                           CompuertaRepositoryPort compuertaRepositoryPort) {
+                                                            VentaRepositoryPort ventaRepositoryPort,
+                                                            ZonaRepositoryPort zonaRepositoryPort,
+                                                            PrecioZonaRepositoryPort precioZonaRepositoryPort,
+                                                            CompuertaRepositoryPort compuertaRepositoryPort,
+                                                            AplicarDescuentoCarritoUseCase aplicarDescuentoCarritoUseCase) {
         return new ReservarAsientosUseCase(ticketRepositoryPort, ventaRepositoryPort, zonaRepositoryPort,
-                precioZonaRepositoryPort, compuertaRepositoryPort);
+                precioZonaRepositoryPort, compuertaRepositoryPort, aplicarDescuentoCarritoUseCase);
     }
 
     @Bean
@@ -408,6 +446,60 @@ public class BeanConfiguration {
             EventoRepositoryPort eventoRepositoryPort,
             LiquidacionQueryPort liquidacionQueryPort) {
         return new ConsultarRecaudoIncrementalUseCase(eventoRepositoryPort, liquidacionQueryPort);
+    }
+
+    @Bean
+    public CrearPromocionUseCase crearPromocionUseCase(PromocionRepositoryPort promocionRepositoryPort,
+                                                       EventoRepositoryPort eventoRepositoryPort) {
+        return new CrearPromocionUseCase(promocionRepositoryPort, eventoRepositoryPort);
+    }
+
+    @Bean
+    public CrearDescuentoUseCase crearDescuentoUseCase(DescuentoRepositoryPort descuentoRepositoryPort,
+                                                       PromocionRepositoryPort promocionRepositoryPort,
+                                                       ZonaRepositoryPort zonaRepositoryPort,
+                                                       EventoRepositoryPort eventoRepositoryPort) {
+        return new CrearDescuentoUseCase(descuentoRepositoryPort, promocionRepositoryPort,
+                zonaRepositoryPort, eventoRepositoryPort);
+    }
+
+    @Bean
+    public CrearCodigosPromocionalesUseCase crearCodigosPromocionalesUseCase(
+            CodigoPromocionalRepositoryPort codigoPromocionalRepositoryPort,
+            PromocionRepositoryPort promocionRepositoryPort) {
+        return new CrearCodigosPromocionalesUseCase(codigoPromocionalRepositoryPort, promocionRepositoryPort);
+    }
+
+    @Bean
+    public GestionarEstadoPromocionUseCase gestionarEstadoPromocionUseCase(
+            PromocionRepositoryPort promocionRepositoryPort) {
+        return new GestionarEstadoPromocionUseCase(promocionRepositoryPort);
+    }
+
+    @Bean
+    public AplicarDescuentoCarritoUseCase aplicarDescuentoCarritoUseCase(
+            PromocionRepositoryPort promocionRepositoryPort,
+            DescuentoRepositoryPort descuentoRepositoryPort) {
+        return new AplicarDescuentoCarritoUseCase(promocionRepositoryPort, descuentoRepositoryPort);
+    }
+
+    @Bean
+    public ValidarCodigoPromocionalUseCase validarCodigoPromocionalUseCase(
+            CodigoPromocionalRepositoryPort codigoPromocionalRepositoryPort,
+            PromocionRepositoryPort promocionRepositoryPort,
+            DescuentoRepositoryPort descuentoRepositoryPort) {
+        return new ValidarCodigoPromocionalUseCase(codigoPromocionalRepositoryPort, promocionRepositoryPort,
+                descuentoRepositoryPort);
+    }
+
+    @Bean
+    public AplicarCodigoPromocionalCarritoUseCase aplicarCodigoPromocionalCarritoUseCase(
+            ValidarCodigoPromocionalUseCase validarCodigoPromocionalUseCase,
+            AplicarDescuentoCarritoUseCase aplicarDescuentoCarritoUseCase,
+            VentaRepositoryPort ventaRepositoryPort,
+            TicketRepositoryPort ticketRepositoryPort) {
+        return new AplicarCodigoPromocionalCarritoUseCase(validarCodigoPromocionalUseCase,
+                aplicarDescuentoCarritoUseCase, ventaRepositoryPort, ticketRepositoryPort);
     }
 
     @Bean

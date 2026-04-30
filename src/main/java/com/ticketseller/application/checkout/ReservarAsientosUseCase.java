@@ -1,6 +1,8 @@
 package com.ticketseller.application.checkout;
 
+import com.ticketseller.application.promocion.AplicarDescuentoCarritoUseCase;
 import com.ticketseller.domain.exception.asiento.AsientoNoDisponibleException;
+import com.ticketseller.domain.model.promocion.TipoUsuario;
 import com.ticketseller.domain.exception.zona.ZonaSinPrecioException;
 import com.ticketseller.domain.model.zona.Compuerta;
 import com.ticketseller.domain.model.ticket.EstadoTicket;
@@ -34,6 +36,7 @@ public class ReservarAsientosUseCase {
     private final ZonaRepositoryPort zonaRepositoryPort;
     private final PrecioZonaRepositoryPort precioZonaRepositoryPort;
     private final CompuertaRepositoryPort compuertaRepositoryPort;
+    private final AplicarDescuentoCarritoUseCase aplicarDescuentoCarritoUseCase;
 
     public Mono<VentaDetalle> ejecutar(ReservarAsientosCommand command) {
         validarCommand(command);
@@ -86,20 +89,24 @@ public class ReservarAsientosUseCase {
         if (zonaSinCuposDisponibles(ocupados, command, zona))
             return Mono.error(new AsientoNoDisponibleException("No hay cupos disponibles en la zona solicitada"));
 
-        BigDecimal total = precioZona.getPrecio().multiply(BigDecimal.valueOf(command.cantidad()));
+        BigDecimal subtotal = precioZona.getPrecio().multiply(BigDecimal.valueOf(command.cantidad()));
 
-        Venta venta = buildVenta(command, total);
-        venta.validarDatosRegistro();
-
-        List<Ticket> tickets = IntStream.range(0, command.cantidad())
-                .mapToObj(ignore -> buildTicket(venta, command, compuerta, precioZona))
-                .peek(Ticket::validarDatosRegistro)
-                .toList();
-
-        return ventaRepositoryPort.guardar(venta)
-                .flatMap(savedVenta -> ticketRepositoryPort.guardarTodos(tickets)
-                        .collectList()
-                        .map(savedTickets -> new VentaDetalle(savedVenta, savedTickets)));
+        return aplicarDescuentoCarritoUseCase.ejecutar(
+                        command.eventoId(), command.zonaId(), subtotal, command.tipoUsuario()
+                )
+                .map(resultado -> {
+                    Venta venta = buildVenta(command, resultado.totalFinal());
+                    venta.validarDatosRegistro();
+                    List<Ticket> tickets = IntStream.range(0, command.cantidad())
+                            .mapToObj(ignore -> buildTicket(venta, command, compuerta, precioZona))
+                            .peek(Ticket::validarDatosRegistro)
+                            .toList();
+                    return new ReservaPreparada(venta, tickets);
+                })
+                .flatMap(preparada -> ventaRepositoryPort.guardar(preparada.venta())
+                        .flatMap(savedVenta -> ticketRepositoryPort.guardarTodos(preparada.tickets())
+                                .collectList()
+                                .map(savedTickets -> new VentaDetalle(savedVenta, savedTickets))));
     }
 
     private boolean zonaSinCuposDisponibles(Long ocupados, ReservarAsientosCommand command, Zona zona) {
@@ -130,5 +137,8 @@ public class ReservarAsientosUseCase {
                 .esCortesia(Boolean.TRUE.equals(command.esCortesia()))
                 .build()
                 .normalizarDatosRegistro();
+    }
+
+    private record ReservaPreparada(Venta venta, List<Ticket> tickets) {
     }
 }

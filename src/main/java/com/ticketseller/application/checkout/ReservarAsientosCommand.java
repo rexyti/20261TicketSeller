@@ -1,5 +1,7 @@
 package com.ticketseller.application.checkout;
 
+import com.ticketseller.domain.model.promocion.TipoUsuario;
+
 import java.util.UUID;
 
 public record ReservarAsientosCommand(
@@ -7,7 +9,8 @@ public record ReservarAsientosCommand(
         UUID eventoId,
         UUID zonaId,
         Integer cantidad,
-        Boolean esCortesia
+        Boolean esCortesia,
+        TipoUsuario tipoUsuario
 ) {
 }
 

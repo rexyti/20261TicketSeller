@@ -3,6 +3,9 @@ DROP TABLE IF EXISTS tipos_asiento;
 DROP TABLE IF EXISTS transacciones_financieras;
 DROP TABLE IF EXISTS tickets;
 DROP TABLE IF EXISTS ventas;
+DROP TABLE IF EXISTS codigos_promocionales;
+DROP TABLE IF EXISTS descuentos;
+DROP TABLE IF EXISTS promociones;
 DROP TABLE IF EXISTS precios_zona;
 DROP TABLE IF EXISTS cancelaciones_evento;
 DROP TABLE IF EXISTS eventos;
@@ -126,4 +129,35 @@ CREATE TABLE historial_cambios_estado (
     estado_nuevo VARCHAR(20),
     fecha_hora TIMESTAMPTZ NOT NULL,
     motivo VARCHAR(255)
+);
+
+CREATE TABLE promociones (
+    id UUID PRIMARY KEY,
+    nombre VARCHAR(255) NOT NULL,
+    tipo VARCHAR(50) NOT NULL,
+    evento_id UUID NOT NULL REFERENCES eventos(id),
+    fecha_inicio TIMESTAMP NOT NULL,
+    fecha_fin TIMESTAMP NOT NULL,
+    estado VARCHAR(50) NOT NULL,
+    tipo_usuario_restringido VARCHAR(50)
+);
+
+CREATE TABLE descuentos (
+    id UUID PRIMARY KEY,
+    promocion_id UUID NOT NULL REFERENCES promociones(id),
+    tipo VARCHAR(50) NOT NULL,
+    valor NUMERIC(12,2) NOT NULL,
+    zona_id UUID REFERENCES zonas(id),
+    acumulable BOOLEAN NOT NULL
+);
+
+CREATE TABLE codigos_promocionales (
+    id UUID PRIMARY KEY,
+    codigo VARCHAR(50) UNIQUE NOT NULL,
+    promocion_id UUID NOT NULL REFERENCES promociones(id),
+    usos_maximos INTEGER,
+    usos_actuales INTEGER NOT NULL DEFAULT 0,
+    fecha_inicio TIMESTAMP NOT NULL,
+    fecha_fin TIMESTAMP NOT NULL,
+    estado VARCHAR(50) NOT NULL
 );

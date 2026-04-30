@@ -8,6 +8,7 @@ import com.ticketseller.application.checkout.ReservarAsientosUseCase;
 import com.ticketseller.application.checkout.VentaDetalle;
 import com.ticketseller.domain.exception.asiento.AsientoNoDisponibleException;
 import com.ticketseller.domain.exception.venta.PagoRechazadoException;
+import com.ticketseller.domain.model.promocion.TipoUsuario;
 import com.ticketseller.domain.model.venta.EstadoVenta;
 import com.ticketseller.domain.model.ticket.Ticket;
 import com.ticketseller.domain.model.venta.Venta;
@@ -60,8 +61,8 @@ class CheckoutControllerTest {
         UUID zonaId = UUID.randomUUID();
         UUID compuertaId = UUID.randomUUID();
 
-        ReservarAsientosRequest request = new ReservarAsientosRequest(compradorId, eventoId, zonaId, 1, false);
-        ReservarAsientosCommand command = new ReservarAsientosCommand(compradorId, eventoId, zonaId, 1, false);
+        ReservarAsientosRequest request = new ReservarAsientosRequest(compradorId, eventoId, zonaId, 1, false, TipoUsuario.GENERAL);
+        ReservarAsientosCommand command = new ReservarAsientosCommand(compradorId, eventoId, zonaId, 1, false, TipoUsuario.GENERAL);
 
         Venta venta = Venta.builder()
                 .id(ventaId)
@@ -109,9 +110,11 @@ class CheckoutControllerTest {
 
     @Test
     void reservarNoDisponibleRetorna409() {
-        ReservarAsientosRequest request = new ReservarAsientosRequest(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), 1, false);
+        ReservarAsientosRequest request = new ReservarAsientosRequest(
+                UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), 1, false, TipoUsuario.GENERAL);
         when(checkoutRestMapper.toCommand(any(ReservarAsientosRequest.class)))
-                .thenReturn(new ReservarAsientosCommand(request.compradorId(), request.eventoId(), request.zonaId(), request.cantidad(), false));
+                .thenReturn(new ReservarAsientosCommand(
+                        request.compradorId(), request.eventoId(), request.zonaId(), request.cantidad(), false, request.tipoUsuario()));
         when(reservarAsientosUseCase.ejecutar(any())).thenReturn(Mono.error(new AsientoNoDisponibleException("ocupado")));
 
         webTestClient.post()
