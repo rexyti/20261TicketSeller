@@ -77,18 +77,18 @@ src/main/java/com/ticketseller/
 │       └── ConsultarEstadoReembolsoUseCase.java
 │
 └── infrastructure/
-    ├── adapter/
-    │   ├── in/rest/
-    │   │   └── postventa/
-    │   │       ├── CancelacionController.java
-    │   │       ├── AdminTicketController.java
-    │   │       ├── AdminReembolsoController.java
-    │   │       ├── MisComprasController.java
-    │   │       └── dto/
-    │   │           └── postventa/
-    │   └── out/persistence/
-    │       └── postventa/
-    │           └── mapper/
+    ├── adapter/in/rest/
+    │   ├── postventa/
+    │   │   ├── CancelacionController.java
+    │   │   ├── AdminTicketController.java
+    │   │   ├── AdminReembolsoController.java
+    │   │   ├── MisComprasController.java
+    │   │   └── dto/
+    │   └── mapper/
+    │       └── PostVentaRestMapper.java
+    ├── adapter/out/persistence/
+    │   └── postventa/
+    │       └── mapper/
     └── config/
         └── BeanConfiguration.java             # Actualizar con los nuevos beans
 

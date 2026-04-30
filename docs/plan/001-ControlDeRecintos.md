@@ -105,18 +105,28 @@ src/main/java/com/ticketseller/
 │       └── ListarCompuertasUseCase.java
 └── infrastructure/
     ├── adapter/in/rest/
-    │   ├── RecintoController.java
-    │   ├── ZonaController.java
-    │   ├── CompuertaController.java
+    │   ├── ApiErrorResponse.java
     │   ├── GlobalExceptionHandler.java
-    │   └── dto/
-    │       ├── recinto/
-    │       ├── zona/
-    │       └── compuerta/
+    │   ├── recinto/
+    │   │   ├── RecintoController.java
+    │   │   └── dto/
+    │   ├── zona/
+    │   │   ├── ZonaController.java
+    │   │   └── dto/
+    │   ├── compuerta/
+    │   │   ├── CompuertaController.java
+    │   │   └── dto/
+    │   └── mapper/
+    │       ├── RecintoRestMapper.java
+    │       ├── ZonaRestMapper.java
+    │       └── CompuertaRestMapper.java
     ├── adapter/out/persistence/
     │   ├── recinto/
+    │   │   └── mapper/
     │   ├── zona/
+    │   │   └── mapper/
     │   └── compuerta/
+    │       └── mapper/
     └── config/
         └── BeanConfiguration.java                  # Inyección de dependencias hexagonal
 
@@ -137,9 +147,9 @@ src/test/java/com/ticketseller/
 │   └── compuerta/
 └── infrastructure/
     ├── adapter/in/rest/
-    │   ├── RecintoControllerTest.java
-    │   ├── ZonaControllerTest.java
-    │   └── CompuertaControllerTest.java
+    │   ├── recinto/RecintoControllerTest.java
+    │   ├── zona/ZonaControllerTest.java
+    │   └── compuerta/CompuertaControllerTest.java
     └── adapter/out/persistence/
         ├── recinto/RecintoRepositoryAdapterTest.java
         ├── zona/ZonaRepositoryAdapterTest.java

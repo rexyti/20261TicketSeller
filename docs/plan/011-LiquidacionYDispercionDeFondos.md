@@ -75,16 +75,15 @@ src/main/java/com/ticketseller/
 │       └── ConsultarRecaudoIncrementalUseCase.java
 │
 └── infrastructure/
-    ├── adapter/
-    │   ├── in/rest/
+    ├── adapter/in/rest/
+    │   ├── liquidacion/
     │   │   ├── LiquidacionController.java
-    │   │   ├── dto/
-    │   │   │   └── liquidacion/
-    │   │   └── mapper/
-    │   │       └── LiquidacionRestMapper.java
-    │   └── out/persistence/
-    │       └── liquidacion/
-    │           └── LiquidacionQueryAdapter.java
+    │   │   └── dto/
+    │   └── mapper/
+    │       └── LiquidacionRestMapper.java
+    ├── adapter/out/persistence/
+    │   └── liquidacion/
+    │       └── LiquidacionQueryAdapter.java
     └── config/
         └── BeanConfiguration.java
 
@@ -93,7 +92,7 @@ src/test/java/com/ticketseller/
 │   └── liquidacion/
 └── infrastructure/
     ├── adapter/in/rest/
-    │   └── LiquidacionControllerTest.java
+    │   └── liquidacion/LiquidacionControllerTest.java
     └── adapter/out/persistence/
         └── liquidacion/
 ```

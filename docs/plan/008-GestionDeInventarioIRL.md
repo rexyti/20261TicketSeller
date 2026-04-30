@@ -75,13 +75,15 @@ src/main/java/com/ticketseller/
 │       └── LiberarHoldsVencidosUseCase.java
 │
 └── infrastructure/
-    ├── adapter/
-    │   ├── in/rest/
-    │   │   └── inventario/
-    │   │       └── dto/
-    │   ├── in/scheduler/
-    │   │   └── inventario/
-    │   │       └── LiberacionHoldsScheduler.java
+    ├── adapter/in/rest/
+    │   ├── asiento/
+    │   │   ├── InventarioController.java
+    │   │   └── dto/
+    │   └── mapper/
+    │       └── AsientoRestMapper.java
+    ├── adapter/in/scheduler/
+    │   └── inventario/
+    │       └── LiberacionHoldsScheduler.java
     └── config/
         └── BeanConfiguration.java             # Actualizar con los nuevos beans
 
@@ -90,7 +92,7 @@ src/test/java/com/ticketseller/
 │   └── inventario/
 └── infrastructure/
     └── adapter/in/rest/
-        └── inventario/
+        └── asiento/
 ```
 
 **Structure Decision**: Feature de extensión de comportamiento sobre `Asiento`. No agrega entidades

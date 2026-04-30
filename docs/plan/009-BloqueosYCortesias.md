@@ -78,16 +78,17 @@ src/main/java/com/ticketseller/
 │       └── ConsultarPanelBloqueosUseCase.java
 │
 └── infrastructure/
-    ├── adapter/
-    │   ├── in/rest/
-    │   │   └── bloqueos/
-    │   │       ├── BloqueoController.java
-    │   │       ├── CortesiaController.java
-    │   │       └── dto/
-    │   │           └── bloqueos/
-    │   └── out/persistence/
-    │       └── bloqueos/
-    │           └── mapper/
+    ├── adapter/in/rest/
+    │   ├── bloqueos/
+    │   │   ├── BloqueoController.java
+    │   │   ├── CortesiaController.java
+    │   │   └── dto/
+    │   └── mapper/
+    │       ├── BloqueoRestMapper.java
+    │       └── CortesiaRestMapper.java
+    ├── adapter/out/persistence/
+    │   └── bloqueos/
+    │       └── mapper/
     └── config/
         └── BeanConfiguration.java             # Actualizar con los nuevos beans
 

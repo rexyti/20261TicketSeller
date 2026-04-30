@@ -69,13 +69,15 @@ src/main/java/com/ticketseller/
 │       └── ConsultarHistorialAsientoUseCase.java
 │
 └── infrastructure/
-    ├── adapter/
-    │   ├── in/rest/
+    ├── adapter/in/rest/
+    │   ├── asiento/
     │   │   ├── AsientoMantenimientoController.java
     │   │   └── dto/
-    │   │       └── asiento/
-    │   └── out/persistence/
-    │       └── historialestadoasiento/
+    │   └── mapper/
+    │       └── AsientoRestMapper.java
+    ├── adapter/out/persistence/
+    │   └── historialestadoasiento/
+    │       └── mapper/
     └── config/
         └── BeanConfiguration.java                        # Registrar los tres nuevos beans de use case
 
@@ -87,7 +89,7 @@ src/test/java/com/ticketseller/
 └── infrastructure/
     └── adapter/
         ├── in/rest/
-        │   └── AsientoMantenimientoControllerTest.java
+        │   └── asiento/AsientoMantenimientoControllerTest.java
         └── out/persistence/
             └── historialestadoasiento/
 ```
