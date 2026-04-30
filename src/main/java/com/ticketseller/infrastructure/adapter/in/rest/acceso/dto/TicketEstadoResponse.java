@@ -1,4 +1,4 @@
-package com.ticketseller.infrastructure.adapter.in.rest.checkout.dto;
+package com.ticketseller.infrastructure.adapter.in.rest.acceso.dto;
 
 import com.ticketseller.domain.model.ticket.EstadoTicket;
 import java.time.LocalDateTime;

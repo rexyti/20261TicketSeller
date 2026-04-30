@@ -58,14 +58,14 @@ src/main/java/com/ticketseller/
 │
 └── infrastructure/
     ├── adapter/in/rest/
-    │   ├── checkout/
+    │   ├── acceso/
     │   │   ├── TicketConsultaController.java              # Inyecta ConsultarEstadoTicketUseCase
     │   │   └── dto/
     │   ├── recinto/
     │   │   ├── RecintoController.java                     # Expone GET /recintos/{id} para estructura
     │   │   └── dto/
     │   └── mapper/
-    │       ├── CheckoutRestMapper.java
+    │       ├── AccesoRestMapper.java
     │       └── RecintoRestMapper.java
     └── config/
         └── BeanConfiguration.java                        # Registrar los dos nuevos beans de use case
