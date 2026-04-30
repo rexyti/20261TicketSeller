@@ -1,6 +1,5 @@
-package com.ticketseller.application;
+package com.ticketseller.application.asiento;
 
-import com.ticketseller.application.asiento.CambiarEstadoAsientoUseCase;
 import com.ticketseller.domain.exception.asiento.TransicionEstadoInvalidaException;
 import com.ticketseller.domain.model.asiento.Asiento;
 import com.ticketseller.domain.model.asiento.EstadoAsiento;

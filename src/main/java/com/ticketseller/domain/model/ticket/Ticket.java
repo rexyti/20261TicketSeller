@@ -1,7 +1,6 @@
 package com.ticketseller.domain.model.ticket;
 
 import com.ticketseller.domain.exception.postventa.TransicionEstadoInvalidaException;
-import com.ticketseller.domain.model.asiento.EstadoAsiento;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -25,10 +24,7 @@ public class Ticket {
     private BigDecimal precio;
     private boolean esCortesia;
     private UUID asientoId;
-    private String categoria;
-    private String bloque;
-    private String coordenadaAcceso;
-    private java.time.LocalDateTime fechaEvento;
+    private AccessDetails accessDetails;
 
     public void validarTransicionA(EstadoTicket destino) {
         if (transicionInvalida(destino)) {
@@ -58,6 +54,7 @@ public class Ticket {
         if (ticketVendidoSinQrGenerado()) {
             throw new IllegalArgumentException("códigoQr es obligatorio para tickets vendidos");
         }
+        accessDetails.validar();
     }
 
     private void validarObligatorio(Object valor, String campo) {

@@ -1,7 +1,9 @@
-package com.ticketseller.application;
+package com.ticketseller.application.acceso;
 
 import com.ticketseller.application.checkout.ConsultarEstadoTicketUseCase;
 import com.ticketseller.domain.exception.venta.TicketNotFoundException;
+import com.ticketseller.domain.model.ticket.AccessDetails;
+import com.ticketseller.domain.model.ticket.CategoriaTicket;
 import com.ticketseller.domain.model.ticket.EstadoTicket;
 import com.ticketseller.domain.model.ticket.Ticket;
 import com.ticketseller.domain.repository.TicketRepositoryPort;
@@ -37,11 +39,13 @@ class ConsultarEstadoTicketUseCaseTest {
         Ticket ticket = Ticket.builder()
                 .id(ticketId)
                 .estado(EstadoTicket.VENDIDO)
-                .categoria("VIP")
-                .bloque("A")
-                .coordenadaAcceso("Norte")
                 .eventoId(UUID.randomUUID())
-                .fechaEvento(LocalDateTime.now())
+                .accessDetails(AccessDetails.builder()
+                        .categoria(CategoriaTicket.VIP)
+                        .zona("A")
+                        .compuerta("Norte")
+                        .fechaEvento(LocalDateTime.now())
+                        .build())
                 .build();
 
         when(ticketRepositoryPort.findById(ticketId)).thenReturn(Mono.just(ticket));
@@ -50,9 +54,9 @@ class ConsultarEstadoTicketUseCaseTest {
                 .expectNextMatches(response ->
                         response.getId().equals(ticketId)
                                 && response.getEstado().equals(EstadoTicket.VENDIDO)
-                                && response.getCategoria().equals("VIP")
-                                && response.getBloque().equals("A")
-                                && response.getCoordenadaAcceso().equals("Norte")
+                                && response.getAccessDetails().getCategoria().equals(CategoriaTicket.VIP)
+                                && response.getAccessDetails().getZona().equals("A")
+                                && response.getAccessDetails().getCompuerta().equals("Norte")
                 )
                 .verifyComplete();
     }

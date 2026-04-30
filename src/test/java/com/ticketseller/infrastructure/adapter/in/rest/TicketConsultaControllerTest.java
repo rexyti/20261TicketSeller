@@ -1,11 +1,13 @@
 package com.ticketseller.infrastructure.adapter.in.rest;
 
 import com.ticketseller.application.checkout.ConsultarEstadoTicketUseCase;
+import com.ticketseller.domain.model.ticket.AccessDetails;
+import com.ticketseller.domain.model.ticket.CategoriaTicket;
 import com.ticketseller.domain.model.ticket.EstadoTicket;
 import com.ticketseller.domain.model.ticket.Ticket;
 import com.ticketseller.infrastructure.adapter.in.rest.acceso.TicketConsultaController;
 import com.ticketseller.infrastructure.adapter.in.rest.acceso.dto.TicketEstadoResponse;
-import com.ticketseller.infrastructure.adapter.in.rest.mapper.CheckoutRestMapper;
+import com.ticketseller.infrastructure.adapter.in.rest.mapper.AccesoRestMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
@@ -26,7 +28,7 @@ class TicketConsultaControllerTest {
     @MockBean
     private ConsultarEstadoTicketUseCase consultarEstadoTicketUseCase;
     @MockBean
-    private CheckoutRestMapper checkoutRestMapper;
+    private AccesoRestMapper accesoRestMapper;
 
     @Test
     void consultarEstado_ok() {
@@ -37,22 +39,24 @@ class TicketConsultaControllerTest {
                 .id(ticketId)
                 .eventoId(eventoId)
                 .estado(EstadoTicket.VENDIDO)
-                .categoria("VIP")
-                .bloque("A")
-                .coordenadaAcceso("NORTE-1")
-                .fechaEvento(fechaEvento)
+                .accessDetails(AccessDetails.builder()
+                        .categoria(CategoriaTicket.VIP)
+                        .zona("A")
+                        .compuerta("NORTE-1")
+                        .fechaEvento(fechaEvento)
+                        .build())
                 .build();
         TicketEstadoResponse response = new TicketEstadoResponse(
                 ticketId,
+                eventoId,
                 EstadoTicket.VENDIDO,
                 "VIP",
                 "A",
                 "NORTE-1",
-                eventoId,
                 fechaEvento
         );
         when(consultarEstadoTicketUseCase.ejecutar(ticketId)).thenReturn(Mono.just(ticket));
-        when(checkoutRestMapper.toEstadoResponse(ticket)).thenReturn(response);
+        when(accesoRestMapper.toResponse(ticket)).thenReturn(response);
         webTestClient.get()
                 .uri("/api/tickets/{id}", ticketId)
                 .accept(MediaType.APPLICATION_JSON)

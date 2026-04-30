@@ -78,11 +78,8 @@ public class ReservarAsientosUseCase {
                 Set.of(EstadoTicket.VENDIDO));
     }
 
-    private Mono<VentaDetalle> reservar(ReservarAsientosCommand command,
-                                        Zona zona,
-                                        PrecioZona precioZona,
-                                        Compuerta compuerta,
-                                        Long ocupados) {
+    private Mono<VentaDetalle> reservar(ReservarAsientosCommand command, Zona zona,
+                                        PrecioZona precioZona, Compuerta compuerta, Long ocupados) {
         if (zonaSinCuposDisponibles(ocupados, command, zona))
             return Mono.error(new AsientoNoDisponibleException("No hay cupos disponibles en la zona solicitada"));
 

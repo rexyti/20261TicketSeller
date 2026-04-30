@@ -6,10 +6,10 @@ import java.util.UUID;
 
 public record TicketEstadoResponse(
     UUID ticketId,
+    UUID eventoId,
     EstadoTicket estado,
     String categoria,
     String bloque,
     String coordenadaAcceso,
-    UUID eventoId,
     LocalDateTime fechaEvento
 ) {}
