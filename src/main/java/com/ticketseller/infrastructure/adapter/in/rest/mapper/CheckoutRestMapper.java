@@ -5,11 +5,11 @@ import com.ticketseller.application.checkout.ReservarAsientosCommand;
 import com.ticketseller.application.checkout.VentaDetalle;
 import com.ticketseller.domain.model.ticket.Ticket;
 import com.ticketseller.domain.model.venta.Venta;
-import com.ticketseller.infrastructure.adapter.in.rest.dto.checkout.ProcesarPagoRequest;
-import com.ticketseller.infrastructure.adapter.in.rest.dto.checkout.ReservarAsientosRequest;
-import com.ticketseller.infrastructure.adapter.in.rest.dto.checkout.TicketEstadoResponse;
-import com.ticketseller.infrastructure.adapter.in.rest.dto.checkout.TicketResponse;
-import com.ticketseller.infrastructure.adapter.in.rest.dto.checkout.VentaResponse;
+import com.ticketseller.infrastructure.adapter.in.rest.checkout.dto.ProcesarPagoRequest;
+import com.ticketseller.infrastructure.adapter.in.rest.checkout.dto.ReservarAsientosRequest;
+import com.ticketseller.infrastructure.adapter.in.rest.checkout.dto.TicketEstadoResponse;
+import com.ticketseller.infrastructure.adapter.in.rest.checkout.dto.TicketResponse;
+import com.ticketseller.infrastructure.adapter.in.rest.checkout.dto.VentaResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 

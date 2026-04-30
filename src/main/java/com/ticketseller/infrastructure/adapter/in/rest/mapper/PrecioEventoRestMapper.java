@@ -1,8 +1,8 @@
 package com.ticketseller.infrastructure.adapter.in.rest.mapper;
 
 import com.ticketseller.domain.model.zona.PrecioZona;
-import com.ticketseller.infrastructure.adapter.in.rest.dto.evento.PrecioZonaRequest;
-import com.ticketseller.infrastructure.adapter.in.rest.dto.evento.PrecioZonaResponse;
+import com.ticketseller.infrastructure.adapter.in.rest.evento.dto.PrecioZonaRequest;
+import com.ticketseller.infrastructure.adapter.in.rest.evento.dto.PrecioZonaResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 

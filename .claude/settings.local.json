@@ -4,7 +4,8 @@
       "Bash(./gradlew tasks *)",
       "Bash(./gradlew test *)",
       "Bash(./gradlew compileJava --no-daemon)",
-      "Bash(./gradlew check *)"
+      "Bash(./gradlew check *)",
+      "Bash(./gradlew compileTestJava --no-daemon)"
     ]
   }
 }

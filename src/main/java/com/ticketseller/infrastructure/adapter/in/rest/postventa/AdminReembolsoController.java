@@ -1,8 +1,8 @@
 package com.ticketseller.infrastructure.adapter.in.rest.postventa;
 
 import com.ticketseller.application.postventa.GestionarReembolsoManualUseCase;
-import com.ticketseller.infrastructure.adapter.in.rest.dto.postventa.ReembolsoManualRequest;
-import com.ticketseller.infrastructure.adapter.in.rest.dto.postventa.ReembolsoResponse;
+import com.ticketseller.infrastructure.adapter.in.rest.postventa.dto.ReembolsoManualRequest;
+import com.ticketseller.infrastructure.adapter.in.rest.postventa.dto.ReembolsoResponse;
 import com.ticketseller.infrastructure.adapter.in.rest.mapper.PostVentaRestMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

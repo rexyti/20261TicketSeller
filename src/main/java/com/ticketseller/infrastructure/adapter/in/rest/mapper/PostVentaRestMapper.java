@@ -4,9 +4,9 @@ import com.ticketseller.application.postventa.CancelacionResultado;
 import com.ticketseller.application.postventa.TicketConReembolso;
 import com.ticketseller.domain.model.postventa.Reembolso;
 import com.ticketseller.domain.model.ticket.Ticket;
-import com.ticketseller.infrastructure.adapter.in.rest.dto.postventa.CancelacionResponse;
-import com.ticketseller.infrastructure.adapter.in.rest.dto.postventa.ReembolsoResponse;
-import com.ticketseller.infrastructure.adapter.in.rest.dto.postventa.TicketConReembolsoResponse;
+import com.ticketseller.infrastructure.adapter.in.rest.postventa.dto.CancelacionResponse;
+import com.ticketseller.infrastructure.adapter.in.rest.postventa.dto.ReembolsoResponse;
+import com.ticketseller.infrastructure.adapter.in.rest.postventa.dto.TicketConReembolsoResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 

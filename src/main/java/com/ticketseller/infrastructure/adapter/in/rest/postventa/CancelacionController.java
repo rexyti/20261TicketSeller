@@ -2,8 +2,8 @@ package com.ticketseller.infrastructure.adapter.in.rest.postventa;
 
 import com.ticketseller.application.postventa.CancelarTicketUseCase;
 import com.ticketseller.application.postventa.ProcesarReembolsoMasivoUseCase;
-import com.ticketseller.infrastructure.adapter.in.rest.dto.postventa.CancelacionResponse;
-import com.ticketseller.infrastructure.adapter.in.rest.dto.postventa.CancelarTicketRequest;
+import com.ticketseller.infrastructure.adapter.in.rest.postventa.dto.CancelacionResponse;
+import com.ticketseller.infrastructure.adapter.in.rest.postventa.dto.CancelarTicketRequest;
 import com.ticketseller.infrastructure.adapter.in.rest.mapper.PostVentaRestMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

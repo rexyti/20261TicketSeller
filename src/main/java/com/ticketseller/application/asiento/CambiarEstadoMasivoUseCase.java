@@ -5,7 +5,7 @@ import com.ticketseller.domain.model.asiento.EstadoAsiento;
 import com.ticketseller.domain.model.asiento.HistorialCambioEstado;
 import com.ticketseller.domain.repository.AsientoRepositoryPort;
 import com.ticketseller.domain.repository.HistorialCambioEstadoRepositoryPort;
-import com.ticketseller.infrastructure.adapter.in.rest.dto.asiento.CambiarEstadoMasivoResponse;
+import com.ticketseller.infrastructure.adapter.in.rest.asiento.dto.CambiarEstadoMasivoResponse;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;

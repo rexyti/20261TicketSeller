@@ -1,7 +1,7 @@
 package com.ticketseller.infrastructure.adapter.in.rest.mapper;
 
 import com.ticketseller.domain.model.asiento.TipoAsiento;
-import com.ticketseller.infrastructure.adapter.in.rest.dto.tipoasiento.TipoAsientoResponse;
+import com.ticketseller.infrastructure.adapter.in.rest.tipoasiento.dto.TipoAsientoResponse;
 import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring")

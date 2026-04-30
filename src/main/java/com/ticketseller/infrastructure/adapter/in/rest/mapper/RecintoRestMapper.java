@@ -2,9 +2,9 @@ package com.ticketseller.infrastructure.adapter.in.rest.mapper;
 
 import com.ticketseller.domain.model.recinto.Recinto;
 import com.ticketseller.domain.model.zona.Zona;
-import com.ticketseller.infrastructure.adapter.in.rest.dto.recinto.CrearRecintoRequest;
-import com.ticketseller.infrastructure.adapter.in.rest.dto.recinto.RecintoEstructuraResponse;
-import com.ticketseller.infrastructure.adapter.in.rest.dto.recinto.RecintoResponse;
+import com.ticketseller.infrastructure.adapter.in.rest.recinto.dto.CrearRecintoRequest;
+import com.ticketseller.infrastructure.adapter.in.rest.recinto.dto.RecintoEstructuraResponse;
+import com.ticketseller.infrastructure.adapter.in.rest.recinto.dto.RecintoResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 

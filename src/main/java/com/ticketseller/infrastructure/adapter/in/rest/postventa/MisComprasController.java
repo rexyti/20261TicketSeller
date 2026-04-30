@@ -1,7 +1,7 @@
 package com.ticketseller.infrastructure.adapter.in.rest.postventa;
 
 import com.ticketseller.application.postventa.ConsultarEstadoReembolsoUseCase;
-import com.ticketseller.infrastructure.adapter.in.rest.dto.postventa.TicketConReembolsoResponse;
+import com.ticketseller.infrastructure.adapter.in.rest.postventa.dto.TicketConReembolsoResponse;
 import com.ticketseller.infrastructure.adapter.in.rest.mapper.PostVentaRestMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

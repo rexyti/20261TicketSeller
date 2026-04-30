@@ -7,7 +7,7 @@ import com.ticketseller.domain.model.postventa.Reembolso;
 import com.ticketseller.domain.model.ticket.EstadoTicket;
 import com.ticketseller.domain.model.ticket.Ticket;
 import com.ticketseller.infrastructure.adapter.in.rest.GlobalExceptionHandler;
-import com.ticketseller.infrastructure.adapter.in.rest.dto.postventa.TicketConReembolsoResponse;
+import com.ticketseller.infrastructure.adapter.in.rest.postventa.dto.TicketConReembolsoResponse;
 import com.ticketseller.infrastructure.adapter.in.rest.mapper.PostVentaRestMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

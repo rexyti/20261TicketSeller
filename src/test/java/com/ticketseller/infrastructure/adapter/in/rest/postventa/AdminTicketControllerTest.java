@@ -5,7 +5,7 @@ import com.ticketseller.domain.exception.postventa.TransicionEstadoInvalidaExcep
 import com.ticketseller.domain.model.ticket.EstadoTicket;
 import com.ticketseller.domain.model.ticket.Ticket;
 import com.ticketseller.infrastructure.adapter.in.rest.GlobalExceptionHandler;
-import com.ticketseller.infrastructure.adapter.in.rest.dto.postventa.CambiarEstadoTicketRequest;
+import com.ticketseller.infrastructure.adapter.in.rest.postventa.dto.CambiarEstadoTicketRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
