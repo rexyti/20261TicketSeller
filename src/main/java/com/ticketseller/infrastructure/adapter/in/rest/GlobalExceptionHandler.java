@@ -1,5 +1,10 @@
 package com.ticketseller.infrastructure.adapter.in.rest;
 
+import com.ticketseller.domain.exception.conciliacion.PagoEnDiscrepanciaException;
+import com.ticketseller.domain.exception.conciliacion.TransaccionDuplicadaException;
+import com.ticketseller.domain.exception.conciliacion.TransaccionNoConfirmadaException;
+import com.ticketseller.domain.exception.transaccion.TransicionVentaInvalidaException;
+import com.ticketseller.domain.exception.transaccion.VentaNoEncontradaException;
 import com.ticketseller.domain.exception.CapacidadInvalidaException;
 import com.ticketseller.domain.exception.CompuertaInvalidaException;
 import com.ticketseller.domain.exception.asiento.NombreTipoAsientoVacioException;
@@ -31,7 +36,6 @@ import com.ticketseller.domain.exception.zona.ZonaNotFoundException;
 import com.ticketseller.domain.exception.zona.ZonaSinPrecioException;
 import com.ticketseller.domain.exception.asiento.TransicionEstadoInvalidaException;
 import com.ticketseller.domain.exception.asiento.AsientoEnCompraException;
-import com.ticketseller.infrastructure.adapter.in.rest.dto.ApiErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.support.WebExchangeBindException;
@@ -62,6 +66,31 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(VentaNotFoundException.class)
     public ResponseEntity<ApiErrorResponse> ventaNotFound(VentaNotFoundException ex) {
         return error("VENTA_NOT_FOUND", ex.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(VentaNoEncontradaException.class)
+    public ResponseEntity<ApiErrorResponse> ventaNoEncontrada(VentaNoEncontradaException ex) {
+        return error("VENTA_NOT_FOUND", ex.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(TransicionVentaInvalidaException.class)
+    public ResponseEntity<ApiErrorResponse> transicionVentaInvalida(TransicionVentaInvalidaException ex) {
+        return error("TRANSICION_VENTA_INVALIDA", ex.getMessage(), HttpStatus.UNPROCESSABLE_ENTITY);
+    }
+
+    @ExceptionHandler(TransaccionDuplicadaException.class)
+    public ResponseEntity<ApiErrorResponse> transaccionDuplicada(TransaccionDuplicadaException ex) {
+        return error("TRANSACCION_DUPLICADA", ex.getMessage(), HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(TransaccionNoConfirmadaException.class)
+    public ResponseEntity<ApiErrorResponse> transaccionNoConfirmada(TransaccionNoConfirmadaException ex) {
+        return error("TRANSACCION_NOT_FOUND", ex.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(PagoEnDiscrepanciaException.class)
+    public ResponseEntity<ApiErrorResponse> pagoEnDiscrepancia(PagoEnDiscrepanciaException ex) {
+        return error("PAGO_EN_DISCREPANCIA", ex.getMessage(), HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler({RecintoConEventosException.class, RecintoDuplicadoException.class,

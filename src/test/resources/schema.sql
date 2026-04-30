@@ -1,3 +1,8 @@
+DROP TABLE IF EXISTS pagos;
+DROP TABLE IF EXISTS historial_estado_venta;
+DROP TABLE IF EXISTS historial_cambios_estado;
+DROP TABLE IF EXISTS historial_estado_ticket;
+DROP TABLE IF EXISTS reembolsos;
 DROP TABLE IF EXISTS asientos;
 DROP TABLE IF EXISTS tipos_asiento;
 DROP TABLE IF EXISTS transacciones_financieras;
@@ -149,4 +154,27 @@ CREATE TABLE historial_cambios_estado (
     estado_nuevo VARCHAR(20),
     fecha_hora TIMESTAMPTZ NOT NULL,
     motivo VARCHAR(255)
+);
+
+CREATE TABLE historial_estado_venta (
+    id UUID PRIMARY KEY,
+    venta_id UUID NOT NULL REFERENCES ventas(id),
+    actor_id UUID,
+    estado_anterior VARCHAR(40) NOT NULL,
+    estado_nuevo VARCHAR(40) NOT NULL,
+    justificacion VARCHAR(255),
+    fecha_cambio TIMESTAMP NOT NULL
+);
+
+CREATE TABLE pagos (
+    id UUID PRIMARY KEY,
+    venta_id UUID NOT NULL REFERENCES ventas(id),
+    id_externo_pasarela VARCHAR(120) UNIQUE,
+    monto_esperado NUMERIC(12, 2) NOT NULL,
+    monto_pasarela NUMERIC(12, 2),
+    estado VARCHAR(40) NOT NULL,
+    agente_id UUID,
+    justificacion_resolucion TEXT,
+    fecha_creacion TIMESTAMP NOT NULL,
+    fecha_actualizacion TIMESTAMP NOT NULL
 );

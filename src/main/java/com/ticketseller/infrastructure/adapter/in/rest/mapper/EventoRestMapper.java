@@ -1,9 +1,9 @@
 package com.ticketseller.infrastructure.adapter.in.rest.mapper;
 
 import com.ticketseller.domain.model.evento.Evento;
-import com.ticketseller.infrastructure.adapter.in.rest.dto.evento.CrearEventoRequest;
-import com.ticketseller.infrastructure.adapter.in.rest.dto.evento.EditarEventoRequest;
-import com.ticketseller.infrastructure.adapter.in.rest.dto.evento.EventoResponse;
+import com.ticketseller.infrastructure.adapter.in.rest.evento.dto.CrearEventoRequest;
+import com.ticketseller.infrastructure.adapter.in.rest.evento.dto.EditarEventoRequest;
+import com.ticketseller.infrastructure.adapter.in.rest.evento.dto.EventoResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 

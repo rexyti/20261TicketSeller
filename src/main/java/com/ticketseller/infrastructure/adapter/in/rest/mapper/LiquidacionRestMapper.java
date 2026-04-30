@@ -3,10 +3,10 @@ package com.ticketseller.infrastructure.adapter.in.rest.mapper;
 import com.ticketseller.domain.model.evento.SnapshotLiquidacion;
 import com.ticketseller.domain.model.recinto.ConfiguracionLiquidacion;
 import com.ticketseller.domain.model.recinto.Recinto;
-import com.ticketseller.infrastructure.adapter.in.rest.dto.liquidacion.CondicionTicketResponse;
-import com.ticketseller.infrastructure.adapter.in.rest.dto.liquidacion.ModeloNegocioResponse;
-import com.ticketseller.infrastructure.adapter.in.rest.dto.liquidacion.RecaudoIncrementalResponse;
-import com.ticketseller.infrastructure.adapter.in.rest.dto.liquidacion.SnapshotLiquidacionResponse;
+import com.ticketseller.infrastructure.adapter.in.rest.liquidacion.dto.CondicionTicketResponse;
+import com.ticketseller.infrastructure.adapter.in.rest.liquidacion.dto.ModeloNegocioResponse;
+import com.ticketseller.infrastructure.adapter.in.rest.liquidacion.dto.RecaudoIncrementalResponse;
+import com.ticketseller.infrastructure.adapter.in.rest.liquidacion.dto.SnapshotLiquidacionResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 

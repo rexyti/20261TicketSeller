@@ -1,5 +1,9 @@
 package com.ticketseller.infrastructure.config;
 
+import com.ticketseller.application.conciliacion.*;
+import com.ticketseller.application.transaccion.CambiarEstadoVentaUseCase;
+import com.ticketseller.application.transaccion.ConsultarHistorialVentaUseCase;
+import com.ticketseller.application.transaccion.ListarTransaccionesUseCase;
 import com.ticketseller.application.capacidad.ConfigurarCapacidadUseCase;
 import com.ticketseller.application.capacidad.ConfigurarCategoriaUseCase;
 import com.ticketseller.application.checkout.ConsultarVentaUseCase;
@@ -66,6 +70,8 @@ import com.ticketseller.domain.repository.TransaccionFinancieraRepositoryPort;
 import com.ticketseller.domain.repository.VentaRepositoryPort;
 import com.ticketseller.domain.repository.HistorialCambioEstadoRepositoryPort;
 import com.ticketseller.domain.repository.HistorialEstadoTicketRepositoryPort;
+import com.ticketseller.domain.repository.HistorialEstadoVentaRepositoryPort;
+import com.ticketseller.domain.repository.PagoRepositoryPort;
 import com.ticketseller.domain.repository.ReembolsoRepositoryPort;
 import com.ticketseller.infrastructure.adapter.out.payment.WompiAdapter;
 import com.ticketseller.infrastructure.adapter.out.persistence.cancelacionevento.CancelacionEventoR2dbcRepository;
@@ -84,6 +90,12 @@ import com.ticketseller.infrastructure.adapter.out.persistence.checkout.mapper.T
 import com.ticketseller.infrastructure.adapter.out.persistence.checkout.mapper.TransaccionFinancieraPersistenceMapper;
 import com.ticketseller.infrastructure.adapter.out.persistence.checkout.mapper.VentaPersistenceMapper;
 import com.ticketseller.infrastructure.adapter.out.persistence.liquidacion.LiquidacionQueryAdapter;
+import com.ticketseller.infrastructure.adapter.out.persistence.conciliacion.pago.PagoR2dbcRepository;
+import com.ticketseller.infrastructure.adapter.out.persistence.conciliacion.pago.PagoRepositoryAdapter;
+import com.ticketseller.infrastructure.adapter.out.persistence.conciliacion.pago.mapper.PagoPersistenceMapper;
+import com.ticketseller.infrastructure.adapter.out.persistence.transaccion.historial.HistorialEstadoVentaR2dbcRepository;
+import com.ticketseller.infrastructure.adapter.out.persistence.transaccion.historial.HistorialEstadoVentaRepositoryAdapter;
+import com.ticketseller.infrastructure.adapter.out.persistence.transaccion.historial.mapper.HistorialEstadoVentaPersistenceMapper;
 import com.ticketseller.infrastructure.adapter.out.persistence.postventa.HistorialEstadoTicketR2dbcRepository;
 import com.ticketseller.infrastructure.adapter.out.persistence.postventa.HistorialEstadoTicketRepositoryAdapter;
 import com.ticketseller.infrastructure.adapter.out.persistence.postventa.ReembolsoR2dbcRepository;
@@ -180,8 +192,9 @@ public class BeanConfiguration {
 
     @Bean
     public VentaRepositoryPort ventaRepositoryPort(VentaR2dbcRepository repository,
-                                                   VentaPersistenceMapper mapper) {
-        return new VentaRepositoryAdapter(repository, mapper);
+                                                   VentaPersistenceMapper mapper,
+                                                   DatabaseClient databaseClient) {
+        return new VentaRepositoryAdapter(repository, mapper, databaseClient);
     }
 
     @Bean
@@ -508,5 +521,65 @@ public class BeanConfiguration {
                                                                            TicketRepositoryPort ticketRepositoryPort,
                                                                            ReembolsoRepositoryPort reembolsoRepositoryPort) {
         return new ConsultarEstadoReembolsoUseCase(ventaRepositoryPort, ticketRepositoryPort, reembolsoRepositoryPort);
+    }
+
+    @Bean
+    public HistorialEstadoVentaRepositoryPort historialEstadoVentaRepositoryPort(
+            HistorialEstadoVentaR2dbcRepository repository,
+            HistorialEstadoVentaPersistenceMapper mapper) {
+        return new HistorialEstadoVentaRepositoryAdapter(repository, mapper);
+    }
+
+    @Bean
+    public PagoRepositoryPort pagoRepositoryPort(PagoR2dbcRepository repository,
+                                                 PagoPersistenceMapper mapper) {
+        return new PagoRepositoryAdapter(repository, mapper);
+    }
+
+    @Bean
+    public CambiarEstadoVentaUseCase cambiarEstadoVentaUseCase(VentaRepositoryPort ventaRepositoryPort,
+                                                               HistorialEstadoVentaRepositoryPort historialEstadoVentaRepositoryPort) {
+        return new CambiarEstadoVentaUseCase(ventaRepositoryPort, historialEstadoVentaRepositoryPort);
+    }
+
+    @Bean
+    public ConsultarHistorialVentaUseCase consultarHistorialVentaUseCase(VentaRepositoryPort ventaRepositoryPort,
+                                                                         HistorialEstadoVentaRepositoryPort historialEstadoVentaRepositoryPort) {
+        return new ConsultarHistorialVentaUseCase(ventaRepositoryPort, historialEstadoVentaRepositoryPort);
+    }
+
+    @Bean
+    public ListarTransaccionesUseCase listarTransaccionesUseCase(VentaRepositoryPort ventaRepositoryPort) {
+        return new ListarTransaccionesUseCase(ventaRepositoryPort);
+    }
+
+    @Bean
+    public VerificarPagoUseCase verificarPagoUseCase(VentaRepositoryPort ventaRepositoryPort,
+                                                     PagoRepositoryPort pagoRepositoryPort) {
+        return new VerificarPagoUseCase(ventaRepositoryPort, pagoRepositoryPort);
+    }
+
+    @Bean
+    public ConfirmarTransaccionUseCase confirmarTransaccionUseCase(VentaRepositoryPort ventaRepositoryPort,
+                                                                   PagoRepositoryPort pagoRepositoryPort) {
+        return new ConfirmarTransaccionUseCase(ventaRepositoryPort, pagoRepositoryPort);
+    }
+
+    @Bean
+    public ResolverDiscrepanciaUseCase resolverDiscrepanciaUseCase(PagoRepositoryPort pagoRepositoryPort,
+                                                                   VentaRepositoryPort ventaRepositoryPort) {
+        return new ResolverDiscrepanciaUseCase(pagoRepositoryPort, ventaRepositoryPort);
+    }
+
+    @Bean
+    public ListarDiscrepanciaUseCase listarDiscrepanciaUseCase(PagoRepositoryPort pagoRepositoryPort) {
+        return new ListarDiscrepanciaUseCase(pagoRepositoryPort);
+    }
+
+    @Bean
+    public ExpirarTransaccionesPendientesUseCase expirarTransaccionesPendientesUseCase(
+            PagoRepositoryPort pagoRepositoryPort,
+            VentaRepositoryPort ventaRepositoryPort) {
+        return new ExpirarTransaccionesPendientesUseCase(pagoRepositoryPort, ventaRepositoryPort);
     }
 }

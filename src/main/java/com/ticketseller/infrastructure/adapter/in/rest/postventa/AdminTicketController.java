@@ -2,8 +2,8 @@ package com.ticketseller.infrastructure.adapter.in.rest.postventa;
 
 import com.ticketseller.application.postventa.CambiarEstadoTicketUseCase;
 import com.ticketseller.domain.model.ticket.Ticket;
-import com.ticketseller.infrastructure.adapter.in.rest.dto.postventa.CambiarEstadoTicketRequest;
-import com.ticketseller.infrastructure.adapter.in.rest.dto.postventa.TicketConReembolsoResponse;
+import com.ticketseller.infrastructure.adapter.in.rest.postventa.dto.CambiarEstadoTicketRequest;
+import com.ticketseller.infrastructure.adapter.in.rest.postventa.dto.TicketConReembolsoResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

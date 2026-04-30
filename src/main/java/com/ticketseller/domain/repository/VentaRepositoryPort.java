@@ -19,5 +19,9 @@ public interface VentaRepositoryPort {
     Flux<Venta> buscarPorCompradorId(UUID compradorId);
 
     Mono<Venta> actualizarEstado(UUID id, EstadoVenta estado);
+
+    Flux<Venta> buscarConFiltros(EstadoVenta estado, LocalDateTime fechaInicio, LocalDateTime fechaFin, UUID eventoId);
+
+    Mono<Venta> actualizarEstadoCondicional(UUID id, EstadoVenta estadoActual, EstadoVenta nuevoEstado);
 }
 
