@@ -1,18 +1,18 @@
 DROP TABLE IF EXISTS pagos;
 DROP TABLE IF EXISTS historial_estado_venta;
-DROP TABLE IF EXISTS historial_cambios_estado;
 DROP TABLE IF EXISTS historial_estado_ticket;
 DROP TABLE IF EXISTS reembolsos;
-DROP TABLE IF EXISTS asientos;
-DROP TABLE IF EXISTS tipos_asiento;
-DROP TABLE IF EXISTS transacciones_financieras;
+DROP TABLE IF EXISTS historial_cambios_estado;
 DROP TABLE IF EXISTS tickets;
-DROP TABLE IF EXISTS ventas;
+DROP TABLE IF EXISTS transacciones_financieras;
+DROP TABLE IF EXISTS asientos;
 DROP TABLE IF EXISTS precios_zona;
+DROP TABLE IF EXISTS ventas;
 DROP TABLE IF EXISTS cancelaciones_evento;
 DROP TABLE IF EXISTS eventos;
 DROP TABLE IF EXISTS compuertas;
 DROP TABLE IF EXISTS zonas;
+DROP TABLE IF EXISTS tipos_asiento;
 DROP TABLE IF EXISTS recintos;
 
 CREATE TABLE recintos (
@@ -56,13 +56,15 @@ CREATE TABLE compuertas (
 
 CREATE TABLE asientos (
     id UUID PRIMARY KEY,
-    fila INTEGER NOT NULL,
+    fila VARCHAR(20) NOT NULL,
     columna INTEGER NOT NULL,
     numero VARCHAR(20) NOT NULL,
     zona_id UUID REFERENCES zonas(id),
+    tipo VARCHAR(50),
     estado VARCHAR(20),
     existente BOOLEAN NOT NULL DEFAULT TRUE,
-    version BIGINT NOT NULL DEFAULT 0
+    version BIGINT NOT NULL DEFAULT 0,
+    expira_en TIMESTAMP
 );
 CREATE TABLE eventos (
     id UUID PRIMARY KEY,
