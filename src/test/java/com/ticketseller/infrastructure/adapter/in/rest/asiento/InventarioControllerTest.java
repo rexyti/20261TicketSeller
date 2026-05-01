@@ -1,25 +1,22 @@
 package com.ticketseller.infrastructure.adapter.in.rest.asiento;
 
 import com.ticketseller.application.inventario.ConfirmarOcupacionUseCase;
-import com.ticketseller.application.inventario.ReservarAsientoUseCase;
 import com.ticketseller.application.inventario.VerificarDisponibilidadUseCase;
-import com.ticketseller.domain.exception.asiento.AsientoNoDisponibleException;
-import com.ticketseller.domain.exception.asiento.AsientoReservadoPorOtroException;
 import com.ticketseller.domain.exception.asiento.HoldExpiradoException;
 import com.ticketseller.domain.model.asiento.Asiento;
 import com.ticketseller.domain.model.asiento.EstadoAsiento;
 import com.ticketseller.infrastructure.adapter.in.rest.GlobalExceptionHandler;
-import com.ticketseller.infrastructure.adapter.in.rest.asiento.dto.ReservarAsientoRequest;
+import com.ticketseller.infrastructure.adapter.in.rest.asiento.dto.DisponibilidadResponse;
+import com.ticketseller.infrastructure.adapter.in.rest.mapper.AsientoRestMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
-import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 import static org.mockito.Mockito.when;
@@ -35,10 +32,24 @@ class InventarioControllerTest {
     private VerificarDisponibilidadUseCase verificarDisponibilidadUseCase;
 
     @MockBean
-    private ReservarAsientoUseCase reservarAsientoUseCase;
+    private ConfirmarOcupacionUseCase confirmarOcupacionUseCase;
 
     @MockBean
-    private ConfirmarOcupacionUseCase confirmarOcupacionUseCase;
+    private AsientoRestMapper asientoRestMapper;
+
+    @BeforeEach
+    void setup() {
+        when(asientoRestMapper.toDisponibilidadResponse(any(Asiento.class))).thenAnswer(inv -> {
+            Asiento asiento = inv.getArgument(0);
+            boolean disponible = EstadoAsiento.DISPONIBLE.equals(asiento.getEstado());
+            return new DisponibilidadResponse(
+                    asiento.getId(),
+                    disponible,
+                    asiento.getEstado() != null ? asiento.getEstado().name() : null,
+                    asiento.getExpiraEn(),
+                    disponible ? null : "ASIENTO NO DISPONIBLE");
+        });
+    }
 
     // T007: GET disponibilidad con asiento DISPONIBLE → 200, disponible:true
     @Test
@@ -48,7 +59,7 @@ class InventarioControllerTest {
         when(verificarDisponibilidadUseCase.ejecutar(id)).thenReturn(Mono.just(asiento));
 
         webTestClient.get()
-                .uri("/api/inventario/asientos/{id}/disponibilidad", id)
+                .uri("/api/v1/inventario/asientos/{id}/disponibilidad", id)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
@@ -64,7 +75,7 @@ class InventarioControllerTest {
         when(verificarDisponibilidadUseCase.ejecutar(id)).thenReturn(Mono.just(asiento));
 
         webTestClient.get()
-                .uri("/api/inventario/asientos/{id}/disponibilidad", id)
+                .uri("/api/v1/inventario/asientos/{id}/disponibilidad", id)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
@@ -80,7 +91,7 @@ class InventarioControllerTest {
         when(verificarDisponibilidadUseCase.ejecutar(id)).thenReturn(Mono.just(asiento));
 
         webTestClient.get()
-                .uri("/api/inventario/asientos/{id}/disponibilidad", id)
+                .uri("/api/v1/inventario/asientos/{id}/disponibilidad", id)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
@@ -95,48 +106,9 @@ class InventarioControllerTest {
         when(verificarDisponibilidadUseCase.ejecutar(id)).thenReturn(Mono.empty());
 
         webTestClient.get()
-                .uri("/api/inventario/asientos/{id}/disponibilidad", id)
+                .uri("/api/v1/inventario/asientos/{id}/disponibilidad", id)
                 .exchange()
                 .expectStatus().isNotFound();
-    }
-
-    // T015: POST reservar asiento disponible → 201 con estado RESERVADO y expiraEn
-    @Test
-    void reservarAsientoDisponibleRetorna201ConReservadoYExpiraEn() {
-        UUID id = UUID.randomUUID();
-        LocalDateTime expiraEn = LocalDateTime.now().plusMinutes(15);
-        Asiento reservado = Asiento.builder().id(id).estado(EstadoAsiento.RESERVADO)
-                .expiraEn(expiraEn).build();
-        when(reservarAsientoUseCase.ejecutar(id)).thenReturn(Mono.just(reservado));
-
-        webTestClient.post()
-                .uri("/api/inventario/asientos/{id}/reservar", id)
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(new ReservarAsientoRequest(UUID.randomUUID()))
-                .exchange()
-                .expectStatus().isCreated()
-                .expectBody()
-                .jsonPath("$.estado").isEqualTo("RESERVADO")
-                .jsonPath("$.expiraEn").isNotEmpty();
-    }
-
-    // T016: POST reservar segundo intento → 409 con mensaje descriptivo
-    @Test
-    void reservarAsientoYaReservadoRetorna409() {
-        UUID id = UUID.randomUUID();
-        when(reservarAsientoUseCase.ejecutar(id)).thenReturn(
-                Mono.error(new AsientoReservadoPorOtroException(
-                        "ASIENTO NO DISPONIBLE - OTRO USUARIO ESTÁ COMPRANDO ESTE ASIENTO")));
-
-        webTestClient.post()
-                .uri("/api/inventario/asientos/{id}/reservar", id)
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(new ReservarAsientoRequest(UUID.randomUUID()))
-                .exchange()
-                .expectStatus().isEqualTo(409)
-                .expectBody()
-                .jsonPath("$.mensaje").isEqualTo(
-                        "ASIENTO NO DISPONIBLE - OTRO USUARIO ESTÁ COMPRANDO ESTE ASIENTO");
     }
 
     // T017: Scheduler libera holds vencidos (simulado: GET após expiração retorna DISPONIBLE)
@@ -147,7 +119,7 @@ class InventarioControllerTest {
         when(verificarDisponibilidadUseCase.ejecutar(id)).thenReturn(Mono.just(disponible));
 
         webTestClient.get()
-                .uri("/api/inventario/asientos/{id}/disponibilidad", id)
+                .uri("/api/v1/inventario/asientos/{id}/disponibilidad", id)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
@@ -162,7 +134,7 @@ class InventarioControllerTest {
         when(confirmarOcupacionUseCase.confirmar(id)).thenReturn(Mono.just(ocupado));
 
         webTestClient.post()
-                .uri("/api/inventario/asientos/{id}/ocupar", id)
+                .uri("/api/v1/inventario/asientos/{id}/ocupar", id)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
@@ -177,39 +149,12 @@ class InventarioControllerTest {
         when(confirmarOcupacionUseCase.liberar(id)).thenReturn(Mono.just(disponible));
 
         webTestClient.post()
-                .uri("/api/inventario/asientos/{id}/liberar", id)
+                .uri("/api/v1/inventario/asientos/{id}/liberar", id)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
                 .jsonPath("$.estado").isEqualTo("DISPONIBLE")
                 .jsonPath("$.disponible").isEqualTo(true);
-    }
-
-    // T031: Concurrencia — primer request 201, segundo 409
-    @Test
-    void primerReservaExitosaSegundaRetorna409() {
-        UUID id = UUID.randomUUID();
-        LocalDateTime expiraEn = LocalDateTime.now().plusMinutes(15);
-        Asiento reservado = Asiento.builder().id(id).estado(EstadoAsiento.RESERVADO)
-                .expiraEn(expiraEn).build();
-        when(reservarAsientoUseCase.ejecutar(id))
-                .thenReturn(Mono.just(reservado))
-                .thenReturn(Mono.error(new AsientoReservadoPorOtroException(
-                        "ASIENTO NO DISPONIBLE - OTRO USUARIO ESTÁ COMPRANDO ESTE ASIENTO")));
-
-        webTestClient.post()
-                .uri("/api/inventario/asientos/{id}/reservar", id)
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(new ReservarAsientoRequest(UUID.randomUUID()))
-                .exchange()
-                .expectStatus().isCreated();
-
-        webTestClient.post()
-                .uri("/api/inventario/asientos/{id}/reservar", id)
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(new ReservarAsientoRequest(UUID.randomUUID()))
-                .exchange()
-                .expectStatus().isEqualTo(409);
     }
 
     // T026: Confirmar con hold expirado → 409
@@ -220,22 +165,7 @@ class InventarioControllerTest {
                 .thenReturn(Mono.error(new HoldExpiradoException("El hold del asiento ha expirado")));
 
         webTestClient.post()
-                .uri("/api/inventario/asientos/{id}/ocupar", id)
-                .exchange()
-                .expectStatus().isEqualTo(409);
-    }
-
-    // T032: Use case con AsientoNoDisponibleException → 409
-    @Test
-    void reservarAsientoNoEncontradoRetorna409() {
-        UUID id = UUID.randomUUID();
-        when(reservarAsientoUseCase.ejecutar(id))
-                .thenReturn(Mono.error(new AsientoNoDisponibleException("Asiento no encontrado: " + id)));
-
-        webTestClient.post()
-                .uri("/api/inventario/asientos/{id}/reservar", id)
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(new ReservarAsientoRequest(UUID.randomUUID()))
+                .uri("/api/v1/inventario/asientos/{id}/ocupar", id)
                 .exchange()
                 .expectStatus().isEqualTo(409);
     }

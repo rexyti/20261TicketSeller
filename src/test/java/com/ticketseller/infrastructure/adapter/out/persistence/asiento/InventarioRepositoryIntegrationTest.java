@@ -2,9 +2,7 @@ package com.ticketseller.infrastructure.adapter.out.persistence.asiento;
 
 import com.ticketseller.application.inventario.ConfirmarOcupacionUseCase;
 import com.ticketseller.application.inventario.LiberarHoldsVencidosUseCase;
-import com.ticketseller.application.inventario.ReservarAsientoUseCase;
 import com.ticketseller.application.inventario.VerificarDisponibilidadUseCase;
-import com.ticketseller.domain.exception.asiento.AsientoReservadoPorOtroException;
 import com.ticketseller.domain.exception.asiento.HoldExpiradoException;
 import com.ticketseller.domain.model.asiento.EstadoAsiento;
 import com.ticketseller.infrastructure.adapter.out.persistence.asiento.mapper.AsientoPersistenceMapper;
@@ -13,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.r2dbc.DataR2dbcTest;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.r2dbc.core.DatabaseClient;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -60,7 +59,6 @@ class InventarioRepositoryIntegrationTest {
 
     private AsientoRepositoryAdapter adapter;
     private VerificarDisponibilidadUseCase verificarDisponibilidadUseCase;
-    private ReservarAsientoUseCase reservarAsientoUseCase;
     private LiberarHoldsVencidosUseCase liberarHoldsVencidosUseCase;
     private ConfirmarOcupacionUseCase confirmarOcupacionUseCase;
 
@@ -72,7 +70,6 @@ class InventarioRepositoryIntegrationTest {
         AsientoPersistenceMapper mapper = Mappers.getMapper(AsientoPersistenceMapper.class);
         adapter = new AsientoRepositoryAdapter(repository, mapper);
         verificarDisponibilidadUseCase = new VerificarDisponibilidadUseCase(adapter);
-        reservarAsientoUseCase = new ReservarAsientoUseCase(adapter);
         liberarHoldsVencidosUseCase = new LiberarHoldsVencidosUseCase(adapter);
         confirmarOcupacionUseCase = new ConfirmarOcupacionUseCase(adapter);
 
@@ -147,7 +144,7 @@ class InventarioRepositoryIntegrationTest {
     void reservarVerificaExpiraEnYSchedulerLiberaHold() {
         UUID id = insertAsiento("DISPONIBLE");
 
-        StepVerifier.create(reservarAsientoUseCase.ejecutar(id))
+        StepVerifier.create(adapter.reservarConHold(id, LocalDateTime.now().plusMinutes(15)))
                 .assertNext(a -> {
                     assertEquals(EstadoAsiento.RESERVADO, a.getEstado());
                     assertNotNull(a.getExpiraEn());
@@ -177,7 +174,7 @@ class InventarioRepositoryIntegrationTest {
     void flujoReservarConfirmarResultaEnAsientoOcupado() {
         UUID id = insertAsiento("DISPONIBLE");
 
-        StepVerifier.create(reservarAsientoUseCase.ejecutar(id))
+        StepVerifier.create(adapter.reservarConHold(id, LocalDateTime.now().plusMinutes(15)))
                 .assertNext(a -> assertEquals(EstadoAsiento.RESERVADO, a.getEstado()))
                 .verifyComplete();
 
@@ -200,9 +197,9 @@ class InventarioRepositoryIntegrationTest {
         Thread t1 = new Thread(() -> {
             try {
                 latch.await();
-                reservarAsientoUseCase.ejecutar(id).block();
+                adapter.reservarConHold(id, LocalDateTime.now().plusMinutes(15)).block();
                 exitosas.incrementAndGet();
-            } catch (AsientoReservadoPorOtroException e) {
+            } catch (OptimisticLockingFailureException e) {
                 fallidas.incrementAndGet();
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
@@ -211,9 +208,9 @@ class InventarioRepositoryIntegrationTest {
         Thread t2 = new Thread(() -> {
             try {
                 latch.await();
-                reservarAsientoUseCase.ejecutar(id).block();
+                adapter.reservarConHold(id, LocalDateTime.now().plusMinutes(15)).block();
                 exitosas.incrementAndGet();
-            } catch (AsientoReservadoPorOtroException e) {
+            } catch (OptimisticLockingFailureException e) {
                 fallidas.incrementAndGet();
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
@@ -228,7 +225,7 @@ class InventarioRepositoryIntegrationTest {
 
         assertEquals(2, exitosas.get() + fallidas.get(), "Deben sumar exactamente 2 resultados");
         assertEquals(1, exitosas.get(), "Solo una reserva debe ser exitosa");
-        assertEquals(1, fallidas.get(), "La segunda debe fallar con AsientoReservadoPorOtroException");
+        assertEquals(1, fallidas.get(), "La segunda debe fallar con OptimisticLockingFailureException");
     }
 
     // T036: edge case — hold expira exactamente durante confirmación
