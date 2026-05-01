@@ -1,7 +1,7 @@
 package com.ticketseller.infrastructure.adapter.in.rest.postventa;
 
 import com.ticketseller.application.postventa.CambiarEstadoTicketUseCase;
-import com.ticketseller.domain.model.ticket.Ticket;
+import com.ticketseller.infrastructure.adapter.in.rest.mapper.PostVentaRestMapper;
 import com.ticketseller.infrastructure.adapter.in.rest.postventa.dto.CambiarEstadoTicketRequest;
 import com.ticketseller.infrastructure.adapter.in.rest.postventa.dto.TicketConReembolsoResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -24,18 +24,14 @@ import java.util.UUID;
 @Tag(name = "Postventa - Admin Tickets", description = "Cambio manual de estado de tickets")
 public class AdminTicketController {
     private final CambiarEstadoTicketUseCase cambiarEstadoTicketUseCase;
+    private final PostVentaRestMapper postVentaRestMapper;
 
     @Operation(summary = "Cambiar estado manual de ticket")
     @PatchMapping("/{id}/estado")
     public Mono<ResponseEntity<TicketConReembolsoResponse>> cambiarEstado(@PathVariable UUID id,
                                                                            @Valid @RequestBody CambiarEstadoTicketRequest request) {
         return cambiarEstadoTicketUseCase.ejecutar(id, request.estado(), request.justificacion(), request.agenteId())
-                .map(this::toResponse)
+                .map(postVentaRestMapper::toTicketConReembolsoResponse)
                 .map(ResponseEntity::ok);
     }
-
-    private TicketConReembolsoResponse toResponse(Ticket ticket) {
-        return new TicketConReembolsoResponse(ticket.getId(), ticket.getEstado(), null, null, null);
-    }
 }
-

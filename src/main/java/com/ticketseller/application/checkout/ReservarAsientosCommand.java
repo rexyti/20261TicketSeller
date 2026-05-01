@@ -1,5 +1,6 @@
 package com.ticketseller.application.checkout;
 
+import java.util.List;
 import java.util.UUID;
 
 public record ReservarAsientosCommand(
@@ -7,7 +8,8 @@ public record ReservarAsientosCommand(
         UUID eventoId,
         UUID zonaId,
         Integer cantidad,
-        Boolean esCortesia
+        Boolean esCortesia,
+        List<UUID> asientoIds
 ) {
 }
 

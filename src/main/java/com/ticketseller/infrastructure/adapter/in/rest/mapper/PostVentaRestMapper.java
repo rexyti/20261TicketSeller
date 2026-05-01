@@ -17,6 +17,13 @@ public interface PostVentaRestMapper {
     @Mapping(source = "id", target = "reembolsoId")
     ReembolsoResponse toReembolsoResponse(Reembolso reembolso);
 
+    @Mapping(source = "id", target = "ticketId")
+    @Mapping(source = "estado", target = "estadoTicket")
+    @Mapping(target = "estadoReembolso", ignore = true)
+    @Mapping(target = "montoReembolso", ignore = true)
+    @Mapping(target = "reembolsoId", ignore = true)
+    TicketConReembolsoResponse toTicketConReembolsoResponse(Ticket ticket);
+
     default TicketConReembolsoResponse toTicketConReembolsoResponse(TicketConReembolso ticketConReembolso) {
         Ticket ticket = ticketConReembolso.ticket();
         Reembolso reembolso = ticketConReembolso.reembolso();

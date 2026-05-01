@@ -61,8 +61,8 @@ class CheckoutControllerTest {
         UUID zonaId = UUID.randomUUID();
         UUID compuertaId = UUID.randomUUID();
 
-        ReservarAsientosRequest request = new ReservarAsientosRequest(compradorId, eventoId, zonaId, 1, false);
-        ReservarAsientosCommand command = new ReservarAsientosCommand(compradorId, eventoId, zonaId, 1, false);
+        ReservarAsientosRequest request = new ReservarAsientosRequest(compradorId, eventoId, zonaId, 1, false, null);
+        ReservarAsientosCommand command = new ReservarAsientosCommand(compradorId, eventoId, zonaId, 1, false, null);
 
         Venta venta = Venta.builder()
                 .id(ventaId)
@@ -91,7 +91,7 @@ class CheckoutControllerTest {
                 venta.getFechaExpiracion(),
                 venta.getTotal(),
                 List.of(new TicketResponse(ticket.getId(), zonaId, compuertaId, null,
-                        ticket.getPrecio(), null, false, null, null))
+                        ticket.getPrecio(), null, false))
         );
 
         when(checkoutRestMapper.toCommand(request)).thenReturn(command);
@@ -110,9 +110,9 @@ class CheckoutControllerTest {
 
     @Test
     void reservarNoDisponibleRetorna409() {
-        ReservarAsientosRequest request = new ReservarAsientosRequest(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), 1, false);
+        ReservarAsientosRequest request = new ReservarAsientosRequest(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), 1, false, null);
         when(checkoutRestMapper.toCommand(any(ReservarAsientosRequest.class)))
-                .thenReturn(new ReservarAsientosCommand(request.compradorId(), request.eventoId(), request.zonaId(), request.cantidad(), false));
+                .thenReturn(new ReservarAsientosCommand(request.compradorId(), request.eventoId(), request.zonaId(), request.cantidad(), false, null));
         when(reservarAsientosUseCase.ejecutar(any())).thenReturn(Mono.error(new AsientoNoDisponibleException("ocupado")));
 
         webTestClient.post()

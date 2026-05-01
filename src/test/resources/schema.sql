@@ -108,7 +108,11 @@ CREATE TABLE tickets (
     codigo_qr TEXT,
     estado VARCHAR(40) NOT NULL,
     precio NUMERIC(12,2) NOT NULL,
-    es_cortesia BOOLEAN NOT NULL DEFAULT FALSE
+    es_cortesia BOOLEAN NOT NULL DEFAULT FALSE,
+    categoria VARCHAR(20),
+    fecha_evento TIMESTAMP,
+    zona_nombre VARCHAR(100),
+    compuerta_nombre VARCHAR(100)
 );
 
 CREATE TABLE transacciones_financieras (

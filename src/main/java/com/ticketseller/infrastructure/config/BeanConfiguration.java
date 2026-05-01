@@ -387,9 +387,11 @@ public class BeanConfiguration {
                                                            VentaRepositoryPort ventaRepositoryPort,
                                                            ZonaRepositoryPort zonaRepositoryPort,
                                                            PrecioZonaRepositoryPort precioZonaRepositoryPort,
-                                                           CompuertaRepositoryPort compuertaRepositoryPort) {
+                                                           CompuertaRepositoryPort compuertaRepositoryPort,
+                                                           EventoRepositoryPort eventoRepositoryPort,
+                                                           AsientoRepositoryPort asientoRepositoryPort) {
         return new ReservarAsientosUseCase(ticketRepositoryPort, ventaRepositoryPort, zonaRepositoryPort,
-                precioZonaRepositoryPort, compuertaRepositoryPort);
+                precioZonaRepositoryPort, compuertaRepositoryPort, eventoRepositoryPort, asientoRepositoryPort);
     }
 
     @Bean

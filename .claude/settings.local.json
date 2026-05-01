@@ -5,7 +5,10 @@
       "Bash(./gradlew test *)",
       "Bash(./gradlew compileJava --no-daemon)",
       "Bash(./gradlew check *)",
-      "Bash(./gradlew compileTestJava --no-daemon)"
+      "Bash(./gradlew compileTestJava --no-daemon)",
+      "Bash(grep -E \"\\\\.java$\")",
+      "Bash(xargs cat *)",
+      "Bash(xargs ls *)"
     ]
   }
 }

@@ -1,6 +1,8 @@
 package com.ticketseller.application.checkout;
 
 import com.ticketseller.domain.exception.venta.PagoRechazadoException;
+import com.ticketseller.domain.model.ticket.AccessDetails;
+import com.ticketseller.domain.model.ticket.CategoriaTicket;
 import com.ticketseller.domain.model.venta.EstadoVenta;
 import com.ticketseller.domain.model.venta.ResultadoPago;
 import com.ticketseller.domain.model.ticket.Ticket;
@@ -48,7 +50,14 @@ class ProcesarPagoUseCaseTest {
                 .build();
 
         Ticket ticket = Ticket.builder().id(UUID.randomUUID()).ventaId(ventaId)
-                .eventoId(UUID.randomUUID()).zonaId(UUID.randomUUID()).precio(BigDecimal.TEN).build();
+                .eventoId(UUID.randomUUID()).zonaId(UUID.randomUUID()).precio(BigDecimal.TEN)
+                .accessDetails(AccessDetails.builder()
+                        .categoria(CategoriaTicket.GENERAL)
+                        .zona("Zona A")
+                        .compuerta("Compuerta Norte")
+                        .fechaEvento(LocalDateTime.now().plusDays(30))
+                        .build())
+                .build();
 
         when(ventaRepositoryPort.buscarPorId(ventaId)).thenReturn(Mono.just(venta));
         when(pasarelaPagoPort.procesarPago(any(), any(), any())).thenReturn(Mono.just(new ResultadoPago(true, "APROBADO", "AUTH", "OK")));
