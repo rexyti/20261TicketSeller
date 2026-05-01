@@ -4,7 +4,6 @@ import com.ticketseller.application.promocion.CrearDescuentoUseCase;
 import com.ticketseller.application.promocion.ValidarCodigoPromocionalUseCase;
 import com.ticketseller.domain.exception.promocion.CodigoPromoAgotadoException;
 import com.ticketseller.domain.exception.promocion.CodigoPromoExpiradoException;
-import com.ticketseller.domain.exception.promocion.CodigoPromoInvalidoException;
 import com.ticketseller.domain.model.promocion.Descuento;
 import com.ticketseller.domain.model.promocion.TipoDescuento;
 import com.ticketseller.infrastructure.adapter.in.rest.GlobalExceptionHandler;

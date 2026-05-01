@@ -1,7 +1,6 @@
 package com.ticketseller.application.promocion;
 
 import com.ticketseller.domain.exception.evento.EventoNotFoundException;
-import com.ticketseller.domain.exception.promocion.PromocionNoActivaException;
 import com.ticketseller.domain.model.promocion.EstadoPromocion;
 import com.ticketseller.domain.model.promocion.Promocion;
 import com.ticketseller.domain.repository.EventoRepositoryPort;

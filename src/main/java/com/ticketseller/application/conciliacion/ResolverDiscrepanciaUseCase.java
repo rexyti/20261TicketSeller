@@ -8,7 +8,6 @@ import com.ticketseller.domain.model.venta.EstadoVenta;
 import com.ticketseller.domain.repository.PagoRepositoryPort;
 import com.ticketseller.domain.repository.VentaRepositoryPort;
 import lombok.RequiredArgsConstructor;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.UUID;

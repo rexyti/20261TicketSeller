@@ -6,7 +6,6 @@ import com.ticketseller.application.inventario.ReservarAsientoUseCase;
 import com.ticketseller.application.inventario.VerificarDisponibilidadUseCase;
 import com.ticketseller.domain.exception.asiento.AsientoReservadoPorOtroException;
 import com.ticketseller.domain.exception.asiento.HoldExpiradoException;
-import com.ticketseller.domain.model.asiento.Asiento;
 import com.ticketseller.domain.model.asiento.EstadoAsiento;
 import com.ticketseller.infrastructure.adapter.out.persistence.asiento.mapper.AsientoPersistenceMapper;
 import org.junit.jupiter.api.BeforeEach;
