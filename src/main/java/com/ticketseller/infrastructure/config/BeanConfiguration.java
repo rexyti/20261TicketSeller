@@ -3,7 +3,6 @@ package com.ticketseller.infrastructure.config;
 import com.ticketseller.application.conciliacion.*;
 import com.ticketseller.application.inventario.ConfirmarOcupacionUseCase;
 import com.ticketseller.application.inventario.LiberarHoldsVencidosUseCase;
-import com.ticketseller.application.inventario.ReservarAsientoUseCase;
 import com.ticketseller.application.inventario.VerificarDisponibilidadUseCase;
 import com.ticketseller.application.transaccion.CambiarEstadoVentaUseCase;
 import com.ticketseller.application.transaccion.ConsultarHistorialVentaUseCase;
@@ -598,11 +597,6 @@ public class BeanConfiguration {
     public VerificarDisponibilidadUseCase verificarDisponibilidadUseCase(
             AsientoRepositoryPort asientoRepositoryPort) {
         return new VerificarDisponibilidadUseCase(asientoRepositoryPort);
-    }
-
-    @Bean
-    public ReservarAsientoUseCase reservarAsientoUseCase(AsientoRepositoryPort asientoRepositoryPort) {
-        return new ReservarAsientoUseCase(asientoRepositoryPort);
     }
 
     @Bean

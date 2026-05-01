@@ -10,7 +10,12 @@
       "Bash(xargs cat *)",
       "Bash(xargs ls *)",
       "Bash(./gradlew compileJava)",
-      "Bash(./gradlew compileTestJava)"
+      "Bash(./gradlew compileTestJava)",
+      "Bash(xargs grep *)",
+      "Bash(Remove-Item \"C:\\\\Users\\\\USUARIO\\\\Documents\\\\Mis GitProyectos\\\\20261TicketSeller\\\\src\\\\main\\\\java\\\\com\\\\ticketseller\\\\application\\\\inventario\\\\ReservarAsientoUseCase.java\")",
+      "Bash(Remove-Item \"C:\\\\Users\\\\USUARIO\\\\Documents\\\\Mis GitProyectos\\\\20261TicketSeller\\\\src\\\\main\\\\java\\\\com\\\\ticketseller\\\\infrastructure\\\\adapter\\\\in\\\\rest\\\\asiento\\\\dto\\\\ReservarAsientoRequest.java\")",
+      "Bash(Remove-Item \"C:\\\\Users\\\\USUARIO\\\\Documents\\\\Mis GitProyectos\\\\20261TicketSeller\\\\src\\\\test\\\\java\\\\com\\\\ticketseller\\\\application\\\\inventario\\\\ReservarAsientoUseCaseTest.java\")",
+      "Bash(./gradlew compileJava compileTestJava)"
     ]
   }
 }
