@@ -143,6 +143,7 @@ public class ReservarAsientosUseCase {
             return Mono.error(new AsientoNoDisponibleException("No hay cupos disponibles en la zona solicitada"));
         }
 
+        // TODO: coordinar con feature 010, invocar AplicarDescuentoCarritoUseCase aquí al calcular total de la Venta
         BigDecimal total = precioZona.getPrecio().multiply(BigDecimal.valueOf(command.cantidad()));
 
         Venta venta = buildVenta(command, total);
