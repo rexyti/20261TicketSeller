@@ -11,6 +11,8 @@ import com.ticketseller.domain.model.venta.ResultadoPago;
 import com.ticketseller.domain.model.ticket.Ticket;
 import com.ticketseller.domain.model.venta.TransaccionFinanciera;
 import com.ticketseller.domain.model.venta.Venta;
+import com.ticketseller.domain.model.asiento.EstadoAsiento;
+import com.ticketseller.domain.repository.AsientoRepositoryPort;
 import com.ticketseller.domain.repository.CodigoQrPort;
 import com.ticketseller.domain.repository.NotificacionEmailPort;
 import com.ticketseller.domain.repository.PasarelaPagoPort;
@@ -18,9 +20,11 @@ import com.ticketseller.domain.repository.TicketRepositoryPort;
 import com.ticketseller.domain.repository.TransaccionFinancieraRepositoryPort;
 import com.ticketseller.domain.repository.VentaRepositoryPort;
 import lombok.RequiredArgsConstructor;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @RequiredArgsConstructor
@@ -32,6 +36,7 @@ public class ProcesarPagoUseCase {
     private final PasarelaPagoPort pasarelaPagoPort;
     private final NotificacionEmailPort notificacionEmailPort;
     private final CodigoQrPort codigoQrPort;
+    private final AsientoRepositoryPort asientoRepositoryPort;
 
     public Mono<VentaDetalle> ejecutar(UUID ventaId, ProcesarPagoCommand command) {
         if (invalidCommand(command))
@@ -80,10 +85,19 @@ public class ProcesarPagoUseCase {
                 .collectList()
                 .flatMap(ticketsVendidos -> ticketRepositoryPort.guardarTodos(ticketsVendidos)
                         .collectList()
-                        .flatMap(savedTickets -> ventaRepositoryPort.actualizarEstado(venta.getId(), EstadoVenta.COMPLETADA)
+                        .flatMap(savedTickets -> actualizarAsientosVendidos(savedTickets)
+                                .then(ventaRepositoryPort.actualizarEstado(venta.getId(), EstadoVenta.COMPLETADA))
                                 .flatMap(ventaPagada -> guardarTransaccion(ventaPagada, command, resultado)
                                         .then(notificacionEmailPort.enviarConfirmacion(ventaPagada, savedTickets))
                                         .thenReturn(new VentaDetalle(ventaPagada, savedTickets)))));
+    }
+
+    private Mono<Void> actualizarAsientosVendidos(List<Ticket> tickets) {
+        return Flux.fromIterable(tickets)
+                .filter(ticket -> ticket.getAsientoId() != null)
+                .flatMap(ticket -> asientoRepositoryPort.buscarPorId(ticket.getAsientoId())
+                        .flatMap(asiento -> asientoRepositoryPort.guardar(asiento.toBuilder().estado(EstadoAsiento.VENDIDO).build())))
+                .then();
     }
 
     private Ticket buildTicket(Ticket ticket) {

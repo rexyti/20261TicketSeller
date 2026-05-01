@@ -406,9 +406,11 @@ public class BeanConfiguration {
                                                    TransaccionFinancieraRepositoryPort transaccionFinancieraRepositoryPort,
                                                    PasarelaPagoPort pasarelaPagoPort,
                                                    NotificacionEmailPort notificacionEmailPort,
-                                                   CodigoQrPort codigoQrPort) {
+                                                   CodigoQrPort codigoQrPort,
+                                                   AsientoRepositoryPort asientoRepositoryPort) {
         return new ProcesarPagoUseCase(ventaRepositoryPort, ticketRepositoryPort,
-                transaccionFinancieraRepositoryPort, pasarelaPagoPort, notificacionEmailPort, codigoQrPort);
+                transaccionFinancieraRepositoryPort, pasarelaPagoPort, notificacionEmailPort, codigoQrPort,
+                asientoRepositoryPort);
     }
 
     @Bean

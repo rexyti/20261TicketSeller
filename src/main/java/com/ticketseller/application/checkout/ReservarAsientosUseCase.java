@@ -157,7 +157,17 @@ public class ReservarAsientosUseCase {
         return ventaRepositoryPort.guardar(venta)
                 .flatMap(savedVenta -> ticketRepositoryPort.guardarTodos(tickets)
                         .collectList()
-                        .map(savedTickets -> new VentaDetalle(savedVenta, savedTickets)));
+                        .flatMap(savedTickets -> reservarAsientos(asientos)
+                                .thenReturn(new VentaDetalle(savedVenta, savedTickets))));
+    }
+
+    private Mono<Void> reservarAsientos(List<Asiento> asientos) {
+        if (asientos.isEmpty()) {
+            return Mono.empty();
+        }
+        return Flux.fromIterable(asientos)
+                .flatMap(asiento -> asientoRepositoryPort.guardar(asiento.toBuilder().estado(EstadoAsiento.RESERVADO).build()))
+                .then();
     }
 
     private boolean zonaSinCuposDisponibles(Long ocupados, ReservarAsientosCommand command, Zona zona) {

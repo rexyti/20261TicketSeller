@@ -7,12 +7,7 @@ import com.ticketseller.domain.model.venta.EstadoVenta;
 import com.ticketseller.domain.model.venta.ResultadoPago;
 import com.ticketseller.domain.model.ticket.Ticket;
 import com.ticketseller.domain.model.venta.Venta;
-import com.ticketseller.domain.repository.CodigoQrPort;
-import com.ticketseller.domain.repository.NotificacionEmailPort;
-import com.ticketseller.domain.repository.PasarelaPagoPort;
-import com.ticketseller.domain.repository.TicketRepositoryPort;
-import com.ticketseller.domain.repository.TransaccionFinancieraRepositoryPort;
-import com.ticketseller.domain.repository.VentaRepositoryPort;
+import com.ticketseller.domain.repository.*;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -37,9 +32,10 @@ class ProcesarPagoUseCaseTest {
         PasarelaPagoPort pasarelaPagoPort = mock(PasarelaPagoPort.class);
         NotificacionEmailPort notificacionEmailPort = mock(NotificacionEmailPort.class);
         CodigoQrPort codigoQrPort = mock(CodigoQrPort.class);
+        AsientoRepositoryPort asientoRepositoryPort = mock(AsientoRepositoryPort.class);
 
         ProcesarPagoUseCase useCase = new ProcesarPagoUseCase(ventaRepositoryPort, ticketRepositoryPort,
-                transaccionRepository, pasarelaPagoPort, notificacionEmailPort, codigoQrPort);
+                transaccionRepository, pasarelaPagoPort, notificacionEmailPort, codigoQrPort, asientoRepositoryPort);
 
         UUID ventaId = UUID.randomUUID();
         Venta venta = Venta.builder()
@@ -83,9 +79,10 @@ class ProcesarPagoUseCaseTest {
         PasarelaPagoPort pasarelaPagoPort = mock(PasarelaPagoPort.class);
         NotificacionEmailPort notificacionEmailPort = mock(NotificacionEmailPort.class);
         CodigoQrPort codigoQrPort = mock(CodigoQrPort.class);
+        AsientoRepositoryPort asientoRepositoryPort = mock(AsientoRepositoryPort.class);
 
         ProcesarPagoUseCase useCase = new ProcesarPagoUseCase(ventaRepositoryPort, ticketRepositoryPort,
-                transaccionRepository, pasarelaPagoPort, notificacionEmailPort, codigoQrPort);
+                transaccionRepository, pasarelaPagoPort, notificacionEmailPort, codigoQrPort, asientoRepositoryPort);
 
         UUID ventaId = UUID.randomUUID();
         Venta venta = Venta.builder()
