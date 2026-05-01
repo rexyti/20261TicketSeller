@@ -1,5 +1,6 @@
 package com.ticketseller.application.conciliacion;
 
+import com.ticketseller.application.inventario.ConfirmarOcupacionUseCase;
 import com.ticketseller.domain.exception.conciliacion.PagoEnDiscrepanciaException;
 import com.ticketseller.domain.exception.transaccion.VentaNoEncontradaException;
 import com.ticketseller.domain.model.conciliacion.EstadoConciliacion;
@@ -7,6 +8,7 @@ import com.ticketseller.domain.model.conciliacion.Pago;
 import com.ticketseller.domain.model.venta.EstadoVenta;
 import com.ticketseller.domain.model.venta.Venta;
 import com.ticketseller.domain.repository.PagoRepositoryPort;
+import com.ticketseller.domain.repository.TicketRepositoryPort;
 import com.ticketseller.domain.repository.VentaRepositoryPort;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
@@ -20,6 +22,8 @@ public class ConfirmarTransaccionUseCase {
 
     private final VentaRepositoryPort ventaRepositoryPort;
     private final PagoRepositoryPort pagoRepositoryPort;
+    private final TicketRepositoryPort ticketRepositoryPort;
+    private final ConfirmarOcupacionUseCase confirmarOcupacionUseCase;
 
     public Mono<Pago> ejecutar(UUID ventaId, String idExternoPasarela, BigDecimal montoPasarela) {
         return pagoRepositoryPort.buscarPorIdExterno(idExternoPasarela)
@@ -42,7 +46,8 @@ public class ConfirmarTransaccionUseCase {
             return Mono.error(new PagoEnDiscrepanciaException(pago.getId()));
         }
         return ventaRepositoryPort.actualizarEstado(pago.getVentaId(), EstadoVenta.COMPLETADA)
-                .then(pagoRepositoryPort.actualizarEstado(pago.getId(), EstadoConciliacion.CONFIRMADO));
+                .then(pagoRepositoryPort.actualizarEstado(pago.getId(), EstadoConciliacion.CONFIRMADO))
+                .flatMap(pagoConfirmado -> confirmarOcupacionAsientos(pago.getVentaId()).thenReturn(pagoConfirmado));
     }
 
     private boolean pagoEnDiscrepancia(Pago pago) {
@@ -66,7 +71,15 @@ public class ConfirmarTransaccionUseCase {
 
         Pago pagoConfirmado = buildPago(venta, idExternoPasarela, EstadoConciliacion.CONFIRMADO, montoPasarela);
         return ventaRepositoryPort.actualizarEstado(venta.getId(), EstadoVenta.COMPLETADA)
-                .then(pagoRepositoryPort.guardar(pagoConfirmado));
+                .then(pagoRepositoryPort.guardar(pagoConfirmado))
+                .flatMap(pago -> confirmarOcupacionAsientos(venta.getId()).thenReturn(pago));
+    }
+
+    private Mono<Void> confirmarOcupacionAsientos(UUID ventaId) {
+        return ticketRepositoryPort.buscarPorVenta(ventaId)
+                .filter(ticket -> ticket.getAsientoId() != null)
+                .flatMap(ticket -> confirmarOcupacionUseCase.confirmar(ticket.getAsientoId()))
+                .then();
     }
 
     private EstadoConciliacion estadoVenta(Venta venta, BigDecimal montoPasarela){

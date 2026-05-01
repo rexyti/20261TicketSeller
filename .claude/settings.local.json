@@ -9,7 +9,8 @@
       "Bash(grep -E \"\\\\.java$\")",
       "Bash(xargs cat *)",
       "Bash(xargs ls *)",
-      "Bash(./gradlew compileJava)"
+      "Bash(./gradlew compileJava)",
+      "Bash(./gradlew compileTestJava)"
     ]
   }
 }
