@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
@@ -22,6 +23,7 @@ import java.util.UUID;
 
 @Tag(name = "Descuentos", description = "Gestión de descuentos y códigos promocionales")
 @RestController
+@RequestMapping("/api/v1")
 @RequiredArgsConstructor
 public class DescuentoController {
 
@@ -30,7 +32,7 @@ public class DescuentoController {
     private final PromocionRestMapper mapper;
 
     @Operation(summary = "Crear un descuento para una promoción")
-    @PostMapping("/api/admin/promociones/{id}/descuentos")
+    @PostMapping("/admin/promociones/{id}/descuentos")
     public Mono<ResponseEntity<DescuentoResponse>> crearDescuento(
             @PathVariable UUID id,
             @Valid @RequestBody CrearDescuentoRequest request) {
@@ -40,7 +42,7 @@ public class DescuentoController {
     }
 
     @Operation(summary = "Aplicar un código promocional al carrito")
-    @PostMapping("/api/compras/carrito/aplicar-codigo")
+    @PostMapping("/compras/carrito/aplicar-codigo")
     public Mono<ResponseEntity<DescuentoResponse>> aplicarCodigo(
             @Valid @RequestBody AplicarCodigoRequest request) {
         return validarCodigoPromocionalUseCase.ejecutar(request.codigo())

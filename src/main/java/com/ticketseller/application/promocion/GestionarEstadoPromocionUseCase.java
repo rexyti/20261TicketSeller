@@ -23,6 +23,12 @@ public class GestionarEstadoPromocionUseCase {
                 .flatMap(promocionRepositoryPort::guardar);
     }
 
+    private boolean esTransicionValida(EstadoPromocion actual, EstadoPromocion nuevoEstado) {
+        return (EstadoPromocion.ACTIVA.equals(nuevoEstado) && EstadoPromocion.PAUSADA.equals(actual))
+                || (EstadoPromocion.PAUSADA.equals(nuevoEstado) && EstadoPromocion.ACTIVA.equals(actual))
+                || EstadoPromocion.FINALIZADA.equals(nuevoEstado);
+    }
+
     private Mono<Promocion> validarTransicion(Promocion promocion, EstadoPromocion nuevoEstado) {
         EstadoPromocion actual = promocion.getEstado();
 
@@ -30,13 +36,7 @@ public class GestionarEstadoPromocionUseCase {
             return Mono.error(new TransicionPromocionInvalidaException(
                     "Una promoción finalizada no puede cambiar de estado"));
         }
-        if (EstadoPromocion.ACTIVA.equals(nuevoEstado) && EstadoPromocion.PAUSADA.equals(actual)) {
-            return Mono.just(promocion);
-        }
-        if (EstadoPromocion.PAUSADA.equals(nuevoEstado) && EstadoPromocion.ACTIVA.equals(actual)) {
-            return Mono.just(promocion);
-        }
-        if (EstadoPromocion.FINALIZADA.equals(nuevoEstado)) {
+        if (esTransicionValida(actual, nuevoEstado)) {
             return Mono.just(promocion);
         }
         return Mono.error(new TransicionPromocionInvalidaException(
