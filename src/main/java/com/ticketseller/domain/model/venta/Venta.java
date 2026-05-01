@@ -1,8 +1,6 @@
 package com.ticketseller.domain.model.venta;
 
-import com.ticketseller.domain.exception.postventa.TransicionEstadoInvalidaException;
 import com.ticketseller.domain.exception.transaccion.TransicionVentaInvalidaException;
-import com.ticketseller.domain.model.ticket.EstadoTicket;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

@@ -11,6 +11,7 @@
       "Bash(xargs ls *)",
       "Bash(./gradlew compileJava)",
       "Bash(./gradlew compileTestJava)",
+      "Bash(./gradlew checkstyleMain checkstyleTest)"
       "Bash(xargs grep *)",
       "Bash(Remove-Item \"C:\\\\Users\\\\USUARIO\\\\Documents\\\\Mis GitProyectos\\\\20261TicketSeller\\\\src\\\\main\\\\java\\\\com\\\\ticketseller\\\\application\\\\inventario\\\\ReservarAsientoUseCase.java\")",
       "Bash(Remove-Item \"C:\\\\Users\\\\USUARIO\\\\Documents\\\\Mis GitProyectos\\\\20261TicketSeller\\\\src\\\\main\\\\java\\\\com\\\\ticketseller\\\\infrastructure\\\\adapter\\\\in\\\\rest\\\\asiento\\\\dto\\\\ReservarAsientoRequest.java\")",

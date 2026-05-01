@@ -1,6 +1,13 @@
 package com.ticketseller.infrastructure.adapter.in.rest;
 
 import com.ticketseller.domain.exception.conciliacion.PagoEnDiscrepanciaException;
+import com.ticketseller.domain.exception.promocion.CodigoPromoAgotadoException;
+import com.ticketseller.domain.exception.promocion.CodigoPromoExpiradoException;
+import com.ticketseller.domain.exception.promocion.CodigoPromoInvalidoException;
+import com.ticketseller.domain.exception.promocion.PromocionNoActivaException;
+import com.ticketseller.domain.exception.promocion.PromocionNotFoundException;
+import com.ticketseller.domain.exception.promocion.TransicionPromocionInvalidaException;
+import com.ticketseller.domain.exception.promocion.UsuarioNoAutorizadoParaPreventaException;
 import com.ticketseller.domain.exception.conciliacion.TransaccionDuplicadaException;
 import com.ticketseller.domain.exception.conciliacion.TransaccionNoConfirmadaException;
 import com.ticketseller.domain.exception.transaccion.TransicionVentaInvalidaException;
@@ -50,9 +57,21 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler({RecintoNotFoundException.class, TipoAsientoNotFoundException.class, ZonaNotFoundException.class})
+    @ExceptionHandler({RecintoNotFoundException.class, TipoAsientoNotFoundException.class, ZonaNotFoundException.class,
+            PromocionNotFoundException.class, CodigoPromoInvalidoException.class})
     public ResponseEntity<ApiErrorResponse> notFound(RuntimeException ex) {
         return error("NOT_FOUND", ex.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(UsuarioNoAutorizadoParaPreventaException.class)
+    public ResponseEntity<ApiErrorResponse> noAutorizadoPreventa(UsuarioNoAutorizadoParaPreventaException ex) {
+        return error("ACCESO_DENEGADO", ex.getMessage(), HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler({CodigoPromoExpiradoException.class, CodigoPromoAgotadoException.class,
+            PromocionNoActivaException.class, TransicionPromocionInvalidaException.class})
+    public ResponseEntity<ApiErrorResponse> promocionConflict(RuntimeException ex) {
+        return error("PROMOCION_CONFLICT", ex.getMessage(), HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(TicketNotFoundException.class)

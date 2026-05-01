@@ -1,5 +1,6 @@
 package com.ticketseller.infrastructure.adapter.in.rest.checkout.dto;
 
+import com.ticketseller.domain.model.promocion.TipoUsuario;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 
@@ -12,7 +13,8 @@ public record ReservarAsientosRequest(
         @NotNull UUID zonaId,
         @NotNull @Min(1) Integer cantidad,
         Boolean esCortesia,
-        List<UUID> asientoIds
+        List<UUID> asientoIds,
+        TipoUsuario tipoUsuario
 ) {
 }
 

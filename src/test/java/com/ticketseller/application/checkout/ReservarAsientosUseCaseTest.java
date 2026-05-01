@@ -1,5 +1,7 @@
 package com.ticketseller.application.checkout;
 
+import com.ticketseller.application.promocion.AplicarDescuentoCarritoUseCase;
+import com.ticketseller.application.promocion.DescuentoAplicado;
 import com.ticketseller.domain.exception.asiento.AsientoNoDisponibleException;
 import com.ticketseller.domain.model.evento.Evento;
 import com.ticketseller.domain.model.ticket.CategoriaTicket;
@@ -23,6 +25,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -38,10 +41,11 @@ class ReservarAsientosUseCaseTest {
         CompuertaRepositoryPort compuertaRepositoryPort = mock(CompuertaRepositoryPort.class);
         EventoRepositoryPort eventoRepositoryPort = mock(EventoRepositoryPort.class);
         AsientoRepositoryPort asientoRepositoryPort = mock(AsientoRepositoryPort.class);
+        AplicarDescuentoCarritoUseCase aplicarDescuentoCarritoUseCase = mock(AplicarDescuentoCarritoUseCase.class);
 
         ReservarAsientosUseCase useCase = new ReservarAsientosUseCase(ticketRepositoryPort, ventaRepositoryPort,
                 zonaRepositoryPort, precioZonaRepositoryPort, compuertaRepositoryPort, eventoRepositoryPort,
-                asientoRepositoryPort);
+                asientoRepositoryPort, aplicarDescuentoCarritoUseCase);
 
         UUID eventoId = UUID.randomUUID();
         UUID zonaId = UUID.randomUUID();
@@ -55,10 +59,13 @@ class ReservarAsientosUseCaseTest {
         when(ticketRepositoryPort.contarPorEventoYZonaYEstados(any(), any(), anySet())).thenReturn(Mono.just(1L));
         when(eventoRepositoryPort.buscarPorId(eventoId)).thenReturn(Mono.just(
                 Evento.builder().id(eventoId).fechaInicio(LocalDateTime.now().plusDays(30)).build()));
+        when(aplicarDescuentoCarritoUseCase.ejecutar(any(), any(), anyList()))
+                .thenReturn(Mono.just(new DescuentoAplicado(
+                        new BigDecimal("20"), BigDecimal.ZERO, new BigDecimal("20"))));
         when(ventaRepositoryPort.guardar(any())).thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
         when(ticketRepositoryPort.guardarTodos(any())).thenAnswer(invocation -> Flux.fromIterable(invocation.getArgument(0)));
 
-        ReservarAsientosCommand command = new ReservarAsientosCommand(UUID.randomUUID(), eventoId, zonaId, 2, false, null);
+        ReservarAsientosCommand command = new ReservarAsientosCommand(UUID.randomUUID(), eventoId, zonaId, 2, false, null, null);
 
         StepVerifier.create(useCase.ejecutar(command))
                 .assertNext(detalle -> {
@@ -81,10 +88,11 @@ class ReservarAsientosUseCaseTest {
         CompuertaRepositoryPort compuertaRepositoryPort = mock(CompuertaRepositoryPort.class);
         EventoRepositoryPort eventoRepositoryPort = mock(EventoRepositoryPort.class);
         AsientoRepositoryPort asientoRepositoryPort = mock(AsientoRepositoryPort.class);
+        AplicarDescuentoCarritoUseCase aplicarDescuentoCarritoUseCase = mock(AplicarDescuentoCarritoUseCase.class);
 
         ReservarAsientosUseCase useCase = new ReservarAsientosUseCase(ticketRepositoryPort, ventaRepositoryPort,
                 zonaRepositoryPort, precioZonaRepositoryPort, compuertaRepositoryPort, eventoRepositoryPort,
-                asientoRepositoryPort);
+                asientoRepositoryPort, aplicarDescuentoCarritoUseCase);
 
         UUID eventoId = UUID.randomUUID();
         UUID zonaId = UUID.randomUUID();
@@ -98,7 +106,7 @@ class ReservarAsientosUseCaseTest {
         when(eventoRepositoryPort.buscarPorId(eventoId)).thenReturn(Mono.just(
                 Evento.builder().id(eventoId).fechaInicio(LocalDateTime.now().plusDays(30)).build()));
 
-        ReservarAsientosCommand command = new ReservarAsientosCommand(UUID.randomUUID(), eventoId, zonaId, 1, false, null);
+        ReservarAsientosCommand command = new ReservarAsientosCommand(UUID.randomUUID(), eventoId, zonaId, 1, false, null, null);
 
         StepVerifier.create(useCase.ejecutar(command))
                 .expectError(AsientoNoDisponibleException.class)
