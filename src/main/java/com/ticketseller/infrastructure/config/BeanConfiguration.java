@@ -1,6 +1,9 @@
 package com.ticketseller.infrastructure.config;
 
 import com.ticketseller.application.conciliacion.*;
+import com.ticketseller.application.inventario.ConfirmarOcupacionUseCase;
+import com.ticketseller.application.inventario.LiberarHoldsVencidosUseCase;
+import com.ticketseller.application.inventario.VerificarDisponibilidadUseCase;
 import com.ticketseller.application.transaccion.CambiarEstadoVentaUseCase;
 import com.ticketseller.application.transaccion.ConsultarHistorialVentaUseCase;
 import com.ticketseller.application.transaccion.ListarTransaccionesUseCase;
@@ -565,8 +568,11 @@ public class BeanConfiguration {
 
     @Bean
     public ConfirmarTransaccionUseCase confirmarTransaccionUseCase(VentaRepositoryPort ventaRepositoryPort,
-                                                                   PagoRepositoryPort pagoRepositoryPort) {
-        return new ConfirmarTransaccionUseCase(ventaRepositoryPort, pagoRepositoryPort);
+                                                                   PagoRepositoryPort pagoRepositoryPort,
+                                                                   TicketRepositoryPort ticketRepositoryPort,
+                                                                   ConfirmarOcupacionUseCase confirmarOcupacionUseCase) {
+        return new ConfirmarTransaccionUseCase(ventaRepositoryPort, pagoRepositoryPort,
+                ticketRepositoryPort, confirmarOcupacionUseCase);
     }
 
     @Bean
@@ -585,5 +591,23 @@ public class BeanConfiguration {
             PagoRepositoryPort pagoRepositoryPort,
             VentaRepositoryPort ventaRepositoryPort) {
         return new ExpirarTransaccionesPendientesUseCase(pagoRepositoryPort, ventaRepositoryPort);
+    }
+
+    @Bean
+    public VerificarDisponibilidadUseCase verificarDisponibilidadUseCase(
+            AsientoRepositoryPort asientoRepositoryPort) {
+        return new VerificarDisponibilidadUseCase(asientoRepositoryPort);
+    }
+
+    @Bean
+    public LiberarHoldsVencidosUseCase liberarHoldsVencidosUseCase(
+            AsientoRepositoryPort asientoRepositoryPort) {
+        return new LiberarHoldsVencidosUseCase(asientoRepositoryPort);
+    }
+
+    @Bean
+    public ConfirmarOcupacionUseCase confirmarOcupacionUseCase(
+            AsientoRepositoryPort asientoRepositoryPort) {
+        return new ConfirmarOcupacionUseCase(asientoRepositoryPort);
     }
 }

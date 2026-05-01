@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
@@ -19,6 +20,8 @@ public class Asiento {
     private UUID zonaId;
     private TipoAsiento tipoAsiento;
     private EstadoAsiento estado;
+    private LocalDateTime expiraEn;
+    private Long version;
 
     public Asiento normalizarDatosRegistro() {
         return this.toBuilder()
@@ -57,6 +60,7 @@ public class Asiento {
             case BLOQUEADO -> validoFromBloqueado(nuevo);
             case RESERVADO -> validoFromReservado(nuevo);
             case VENDIDO -> validoFromVendido(nuevo);
+            case OCUPADO -> validoFromOcupado(nuevo);
             case MANTENIMIENTO -> validoFromMantenimiento(nuevo);
             default -> false;
         };
@@ -80,7 +84,12 @@ public class Asiento {
     }
 
     private boolean validoFromReservado(EstadoAsiento nuevo) {
-        return EstadoAsiento.DISPONIBLE.equals(nuevo) || EstadoAsiento.VENDIDO.equals(nuevo);
+        return EstadoAsiento.DISPONIBLE.equals(nuevo) || EstadoAsiento.VENDIDO.equals(nuevo)
+                || EstadoAsiento.OCUPADO.equals(nuevo);
+    }
+
+    private boolean validoFromOcupado(EstadoAsiento nuevo) {
+        return EstadoAsiento.ANULADO.equals(nuevo);
     }
 
     private boolean validoFromBloqueado(EstadoAsiento nuevo) {

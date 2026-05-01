@@ -36,6 +36,8 @@ import com.ticketseller.domain.exception.zona.ZonaNotFoundException;
 import com.ticketseller.domain.exception.zona.ZonaSinPrecioException;
 import com.ticketseller.domain.exception.asiento.TransicionEstadoInvalidaException;
 import com.ticketseller.domain.exception.asiento.AsientoEnCompraException;
+import com.ticketseller.domain.exception.asiento.AsientoReservadoPorOtroException;
+import com.ticketseller.domain.exception.asiento.HoldExpiradoException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.support.WebExchangeBindException;
@@ -105,6 +107,16 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({AsientoNoDisponibleException.class, ReservaExpiradaException.class})
     public ResponseEntity<ApiErrorResponse> checkoutConflict(RuntimeException ex) {
         return error("CHECKOUT_CONFLICT", ex.getMessage(), HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(AsientoReservadoPorOtroException.class)
+    public ResponseEntity<ApiErrorResponse> asientoReservadoPorOtro(AsientoReservadoPorOtroException ex) {
+        return error("ASIENTO_RESERVADO_POR_OTRO", ex.getMessage(), HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(HoldExpiradoException.class)
+    public ResponseEntity<ApiErrorResponse> holdExpirado(HoldExpiradoException ex) {
+        return error("HOLD_EXPIRADO", ex.getMessage(), HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler({TicketYaUsadoException.class})
