@@ -1,16 +1,13 @@
 package com.ticketseller.application.checkout;
 
 import com.ticketseller.domain.exception.venta.PagoRechazadoException;
+import com.ticketseller.domain.model.ticket.AccessDetails;
+import com.ticketseller.domain.model.ticket.CategoriaTicket;
 import com.ticketseller.domain.model.venta.EstadoVenta;
 import com.ticketseller.domain.model.venta.ResultadoPago;
 import com.ticketseller.domain.model.ticket.Ticket;
 import com.ticketseller.domain.model.venta.Venta;
-import com.ticketseller.domain.repository.CodigoQrPort;
-import com.ticketseller.domain.repository.NotificacionEmailPort;
-import com.ticketseller.domain.repository.PasarelaPagoPort;
-import com.ticketseller.domain.repository.TicketRepositoryPort;
-import com.ticketseller.domain.repository.TransaccionFinancieraRepositoryPort;
-import com.ticketseller.domain.repository.VentaRepositoryPort;
+import com.ticketseller.domain.repository.*;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -35,9 +32,10 @@ class ProcesarPagoUseCaseTest {
         PasarelaPagoPort pasarelaPagoPort = mock(PasarelaPagoPort.class);
         NotificacionEmailPort notificacionEmailPort = mock(NotificacionEmailPort.class);
         CodigoQrPort codigoQrPort = mock(CodigoQrPort.class);
+        AsientoRepositoryPort asientoRepositoryPort = mock(AsientoRepositoryPort.class);
 
         ProcesarPagoUseCase useCase = new ProcesarPagoUseCase(ventaRepositoryPort, ticketRepositoryPort,
-                transaccionRepository, pasarelaPagoPort, notificacionEmailPort, codigoQrPort);
+                transaccionRepository, pasarelaPagoPort, notificacionEmailPort, codigoQrPort, asientoRepositoryPort);
 
         UUID ventaId = UUID.randomUUID();
         Venta venta = Venta.builder()
@@ -48,7 +46,14 @@ class ProcesarPagoUseCaseTest {
                 .build();
 
         Ticket ticket = Ticket.builder().id(UUID.randomUUID()).ventaId(ventaId)
-                .eventoId(UUID.randomUUID()).zonaId(UUID.randomUUID()).precio(BigDecimal.TEN).build();
+                .eventoId(UUID.randomUUID()).zonaId(UUID.randomUUID()).precio(BigDecimal.TEN)
+                .accessDetails(AccessDetails.builder()
+                        .categoria(CategoriaTicket.GENERAL)
+                        .zona("Zona A")
+                        .compuerta("Compuerta Norte")
+                        .fechaEvento(LocalDateTime.now().plusDays(30))
+                        .build())
+                .build();
 
         when(ventaRepositoryPort.buscarPorId(ventaId)).thenReturn(Mono.just(venta));
         when(pasarelaPagoPort.procesarPago(any(), any(), any())).thenReturn(Mono.just(new ResultadoPago(true, "APROBADO", "AUTH", "OK")));
@@ -74,9 +79,10 @@ class ProcesarPagoUseCaseTest {
         PasarelaPagoPort pasarelaPagoPort = mock(PasarelaPagoPort.class);
         NotificacionEmailPort notificacionEmailPort = mock(NotificacionEmailPort.class);
         CodigoQrPort codigoQrPort = mock(CodigoQrPort.class);
+        AsientoRepositoryPort asientoRepositoryPort = mock(AsientoRepositoryPort.class);
 
         ProcesarPagoUseCase useCase = new ProcesarPagoUseCase(ventaRepositoryPort, ticketRepositoryPort,
-                transaccionRepository, pasarelaPagoPort, notificacionEmailPort, codigoQrPort);
+                transaccionRepository, pasarelaPagoPort, notificacionEmailPort, codigoQrPort, asientoRepositoryPort);
 
         UUID ventaId = UUID.randomUUID();
         Venta venta = Venta.builder()

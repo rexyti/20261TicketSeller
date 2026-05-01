@@ -86,16 +86,16 @@ src/main/java/com/ticketseller/
 │       └── ValidarCodigoPromocionalUseCase.java
 │
 └── infrastructure/
-    ├── adapter/
-    │   ├── in/rest/
-    │   │   └── promocion/
-    │   │       ├── PromocionController.java
-    │   │       ├── DescuentoController.java
-    │   │       └── dto/
-    │   │           └── promocion/
-    │   └── out/persistence/
-    │       └── promocion/
-    │           └── mapper/
+    ├── adapter/in/rest/
+    │   ├── promocion/
+    │   │   ├── PromocionController.java
+    │   │   ├── DescuentoController.java
+    │   │   └── dto/
+    │   └── mapper/
+    │       └── PromocionRestMapper.java
+    ├── adapter/out/persistence/
+    │   └── promocion/
+    │       └── mapper/
     └── config/
         └── BeanConfiguration.java             # Actualizar con los nuevos beans
 

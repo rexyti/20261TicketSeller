@@ -95,8 +95,14 @@ src/main/java/com/ticketseller/
 └── infrastructure/
     ├── adapter/in/rest/
     │   ├── transaccion/
-    │   └── conciliacion/
-    │       └── dto/
+    │   │   ├── TransaccionController.java
+    │   │   └── dto/
+    │   ├── conciliacion/
+    │   │   ├── ConciliacionController.java
+    │   │   └── dto/
+    │   └── mapper/
+    │       ├── TransaccionRestMapper.java
+    │       └── ConciliacionRestMapper.java
     ├── adapter/in/scheduler/
     │   └── conciliacion/
     │       └── ExpiracionTransaccionesScheduler.java

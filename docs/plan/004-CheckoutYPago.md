@@ -85,19 +85,21 @@ src/main/java/com/ticketseller/
 │       └── ConsultarVentaUseCase.java
 │
 └── infrastructure/
-    ├── adapter/
-    │   ├── in/rest/
+    ├── adapter/in/rest/
+    │   ├── checkout/
     │   │   ├── CheckoutController.java
+    │   │   ├── TicketConsultaController.java
     │   │   └── dto/
-    │   │       └── checkout/
-    │   └── out/
-    │       ├── persistence/
-    │       │   └── checkout/
-    │       ├── payment/
-    │       ├── email/
-    │       └── qr/
+    │   └── mapper/
+    │       └── CheckoutRestMapper.java
+    ├── adapter/out/persistence/
+    │   └── checkout/
+    ├── adapter/out/payment/
+    ├── adapter/out/email/
+    ├── adapter/out/qr/
     └── config/
-        └── BeanConfiguration.java             # Actualizar con los nuevos beans
+        ├── BeanConfiguration.java             # Actualizar con los nuevos beans
+        └── CheckoutReservaExpirationJob.java  # Job reactivo para liberar reservas
 
 src/test/java/com/ticketseller/
 ├── domain/
@@ -106,7 +108,7 @@ src/test/java/com/ticketseller/
 │   └── checkout/
 └── infrastructure/
     ├── adapter/in/rest/
-    │   └── CheckoutControllerTest.java
+    │   └── checkout/CheckoutControllerTest.java
     ├── adapter/out/persistence/
     │   └── checkout/
     └── adapter/out/payment/

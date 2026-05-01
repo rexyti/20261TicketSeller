@@ -7,7 +7,7 @@ import com.ticketseller.domain.model.ticket.Ticket;
 import com.ticketseller.domain.model.venta.Venta;
 import com.ticketseller.infrastructure.adapter.in.rest.checkout.dto.ProcesarPagoRequest;
 import com.ticketseller.infrastructure.adapter.in.rest.checkout.dto.ReservarAsientosRequest;
-import com.ticketseller.infrastructure.adapter.in.rest.checkout.dto.TicketEstadoResponse;
+import com.ticketseller.infrastructure.adapter.in.rest.acceso.dto.TicketEstadoResponse;
 import com.ticketseller.infrastructure.adapter.in.rest.checkout.dto.TicketResponse;
 import com.ticketseller.infrastructure.adapter.in.rest.checkout.dto.VentaResponse;
 import org.mapstruct.Mapper;
@@ -23,9 +23,6 @@ public interface CheckoutRestMapper {
     ProcesarPagoCommand toCommand(ProcesarPagoRequest request);
 
     TicketResponse toTicketResponse(Ticket ticket);
-
-    @Mapping(source = "id", target = "ticketId")
-    TicketEstadoResponse toEstadoResponse(Ticket ticket);
 
     VentaResponse toVentaResponse(Venta venta, List<TicketResponse> tickets);
 

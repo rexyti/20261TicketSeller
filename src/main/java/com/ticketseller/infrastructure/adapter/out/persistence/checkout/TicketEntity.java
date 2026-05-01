@@ -9,6 +9,7 @@ import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
@@ -35,4 +36,11 @@ public class TicketEntity {
     private boolean esCortesia;
     @Column("asiento_id")
     private UUID asientoId;
+    private String categoria;
+    @Column("fecha_evento")
+    private LocalDateTime fechaEvento;
+    @Column("zona_nombre")
+    private String zonaNombre;
+    @Column("compuerta_nombre")
+    private String compuertaNombre;
 }

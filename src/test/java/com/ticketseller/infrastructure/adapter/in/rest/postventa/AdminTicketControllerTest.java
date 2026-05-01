@@ -5,7 +5,9 @@ import com.ticketseller.domain.exception.postventa.TransicionEstadoInvalidaExcep
 import com.ticketseller.domain.model.ticket.EstadoTicket;
 import com.ticketseller.domain.model.ticket.Ticket;
 import com.ticketseller.infrastructure.adapter.in.rest.GlobalExceptionHandler;
+import com.ticketseller.infrastructure.adapter.in.rest.mapper.PostVentaRestMapper;
 import com.ticketseller.infrastructure.adapter.in.rest.postventa.dto.CambiarEstadoTicketRequest;
+import com.ticketseller.infrastructure.adapter.in.rest.postventa.dto.TicketConReembolsoResponse;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
@@ -31,6 +33,9 @@ class AdminTicketControllerTest {
     @MockBean
     private CambiarEstadoTicketUseCase cambiarEstadoTicketUseCase;
 
+    @MockBean
+    private PostVentaRestMapper postVentaRestMapper;
+
     @Test
     void cambiarEstadoVendidoRetorna200() {
         UUID ticketId = UUID.randomUUID();
@@ -43,7 +48,9 @@ class AdminTicketControllerTest {
                 .estado(EstadoTicket.VENDIDO)
                 .precio(BigDecimal.valueOf(10))
                 .build();
+        TicketConReembolsoResponse response = new TicketConReembolsoResponse(ticketId, EstadoTicket.VENDIDO, null, null, null);
         when(cambiarEstadoTicketUseCase.ejecutar(any(), any(), any(), any())).thenReturn(Mono.just(ticket));
+        when(postVentaRestMapper.toTicketConReembolsoResponse(ticket)).thenReturn(response);
 
         webTestClient.patch()
                 .uri("/api/v1/admin/tickets/{id}/estado", ticketId)
@@ -70,4 +77,3 @@ class AdminTicketControllerTest {
                 .expectStatus().isEqualTo(422);
     }
 }
-

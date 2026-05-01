@@ -84,15 +84,17 @@ src/main/java/com/ticketseller/
 │       └── ListarPreciosUseCase.java
 │
 └── infrastructure/
-    ├── adapter/
-    │   ├── in/rest/
+    ├── adapter/in/rest/
+    │   ├── evento/
     │   │   ├── EventoController.java
     │   │   ├── PrecioEventoController.java
     │   │   └── dto/
-    │   │       └── evento/
-    │   └── out/persistence/
-    │       ├── evento/
-    │       └── preciozona/
+    │   └── mapper/
+    │       ├── EventoRestMapper.java
+    │       └── PrecioEventoRestMapper.java
+    ├── adapter/out/persistence/
+    │   ├── evento/
+    │   └── preciozona/
     └── config/
         └── BeanConfiguration.java
 
@@ -104,8 +106,8 @@ src/test/java/com/ticketseller/
 │   └── precios/
 └── infrastructure/
     ├── adapter/in/rest/
-    │   ├── EventoControllerTest.java
-    │   └── PrecioEventoControllerTest.java
+    │   ├── evento/EventoControllerTest.java
+    │   └── evento/PrecioEventoControllerTest.java
     └── adapter/out/persistence/
         └── evento/
 ```

@@ -75,27 +75,22 @@ src/main/java/com/ticketseller/
 │   └── MarcarEspacioVacioUseCase.java                    # (US5) Marca un asiento como no existente
 │
 └── infrastructure/
-    ├── adapter/
-    │   ├── in/rest/
+    ├── adapter/in/rest/
+    │   ├── tipoasiento/
     │   │   ├── TipoAsientoController.java                # Inyecta cada use case según el endpoint
+    │   │   └── dto/
+    │   ├── asiento/
     │   │   ├── MapaAsientosController.java               # (US5)
     │   │   └── dto/
-    │   │       ├── CrearTipoAsientoRequest.java
-    │   │       ├── EditarTipoAsientoRequest.java
-    │   │       ├── TipoAsientoResponse.java              # incluye campo enUso (boolean) y advertencia (nullable)
-    │   │       ├── AsignarTipoAsientoRequest.java
-    │   │       ├── CrearMapaAsientosRequest.java         # (US5) filas, columnasPorFila
-    │   │       └── AsientoMapaResponse.java              # (US5) id, fila, columna, numero, existente, estado
-    │   └── out/persistence/
-    │       ├── TipoAsientoEntity.java
-    │       ├── AsientoEntity.java
-    │       ├── TipoAsientoR2dbcRepository.java
-    │       ├── AsientoR2dbcRepository.java
-    │       ├── TipoAsientoRepositoryAdapter.java
-    │       ├── AsientoRepositoryAdapter.java
-    │       └── mapper/
-    │           ├── TipoAsientoPersistenceMapper.java
-    │           └── AsientoPersistenceMapper.java
+    │   └── mapper/
+    │       ├── TipoAsientoRestMapper.java
+    │       └── AsientoRestMapper.java
+    ├── adapter/out/persistence/
+    │   ├── tipoasiento/
+    │   │   └── mapper/
+    │   ├── asiento/
+    │   │   └── mapper/
+    │   └── mapaasientos/
     └── config/
         └── BeanConfiguration.java                        # Registrar los nuevos beans de use case
 
@@ -109,8 +104,8 @@ tests/
 │   └── CrearMapaAsientosUseCaseTest.java                 # (US5)
 └── infrastructure/
     ├── adapter/in/rest/
-    │   ├── TipoAsientoControllerTest.java                # WebTestClient
-    │   └── MapaAsientosControllerTest.java               # (US5) WebTestClient
+    │   ├── tipoasiento/TipoAsientoControllerTest.java    # WebTestClient
+    │   └── asiento/MapaAsientosControllerTest.java       # (US5) WebTestClient
     └── adapter/out/persistence/
         ├── TipoAsientoRepositoryAdapterTest.java         # Testcontainers
         └── AsientoRepositoryAdapterTest.java             # Testcontainers
@@ -211,17 +206,20 @@ src/main/java/com/ticketseller/
 │       └── MarcarEspacioVacioUseCase.java                # (US5)
 │
 └── infrastructure/
-    ├── adapter/
-    │   ├── in/rest/
+    ├── adapter/in/rest/
+    │   ├── tipoasiento/
     │   │   ├── TipoAsientoController.java
+    │   │   └── dto/
+    │   ├── asiento/
     │   │   ├── MapaAsientosController.java               # (US5)
     │   │   └── dto/
-    │   │       ├── tipoasiento/
-    │   │       └── asiento/                              # (US5)
-    │   └── out/persistence/
-    │       ├── tipoasiento/
-    │       ├── asiento/
-    │       └── mapaasientos/
+    │   └── mapper/
+    │       ├── TipoAsientoRestMapper.java
+    │       └── AsientoRestMapper.java
+    ├── adapter/out/persistence/
+    │   ├── tipoasiento/
+    │   ├── asiento/
+    │   └── mapaasientos/
     └── config/
         └── BeanConfiguration.java                        # Registrar los nuevos beans de use case
 

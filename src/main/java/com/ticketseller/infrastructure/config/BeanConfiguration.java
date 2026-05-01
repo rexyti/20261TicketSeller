@@ -387,9 +387,11 @@ public class BeanConfiguration {
                                                            VentaRepositoryPort ventaRepositoryPort,
                                                            ZonaRepositoryPort zonaRepositoryPort,
                                                            PrecioZonaRepositoryPort precioZonaRepositoryPort,
-                                                           CompuertaRepositoryPort compuertaRepositoryPort) {
+                                                           CompuertaRepositoryPort compuertaRepositoryPort,
+                                                           EventoRepositoryPort eventoRepositoryPort,
+                                                           AsientoRepositoryPort asientoRepositoryPort) {
         return new ReservarAsientosUseCase(ticketRepositoryPort, ventaRepositoryPort, zonaRepositoryPort,
-                precioZonaRepositoryPort, compuertaRepositoryPort);
+                precioZonaRepositoryPort, compuertaRepositoryPort, eventoRepositoryPort, asientoRepositoryPort);
     }
 
     @Bean
@@ -404,9 +406,11 @@ public class BeanConfiguration {
                                                    TransaccionFinancieraRepositoryPort transaccionFinancieraRepositoryPort,
                                                    PasarelaPagoPort pasarelaPagoPort,
                                                    NotificacionEmailPort notificacionEmailPort,
-                                                   CodigoQrPort codigoQrPort) {
+                                                   CodigoQrPort codigoQrPort,
+                                                   AsientoRepositoryPort asientoRepositoryPort) {
         return new ProcesarPagoUseCase(ventaRepositoryPort, ticketRepositoryPort,
-                transaccionFinancieraRepositoryPort, pasarelaPagoPort, notificacionEmailPort, codigoQrPort);
+                transaccionFinancieraRepositoryPort, pasarelaPagoPort, notificacionEmailPort, codigoQrPort,
+                asientoRepositoryPort);
     }
 
     @Bean
