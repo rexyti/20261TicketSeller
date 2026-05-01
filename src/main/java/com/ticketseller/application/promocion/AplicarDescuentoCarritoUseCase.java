@@ -34,18 +34,12 @@ public class AplicarDescuentoCarritoUseCase {
                 .filter(p -> p.getTipoUsuarioRestringido() != null)
                 .filter(p -> p.estaVigenteEn(ahora))
                 .collectList()
-                .flatMap(preventas -> {
-                    if (preventas.isEmpty()) {
-                        return Mono.<Void>empty();
-                    }
-                    boolean autorizado = preventas.stream()
-                            .anyMatch(p -> p.getTipoUsuarioRestringido().equals(tipoUsuario));
-                    if (!autorizado) {
-                        return Mono.error(new UsuarioNoAutorizadoParaPreventaException(
-                                "El usuario no está autorizado para acceder a esta preventa"));
-                    }
-                    return Mono.<Void>empty();
-                });
+                .filter(preventas -> !preventas.isEmpty())
+                .flatMap(preventas -> preventas.stream()
+                        .anyMatch(p -> p.getTipoUsuarioRestringido().equals(tipoUsuario))
+                        ? Mono.<Void>empty()
+                        : Mono.error(new UsuarioNoAutorizadoParaPreventaException(
+                                "El usuario no está autorizado para acceder a esta preventa")));
     }
 
     private Mono<DescuentoAplicado> calcularDescuento(UUID eventoId, List<ItemCarrito> items, LocalDateTime ahora) {

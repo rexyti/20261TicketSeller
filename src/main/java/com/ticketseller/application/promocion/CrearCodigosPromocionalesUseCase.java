@@ -4,6 +4,7 @@ import com.ticketseller.domain.exception.promocion.PromocionNoActivaException;
 import com.ticketseller.domain.exception.promocion.PromocionNotFoundException;
 import com.ticketseller.domain.model.promocion.CodigoPromocional;
 import com.ticketseller.domain.model.promocion.EstadoCodigoPromocional;
+import com.ticketseller.domain.model.promocion.Promocion;
 import com.ticketseller.domain.repository.CodigoPromocionalRepositoryPort;
 import com.ticketseller.domain.repository.PromocionRepositoryPort;
 import lombok.RequiredArgsConstructor;
@@ -25,12 +26,8 @@ public class CrearCodigosPromocionalesUseCase {
                                             String prefijo, LocalDateTime fechaFin) {
         return promocionRepositoryPort.buscarPorId(promocionId)
                 .switchIfEmpty(Mono.error(new PromocionNotFoundException("La promoción indicada no existe")))
-                .flatMap(promocion -> {
-                    if (!promocion.estaActiva()) {
-                        return Mono.error(new PromocionNoActivaException("Solo se pueden generar códigos para promociones activas"));
-                    }
-                    return Mono.just(promocion);
-                })
+                .filter(Promocion::estaActiva)
+                .switchIfEmpty(Mono.error(new PromocionNoActivaException("Solo se pueden generar códigos para promociones activas")))
                 .flatMapMany(p -> {
                     List<CodigoPromocional> codigos = generarCodigos(promocionId, cantidad, usosMaximosPorCodigo,
                             prefijo, LocalDateTime.now(), fechaFin);
@@ -38,21 +35,26 @@ public class CrearCodigosPromocionalesUseCase {
                 });
     }
 
+    private CodigoPromocional buildCodigo(UUID promocionId, String base, Integer usosMaximos,
+                                          LocalDateTime fechaInicio, LocalDateTime fechaFin) {
+        return CodigoPromocional.builder()
+                .id(UUID.randomUUID())
+                .codigo(base + UUID.randomUUID().toString().replace("-", "").substring(0, 8).toUpperCase())
+                .promocionId(promocionId)
+                .usosMaximos(usosMaximos)
+                .usosActuales(0)
+                .fechaInicio(fechaInicio)
+                .fechaFin(fechaFin)
+                .estado(EstadoCodigoPromocional.ACTIVO)
+                .build();
+    }
+
     private List<CodigoPromocional> generarCodigos(UUID promocionId, int cantidad,
                                                    Integer usosMaximosPorCodigo, String prefijo,
                                                    LocalDateTime fechaInicio, LocalDateTime fechaFin) {
         String base = prefijo != null && !prefijo.isBlank() ? prefijo.toUpperCase() + "-" : "";
         return IntStream.range(0, cantidad)
-                .mapToObj(i -> CodigoPromocional.builder()
-                        .id(UUID.randomUUID())
-                        .codigo(base + UUID.randomUUID().toString().replace("-", "").substring(0, 8).toUpperCase())
-                        .promocionId(promocionId)
-                        .usosMaximos(usosMaximosPorCodigo)
-                        .usosActuales(0)
-                        .fechaInicio(fechaInicio)
-                        .fechaFin(fechaFin)
-                        .estado(EstadoCodigoPromocional.ACTIVO)
-                        .build())
+                .mapToObj(i -> buildCodigo(promocionId, base, usosMaximosPorCodigo, fechaInicio, fechaFin))
                 .toList();
     }
 }

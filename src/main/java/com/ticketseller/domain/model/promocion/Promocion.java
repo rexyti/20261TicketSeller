@@ -28,6 +28,12 @@ public class Promocion {
     }
 
     public boolean estaVigenteEn(LocalDateTime momento) {
-        return !momento.isBefore(fechaInicio) && !momento.isAfter(fechaFin);
+        return momento.isAfter(fechaInicio) && momento.isBefore(fechaFin);
+    }
+
+    public void validar() {
+        if (nombre == null || nombre.isBlank()) {
+            throw new IllegalArgumentException("El nombre de la promoción no puede ser nulo ni vacío");
+        }
     }
 }
