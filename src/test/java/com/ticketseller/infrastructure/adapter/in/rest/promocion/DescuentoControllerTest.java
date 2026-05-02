@@ -53,7 +53,7 @@ class DescuentoControllerTest {
         when(mapper.toResponse(descuento)).thenReturn(response);
 
         webTestClient.post()
-                .uri("/api/admin/promociones/{id}/descuentos", promocionId)
+                .uri("/api/v1/admin/promociones/{id}/descuentos", promocionId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue("""
                         {
@@ -77,7 +77,7 @@ class DescuentoControllerTest {
         when(mapper.toResponse(descuento)).thenReturn(response);
 
         webTestClient.post()
-                .uri("/api/admin/promociones/{id}/descuentos", promocionId)
+                .uri("/api/v1/admin/promociones/{id}/descuentos", promocionId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue("""
                         {
@@ -99,7 +99,7 @@ class DescuentoControllerTest {
         when(mapper.toResponse(descuento)).thenReturn(response);
 
         webTestClient.post()
-                .uri("/api/compras/carrito/aplicar-codigo")
+                .uri("/api/v1/compras/carrito/aplicar-codigo")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue("{\"codigo\": \"AMIGO20\"}")
                 .exchange()
@@ -112,7 +112,7 @@ class DescuentoControllerTest {
                 .thenReturn(Mono.error(new CodigoPromoAgotadoException("CÓDIGO YA UTILIZADO")));
 
         webTestClient.post()
-                .uri("/api/compras/carrito/aplicar-codigo")
+                .uri("/api/v1/compras/carrito/aplicar-codigo")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue("{\"codigo\": \"USED\"}")
                 .exchange()
@@ -127,7 +127,7 @@ class DescuentoControllerTest {
                 .thenReturn(Mono.error(new CodigoPromoExpiradoException("CÓDIGO EXPIRADO")));
 
         webTestClient.post()
-                .uri("/api/compras/carrito/aplicar-codigo")
+                .uri("/api/v1/compras/carrito/aplicar-codigo")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue("{\"codigo\": \"EXPIRED\"}")
                 .exchange()
@@ -142,7 +142,7 @@ class DescuentoControllerTest {
                 .thenReturn(Mono.error(new CodigoPromoAgotadoException("CÓDIGO YA UTILIZADO")));
 
         webTestClient.post()
-                .uri("/api/compras/carrito/aplicar-codigo")
+                .uri("/api/v1/compras/carrito/aplicar-codigo")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue("{\"codigo\": \"LLENO\"}")
                 .exchange()
@@ -158,7 +158,7 @@ class DescuentoControllerTest {
         when(mapper.toResponse(descuento)).thenReturn(response);
 
         webTestClient.post()
-                .uri("/api/compras/carrito/aplicar-codigo")
+                .uri("/api/v1/compras/carrito/aplicar-codigo")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue("{\"codigo\": \"DESCUENTO20\"}")
                 .exchange()
@@ -173,7 +173,7 @@ class DescuentoControllerTest {
                 .thenReturn(Mono.error(new CodigoPromoExpiradoException("CÓDIGO EXPIRADO")));
 
         webTestClient.post()
-                .uri("/api/compras/carrito/aplicar-codigo")
+                .uri("/api/v1/compras/carrito/aplicar-codigo")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue("{\"codigo\": \"VENCIDO\"}")
                 .exchange()

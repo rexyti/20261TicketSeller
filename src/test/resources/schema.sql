@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS cortesias;
+DROP TABLE IF EXISTS bloqueos;
 DROP TABLE IF EXISTS codigos_promocionales;
 DROP TABLE IF EXISTS descuentos;
 DROP TABLE IF EXISTS promociones;
@@ -105,7 +107,7 @@ CREATE TABLE ventas (
 
 CREATE TABLE tickets (
     id UUID PRIMARY KEY,
-    venta_id UUID NOT NULL REFERENCES ventas(id),
+    venta_id UUID REFERENCES ventas(id),
     evento_id UUID NOT NULL REFERENCES eventos(id),
     zona_id UUID NOT NULL REFERENCES zonas(id),
     compuerta_id UUID REFERENCES compuertas(id),
@@ -203,6 +205,27 @@ CREATE TABLE codigos_promocionales (
     usos_actuales INTEGER NOT NULL DEFAULT 0,
     fecha_inicio TIMESTAMP NOT NULL,
     fecha_fin TIMESTAMP NOT NULL,
+    estado VARCHAR(20) NOT NULL
+);
+
+CREATE TABLE bloqueos (
+    id UUID PRIMARY KEY,
+    asiento_id UUID NOT NULL REFERENCES asientos(id),
+    evento_id UUID NOT NULL REFERENCES eventos(id),
+    destinatario VARCHAR(255) NOT NULL,
+    fecha_creacion TIMESTAMP NOT NULL,
+    fecha_expiracion TIMESTAMP,
+    estado VARCHAR(20) NOT NULL
+);
+
+CREATE TABLE cortesias (
+    id UUID PRIMARY KEY,
+    asiento_id UUID REFERENCES asientos(id),
+    evento_id UUID NOT NULL REFERENCES eventos(id),
+    destinatario VARCHAR(255) NOT NULL,
+    categoria VARCHAR(50) NOT NULL,
+    codigo_unico VARCHAR(100) NOT NULL UNIQUE,
+    ticket_id UUID REFERENCES tickets(id),
     estado VARCHAR(20) NOT NULL
 );
 

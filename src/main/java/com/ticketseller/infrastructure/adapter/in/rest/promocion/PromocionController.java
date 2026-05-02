@@ -31,7 +31,7 @@ import java.util.UUID;
 
 @Tag(name = "Promociones", description = "Gestión de campañas y descuentos")
 @RestController
-@RequestMapping("/api/admin/promociones")
+@RequestMapping("/api/v1/admin/promociones")
 @RequiredArgsConstructor
 public class PromocionController {
 

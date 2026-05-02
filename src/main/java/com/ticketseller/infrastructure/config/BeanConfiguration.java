@@ -1,5 +1,17 @@
 package com.ticketseller.infrastructure.config;
 
+import com.ticketseller.application.bloqueos.BloquearAsientosUseCase;
+import com.ticketseller.application.bloqueos.ConsultarPanelBloqueosUseCase;
+import com.ticketseller.application.bloqueos.CrearCortesiaUseCase;
+import com.ticketseller.application.bloqueos.GestionarBloqueoUseCase;
+import com.ticketseller.domain.repository.BloqueoRepositoryPort;
+import com.ticketseller.domain.repository.CortesiaRepositoryPort;
+import com.ticketseller.infrastructure.adapter.out.persistence.bloqueos.BloqueoR2dbcRepository;
+import com.ticketseller.infrastructure.adapter.out.persistence.bloqueos.BloqueoRepositoryAdapter;
+import com.ticketseller.infrastructure.adapter.out.persistence.bloqueos.CortesiaR2dbcRepository;
+import com.ticketseller.infrastructure.adapter.out.persistence.bloqueos.CortesiaRepositoryAdapter;
+import com.ticketseller.infrastructure.adapter.out.persistence.bloqueos.mapper.BloqueoPersistenceMapper;
+import com.ticketseller.infrastructure.adapter.out.persistence.bloqueos.mapper.CortesiaPersistenceMapper;
 import com.ticketseller.application.conciliacion.*;
 import com.ticketseller.application.promocion.AplicarDescuentoCarritoUseCase;
 import com.ticketseller.application.promocion.CrearCodigosPromocionalesUseCase;
@@ -690,5 +702,46 @@ public class BeanConfiguration {
             PromocionRepositoryPort promocionRepositoryPort,
             DescuentoRepositoryPort descuentoRepositoryPort) {
         return new ValidarCodigoPromocionalUseCase(codigoRepositoryPort, promocionRepositoryPort, descuentoRepositoryPort);
+    }
+
+    @Bean
+    public BloqueoRepositoryPort bloqueoRepositoryPort(BloqueoR2dbcRepository repository,
+                                                        BloqueoPersistenceMapper mapper) {
+        return new BloqueoRepositoryAdapter(repository, mapper);
+    }
+
+    @Bean
+    public CortesiaRepositoryPort cortesiaRepositoryPort(CortesiaR2dbcRepository repository,
+                                                          CortesiaPersistenceMapper mapper) {
+        return new CortesiaRepositoryAdapter(repository, mapper);
+    }
+
+    @Bean
+    public BloquearAsientosUseCase bloquearAsientosUseCase(
+            com.ticketseller.domain.repository.AsientoRepositoryPort asientoRepositoryPort,
+            BloqueoRepositoryPort bloqueoRepositoryPort) {
+        return new BloquearAsientosUseCase(asientoRepositoryPort, bloqueoRepositoryPort);
+    }
+
+    @Bean
+    public CrearCortesiaUseCase crearCortesiaUseCase(
+            com.ticketseller.domain.repository.AsientoRepositoryPort asientoRepositoryPort,
+            CortesiaRepositoryPort cortesiaRepositoryPort,
+            com.ticketseller.domain.repository.TicketRepositoryPort ticketRepositoryPort) {
+        return new CrearCortesiaUseCase(asientoRepositoryPort, cortesiaRepositoryPort, ticketRepositoryPort);
+    }
+
+    @Bean
+    public GestionarBloqueoUseCase gestionarBloqueoUseCase(
+            BloqueoRepositoryPort bloqueoRepositoryPort,
+            com.ticketseller.domain.repository.AsientoRepositoryPort asientoRepositoryPort) {
+        return new GestionarBloqueoUseCase(bloqueoRepositoryPort, asientoRepositoryPort);
+    }
+
+    @Bean
+    public ConsultarPanelBloqueosUseCase consultarPanelBloqueosUseCase(
+            BloqueoRepositoryPort bloqueoRepositoryPort,
+            CortesiaRepositoryPort cortesiaRepositoryPort) {
+        return new ConsultarPanelBloqueosUseCase(bloqueoRepositoryPort, cortesiaRepositoryPort);
     }
 }

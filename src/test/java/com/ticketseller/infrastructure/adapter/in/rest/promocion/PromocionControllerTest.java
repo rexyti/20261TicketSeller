@@ -68,7 +68,7 @@ class PromocionControllerTest {
         when(mapper.toResponse(promocion)).thenReturn(response);
 
         webTestClient.post()
-                .uri("/api/admin/promociones")
+                .uri("/api/v1/admin/promociones")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue("""
                         {
@@ -100,7 +100,7 @@ class PromocionControllerTest {
         when(mapper.toResponse(descuentoAplicado)).thenReturn(responseDto);
 
         webTestClient.post()
-                .uri("/api/admin/promociones/calcular-descuentos")
+                .uri("/api/v1/admin/promociones/calcular-descuentos")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue("""
                         {
@@ -121,7 +121,7 @@ class PromocionControllerTest {
                         "El usuario no está autorizado para acceder a esta preventa")));
 
         webTestClient.post()
-                .uri("/api/admin/promociones/calcular-descuentos")
+                .uri("/api/v1/admin/promociones/calcular-descuentos")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue("""
                         {
@@ -147,7 +147,7 @@ class PromocionControllerTest {
         when(mapper.toResponse(pausada)).thenReturn(response);
 
         webTestClient.patch()
-                .uri("/api/admin/promociones/{id}/estado", id)
+                .uri("/api/v1/admin/promociones/{id}/estado", id)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue("{\"estado\": \"PAUSADA\"}")
                 .exchange()
@@ -161,7 +161,7 @@ class PromocionControllerTest {
                 .thenReturn(Mono.error(new TransicionPromocionInvalidaException("Transición inválida")));
 
         webTestClient.patch()
-                .uri("/api/admin/promociones/{id}/estado", id)
+                .uri("/api/v1/admin/promociones/{id}/estado", id)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue("{\"estado\": \"PAUSADA\"}")
                 .exchange()
@@ -179,7 +179,7 @@ class PromocionControllerTest {
         when(mapper.toResponse(activa)).thenReturn(response);
 
         webTestClient.patch()
-                .uri("/api/admin/promociones/{id}/estado", id)
+                .uri("/api/v1/admin/promociones/{id}/estado", id)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue("{\"estado\": \"ACTIVA\"}")
                 .exchange()
@@ -194,7 +194,7 @@ class PromocionControllerTest {
                         "Una promoción finalizada no puede cambiar de estado")));
 
         webTestClient.patch()
-                .uri("/api/admin/promociones/{id}/estado", id)
+                .uri("/api/v1/admin/promociones/{id}/estado", id)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue("{\"estado\": \"ACTIVA\"}")
                 .exchange()
@@ -213,7 +213,7 @@ class PromocionControllerTest {
                 .thenReturn(Flux.just(codigo1, codigo2));
 
         webTestClient.post()
-                .uri("/api/admin/promociones/{id}/codigos", id)
+                .uri("/api/v1/admin/promociones/{id}/codigos", id)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue("""
                         {
