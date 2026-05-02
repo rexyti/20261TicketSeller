@@ -1,5 +1,8 @@
 package com.ticketseller.infrastructure.adapter.in.rest;
 
+import com.ticketseller.domain.exception.bloqueos.AsientoOcupadoException;
+import com.ticketseller.domain.exception.bloqueos.AsientoYaBloqueadoException;
+import com.ticketseller.domain.exception.bloqueos.BloqueoNoEncontradoException;
 import com.ticketseller.domain.exception.conciliacion.PagoEnDiscrepanciaException;
 import com.ticketseller.domain.exception.promocion.CodigoPromoAgotadoException;
 import com.ticketseller.domain.exception.promocion.CodigoPromoExpiradoException;
@@ -112,6 +115,16 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(PagoEnDiscrepanciaException.class)
     public ResponseEntity<ApiErrorResponse> pagoEnDiscrepancia(PagoEnDiscrepanciaException ex) {
         return error("PAGO_EN_DISCREPANCIA", ex.getMessage(), HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler({AsientoYaBloqueadoException.class, AsientoOcupadoException.class})
+    public ResponseEntity<ApiErrorResponse> bloqueoConflict(RuntimeException ex) {
+        return error("BLOQUEO_CONFLICT", ex.getMessage(), HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(BloqueoNoEncontradoException.class)
+    public ResponseEntity<ApiErrorResponse> bloqueoNotFound(BloqueoNoEncontradoException ex) {
+        return error("BLOQUEO_NOT_FOUND", ex.getMessage(), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler({RecintoConEventosException.class, RecintoDuplicadoException.class,

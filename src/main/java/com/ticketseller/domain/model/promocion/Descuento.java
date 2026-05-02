@@ -26,7 +26,7 @@ public class Descuento {
     }
 
     public void validar() {
-        if (valor == null || valor.compareTo(BigDecimal.ZERO) < 0) {
+        if (valor == null || valor.compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("El valor del descuento no puede ser negativo");
         }
         if (TipoDescuento.PORCENTAJE.equals(tipo) && valor.compareTo(new BigDecimal("100")) > 0) {
