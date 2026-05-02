@@ -3,7 +3,7 @@ package com.ticketseller.infrastructure.adapter.in.rest.bloqueos;
 import com.ticketseller.application.bloqueos.BloquearAsientosUseCase;
 import com.ticketseller.application.bloqueos.ConsultarPanelBloqueosUseCase;
 import com.ticketseller.application.bloqueos.GestionarBloqueoUseCase;
-import com.ticketseller.domain.model.bloqueos.TipoPanelItem;
+import com.ticketseller.application.bloqueos.TipoPanelItem;
 import com.ticketseller.infrastructure.adapter.in.rest.bloqueos.dto.BloquearAsientosRequest;
 import com.ticketseller.infrastructure.adapter.in.rest.bloqueos.dto.BloqueoResponse;
 import com.ticketseller.infrastructure.adapter.in.rest.bloqueos.dto.EditarBloqueoRequest;

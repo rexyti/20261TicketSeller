@@ -1,4 +1,4 @@
-package com.ticketseller.domain.model.bloqueos;
+package com.ticketseller.application.bloqueos;
 
 import java.time.LocalDateTime;
 import java.util.UUID;

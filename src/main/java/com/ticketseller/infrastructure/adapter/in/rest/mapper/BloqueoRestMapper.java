@@ -1,7 +1,7 @@
 package com.ticketseller.infrastructure.adapter.in.rest.mapper;
 
+import com.ticketseller.application.bloqueos.PanelItem;
 import com.ticketseller.domain.model.bloqueos.Bloqueo;
-import com.ticketseller.domain.model.bloqueos.PanelItem;
 import com.ticketseller.infrastructure.adapter.in.rest.bloqueos.dto.BloqueoResponse;
 import com.ticketseller.infrastructure.adapter.in.rest.bloqueos.dto.PanelItemResponse;
 import org.mapstruct.Mapper;

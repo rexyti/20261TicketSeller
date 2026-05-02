@@ -4,20 +4,17 @@ import com.ticketseller.domain.model.bloqueos.Bloqueo;
 import com.ticketseller.domain.model.bloqueos.EstadoBloqueo;
 import com.ticketseller.domain.repository.BloqueoRepositoryPort;
 import com.ticketseller.infrastructure.adapter.out.persistence.bloqueos.mapper.BloqueoPersistenceMapper;
+import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.UUID;
 
+@RequiredArgsConstructor
 public class BloqueoRepositoryAdapter implements BloqueoRepositoryPort {
 
     private final BloqueoR2dbcRepository repository;
     private final BloqueoPersistenceMapper mapper;
-
-    public BloqueoRepositoryAdapter(BloqueoR2dbcRepository repository, BloqueoPersistenceMapper mapper) {
-        this.repository = repository;
-        this.mapper = mapper;
-    }
 
     @Override
     public Mono<Bloqueo> guardar(Bloqueo bloqueo) {

@@ -3,20 +3,17 @@ package com.ticketseller.infrastructure.adapter.out.persistence.bloqueos;
 import com.ticketseller.domain.model.bloqueos.Cortesia;
 import com.ticketseller.domain.repository.CortesiaRepositoryPort;
 import com.ticketseller.infrastructure.adapter.out.persistence.bloqueos.mapper.CortesiaPersistenceMapper;
+import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.UUID;
 
+@RequiredArgsConstructor
 public class CortesiaRepositoryAdapter implements CortesiaRepositoryPort {
 
     private final CortesiaR2dbcRepository repository;
     private final CortesiaPersistenceMapper mapper;
-
-    public CortesiaRepositoryAdapter(CortesiaR2dbcRepository repository, CortesiaPersistenceMapper mapper) {
-        this.repository = repository;
-        this.mapper = mapper;
-    }
 
     @Override
     public Mono<Cortesia> guardar(Cortesia cortesia) {

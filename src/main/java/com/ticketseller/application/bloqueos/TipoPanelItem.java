@@ -1,4 +1,4 @@
-package com.ticketseller.domain.model.bloqueos;
+package com.ticketseller.application.bloqueos;
 
 public enum TipoPanelItem {
     BLOQUEO,

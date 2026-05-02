@@ -82,6 +82,7 @@ public class CrearCortesiaUseCase {
                 .ticketId(ticketId)
                 .estado(EstadoCortesia.GENERADA)
                 .build();
+        cortesia.validar();
         return cortesiaRepositoryPort.guardar(cortesia);
     }
 
@@ -95,6 +96,7 @@ public class CrearCortesiaUseCase {
                 .codigoUnico(codigoUnico)
                 .estado(EstadoCortesia.GENERADA)
                 .build();
+        cortesia.validar();
         return cortesiaRepositoryPort.guardar(cortesia);
     }
 }

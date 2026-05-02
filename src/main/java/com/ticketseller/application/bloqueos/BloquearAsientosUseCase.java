@@ -63,6 +63,7 @@ public class BloquearAsientosUseCase {
                 .fechaExpiracion(fechaExpiracion)
                 .estado(EstadoBloqueo.ACTIVO)
                 .build();
+        bloqueo.validar();
         return bloqueoRepositoryPort.guardar(bloqueo);
     }
 }

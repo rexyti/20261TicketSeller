@@ -20,4 +20,13 @@ public class Cortesia {
     private String codigoUnico;
     private UUID ticketId;
     private EstadoCortesia estado;
+
+    public void validar() {
+        if (destinatario == null || destinatario.isBlank()) {
+            throw new IllegalArgumentException("El destinatario de la cortesía no puede estar vacío");
+        }
+        if (codigoUnico == null || codigoUnico.isBlank()) {
+            throw new IllegalArgumentException("El código único de la cortesía no puede estar vacío");
+        }
+    }
 }
