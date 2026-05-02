@@ -76,6 +76,6 @@ public class BloqueoController {
     @DeleteMapping("/bloqueos/{bloqueoId}")
     public Mono<ResponseEntity<Void>> liberarBloqueo(@PathVariable UUID bloqueoId) {
         return gestionarBloqueoUseCase.liberarBloqueo(bloqueoId)
-                .thenReturn(ResponseEntity.<Void>noContent().build());
+                .thenReturn(ResponseEntity.noContent().build());
     }
 }

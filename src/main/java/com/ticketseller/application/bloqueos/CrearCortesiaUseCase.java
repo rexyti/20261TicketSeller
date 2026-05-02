@@ -36,7 +36,7 @@ public class CrearCortesiaUseCase {
         return asientoRepositoryPort.buscarPorId(asientoId)
                 .switchIfEmpty(Mono.error(new IllegalArgumentException(
                         "Asiento %s no encontrado".formatted(asientoId))))
-                .flatMap(asiento -> validarYBloquear(asiento))
+                .flatMap(this::validarYBloquear)
                 .flatMap(asiento -> crearTicketYCortesia(eventoId, destinatario, categoria, asiento));
     }
 

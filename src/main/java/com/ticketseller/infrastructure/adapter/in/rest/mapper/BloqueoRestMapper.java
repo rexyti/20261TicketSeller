@@ -21,7 +21,7 @@ public interface BloqueoRestMapper {
         if (bloqueos.isEmpty()) {
             return null;
         }
-        Bloqueo first = bloqueos.get(0);
+        Bloqueo first = bloqueos.getFirst();
         List<java.util.UUID> asientoIds = bloqueos.stream()
                 .map(Bloqueo::getAsientoId)
                 .toList();

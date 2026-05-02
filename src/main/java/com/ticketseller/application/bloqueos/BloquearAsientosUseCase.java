@@ -28,7 +28,7 @@ public class BloquearAsientosUseCase {
                 .flatMap(id -> asientoRepositoryPort.buscarPorId(id)
                         .switchIfEmpty(Mono.error(new IllegalArgumentException(
                                 "Asiento %s no encontrado".formatted(id)))))
-                .doOnNext(asiento -> validarDisponible(asiento))
+                .doOnNext(this::validarDisponible)
                 .collectList()
                 .flatMap(asientos -> bloquearTodos(asientos, eventoId, destinatario, fechaExpiracion));
     }
