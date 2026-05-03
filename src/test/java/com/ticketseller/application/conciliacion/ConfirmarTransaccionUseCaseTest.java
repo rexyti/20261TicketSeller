@@ -53,7 +53,7 @@ class ConfirmarTransaccionUseCaseTest {
         when(pagoRepositoryPort.actualizarEstado(pagoId, EstadoConciliacion.CONFIRMADO))
                 .thenReturn(Mono.just(pagoConfirmado));
         when(ticketRepositoryPort.buscarPorVenta(ventaId)).thenReturn(Flux.just(ticket));
-        when(confirmarOcupacionUseCase.confirmar(asientoId)).thenReturn(Mono.just(ocupado));
+        when(confirmarOcupacionUseCase.ejecutar(asientoId)).thenReturn(Mono.just(ocupado));
 
         StepVerifier.create(useCase.ejecutar(ventaId, "ext-123", BigDecimal.valueOf(100)))
                 .assertNext(p -> assertEquals(EstadoConciliacion.CONFIRMADO, p.getEstado()))
@@ -76,7 +76,7 @@ class ConfirmarTransaccionUseCaseTest {
         when(ventaRepositoryPort.actualizarEstado(ventaId, EstadoVenta.COMPLETADA)).thenReturn(Mono.just(venta));
         when(pagoRepositoryPort.guardar(any())).thenReturn(Mono.just(pagoGuardado));
         when(ticketRepositoryPort.buscarPorVenta(ventaId)).thenReturn(Flux.just(ticket));
-        when(confirmarOcupacionUseCase.confirmar(asientoId)).thenReturn(Mono.just(ocupado));
+        when(confirmarOcupacionUseCase.ejecutar(asientoId)).thenReturn(Mono.just(ocupado));
 
         StepVerifier.create(useCase.ejecutar(ventaId, "ext-new", BigDecimal.valueOf(50)))
                 .assertNext(p -> assertEquals(EstadoConciliacion.CONFIRMADO, p.getEstado()))

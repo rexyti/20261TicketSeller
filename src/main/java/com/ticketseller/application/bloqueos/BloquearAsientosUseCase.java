@@ -1,5 +1,6 @@
 package com.ticketseller.application.bloqueos;
 
+import com.ticketseller.domain.exception.asiento.AsientoNotFoundException;
 import com.ticketseller.domain.exception.bloqueos.AsientoOcupadoException;
 import com.ticketseller.domain.exception.bloqueos.AsientoYaBloqueadoException;
 import com.ticketseller.domain.model.asiento.Asiento;
@@ -26,7 +27,7 @@ public class BloquearAsientosUseCase {
                                         String destinatario, LocalDateTime fechaExpiracion) {
         return Flux.fromIterable(asientoIds)
                 .flatMap(id -> asientoRepositoryPort.buscarPorId(id)
-                        .switchIfEmpty(Mono.error(new IllegalArgumentException(
+                        .switchIfEmpty(Mono.error(new AsientoNotFoundException(
                                 "Asiento %s no encontrado".formatted(id)))))
                 .doOnNext(this::validarDisponible)
                 .collectList()
@@ -45,11 +46,17 @@ public class BloquearAsientosUseCase {
     private Mono<List<Bloqueo>> bloquearTodos(List<Asiento> asientos, UUID eventoId,
                                                String destinatario, LocalDateTime fechaExpiracion) {
         List<Asiento> bloqueados = asientos.stream()
-                .map(a -> a.toBuilder().estado(EstadoAsiento.BLOQUEADO).build())
+                .map(this::buildAsientoBloqueado)
                 .toList();
         return asientoRepositoryPort.guardarTodos(bloqueados)
                 .flatMap(asiento -> crearBloqueo(asiento.getId(), eventoId, destinatario, fechaExpiracion))
                 .collectList();
+    }
+
+    private Asiento buildAsientoBloqueado(Asiento asiento){
+        return asiento.toBuilder()
+                .estado(EstadoAsiento.BLOQUEADO)
+                .build();
     }
 
     private Mono<Bloqueo> crearBloqueo(UUID asientoId, UUID eventoId,

@@ -1,5 +1,8 @@
 package com.ticketseller.application.liquidacion;
 
+import com.ticketseller.domain.exception.liquidacion.ModeloNegocioInvalidoException;
+import com.ticketseller.domain.exception.liquidacion.MontoFijoInvalidoException;
+import com.ticketseller.domain.exception.recinto.RecintoNoCategorizadoException;
 import com.ticketseller.domain.exception.recinto.RecintoNotFoundException;
 import com.ticketseller.domain.model.recinto.ModeloNegocio;
 import com.ticketseller.domain.model.recinto.Recinto;
@@ -34,13 +37,13 @@ public class ConfigurarModeloNegocioUseCase {
 
     private void validarModelo(ModeloNegocio modelo, BigDecimal montoFijo, Recinto recinto) {
         if (noHayModelo(modelo)) {
-            throw new IllegalArgumentException("El modelo de negocio es obligatorio");
+            throw new ModeloNegocioInvalidoException("El modelo de negocio es obligatorio");
         }
         if (tarifaPlanaConMontoInvalido(modelo, montoFijo)) {
-            throw new IllegalArgumentException("El monto fijo es obligatorio y debe ser mayor a cero para TARIFA_PLANA");
+            throw new MontoFijoInvalidoException("El monto fijo es obligatorio y debe ser mayor a cero para TARIFA_PLANA");
         }
         if (recintoConTarifaRepartoYSinCategoria(recinto, modelo)) {
-            throw new IllegalArgumentException("El recinto debe tener una categoría configurada para REPARTO_INGRESOS");
+            throw new RecintoNoCategorizadoException("El recinto debe tener una categoría configurada para REPARTO_INGRESOS");
         }
     }
 

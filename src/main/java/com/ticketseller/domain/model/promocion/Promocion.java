@@ -32,8 +32,12 @@ public class Promocion {
     }
 
     public void validar() {
-        if (nombre == null || nombre.isBlank()) {
+        if (nombreInvalido()) {
             throw new IllegalArgumentException("El nombre de la promoción no puede ser nulo ni vacío");
         }
+    }
+
+    private boolean nombreInvalido() {
+        return nombre == null || nombre.isBlank();
     }
 }

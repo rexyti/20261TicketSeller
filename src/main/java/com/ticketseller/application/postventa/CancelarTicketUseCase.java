@@ -1,6 +1,8 @@
 package com.ticketseller.application.postventa;
 
+import com.ticketseller.domain.exception.evento.EventoNotFoundException;
 import com.ticketseller.domain.exception.postventa.CancelacionFueraDePlazoException;
+import com.ticketseller.domain.exception.postventa.SolicitudCancelacionTicketsInvalidaException;
 import com.ticketseller.domain.exception.postventa.TicketYaUsadoException;
 import com.ticketseller.domain.exception.venta.TicketNotFoundException;
 import com.ticketseller.domain.model.asiento.Asiento;
@@ -37,14 +39,18 @@ public class CancelarTicketUseCase {
     }
 
     public Mono<CancelacionResultado> cancelarVarios(List<UUID> ticketIds) {
-        if (ticketIds == null || ticketIds.isEmpty()) {
-            return Mono.error(new IllegalArgumentException("ticketIds es obligatorio"));
+        if (noHayTicketsParaCancelar(ticketIds)) {
+            return Mono.error(new SolicitudCancelacionTicketsInvalidaException("ticketIds es obligatorio"));
         }
         return Flux.fromIterable(ticketIds)
                 .distinct()
                 .flatMap(this::cancelarYEncolarReembolso)
                 .collectList()
                 .map(this::armarResultado);
+    }
+
+    public boolean noHayTicketsParaCancelar(List<UUID> ticketIds){
+        return ticketIds == null || ticketIds.isEmpty();
     }
 
     private Mono<CancelacionTicket> cancelarYEncolarReembolso(UUID ticketId) {
@@ -60,15 +66,19 @@ public class CancelarTicketUseCase {
             return Mono.error(new TicketYaUsadoException("No se puede cancelar un ticket ya usado"));
         }
         return eventoRepositoryPort.buscarPorId(ticket.getEventoId())
-                .switchIfEmpty(Mono.error(new IllegalArgumentException("Evento no encontrado para ticket")))
+                .switchIfEmpty(Mono.error(new EventoNotFoundException("Evento no encontrado para ticket")))
                 .flatMap(evento -> validarPlazo(evento).thenReturn(ticket));
     }
 
     private Mono<Void> validarPlazo(Evento evento) {
-        if (evento.getFechaInicio() != null && !LocalDateTime.now().isBefore(evento.getFechaInicio())) {
+        if (eventoYaInicio(evento)) {
             return Mono.error(new CancelacionFueraDePlazoException("No se puede cancelar: el evento ya ocurrió"));
         }
         return Mono.empty();
+    }
+
+    private boolean eventoYaInicio(Evento evento){
+        return  evento.getFechaInicio() != null && LocalDateTime.now().isAfter(evento.getFechaInicio());
     }
 
     private Mono<Ticket> cancelarTicketYLiberarAsiento(Ticket ticket) {

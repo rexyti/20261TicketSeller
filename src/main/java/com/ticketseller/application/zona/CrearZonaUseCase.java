@@ -48,15 +48,15 @@ public class CrearZonaUseCase {
 
     private Mono<Void> validarCapacidadDisponible(Recinto recinto, Zona zona) {
         return zonaRepositoryPort.sumarCapacidadesPorRecinto(recinto.getId())
-                .filter(suma -> !capacidadSuperada(suma + zona.getCapacidad(), recinto.getCapacidadMaxima()))
+                .filter(suma -> capacidadNoSuperada(suma + zona.getCapacidad(), recinto.getCapacidadMaxima()))
                 .switchIfEmpty(Mono.error(new ZonaCapacidadExcedidaException(
                         "La capacidad de zonas excede la capacidad total del recinto"
                 )))
                 .then();
     }
 
-    private boolean capacidadSuperada(int capacidadUsada, int capacidadMaxima) {
-        return capacidadUsada > capacidadMaxima;
+    private boolean capacidadNoSuperada(int capacidadUsada, int capacidadMaxima) {
+        return capacidadUsada < capacidadMaxima;
     }
 
     private Zona buildZona(UUID recintoId, Zona request) {

@@ -4,6 +4,7 @@ import com.ticketseller.application.promocion.AplicarDescuentoCarritoUseCase;
 import com.ticketseller.application.promocion.CrearCodigosPromocionalesUseCase;
 import com.ticketseller.application.promocion.CrearPromocionUseCase;
 import com.ticketseller.application.promocion.GestionarEstadoPromocionUseCase;
+import com.ticketseller.domain.model.promocion.CodigoPromocional;
 import com.ticketseller.infrastructure.adapter.in.rest.mapper.PromocionRestMapper;
 import com.ticketseller.infrastructure.adapter.in.rest.promocion.dto.ActualizarEstadoPromocionRequest;
 import com.ticketseller.infrastructure.adapter.in.rest.promocion.dto.CalcularDescuentoRequest;
@@ -67,7 +68,7 @@ public class PromocionController {
         return crearCodigosPromocionalesUseCase.ejecutar(
                 id, request.cantidad(), request.usosMaximosPorCodigo(),
                 request.prefijo(), request.fechaFin())
-                .map(codigo -> codigo.getCodigo())
+                .map(CodigoPromocional::getCodigo)
                 .collectList()
                 .map(codigos -> ResponseEntity.status(HttpStatus.CREATED).body(codigos));
     }

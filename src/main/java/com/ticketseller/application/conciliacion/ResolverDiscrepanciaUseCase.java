@@ -1,5 +1,7 @@
 package com.ticketseller.application.conciliacion;
 
+import com.ticketseller.domain.exception.conciliacion.DiscrepanciaSinAgenteException;
+import com.ticketseller.domain.exception.conciliacion.JustificacionInvalidaException;
 import com.ticketseller.domain.exception.conciliacion.PagoNoEnDiscrepanciaException;
 import com.ticketseller.domain.exception.conciliacion.TransaccionNoConfirmadaException;
 import com.ticketseller.domain.model.conciliacion.EstadoConciliacion;
@@ -20,10 +22,10 @@ public class ResolverDiscrepanciaUseCase {
 
     public Mono<Pago> ejecutar(UUID pagoId, boolean confirmar, UUID agenteId, String justificacion) {
         if (noHayJustificacion(justificacion)) {
-            return Mono.error(new IllegalArgumentException("justificacion es obligatoria"));
+            return Mono.error(new JustificacionInvalidaException("Justificación es obligatoria"));
         }
         if (agenteIdInvalido(agenteId)) {
-            return Mono.error(new IllegalArgumentException("agenteId es obligatorio"));
+            return Mono.error(new DiscrepanciaSinAgenteException("agenteId es obligatorio"));
         }
 
         return pagoRepositoryPort.buscarPorId(pagoId)

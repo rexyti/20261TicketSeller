@@ -1,5 +1,6 @@
 package com.ticketseller.application.evento;
 
+import com.ticketseller.domain.exception.evento.EventoCanceladoSinMotivoException;
 import com.ticketseller.domain.exception.evento.EventoNotFoundException;
 import com.ticketseller.domain.model.evento.CancelacionEvento;
 import com.ticketseller.domain.model.evento.Evento;
@@ -28,20 +29,28 @@ public class CancelarEventoUseCase {
     }
 
     private Mono<CancelacionEvento> guardarCancelacion(Evento eventoCancelado, String motivoNormalizado) {
-        return cancelacionEventoRepositoryPort.guardar(CancelacionEvento.builder()
+        return cancelacionEventoRepositoryPort.guardar(buildCancelacionEvento(eventoCancelado, motivoNormalizado));
+    }
+
+    private CancelacionEvento buildCancelacionEvento(Evento evento, String motivo) {
+        return CancelacionEvento.builder()
                 .id(UUID.randomUUID())
-                .eventoId(eventoCancelado.getId())
+                .eventoId(evento.getId())
                 .fechaCancelacion(LocalDateTime.now())
-                .motivo(motivoNormalizado)
-                .build());
+                .motivo(motivo)
+                .build();
     }
 
     private String normalizarMotivo(String motivo) {
         String motivoNormalizado = motivo == null ? null : motivo.trim();
-        if (motivoNormalizado == null || motivoNormalizado.isBlank()) {
-            throw new IllegalArgumentException("El motivo de cancelacion es obligatorio");
+        if (noHayMotivo(motivoNormalizado)) {
+            throw new EventoCanceladoSinMotivoException("El motivo de cancelacion es obligatorio");
         }
         return motivoNormalizado;
+    }
+
+    private boolean noHayMotivo(String motivo) {
+        return motivo == null || motivo.isBlank();
     }
 }
 

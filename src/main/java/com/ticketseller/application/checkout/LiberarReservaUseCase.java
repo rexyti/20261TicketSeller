@@ -13,7 +13,6 @@ import java.time.LocalDateTime;
 public class LiberarReservaUseCase {
 
     private final VentaRepositoryPort ventaRepositoryPort;
-    private final TicketRepositoryPort ticketRepositoryPort;
 
     public Mono<Void> ejecutar() {
         return ventaRepositoryPort.buscarVentasExpiradas(LocalDateTime.now())

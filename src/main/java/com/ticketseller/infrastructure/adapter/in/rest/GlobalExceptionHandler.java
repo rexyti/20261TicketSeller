@@ -1,53 +1,65 @@
 package com.ticketseller.infrastructure.adapter.in.rest;
 
+import com.ticketseller.domain.exception.asiento.*;
 import com.ticketseller.domain.exception.bloqueos.AsientoOcupadoException;
 import com.ticketseller.domain.exception.bloqueos.AsientoYaBloqueadoException;
 import com.ticketseller.domain.exception.bloqueos.BloqueoNoEncontradoException;
+import com.ticketseller.domain.exception.compuerta.CompuertaInvalidaException;
+import com.ticketseller.domain.exception.compuerta.CompuertaNotFoundException;
+import com.ticketseller.domain.exception.conciliacion.DiscrepanciaSinAgenteException;
+import com.ticketseller.domain.exception.conciliacion.JustificacionInvalidaException;
 import com.ticketseller.domain.exception.conciliacion.PagoEnDiscrepanciaException;
-import com.ticketseller.domain.exception.promocion.CodigoPromoAgotadoException;
-import com.ticketseller.domain.exception.promocion.CodigoPromoExpiradoException;
-import com.ticketseller.domain.exception.promocion.CodigoPromoInvalidoException;
-import com.ticketseller.domain.exception.promocion.PromocionNoActivaException;
-import com.ticketseller.domain.exception.promocion.PromocionNotFoundException;
-import com.ticketseller.domain.exception.promocion.TransicionPromocionInvalidaException;
-import com.ticketseller.domain.exception.promocion.UsuarioNoAutorizadoParaPreventaException;
+import com.ticketseller.domain.exception.conciliacion.PagoNoEnDiscrepanciaException;
 import com.ticketseller.domain.exception.conciliacion.TransaccionDuplicadaException;
 import com.ticketseller.domain.exception.conciliacion.TransaccionNoConfirmadaException;
-import com.ticketseller.domain.exception.transaccion.TransicionVentaInvalidaException;
-import com.ticketseller.domain.exception.transaccion.VentaNoEncontradaException;
-import com.ticketseller.domain.exception.CapacidadInvalidaException;
-import com.ticketseller.domain.exception.CompuertaInvalidaException;
-import com.ticketseller.domain.exception.asiento.NombreTipoAsientoVacioException;
-import com.ticketseller.domain.exception.asiento.AsientoNoDisponibleException;
-import com.ticketseller.domain.exception.postventa.CancelacionFueraDePlazoException;
-import com.ticketseller.domain.exception.postventa.ReembolsoFallidoException;
-import com.ticketseller.domain.exception.postventa.TicketYaUsadoException;
+import com.ticketseller.domain.exception.evento.EventoCanceladoSinMotivoException;
 import com.ticketseller.domain.exception.evento.EventoEnProgresoException;
 import com.ticketseller.domain.exception.evento.EventoNoFinalizadoException;
 import com.ticketseller.domain.exception.evento.EventoNotFoundException;
 import com.ticketseller.domain.exception.evento.EventoSolapamientoException;
-import com.ticketseller.domain.exception.LiquidacionNoConfiguradaException;
-import com.ticketseller.domain.exception.venta.PagoRechazadoException;
-import com.ticketseller.domain.exception.venta.TicketNotFoundException;
+import com.ticketseller.domain.exception.evento.SolicitudRegistroEventoInvalidaException;
+import com.ticketseller.domain.exception.liquidacion.LiquidacionNoConfiguradaException;
+import com.ticketseller.domain.exception.liquidacion.ModeloNegocioInvalidoException;
+import com.ticketseller.domain.exception.liquidacion.MontoFijoInvalidoException;
+import com.ticketseller.domain.exception.postventa.CambioEstadoTicketSinJustificacionException;
+import com.ticketseller.domain.exception.postventa.CancelacionFueraDePlazoException;
+import com.ticketseller.domain.exception.postventa.EstadoTicketInvalidoException;
+import com.ticketseller.domain.exception.postventa.MontoReembolsoInvalidoException;
+import com.ticketseller.domain.exception.postventa.ReembolsoFallidoException;
+import com.ticketseller.domain.exception.postventa.SolicitudCancelacionTicketsInvalidaException;
+import com.ticketseller.domain.exception.postventa.TicketNoAptoParaReembolsoException;
+import com.ticketseller.domain.exception.postventa.TicketYaUsadoException;
+import com.ticketseller.domain.exception.promocion.CodigoPromoAgotadoException;
+import com.ticketseller.domain.exception.promocion.CodigoPromoExpiradoException;
+import com.ticketseller.domain.exception.promocion.CodigoPromoInvalidoException;
+import com.ticketseller.domain.exception.promocion.FechasInvalidasPromocionException;
+import com.ticketseller.domain.exception.promocion.PromocionNoActivaException;
+import com.ticketseller.domain.exception.promocion.PromocionNotFoundException;
+import com.ticketseller.domain.exception.promocion.TransicionPromocionInvalidaException;
+import com.ticketseller.domain.exception.promocion.UsuarioNoAutorizadoParaPreventaException;
 import com.ticketseller.domain.exception.recinto.RecintoConEventosException;
+import com.ticketseller.domain.exception.recinto.RecintoNoCategorizadoException;
 import com.ticketseller.domain.exception.recinto.RecintoNoDisponibleException;
 import com.ticketseller.domain.exception.recinto.RecintoDuplicadoException;
 import com.ticketseller.domain.exception.recinto.RecintoInvalidoException;
 import com.ticketseller.domain.exception.recinto.RecintoNotFoundException;
-import com.ticketseller.domain.exception.asiento.TipoAsientoEnUsoException;
-import com.ticketseller.domain.exception.asiento.TipoAsientoInactivoException;
-import com.ticketseller.domain.exception.asiento.TipoAsientoNotFoundException;
+import com.ticketseller.domain.exception.transaccion.CambioEstadoVentaSinJustificacionException;
+import com.ticketseller.domain.exception.transaccion.TransicionVentaInvalidaException;
+import com.ticketseller.domain.exception.transaccion.VentaNoEncontradaException;
+import com.ticketseller.domain.exception.venta.EstadoVentaInvalidoException;
+import com.ticketseller.domain.exception.venta.MetodoPagoInvalidoException;
+import com.ticketseller.domain.exception.venta.PagoRechazadoException;
 import com.ticketseller.domain.exception.venta.ReservaExpiradaException;
+import com.ticketseller.domain.exception.venta.SolicitudReservaInvalidaException;
+import com.ticketseller.domain.exception.venta.TicketNotFoundException;
 import com.ticketseller.domain.exception.venta.VentaNotFoundException;
+import com.ticketseller.domain.exception.zona.CapacidadInvalidaException;
 import com.ticketseller.domain.exception.zona.ZonaCapacidadExcedidaException;
 import com.ticketseller.domain.exception.zona.ZonaConTicketsVendidosException;
 import com.ticketseller.domain.exception.zona.ZonaInvalidaException;
+import com.ticketseller.domain.exception.zona.ZonaNombreDuplicadoException;
 import com.ticketseller.domain.exception.zona.ZonaNotFoundException;
 import com.ticketseller.domain.exception.zona.ZonaSinPrecioException;
-import com.ticketseller.domain.exception.asiento.TransicionEstadoInvalidaException;
-import com.ticketseller.domain.exception.asiento.AsientoEnCompraException;
-import com.ticketseller.domain.exception.asiento.AsientoReservadoPorOtroException;
-import com.ticketseller.domain.exception.asiento.HoldExpiradoException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.support.WebExchangeBindException;
@@ -61,7 +73,8 @@ import java.util.stream.Collectors;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler({RecintoNotFoundException.class, TipoAsientoNotFoundException.class, ZonaNotFoundException.class,
-            PromocionNotFoundException.class, CodigoPromoInvalidoException.class})
+            PromocionNotFoundException.class, CodigoPromoInvalidoException.class,
+            AsientoNotFoundException.class, CompuertaNotFoundException.class})
     public ResponseEntity<ApiErrorResponse> notFound(RuntimeException ex) {
         return error("NOT_FOUND", ex.getMessage(), HttpStatus.NOT_FOUND);
     }
@@ -129,9 +142,11 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler({RecintoConEventosException.class, RecintoDuplicadoException.class,
             RecintoNoDisponibleException.class, EventoEnProgresoException.class, EventoSolapamientoException.class,
-            EventoNoFinalizadoException.class,
+            EventoNoFinalizadoException.class, TipoAsientoYaExistenteException.class,
             TipoAsientoEnUsoException.class, TipoAsientoInactivoException.class,
-            TransicionEstadoInvalidaException.class, AsientoEnCompraException.class})
+            TransicionEstadoInvalidaException.class, AsientoEnCompraException.class,
+            AsientoEnZonaDiferenteException.class, RecintoConZonasYaActivasException.class,
+            ZonaNombreDuplicadoException.class, PagoNoEnDiscrepanciaException.class})
     public ResponseEntity<ApiErrorResponse> conflict(RuntimeException ex) {
         return error("CONFLICT", ex.getMessage(), HttpStatus.CONFLICT);
     }
@@ -170,7 +185,15 @@ public class GlobalExceptionHandler {
             ZonaInvalidaException.class, CompuertaInvalidaException.class, ZonaCapacidadExcedidaException.class,
             ZonaConTicketsVendidosException.class, NombreTipoAsientoVacioException.class,
             IllegalArgumentException.class, //IllegalStateException.class,
-            ZonaConTicketsVendidosException.class, ZonaSinPrecioException.class})
+            ZonaSinPrecioException.class,
+            AsientoInvalidoException.class, TipoAsientoInvalidoException.class,
+            EstadoVentaInvalidoException.class, MetodoPagoInvalidoException.class,
+            SolicitudReservaInvalidaException.class, EventoCanceladoSinMotivoException.class,
+            SolicitudRegistroEventoInvalidaException.class, CambioEstadoTicketSinJustificacionException.class,
+            EstadoTicketInvalidoException.class, MontoReembolsoInvalidoException.class,
+            SolicitudCancelacionTicketsInvalidaException.class, JustificacionInvalidaException.class,
+            CambioEstadoVentaSinJustificacionException.class, ModeloNegocioInvalidoException.class,
+            MontoFijoInvalidoException.class, FechasInvalidasPromocionException.class})
     public ResponseEntity<ApiErrorResponse> badRequest(RuntimeException ex) {
         return error("VALIDATION_ERROR", ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
@@ -181,7 +204,9 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler({CancelacionFueraDePlazoException.class,
-            com.ticketseller.domain.exception.postventa.TransicionEstadoInvalidaException.class})
+            com.ticketseller.domain.exception.postventa.TransicionEstadoInvalidaException.class,
+            RecintoNoCategorizadoException.class, TicketNoAptoParaReembolsoException.class,
+            DiscrepanciaSinAgenteException.class})
     public ResponseEntity<ApiErrorResponse> unprocessable(RuntimeException ex) {
         return error("UNPROCESSABLE_ENTITY", ex.getMessage(), HttpStatus.UNPROCESSABLE_ENTITY);
     }

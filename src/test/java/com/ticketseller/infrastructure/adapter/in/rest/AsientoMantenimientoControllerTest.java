@@ -55,7 +55,7 @@ class AsientoMantenimientoControllerTest {
         CambiarEstadoRequest request = new CambiarEstadoRequest(EstadoAsiento.MANTENIMIENTO, "Motivo test");
 
         webTestClient.patch()
-                .uri("/api/eventos/{eventoId}/asientos/{asientoId}/estado", eventoId, UUID.randomUUID())
+                .uri("/api/v1/eventos/{eventoId}/asientos/{asientoId}/estado", eventoId, UUID.randomUUID())
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(request)
                 .exchange()
@@ -67,7 +67,7 @@ class AsientoMantenimientoControllerTest {
         String invalidRequest = "{\"motivo\": \"Motivo test\"}";
 
         webTestClient.patch()
-                .uri("/api/eventos/{eventoId}/asientos/{asientoId}/estado", eventoId, UUID.randomUUID())
+                .uri("/api/v1/eventos/{eventoId}/asientos/{asientoId}/estado", eventoId, UUID.randomUUID())
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(invalidRequest)
                 .exchange()

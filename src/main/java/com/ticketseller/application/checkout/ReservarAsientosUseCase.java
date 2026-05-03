@@ -4,6 +4,10 @@ import com.ticketseller.application.promocion.AplicarDescuentoCarritoUseCase;
 import com.ticketseller.application.promocion.ItemCarrito;
 import com.ticketseller.domain.exception.asiento.AsientoEnZonaDiferenteException;
 import com.ticketseller.domain.exception.asiento.AsientoNoDisponibleException;
+import com.ticketseller.domain.exception.asiento.AsientoNotFoundException;
+import com.ticketseller.domain.exception.evento.EventoNotFoundException;
+import com.ticketseller.domain.exception.venta.SolicitudReservaInvalidaException;
+import com.ticketseller.domain.exception.zona.ZonaNotFoundException;
 import com.ticketseller.domain.exception.zona.ZonaSinPrecioException;
 import com.ticketseller.domain.model.asiento.Asiento;
 import com.ticketseller.domain.model.asiento.EstadoAsiento;
@@ -74,7 +78,7 @@ public class ReservarAsientosUseCase {
 
     private void validarCommand(ReservarAsientosCommand command) {
         if (solicitudReservaInvalida(command)) {
-            throw new IllegalArgumentException("La solicitud de reserva es invalida");
+            throw new SolicitudReservaInvalidaException("La solicitud de reserva es invalida");
         }
     }
 
@@ -88,7 +92,7 @@ public class ReservarAsientosUseCase {
 
     private Mono<Zona> obtenerZona(UUID zonaId) {
         return zonaRepositoryPort.buscarPorId(zonaId)
-                .switchIfEmpty(Mono.error(new IllegalArgumentException("Zona no encontrada")));
+                .switchIfEmpty(Mono.error(new ZonaNotFoundException("Zona no encontrada")));
     }
 
     private Mono<PrecioZona> obtenerPrecio(UUID eventoId, UUID zonaId) {
@@ -109,13 +113,13 @@ public class ReservarAsientosUseCase {
 
     private Mono<Evento> obtenerEvento(UUID eventoId) {
         return eventoRepositoryPort.buscarPorId(eventoId)
-                .switchIfEmpty(Mono.error(new IllegalArgumentException("Evento no encontrado")));
+                .switchIfEmpty(Mono.error(new EventoNotFoundException("Evento no encontrado")));
     }
 
     private Mono<List<Asiento>> obtenerYValidarAsientos(ReservarAsientosCommand command) {
         return Flux.fromIterable(command.asientoIds())
                 .flatMap(id -> asientoRepositoryPort.buscarPorId(id)
-                        .switchIfEmpty(Mono.error(new IllegalArgumentException("Asiento no encontrado: " + id))))
+                        .switchIfEmpty(Mono.error(new AsientoNotFoundException("Asiento no encontrado: " + id))))
                 .collectList()
                 .flatMap(asientos -> validarEstadoAsientos(asientos, command.zonaId()));
     }

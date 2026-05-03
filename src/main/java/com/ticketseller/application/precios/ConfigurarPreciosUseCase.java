@@ -39,19 +39,29 @@ public class ConfigurarPreciosUseCase {
                         .flatMapMany(zonas -> {
                             Map<UUID, PrecioZona> porZona = obtenerPreciosPorZona(precios);
 
-                            if (hayPreciosIncompletos(zonas, porZona)) {
-                                return Flux.error(new ZonaSinPrecioException("No se pueden dejar zonas sin precio"));
-                            }
-
-                            if (hayZonasInvalidas(zonas, porZona)) {
-                                return Flux.error(new ZonaSinPrecioException("Existen zonas que no pertenecen al recinto del evento"));
-                            }
-
-                            return precioZonaRepositoryPort.eliminarPorEvento(eventoId)
-                                    .thenMany(Flux.fromIterable(porZona.values())
-                                            .map(precio -> buildPrecioZona(precio, eventoId))
-                                            .flatMap(precioZonaRepositoryPort::guardar));
+                            return validarPreciosCompletos(zonas, porZona)
+                                    .then(Mono.defer(() -> validarZonasValidas(zonas, porZona)))
+                                    .thenMany(eliminarYGuardarPrecios(eventoId, porZona));
                         }));
+    }
+
+    private Mono<Void> validarPreciosCompletos(List<Zona> zonas, Map<UUID, PrecioZona> porZona) {
+        return hayPreciosIncompletos(zonas, porZona)
+                ? Mono.error(new ZonaSinPrecioException("No se pueden dejar zonas sin precio"))
+                : Mono.empty();
+    }
+
+    private Mono<Void> validarZonasValidas(List<Zona> zonas, Map<UUID, PrecioZona> porZona) {
+        return hayZonasInvalidas(zonas, porZona)
+                ? Mono.error(new ZonaSinPrecioException("Existen zonas que no pertenecen al recinto del evento"))
+                : Mono.empty();
+    }
+
+    private Flux<PrecioZona> eliminarYGuardarPrecios(UUID eventoId, Map<UUID, PrecioZona> porZona) {
+        return precioZonaRepositoryPort.eliminarPorEvento(eventoId)
+                .thenMany(Flux.fromIterable(porZona.values())
+                        .map(precio -> buildPrecioZona(precio, eventoId))
+                        .flatMap(precioZonaRepositoryPort::guardar));
     }
 
     private Map<UUID, PrecioZona> obtenerPreciosPorZona(List<PrecioZona> precios) {

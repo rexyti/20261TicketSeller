@@ -1,4 +1,4 @@
-package com.ticketseller.domain.exception;
+package com.ticketseller.domain.exception.compuerta;
 
 public class CompuertaInvalidaException extends RuntimeException {
 

@@ -51,11 +51,8 @@ public class TipoAsientoController {
     @PostMapping("/tipos-asiento")
     public Mono<ResponseEntity<TipoAsientoResponse>> crear(@Valid @RequestBody CrearTipoAsientoRequest request) {
         return crearTipoAsientoUseCase.ejecutar(request.nombre(), request.descripcion())
-                .map(tuple -> {
-                    String advertencia = tuple.getT2().isEmpty() ? null : tuple.getT2();
-                    return ResponseEntity.status(HttpStatus.CREATED)
-                            .body(tipoAsientoRestMapper.toResponse(tuple.getT1(), false, advertencia));
-                });
+                .map(tipo -> ResponseEntity.status(HttpStatus.CREATED)
+                        .body(tipoAsientoRestMapper.toResponse(tipo, false, null)));
     }
 
     @Operation(summary = "Listar tipos de asiento")

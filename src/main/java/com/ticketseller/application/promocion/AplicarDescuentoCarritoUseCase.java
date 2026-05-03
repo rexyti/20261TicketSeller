@@ -1,10 +1,7 @@
 package com.ticketseller.application.promocion;
 
 import com.ticketseller.domain.exception.promocion.UsuarioNoAutorizadoParaPreventaException;
-import com.ticketseller.domain.model.promocion.Descuento;
-import com.ticketseller.domain.model.promocion.TipoDescuento;
-import com.ticketseller.domain.model.promocion.TipoPromocion;
-import com.ticketseller.domain.model.promocion.TipoUsuario;
+import com.ticketseller.domain.model.promocion.*;
 import com.ticketseller.domain.repository.DescuentoRepositoryPort;
 import com.ticketseller.domain.repository.PromocionRepositoryPort;
 import lombok.RequiredArgsConstructor;
@@ -24,15 +21,13 @@ public class AplicarDescuentoCarritoUseCase {
 
     public Mono<DescuentoAplicado> ejecutar(UUID eventoId, TipoUsuario tipoUsuario, List<ItemCarrito> items) {
         LocalDateTime ahora = LocalDateTime.now();
-        return validarAccesoPreventa(eventoId, tipoUsuario, ahora)
+        return validarAccesoPreventa(eventoId, tipoUsuario)
                 .then(calcularDescuento(eventoId, items, ahora));
     }
 
-    private Mono<Void> validarAccesoPreventa(UUID eventoId, TipoUsuario tipoUsuario, LocalDateTime ahora) {
+    private Mono<Void> validarAccesoPreventa(UUID eventoId, TipoUsuario tipoUsuario) {
         return promocionRepositoryPort.buscarActivasPorEvento(eventoId)
-                .filter(p -> TipoPromocion.PREVENTA.equals(p.getTipo()))
-                .filter(p -> p.getTipoUsuarioRestringido() != null)
-                .filter(p -> p.estaVigenteEn(ahora))
+                .filter(this::promocionEnPreventaVigenteConUsuarioRestringido)
                 .collectList()
                 .filter(preventas -> !preventas.isEmpty())
                 .flatMap(preventas -> preventas.stream()
@@ -40,6 +35,12 @@ public class AplicarDescuentoCarritoUseCase {
                         ? Mono.<Void>empty()
                         : Mono.error(new UsuarioNoAutorizadoParaPreventaException(
                                 "El usuario no está autorizado para acceder a esta preventa")));
+    }
+
+    private boolean promocionEnPreventaVigenteConUsuarioRestringido(Promocion p){
+        return TipoPromocion.PREVENTA.equals(p.getTipo())
+                && p.getTipoUsuarioRestringido() != null
+                && p.estaVigenteEn(LocalDateTime.now());
     }
 
     private Mono<DescuentoAplicado> calcularDescuento(UUID eventoId, List<ItemCarrito> items, LocalDateTime ahora) {

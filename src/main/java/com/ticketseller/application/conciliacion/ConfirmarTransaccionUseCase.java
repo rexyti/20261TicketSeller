@@ -5,6 +5,7 @@ import com.ticketseller.domain.exception.conciliacion.PagoEnDiscrepanciaExceptio
 import com.ticketseller.domain.exception.transaccion.VentaNoEncontradaException;
 import com.ticketseller.domain.model.conciliacion.EstadoConciliacion;
 import com.ticketseller.domain.model.conciliacion.Pago;
+import com.ticketseller.domain.model.ticket.Ticket;
 import com.ticketseller.domain.model.venta.EstadoVenta;
 import com.ticketseller.domain.model.venta.Venta;
 import com.ticketseller.domain.repository.PagoRepositoryPort;
@@ -77,9 +78,13 @@ public class ConfirmarTransaccionUseCase {
 
     private Mono<Void> confirmarOcupacionAsientos(UUID ventaId) {
         return ticketRepositoryPort.buscarPorVenta(ventaId)
-                .filter(ticket -> ticket.getAsientoId() != null)
-                .flatMap(ticket -> confirmarOcupacionUseCase.confirmar(ticket.getAsientoId()))
+                .filter(this::ticketConAsiento)
+                .flatMap(ticket -> confirmarOcupacionUseCase.ejecutar(ticket.getAsientoId()))
                 .then();
+    }
+
+    private boolean ticketConAsiento(Ticket ticket){
+        return ticket.getAsientoId() != null;
     }
 
     private EstadoConciliacion estadoVenta(Venta venta, BigDecimal montoPasarela){

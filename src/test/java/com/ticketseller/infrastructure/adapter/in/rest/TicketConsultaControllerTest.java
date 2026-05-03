@@ -58,7 +58,7 @@ class TicketConsultaControllerTest {
         when(consultarEstadoTicketUseCase.ejecutar(ticketId)).thenReturn(Mono.just(ticket));
         when(accesoRestMapper.toResponse(ticket)).thenReturn(response);
         webTestClient.get()
-                .uri("/api/tickets/{id}", ticketId)
+                .uri("/api/v1/tickets/{id}", ticketId)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()

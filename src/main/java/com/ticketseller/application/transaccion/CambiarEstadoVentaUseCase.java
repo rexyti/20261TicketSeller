@@ -1,7 +1,9 @@
 package com.ticketseller.application.transaccion;
 
+import com.ticketseller.domain.exception.transaccion.CambioEstadoVentaSinJustificacionException;
 import com.ticketseller.domain.exception.transaccion.TransicionVentaInvalidaException;
 import com.ticketseller.domain.exception.transaccion.VentaNoEncontradaException;
+import com.ticketseller.domain.exception.venta.EstadoVentaInvalidoException;
 import com.ticketseller.domain.model.transaccion.HistorialEstadoVenta;
 import com.ticketseller.domain.model.venta.EstadoVenta;
 import com.ticketseller.domain.model.venta.Venta;
@@ -21,10 +23,10 @@ public class CambiarEstadoVentaUseCase {
 
     public Mono<Venta> ejecutar(UUID ventaId, EstadoVenta nuevoEstado, String justificacion, UUID actorId) {
         if (esNuevoEstadoInvalido(nuevoEstado)) {
-            return Mono.error(new IllegalArgumentException("nuevoEstado es obligatorio"));
+            return Mono.error(new EstadoVentaInvalidoException("Nuevo Estado es obligatorio"));
         }
         if (justificacionInvalida(justificacion)) {
-            return Mono.error(new IllegalArgumentException("justificacion es obligatoria"));
+            return Mono.error(new CambioEstadoVentaSinJustificacionException("Justificación es obligatoria"));
         }
         String justificacionNormalizada = justificacion.trim();
 

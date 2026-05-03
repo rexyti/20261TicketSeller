@@ -27,12 +27,20 @@ public class TipoAsiento {
     }
 
     public void validarDatosRegistro() {
-        if (nombre == null || nombre.isBlank()) {
+        if (nombreInvalido(nombre)) {
             throw new NombreTipoAsientoVacioException("El campo nombre es obligatorio");
         }
-        if (estado == null) {
+        if (sinEstado()) {
             throw new TipoAsientoInvalidoException("El estado del tipo de asiento es obligatorio");
         }
+    }
+
+    private boolean nombreInvalido(String nombre){
+        return nombre == null || nombre.isBlank();
+    }
+
+    private boolean sinEstado(){
+        return estado == null;
     }
 
     private String trimOrNull(String valor) {

@@ -1,6 +1,6 @@
 package com.ticketseller.infrastructure.adapter.in.rest.postventa;
 
-import com.ticketseller.application.postventa.GestionarReembolsoManualUseCase;
+import com.ticketseller.application.postventa.ProcesarReembolsoManualUseCase;
 import com.ticketseller.infrastructure.adapter.in.rest.postventa.dto.ReembolsoManualRequest;
 import com.ticketseller.infrastructure.adapter.in.rest.postventa.dto.ReembolsoResponse;
 import com.ticketseller.infrastructure.adapter.in.rest.mapper.PostVentaRestMapper;
@@ -23,14 +23,14 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Tag(name = "Postventa - Admin Reembolsos", description = "Gestión manual y automática de reembolsos")
 public class AdminReembolsoController {
-    private final GestionarReembolsoManualUseCase gestionarReembolsoManualUseCase;
+    private final ProcesarReembolsoManualUseCase procesarReembolsoManualUseCase;
     private final PostVentaRestMapper postVentaRestMapper;
 
     @Operation(summary = "Procesar reembolso manual por ticket")
     @PostMapping("/tickets/{id}/reembolso")
     public Mono<ResponseEntity<ReembolsoResponse>> procesarManual(@PathVariable UUID id,
                                                                   @Valid @RequestBody ReembolsoManualRequest request) {
-        return gestionarReembolsoManualUseCase.ejecutar(id, request.tipo(), request.monto(), request.agenteId())
+        return procesarReembolsoManualUseCase.ejecutar(id, request.tipo(), request.monto(), request.agenteId())
                 .map(postVentaRestMapper::toReembolsoResponse)
                 .map(ResponseEntity::ok);
     }
@@ -38,7 +38,7 @@ public class AdminReembolsoController {
     @Operation(summary = "Procesar cola automática de reembolsos pendientes")
     @PostMapping("/reembolsos/procesar-cola")
     public Mono<ResponseEntity<Void>> procesarCola() {
-        return gestionarReembolsoManualUseCase.procesarColaPendiente()
+        return procesarReembolsoManualUseCase.procesarColaPendiente()
                 .thenReturn(ResponseEntity.ok().build());
     }
 }

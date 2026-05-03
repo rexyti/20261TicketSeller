@@ -22,11 +22,19 @@ public class Cortesia {
     private EstadoCortesia estado;
 
     public void validar() {
-        if (destinatario == null || destinatario.isBlank()) {
+        if (sinDestinatario()) {
             throw new IllegalArgumentException("El destinatario de la cortesía no puede estar vacío");
         }
-        if (codigoUnico == null || codigoUnico.isBlank()) {
+        if (sinCodigoCortesia()) {
             throw new IllegalArgumentException("El código único de la cortesía no puede estar vacío");
         }
+    }
+
+    private boolean sinDestinatario(){
+        return destinatario == null || destinatario.isBlank();
+    }
+
+    private boolean sinCodigoCortesia(){
+        return codigoUnico == null || codigoUnico.isBlank();
     }
 }

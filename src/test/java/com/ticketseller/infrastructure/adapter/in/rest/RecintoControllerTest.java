@@ -7,12 +7,16 @@ import com.ticketseller.application.recinto.DesactivarRecintoUseCase;
 import com.ticketseller.application.recinto.EditarRecintoUseCase;
 import com.ticketseller.application.recinto.ListarRecintosFiltradosUseCase;
 import com.ticketseller.application.recinto.RegistrarRecintoUseCase;
+import com.ticketseller.domain.exception.recinto.RecintoConEventosException;
 import com.ticketseller.domain.exception.recinto.RecintoDuplicadoException;
 import com.ticketseller.domain.exception.recinto.RecintoInvalidoException;
 import com.ticketseller.domain.exception.recinto.RecintoNotFoundException;
+import com.ticketseller.domain.model.recinto.CategoriaRecinto;
 import com.ticketseller.domain.model.recinto.Recinto;
+import com.ticketseller.domain.model.zona.Zona;
 import com.ticketseller.domain.shared.Pagina;
 import com.ticketseller.infrastructure.adapter.in.rest.recinto.dto.CrearRecintoRequest;
+import com.ticketseller.infrastructure.adapter.in.rest.recinto.dto.RecintoEstructuraResponse;
 import com.ticketseller.infrastructure.adapter.in.rest.recinto.dto.RecintoResponse;
 import com.ticketseller.infrastructure.adapter.in.rest.mapper.RecintoRestMapper;
 import com.ticketseller.infrastructure.adapter.in.rest.recinto.RecintoController;
@@ -24,6 +28,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuples;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -240,6 +245,170 @@ class RecintoControllerTest {
                           "capacidadMaxima": 1200
                         }
                         """)
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+    @Test
+    void patchEditarRecintoRetorna200() {
+        UUID id = UUID.randomUUID();
+        Recinto updated = Recinto.builder()
+                .id(id).nombre("Nuevo Nombre").ciudad("Medellin")
+                .direccion("Carrera 2").capacidadMaxima(500)
+                .telefono("3009876543").compuertasIngreso(2)
+                .fechaCreacion(LocalDateTime.now()).activo(true).build();
+        RecintoResponse response = new RecintoResponse(updated.getId(), updated.getNombre(), updated.getCiudad(),
+                updated.getDireccion(), updated.getCapacidadMaxima(), updated.getTelefono(),
+                updated.getFechaCreacion(), updated.getCompuertasIngreso(), updated.isActivo(), updated.getCategoria());
+
+        when(editarRecintoUseCase.ejecutar(any(UUID.class), any(Recinto.class))).thenReturn(Mono.just(updated));
+        when(recintoRestMapper.toResponse(updated)).thenReturn(response);
+
+        webTestClient.patch()
+                .uri("/api/v1/recintos/{id}", id)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue("""
+                        {
+                          "nombre": "Nuevo Nombre",
+                          "ciudad": "Medellin",
+                          "direccion": "Carrera 2",
+                          "capacidadMaxima": 500,
+                          "telefono": "3009876543",
+                          "compuertasIngreso": 2
+                        }
+                        """)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.nombre").isEqualTo("Nuevo Nombre");
+    }
+
+    @Test
+    void patchEditarRecintoInexistenteRetorna404() {
+        UUID id = UUID.randomUUID();
+        when(editarRecintoUseCase.ejecutar(any(UUID.class), any(Recinto.class)))
+                .thenReturn(Mono.error(new RecintoNotFoundException("Recinto no encontrado")));
+
+        webTestClient.patch()
+                .uri("/api/v1/recintos/{id}", id)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue("""
+                        {
+                          "nombre": "Nombre",
+                          "ciudad": "Ciudad"
+                        }
+                        """)
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+    @Test
+    void patchDesactivarRecintoRetorna200() {
+        UUID id = UUID.randomUUID();
+        Recinto desactivado = Recinto.builder()
+                .id(id).nombre("Movistar Arena").ciudad("Bogota")
+                .fechaCreacion(LocalDateTime.now()).activo(false).build();
+        RecintoResponse response = new RecintoResponse(desactivado.getId(), desactivado.getNombre(),
+                desactivado.getCiudad(), desactivado.getDireccion(), desactivado.getCapacidadMaxima(),
+                desactivado.getTelefono(), desactivado.getFechaCreacion(), desactivado.getCompuertasIngreso(),
+                desactivado.isActivo(), desactivado.getCategoria());
+
+        when(desactivarRecintoUseCase.ejecutar(id)).thenReturn(Mono.just(desactivado));
+        when(recintoRestMapper.toResponse(desactivado)).thenReturn(response);
+
+        webTestClient.patch()
+                .uri("/api/v1/recintos/{id}/desactivar", id)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.activo").isEqualTo(false);
+    }
+
+    @Test
+    void patchDesactivarRecintoConEventosRetorna409() {
+        UUID id = UUID.randomUUID();
+        when(desactivarRecintoUseCase.ejecutar(id))
+                .thenReturn(Mono.error(new RecintoConEventosException("El recinto tiene eventos activos")));
+
+        webTestClient.patch()
+                .uri("/api/v1/recintos/{id}/desactivar", id)
+                .exchange()
+                .expectStatus().isEqualTo(409)
+                .expectBody()
+                .jsonPath("$.codigo").isEqualTo("CONFLICT");
+    }
+
+    @Test
+    void patchCategoriaValidaRetorna200() {
+        UUID id = UUID.randomUUID();
+        Recinto updated = Recinto.builder()
+                .id(id).nombre("Movistar Arena").ciudad("Bogota")
+                .categoria(CategoriaRecinto.ESTADIO).fechaCreacion(LocalDateTime.now()).activo(true).build();
+        RecintoResponse response = new RecintoResponse(updated.getId(), updated.getNombre(), updated.getCiudad(),
+                updated.getDireccion(), updated.getCapacidadMaxima(), updated.getTelefono(),
+                updated.getFechaCreacion(), updated.getCompuertasIngreso(), updated.isActivo(), updated.getCategoria());
+
+        when(configurarCategoriaUseCase.ejecutar(id, CategoriaRecinto.ESTADIO)).thenReturn(Mono.just(updated));
+        when(recintoRestMapper.toResponse(updated)).thenReturn(response);
+
+        webTestClient.patch()
+                .uri("/api/v1/recintos/{id}/categoria", id)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue("""
+                        {
+                          "categoria": "ESTADIO"
+                        }
+                        """)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.categoria").isEqualTo("ESTADIO");
+    }
+
+    @Test
+    void patchCategoriaRecintoInexistenteRetorna404() {
+        UUID id = UUID.randomUUID();
+        when(configurarCategoriaUseCase.ejecutar(any(UUID.class), any(CategoriaRecinto.class)))
+                .thenReturn(Mono.error(new RecintoNotFoundException("Recinto no encontrado")));
+
+        webTestClient.patch()
+                .uri("/api/v1/recintos/{id}/categoria", id)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue("""
+                        {
+                          "categoria": "ESTADIO"
+                        }
+                        """)
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+    @Test
+    void getEstructuraRecintoRetorna200() {
+        UUID id = UUID.randomUUID();
+        Recinto recinto = Recinto.builder().id(id).nombre("Movistar Arena").ciudad("Bogota").build();
+        List<Zona> zonas = List.of();
+        RecintoEstructuraResponse estructura = new RecintoEstructuraResponse(id, List.of());
+
+        when(consultarEstructuraRecintoUseCase.ejecutar(id)).thenReturn(Mono.just(Tuples.of(recinto, zonas)));
+        when(recintoRestMapper.toEstructuraResponse(recinto, zonas)).thenReturn(estructura);
+
+        webTestClient.get()
+                .uri("/api/v1/recintos/{id}", id)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.recintoId").isEqualTo(id.toString());
+    }
+
+    @Test
+    void getEstructuraRecintoInexistenteRetorna404() {
+        UUID id = UUID.randomUUID();
+        when(consultarEstructuraRecintoUseCase.ejecutar(id))
+                .thenReturn(Mono.error(new RecintoNotFoundException("Recinto no encontrado")));
+
+        webTestClient.get()
+                .uri("/api/v1/recintos/{id}", id)
                 .exchange()
                 .expectStatus().isNotFound();
     }

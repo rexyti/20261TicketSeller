@@ -1,5 +1,6 @@
 package com.ticketseller.application.bloqueos;
 
+import com.ticketseller.domain.exception.asiento.AsientoNotFoundException;
 import com.ticketseller.domain.exception.bloqueos.AsientoOcupadoException;
 import com.ticketseller.domain.model.asiento.Asiento;
 import com.ticketseller.domain.model.asiento.EstadoAsiento;
@@ -34,7 +35,7 @@ public class CrearCortesiaUseCase {
     private Mono<Cortesia> crearCortesiaConAsiento(UUID eventoId, String destinatario,
                                                     CategoriaCortesia categoria, UUID asientoId) {
         return asientoRepositoryPort.buscarPorId(asientoId)
-                .switchIfEmpty(Mono.error(new IllegalArgumentException(
+                .switchIfEmpty(Mono.error(new AsientoNotFoundException(
                         "Asiento %s no encontrado".formatted(asientoId))))
                 .flatMap(this::validarYBloquear)
                 .flatMap(asiento -> crearTicketYCortesia(eventoId, destinatario, categoria, asiento));
@@ -42,10 +43,19 @@ public class CrearCortesiaUseCase {
 
     private Mono<Asiento> validarYBloquear(Asiento asiento) {
         return Mono.just(asiento)
-                .filter(a -> EstadoAsiento.DISPONIBLE.equals(a.getEstado()))
+                .filter(this::asientoDisponible)
                 .switchIfEmpty(Mono.error(new AsientoOcupadoException(asiento.getId())))
-                .flatMap(a -> asientoRepositoryPort.guardar(
-                        a.toBuilder().estado(EstadoAsiento.BLOQUEADO).build()));
+                .flatMap(a -> asientoRepositoryPort.guardar(buildAsientoBloqueado(a)));
+    }
+
+    private boolean asientoDisponible(Asiento asiento) {
+        return EstadoAsiento.DISPONIBLE.equals(asiento.getEstado());
+    }
+
+    private Asiento buildAsientoBloqueado(Asiento asiento){
+        return asiento.toBuilder()
+                .estado(EstadoAsiento.BLOQUEADO)
+                .build();
     }
 
     private Mono<Cortesia> crearTicketYCortesia(UUID eventoId, String destinatario,

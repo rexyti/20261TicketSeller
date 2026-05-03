@@ -2,7 +2,8 @@ package com.ticketseller.application.compuerta;
 
 import com.ticketseller.domain.exception.recinto.RecintoNotFoundException;
 import com.ticketseller.domain.exception.zona.ZonaCapacidadExcedidaException;
-import com.ticketseller.domain.exception.CompuertaInvalidaException;
+import com.ticketseller.domain.exception.compuerta.CompuertaInvalidaException;
+import com.ticketseller.domain.exception.zona.ZonaNotFoundException;
 import com.ticketseller.domain.model.zona.Compuerta;
 import com.ticketseller.domain.repository.CompuertaRepositoryPort;
 import com.ticketseller.domain.repository.RecintoRepositoryPort;
@@ -34,7 +35,7 @@ public class CrearCompuertaUseCase {
             return compuertaRepositoryPort.guardar(buildCompuerta(recintoId, request, true));
         }
         return zonaRepositoryPort.buscarPorId(request.getZonaId())
-                .switchIfEmpty(Mono.error(new ZonaCapacidadExcedidaException("La zona indicada no existe")))
+                .switchIfEmpty(Mono.error(new ZonaNotFoundException("La zona indicada no existe")))
                 .flatMap(zona -> compuertaRepositoryPort.guardar(buildCompuerta(recintoId, request, false)));
     }
 

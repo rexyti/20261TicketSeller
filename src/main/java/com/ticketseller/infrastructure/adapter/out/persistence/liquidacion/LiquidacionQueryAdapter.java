@@ -37,7 +37,7 @@ public class LiquidacionQueryAdapter implements LiquidacionQueryPort {
                   AND t.estado IN ('VENDIDO', 'ANULADO', 'REEMBOLSADO')
                 GROUP BY condicion
                 """;
-        // NEEDS CLARIFICATION: confirmar con el equipo — tickets en estados intermedios (RESERVADO, EXPIRADO) se excluyen
+        // NEEDS CLARIFICATION: ejecutar con el equipo — tickets en estados intermedios (RESERVADO, EXPIRADO) se excluyen
 
         return databaseClient.sql(sql)
                 .bind("eventoId", eventoId)

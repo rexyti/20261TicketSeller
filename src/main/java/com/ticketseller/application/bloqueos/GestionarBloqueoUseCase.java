@@ -27,7 +27,7 @@ public class GestionarBloqueoUseCase {
     public Mono<Void> liberarBloqueo(UUID bloqueoId) {
         return bloqueoRepositoryPort.buscarPorId(bloqueoId)
                 .switchIfEmpty(Mono.error(new BloqueoNoEncontradoException(bloqueoId)))
-                .flatMap(bloqueo -> liberarAsientoYBloqueo(bloqueo));
+                .flatMap(this::liberarAsientoYBloqueo);
     }
 
     private Mono<Void> liberarAsientoYBloqueo(Bloqueo bloqueo) {

@@ -12,9 +12,13 @@ public class ListarEventosUseCase {
     private final EventoRepositoryPort eventoRepositoryPort;
 
     public Flux<Evento> ejecutar(EstadoEvento estado) {
-        return estado == null
+        return sinImportarElEstado(estado)
                 ? eventoRepositoryPort.listarActivos()
                 : eventoRepositoryPort.listarPorEstado(estado);
+    }
+
+    private boolean sinImportarElEstado(EstadoEvento estadoEvento){
+        return estadoEvento == null;
     }
 }
 

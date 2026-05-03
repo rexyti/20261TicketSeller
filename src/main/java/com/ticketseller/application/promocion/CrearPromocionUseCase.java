@@ -1,6 +1,7 @@
 package com.ticketseller.application.promocion;
 
 import com.ticketseller.domain.exception.evento.EventoNotFoundException;
+import com.ticketseller.domain.exception.promocion.FechasInvalidasPromocionException;
 import com.ticketseller.domain.model.promocion.EstadoPromocion;
 import com.ticketseller.domain.model.promocion.Promocion;
 import com.ticketseller.domain.repository.EventoRepositoryPort;
@@ -25,12 +26,20 @@ public class CrearPromocionUseCase {
     }
 
     private void validarFechas(Promocion p) {
-        if (p.getFechaInicio() == null || p.getFechaFin() == null) {
-            throw new IllegalArgumentException("Las fechas de inicio y fin son obligatorias");
+        if (sinFechasEstablecidas(p)) {
+            throw new FechasInvalidasPromocionException("Las fechas de inicio y fin son obligatorias");
         }
-        if (!p.getFechaInicio().isBefore(p.getFechaFin())) {
-            throw new IllegalArgumentException("La fecha de inicio debe ser anterior a la fecha de fin");
+        if (fechaInicioPosteriorFechaFin(p)) {
+            throw new FechasInvalidasPromocionException("La fecha de inicio debe ser anterior a la fecha de fin");
         }
+    }
+
+    private boolean sinFechasEstablecidas(Promocion p){
+        return p.getFechaInicio() == null || p.getFechaFin() == null;
+    }
+
+    private boolean fechaInicioPosteriorFechaFin(Promocion p) {
+        return p.getFechaInicio().isAfter(p.getFechaFin());
     }
 
     private Mono<Promocion> validarEventoExiste(Promocion p) {

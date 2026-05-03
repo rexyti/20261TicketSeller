@@ -23,7 +23,7 @@ class LiberarReservaUseCaseTest {
         VentaRepositoryPort ventaRepositoryPort = mock(VentaRepositoryPort.class);
         TicketRepositoryPort ticketRepositoryPort = mock(TicketRepositoryPort.class);
 
-        LiberarReservaUseCase useCase = new LiberarReservaUseCase(ventaRepositoryPort, ticketRepositoryPort);
+        LiberarReservaUseCase useCase = new LiberarReservaUseCase(ventaRepositoryPort);
 
         Venta venta = Venta.builder()
                 .id(UUID.randomUUID())

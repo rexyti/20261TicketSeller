@@ -1,6 +1,6 @@
 package com.ticketseller.application.liquidacion;
 
-import com.ticketseller.domain.exception.LiquidacionNoConfiguradaException;
+import com.ticketseller.domain.exception.liquidacion.LiquidacionNoConfiguradaException;
 import com.ticketseller.domain.exception.recinto.RecintoNotFoundException;
 import com.ticketseller.domain.model.recinto.ConfiguracionLiquidacion;
 import com.ticketseller.domain.repository.RecintoRepositoryPort;
