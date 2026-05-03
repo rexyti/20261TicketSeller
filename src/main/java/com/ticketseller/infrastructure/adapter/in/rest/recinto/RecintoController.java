@@ -9,7 +9,6 @@ import com.ticketseller.application.recinto.ListarRecintosFiltradosUseCase;
 import com.ticketseller.application.recinto.RegistrarRecintoUseCase;
 import com.ticketseller.domain.model.recinto.CategoriaRecinto;
 import com.ticketseller.domain.model.recinto.Recinto;
-import com.ticketseller.infrastructure.adapter.in.rest.recinto.dto.CambiarEstadoRecintoRequest;
 import com.ticketseller.infrastructure.adapter.in.rest.recinto.dto.ConfigurarCapacidadRequest;
 import com.ticketseller.infrastructure.adapter.in.rest.recinto.dto.ConfigurarCategoriaRequest;
 import com.ticketseller.infrastructure.adapter.in.rest.recinto.dto.CrearRecintoRequest;
@@ -114,12 +113,8 @@ public class RecintoController {
     }
 
     @Operation(summary = "Desactivar un recinto")
-    @PatchMapping("/{id}/estado")
-    public Mono<ResponseEntity<RecintoResponse>> cambiarEstado(@PathVariable UUID id,
-                                                               @Valid @RequestBody CambiarEstadoRecintoRequest request) {
-        if (Boolean.TRUE.equals(request.activo())) {
-            return Mono.error(new IllegalArgumentException("Este endpoint solo permite desactivar recintos"));
-        }
+    @PatchMapping("/{id}/desactivar")
+    public Mono<ResponseEntity<RecintoResponse>> desactivar(@PathVariable UUID id) {
         return desactivarRecintoUseCase.ejecutar(id)
                 .map(recintoRestMapper::toResponse)
                 .map(ResponseEntity::ok);

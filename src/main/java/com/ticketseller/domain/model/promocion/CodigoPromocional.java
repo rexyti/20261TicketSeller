@@ -28,15 +28,27 @@ public class CodigoPromocional {
     }
 
     public void validar() {
-        if (codigo == null || codigo.isBlank()) {
+        if (sinCodigo()) {
             throw new IllegalArgumentException("El código no puede estar vacío");
         }
-        if (usosMaximos != null && usosMaximos <= 0) {
+        if (usosInvalidos()) {
             throw new IllegalArgumentException("Los usos máximos deben ser mayores que cero");
         }
-        if (fechaInicio != null && fechaFin != null && !fechaInicio.isBefore(fechaFin)) {
+        if (fechasInvalidas()) {
             throw new IllegalArgumentException("La fecha de inicio debe ser anterior a la fecha de fin");
         }
+    }
+
+    private boolean sinCodigo(){
+        return codigo == null || codigo.isBlank();
+    }
+
+    private boolean usosInvalidos() {
+        return usosMaximos != null && usosMaximos <= 0;
+    }
+
+    private boolean fechasInvalidas() {
+        return fechaInicio != null && fechaFin != null && fechaInicio.isAfter(fechaFin);
     }
 
     public boolean tieneUsosDisponibles() {

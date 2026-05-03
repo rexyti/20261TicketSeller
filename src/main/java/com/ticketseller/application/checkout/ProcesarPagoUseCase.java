@@ -1,5 +1,6 @@
 package com.ticketseller.application.checkout;
 
+import com.ticketseller.domain.exception.venta.MetodoPagoInvalidoException;
 import com.ticketseller.domain.exception.venta.PagoRechazadoException;
 import com.ticketseller.domain.exception.venta.ReservaExpiradaException;
 import com.ticketseller.domain.exception.venta.VentaNotFoundException;
@@ -40,7 +41,7 @@ public class ProcesarPagoUseCase {
 
     public Mono<VentaDetalle> ejecutar(UUID ventaId, ProcesarPagoCommand command) {
         if (invalidCommand(command))
-            return Mono.error(new IllegalArgumentException("El método de pago es obligatorio"));
+            return Mono.error(new MetodoPagoInvalidoException("El método de pago es obligatorio"));
 
         return ventaRepositoryPort.buscarPorId(ventaId)
                 .switchIfEmpty(Mono.error(new VentaNotFoundException("Venta no encontrada")))

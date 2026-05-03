@@ -1,6 +1,7 @@
 package com.ticketseller.infrastructure.adapter.in.rest.asiento;
 
 import com.ticketseller.application.inventario.ConfirmarOcupacionUseCase;
+import com.ticketseller.application.inventario.LiberarHoldUseCase;
 import com.ticketseller.application.inventario.VerificarDisponibilidadUseCase;
 import com.ticketseller.infrastructure.adapter.in.rest.asiento.dto.DisponibilidadResponse;
 import com.ticketseller.infrastructure.adapter.in.rest.mapper.AsientoRestMapper;
@@ -27,6 +28,7 @@ public class InventarioController {
 
     private final VerificarDisponibilidadUseCase verificarDisponibilidadUseCase;
     private final ConfirmarOcupacionUseCase confirmarOcupacionUseCase;
+    private final LiberarHoldUseCase liberarHoldUseCase;
     private final AsientoRestMapper asientoRestMapper;
 
     @Operation(summary = "Verificar disponibilidad de un asiento")
@@ -49,7 +51,7 @@ public class InventarioController {
     })
     @PostMapping("/{id}/ocupar")
     public Mono<ResponseEntity<DisponibilidadResponse>> ocupar(@PathVariable UUID id) {
-        return confirmarOcupacionUseCase.confirmar(id)
+        return confirmarOcupacionUseCase.ejecutar(id)
                 .map(asiento -> ResponseEntity.ok(asientoRestMapper.toDisponibilidadResponse(asiento)));
     }
 
@@ -60,7 +62,7 @@ public class InventarioController {
     })
     @PostMapping("/{id}/liberar")
     public Mono<ResponseEntity<DisponibilidadResponse>> liberar(@PathVariable UUID id) {
-        return confirmarOcupacionUseCase.liberar(id)
+        return liberarHoldUseCase.ejecutar(id)
                 .map(asiento -> ResponseEntity.ok(asientoRestMapper.toDisponibilidadResponse(asiento)));
     }
 }

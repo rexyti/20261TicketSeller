@@ -26,11 +26,19 @@ public class Descuento {
     }
 
     public void validar() {
-        if (valor == null || valor.compareTo(BigDecimal.ZERO) <= 0) {
+        if (valorNegativo()) {
             throw new IllegalArgumentException("El valor del descuento no puede ser negativo");
         }
-        if (TipoDescuento.PORCENTAJE.equals(tipo) && valor.compareTo(new BigDecimal("100")) > 0) {
+        if (porcentajeExcesivo()) {
             throw new IllegalArgumentException("El porcentaje de descuento no puede superar el 100%");
         }
+    }
+
+    private boolean valorNegativo() {
+        return valor == null || valor.compareTo(BigDecimal.ZERO) < 0;
+    }
+
+    private boolean porcentajeExcesivo() {
+        return TipoDescuento.PORCENTAJE.equals(tipo) && valor.compareTo(new BigDecimal("100")) > 0;
     }
 }

@@ -1,5 +1,6 @@
 package com.ticketseller.application.compuerta;
 
+import com.ticketseller.domain.exception.compuerta.CompuertaNotFoundException;
 import com.ticketseller.domain.exception.recinto.RecintoNotFoundException;
 import com.ticketseller.domain.exception.zona.ZonaNotFoundException;
 import com.ticketseller.domain.model.zona.Compuerta;
@@ -18,7 +19,7 @@ public class AsignarCompuertaAZonaUseCase {
 
     public Mono<Compuerta> ejecutar(UUID compuertaId, UUID zonaId) {
         return compuertaRepositoryPort.buscarPorId(compuertaId)
-                .switchIfEmpty(Mono.error(new RecintoNotFoundException("Compuerta no encontrada")))
+                .switchIfEmpty(Mono.error(new CompuertaNotFoundException("Compuerta no encontrada")))
                 .flatMap(compuerta -> zonaRepositoryPort.buscarPorId(zonaId)
                         .switchIfEmpty(Mono.error(new ZonaNotFoundException("Zona no encontrada")))
                         .flatMap(zona -> compuertaRepositoryPort.guardar(buildCompuertaAsignada(zonaId, compuerta))));

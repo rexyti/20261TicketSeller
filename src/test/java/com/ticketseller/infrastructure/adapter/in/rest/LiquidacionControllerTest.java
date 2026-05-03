@@ -6,7 +6,7 @@ import com.ticketseller.application.liquidacion.ConsultarRecaudoIncrementalUseCa
 import com.ticketseller.application.liquidacion.ConsultarSnapshotUseCase;
 import com.ticketseller.domain.exception.evento.EventoNoFinalizadoException;
 import com.ticketseller.domain.exception.evento.EventoNotFoundException;
-import com.ticketseller.domain.exception.LiquidacionNoConfiguradaException;
+import com.ticketseller.domain.exception.liquidacion.LiquidacionNoConfiguradaException;
 import com.ticketseller.domain.exception.recinto.RecintoNotFoundException;
 import com.ticketseller.domain.model.recinto.CategoriaRecinto;
 import com.ticketseller.domain.model.recinto.ConfiguracionLiquidacion;

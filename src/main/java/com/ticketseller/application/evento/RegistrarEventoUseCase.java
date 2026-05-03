@@ -1,6 +1,7 @@
 package com.ticketseller.application.evento;
 
 import com.ticketseller.domain.exception.evento.EventoSolapamientoException;
+import com.ticketseller.domain.exception.evento.SolicitudRegistroEventoInvalidaException;
 import com.ticketseller.domain.exception.recinto.RecintoNoDisponibleException;
 import com.ticketseller.domain.model.evento.EstadoEvento;
 import com.ticketseller.domain.model.evento.Evento;
@@ -20,13 +21,13 @@ public class RegistrarEventoUseCase {
 
     public Mono<Evento> ejecutar(Evento request) {
         return Mono.justOrEmpty(request)
-                .switchIfEmpty(Mono.error(new IllegalArgumentException("El request de evento es obligatorio")))
-                .map(Evento::normalizarDatosRegistro)
-                .doOnNext(Evento::validarDatosRegistro)
-                .flatMap(this::validarRecintoDisponible)
-                .flatMap(this::validarSolapamiento)
-                .map(this::buildNuevoEvento)
-                .flatMap(eventoRepositoryPort::guardar);
+            .switchIfEmpty(Mono.error(new SolicitudRegistroEventoInvalidaException("El request de evento es obligatorio")))
+            .map(Evento::normalizarDatosRegistro)
+            .doOnNext(Evento::validarDatosRegistro)
+            .flatMap(this::validarRecintoDisponible)
+            .flatMap(this::validarSolapamiento)
+            .map(this::buildNuevoEvento)
+            .flatMap(eventoRepositoryPort::guardar);
     }
 
     private Mono<Evento> validarRecintoDisponible(Evento evento) {

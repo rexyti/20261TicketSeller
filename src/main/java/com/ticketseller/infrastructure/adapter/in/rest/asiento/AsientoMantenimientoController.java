@@ -23,7 +23,7 @@ import reactor.core.publisher.Mono;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/eventos/{eventoId}/asientos")
+@RequestMapping("/api/v1/eventos/{eventoId}/asientos")
 @RequiredArgsConstructor
 @Tag(name = "Mantenimiento de Asientos", description = "Endpoints para la gestión de estados y auditoría de asientos")
 public class AsientoMantenimientoController {

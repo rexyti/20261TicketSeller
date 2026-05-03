@@ -4,6 +4,7 @@ import com.ticketseller.application.bloqueos.BloquearAsientosUseCase;
 import com.ticketseller.application.bloqueos.ConsultarPanelBloqueosUseCase;
 import com.ticketseller.application.bloqueos.CrearCortesiaUseCase;
 import com.ticketseller.application.bloqueos.GestionarBloqueoUseCase;
+import com.ticketseller.application.inventario.LiberarHoldUseCase;
 import com.ticketseller.domain.repository.BloqueoRepositoryPort;
 import com.ticketseller.domain.repository.CortesiaRepositoryPort;
 import com.ticketseller.infrastructure.adapter.out.persistence.bloqueos.BloqueoR2dbcRepository;
@@ -46,7 +47,7 @@ import com.ticketseller.application.checkout.ReservarAsientosUseCase;
 import com.ticketseller.application.postventa.CambiarEstadoTicketUseCase;
 import com.ticketseller.application.postventa.CancelarTicketUseCase;
 import com.ticketseller.application.postventa.ConsultarEstadoReembolsoUseCase;
-import com.ticketseller.application.postventa.GestionarReembolsoManualUseCase;
+import com.ticketseller.application.postventa.ProcesarReembolsoManualUseCase;
 import com.ticketseller.application.postventa.ProcesarReembolsoMasivoUseCase;
 import com.ticketseller.application.compuerta.AsignarCompuertaAZonaUseCase;
 import com.ticketseller.application.compuerta.CrearCompuertaUseCase;
@@ -430,9 +431,8 @@ public class BeanConfiguration {
     }
 
     @Bean
-    public LiberarReservaUseCase liberarReservaUseCase(VentaRepositoryPort ventaRepositoryPort,
-                                                       TicketRepositoryPort ticketRepositoryPort) {
-        return new LiberarReservaUseCase(ventaRepositoryPort, ticketRepositoryPort);
+    public LiberarReservaUseCase liberarReservaUseCase(VentaRepositoryPort ventaRepositoryPort) {
+        return new LiberarReservaUseCase(ventaRepositoryPort);
     }
 
     @Bean
@@ -546,12 +546,12 @@ public class BeanConfiguration {
     }
 
     @Bean
-    public GestionarReembolsoManualUseCase gestionarReembolsoManualUseCase(TicketRepositoryPort ticketRepositoryPort,
-                                                                           ReembolsoRepositoryPort reembolsoRepositoryPort,
-                                                                           PasarelaPagoPort pasarelaPagoPort,
-                                                                           NotificacionEmailPort notificacionEmailPort,
-                                                                           VentaRepositoryPort ventaRepositoryPort) {
-        return new GestionarReembolsoManualUseCase(ticketRepositoryPort, reembolsoRepositoryPort, pasarelaPagoPort,
+    public ProcesarReembolsoManualUseCase gestionarReembolsoManualUseCase(TicketRepositoryPort ticketRepositoryPort,
+                                                                          ReembolsoRepositoryPort reembolsoRepositoryPort,
+                                                                          PasarelaPagoPort pasarelaPagoPort,
+                                                                          NotificacionEmailPort notificacionEmailPort,
+                                                                          VentaRepositoryPort ventaRepositoryPort) {
+        return new ProcesarReembolsoManualUseCase(ticketRepositoryPort, reembolsoRepositoryPort, pasarelaPagoPort,
                 notificacionEmailPort, ventaRepositoryPort);
     }
 
@@ -641,6 +641,11 @@ public class BeanConfiguration {
     public ConfirmarOcupacionUseCase confirmarOcupacionUseCase(
             AsientoRepositoryPort asientoRepositoryPort) {
         return new ConfirmarOcupacionUseCase(asientoRepositoryPort);
+    }
+
+    @Bean
+    public LiberarHoldUseCase liberarHoldUseCase(AsientoRepositoryPort asientoRepositoryPort){
+        return new LiberarHoldUseCase(asientoRepositoryPort);
     }
 
     @Bean

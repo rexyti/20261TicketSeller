@@ -20,9 +20,13 @@ public class MarcarEspacioVacioUseCase {
     }
 
     private Mono<Asiento> marcarComoEnMantenimientoYGuardar(Asiento asiento) {
-        Asiento actualizado = asiento.toBuilder()
+        Asiento actualizado = marcarComoEnMantenimiento(asiento);
+        return asientoRepositoryPort.guardar(actualizado);
+    }
+
+    private Asiento marcarComoEnMantenimiento(Asiento asiento) {
+        return asiento.toBuilder()
                 .estado(EstadoAsiento.MANTENIMIENTO)
                 .build();
-        return asientoRepositoryPort.guardar(actualizado);
     }
 }

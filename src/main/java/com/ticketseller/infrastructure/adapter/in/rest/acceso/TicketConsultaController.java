@@ -19,7 +19,7 @@ import reactor.core.publisher.Mono;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/tickets")
+@RequestMapping("/api/v1/tickets")
 @RequiredArgsConstructor
 @Tag(name = "Control de Acceso", description = "Endpoints para la validación de tickets y acceso al recinto")
 public class TicketConsultaController {

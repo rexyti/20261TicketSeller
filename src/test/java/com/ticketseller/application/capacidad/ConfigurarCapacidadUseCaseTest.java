@@ -1,6 +1,6 @@
 package com.ticketseller.application.capacidad;
 
-import com.ticketseller.domain.exception.CapacidadInvalidaException;
+import com.ticketseller.domain.exception.zona.CapacidadInvalidaException;
 import com.ticketseller.domain.exception.recinto.RecintoConEventosException;
 import com.ticketseller.domain.exception.recinto.RecintoNotFoundException;
 import com.ticketseller.domain.model.recinto.Recinto;

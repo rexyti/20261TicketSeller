@@ -22,12 +22,20 @@ public class Bloqueo {
     private EstadoBloqueo estado;
 
     public void validar() {
-        if (destinatario == null || destinatario.isBlank()) {
+        if (sinDestinatario()) {
             throw new IllegalArgumentException("El destinatario del bloqueo no puede estar vacío");
         }
-        if (fechaExpiracion != null && fechaCreacion != null
-                && !fechaExpiracion.isAfter(fechaCreacion)) {
+        if (fechasInvalidas()) {
             throw new IllegalArgumentException("La fecha de expiración debe ser posterior a la fecha de creación");
         }
+    }
+
+    private boolean sinDestinatario(){
+        return destinatario == null || destinatario.isBlank();
+    }
+
+    private boolean fechasInvalidas(){
+        return fechaExpiracion != null && fechaCreacion != null
+                && fechaExpiracion.isBefore(fechaCreacion);
     }
 }

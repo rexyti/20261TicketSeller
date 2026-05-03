@@ -1,5 +1,6 @@
 package com.ticketseller.application.postventa;
 
+import com.ticketseller.domain.exception.postventa.MontoReembolsoInvalidoException;
 import com.ticketseller.domain.exception.postventa.ReembolsoFallidoException;
 import com.ticketseller.domain.exception.postventa.TicketNoAptoParaReembolsoException;
 import com.ticketseller.domain.exception.venta.TicketNotFoundException;
@@ -23,7 +24,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @RequiredArgsConstructor
-public class GestionarReembolsoManualUseCase {
+public class ProcesarReembolsoManualUseCase {
     private static final String PLAZO_ACREDITACION = "3-5 días hábiles";
     private static final String METODO_REEMBOLSO = "TARJETA";
 
@@ -47,10 +48,14 @@ public class GestionarReembolsoManualUseCase {
     }
 
     private Mono<Ticket> validarEstadoTicket(Ticket ticket) {
-        if (EstadoTicket.CANCELADO.equals(ticket.getEstado()) || EstadoTicket.REEMBOLSO_PENDIENTE.equals(ticket.getEstado())) {
+        if (esTicketCanceladoOPendientePorReembolso(ticket)) {
             return Mono.just(ticket);
         }
         return Mono.error(new TicketNoAptoParaReembolsoException("El ticket no está en estado válido para reembolso"));
+    }
+
+    private boolean esTicketCanceladoOPendientePorReembolso(Ticket ticket){
+        return EstadoTicket.CANCELADO.equals(ticket.getEstado()) || EstadoTicket.REEMBOLSO_PENDIENTE.equals(ticket.getEstado());
     }
 
     private Mono<Reembolso> procesarReembolso(Ticket ticket, TipoReembolso tipo, BigDecimal monto, UUID agenteId) {
@@ -74,13 +79,21 @@ public class GestionarReembolsoManualUseCase {
 
     private BigDecimal resolverMonto(Ticket ticket, TipoReembolso tipo, BigDecimal monto) {
         TipoReembolso tipoEfectivo = tipo == null ? TipoReembolso.TOTAL : tipo;
-        if (TipoReembolso.TOTAL.equals(tipoEfectivo)) {
+        if (esReembolsoTotal(tipoEfectivo)) {
             return ticket.getPrecio();
         }
-        if (monto == null || monto.compareTo(BigDecimal.ZERO) <= 0 || monto.compareTo(ticket.getPrecio()) > 0) {
-            throw new IllegalArgumentException("Monto parcial inválido");
+        if (esMontoParcialInvalido(ticket, monto)) {
+            throw new MontoReembolsoInvalidoException("Monto parcial inválido");
         }
         return monto;
+    }
+
+    private boolean esReembolsoTotal(TipoReembolso tipo){
+        return TipoReembolso.TOTAL.equals(tipo);
+    }
+
+    private boolean esMontoParcialInvalido(Ticket ticket, BigDecimal monto){
+        return monto == null || monto.compareTo(BigDecimal.ZERO) <= 0 || monto.compareTo(ticket.getPrecio()) > 0;
     }
 
     private Reembolso reembolsoNuevo(Ticket ticket, TipoReembolso tipo, BigDecimal monto, UUID agenteId) {
@@ -97,6 +110,11 @@ public class GestionarReembolsoManualUseCase {
     }
 
     private Mono<Reembolso> marcarEnProceso(Reembolso reembolso, TipoReembolso tipo, BigDecimal monto, UUID agenteId) {
+        Reembolso enProceso = buildEnProceso(reembolso, tipo, monto, agenteId);
+        return reembolsoRepositoryPort.guardar(enProceso);
+    }
+
+    private Reembolso buildEnProceso(Reembolso reembolso, TipoReembolso tipo, BigDecimal monto, UUID agenteId) {
         Reembolso enProceso = reembolso.toBuilder()
                 .tipo(tipo == null ? reembolso.getTipo() : tipo)
                 .monto(monto)
@@ -105,22 +123,26 @@ public class GestionarReembolsoManualUseCase {
                 .fechaSolicitud(reembolso.getFechaSolicitud() == null ? LocalDateTime.now() : reembolso.getFechaSolicitud())
                 .build();
         enProceso.validarDatosRegistro();
-        return reembolsoRepositoryPort.guardar(enProceso);
+        return enProceso;
     }
 
     private Mono<Reembolso> finalizarProceso(Ticket ticket, Reembolso reembolsoEnProceso, ResultadoPago resultado) {
         if (!resultado.aprobado()) {
             return registrarFallo(reembolsoEnProceso, resultado.respuestaPasarela());
         }
-        Reembolso completado = reembolsoEnProceso.toBuilder()
-                .estado(EstadoReembolso.COMPLETADO)
-                .fechaCompletado(LocalDateTime.now())
-                .build();
+        Reembolso completado = finalizarProceso(reembolsoEnProceso);
         Ticket ticketReembolsado = ticket.toBuilder().estado(EstadoTicket.REEMBOLSADO).build();
         return reembolsoRepositoryPort.guardar(completado)
                 .flatMap(saved -> ticketRepositoryPort.guardar(ticketReembolsado)
                         .then(notificarComprador(saved, ticket))
                         .thenReturn(saved));
+    }
+
+    private Reembolso finalizarProceso(Reembolso reembolsoEnProceso) {
+        return reembolsoEnProceso.toBuilder()
+                .estado(EstadoReembolso.COMPLETADO)
+                .fechaCompletado(LocalDateTime.now())
+                .build();
     }
 
     private Mono<Void> notificarComprador(Reembolso reembolso, Ticket ticket) {

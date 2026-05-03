@@ -33,7 +33,7 @@ public class CambiarEstadoAsientoUseCase {
     }
 
     private Mono<Void> validarSinCompraActiva(UUID asientoId) {
-        // TODO: integrar con carrito cuando feature 005 esté implementado
+        // TODO: integrar con carrito cuando feature 004 esté implementado
         return Mono.just(false)
                 .filter(enCompra -> !enCompra)
                 .switchIfEmpty(Mono.error(new AsientoEnCompraException("El asiento está siendo reservado por un cliente.")))

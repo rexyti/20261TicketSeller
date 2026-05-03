@@ -1,6 +1,7 @@
 package com.ticketseller.infrastructure.adapter.in.rest.asiento;
 
 import com.ticketseller.application.inventario.ConfirmarOcupacionUseCase;
+import com.ticketseller.application.inventario.LiberarHoldUseCase;
 import com.ticketseller.application.inventario.VerificarDisponibilidadUseCase;
 import com.ticketseller.domain.exception.asiento.HoldExpiradoException;
 import com.ticketseller.domain.model.asiento.Asiento;
@@ -34,6 +35,9 @@ class InventarioControllerTest {
 
     @MockBean
     private ConfirmarOcupacionUseCase confirmarOcupacionUseCase;
+
+    @MockBean
+    private LiberarHoldUseCase liberarHoldUseCase;
 
     @MockBean
     private AsientoRestMapper asientoRestMapper;
@@ -132,7 +136,7 @@ class InventarioControllerTest {
     void ocuparAsientoConPagoConfirmadoRetorna200ConOcupado() {
         UUID id = UUID.randomUUID();
         Asiento ocupado = Asiento.builder().id(id).estado(EstadoAsiento.OCUPADO).build();
-        when(confirmarOcupacionUseCase.confirmar(id)).thenReturn(Mono.just(ocupado));
+        when(confirmarOcupacionUseCase.ejecutar(id)).thenReturn(Mono.just(ocupado));
 
         webTestClient.post()
                 .uri("/api/v1/inventario/asientos/{id}/ocupar", id)
@@ -142,12 +146,12 @@ class InventarioControllerTest {
                 .jsonPath("$.estado").isEqualTo("OCUPADO");
     }
 
-    // T025: POST /liberar tras pago fallido → 200 con estado DISPONIBLE
+    // T025: POST /ejecutar tras pago fallido → 200 con estado DISPONIBLE
     @Test
     void liberarAsientoTrasPagoFallidoRetorna200ConDisponible() {
         UUID id = UUID.randomUUID();
         Asiento disponible = Asiento.builder().id(id).estado(EstadoAsiento.DISPONIBLE).build();
-        when(confirmarOcupacionUseCase.liberar(id)).thenReturn(Mono.just(disponible));
+        when(liberarHoldUseCase.ejecutar(id)).thenReturn(Mono.just(disponible));
 
         webTestClient.post()
                 .uri("/api/v1/inventario/asientos/{id}/liberar", id)
@@ -162,7 +166,7 @@ class InventarioControllerTest {
     @Test
     void ocuparConHoldExpiradoRetorna409() {
         UUID id = UUID.randomUUID();
-        when(confirmarOcupacionUseCase.confirmar(id))
+        when(confirmarOcupacionUseCase.ejecutar(id))
                 .thenReturn(Mono.error(new HoldExpiradoException("El hold del asiento ha expirado")));
 
         webTestClient.post()

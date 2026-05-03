@@ -15,12 +15,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -28,6 +23,7 @@ import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/api/v1")
 @Tag(name = "Conciliación de Pagos", description = "Verificación, confirmación y resolución de discrepancias de pagos")
 public class ConciliacionController {
 
@@ -38,7 +34,7 @@ public class ConciliacionController {
     private final ConciliacionRestMapper mapper;
 
     @Operation(summary = "Verificar pago de pasarela")
-    @PostMapping("/api/v1/pagos/verificar")
+    @PostMapping("/pagos/verificar")
     public Mono<ResponseEntity<PagoResponse>> verificar(@Valid @RequestBody VerificarPagoRequest request) {
         return verificarPagoUseCase.ejecutar(request.ventaId(), request.montoPasarela(), request.idExternoPasarela())
                 .map(mapper::toPagoResponse)
@@ -46,7 +42,7 @@ public class ConciliacionController {
     }
 
     @Operation(summary = "Confirmar transacción de forma idempotente")
-    @PostMapping("/api/v1/pagos/confirmar")
+    @PostMapping("/pagos/confirmar")
     public Mono<ResponseEntity<PagoResponse>> confirmar(@Valid @RequestBody ConfirmarPagoRequest request) {
         return confirmarTransaccionUseCase.ejecutar(request.ventaId(), request.idExternoPasarela(), request.montoPasarela())
                 .map(mapper::toPagoResponse)
@@ -54,13 +50,13 @@ public class ConciliacionController {
     }
 
     @Operation(summary = "Listar pagos en discrepancia")
-    @GetMapping("/api/v1/admin/conciliacion/discrepancias")
+    @GetMapping("/admin/conciliacion/discrepancias")
     public Flux<PagoResponse> listarDiscrepancias() {
         return listarDiscrepanciaUseCase.ejecutar().map(mapper::toPagoResponse);
     }
 
     @Operation(summary = "Resolver una discrepancia de pago manualmente")
-    @PatchMapping("/api/v1/admin/conciliacion/discrepancias/{id}/resolver")
+    @PatchMapping("/admin/conciliacion/discrepancias/{id}/resolver")
     public Mono<ResponseEntity<PagoResponse>> resolver(
             @PathVariable UUID id,
             @Valid @RequestBody ResolverDiscrepanciaRequest request) {

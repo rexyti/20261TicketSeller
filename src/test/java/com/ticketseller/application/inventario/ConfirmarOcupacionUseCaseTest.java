@@ -31,7 +31,7 @@ class ConfirmarOcupacionUseCaseTest {
         when(asientoRepositoryPort.buscarPorId(id)).thenReturn(Mono.just(reservado));
         when(asientoRepositoryPort.marcarOcupado(id)).thenReturn(Mono.just(ocupado));
 
-        StepVerifier.create(useCase.confirmar(id))
+        StepVerifier.create(useCase.ejecutar(id))
                 .assertNext(a -> assertEquals(EstadoAsiento.OCUPADO, a.getEstado()))
                 .verifyComplete();
     }
@@ -44,7 +44,7 @@ class ConfirmarOcupacionUseCaseTest {
 
         when(asientoRepositoryPort.buscarPorId(id)).thenReturn(Mono.just(reservado));
 
-        StepVerifier.create(useCase.confirmar(id))
+        StepVerifier.create(useCase.ejecutar(id))
                 .expectError(HoldExpiradoException.class)
                 .verify();
     }
@@ -55,28 +55,7 @@ class ConfirmarOcupacionUseCaseTest {
         Asiento disponible = Asiento.builder().id(id).estado(EstadoAsiento.DISPONIBLE).build();
         when(asientoRepositoryPort.buscarPorId(id)).thenReturn(Mono.just(disponible));
 
-        StepVerifier.create(useCase.confirmar(id))
-                .expectError(AsientoNoDisponibleException.class)
-                .verify();
-    }
-
-    @Test
-    void liberaHoldExitosamente() {
-        UUID id = UUID.randomUUID();
-        Asiento disponible = Asiento.builder().id(id).estado(EstadoAsiento.DISPONIBLE).build();
-        when(asientoRepositoryPort.liberarHold(id)).thenReturn(Mono.just(disponible));
-
-        StepVerifier.create(useCase.liberar(id))
-                .assertNext(a -> assertEquals(EstadoAsiento.DISPONIBLE, a.getEstado()))
-                .verifyComplete();
-    }
-
-    @Test
-    void fallaConAsientoNoDisponibleAlLiberarAsientoInexistente() {
-        UUID id = UUID.randomUUID();
-        when(asientoRepositoryPort.liberarHold(id)).thenReturn(Mono.empty());
-
-        StepVerifier.create(useCase.liberar(id))
+        StepVerifier.create(useCase.ejecutar(id))
                 .expectError(AsientoNoDisponibleException.class)
                 .verify();
     }

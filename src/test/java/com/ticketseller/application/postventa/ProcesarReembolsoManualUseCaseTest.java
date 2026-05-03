@@ -30,7 +30,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class GestionarReembolsoManualUseCaseTest {
+class ProcesarReembolsoManualUseCaseTest {
 
     @Mock
     private TicketRepositoryPort ticketRepositoryPort;
@@ -43,7 +43,7 @@ class GestionarReembolsoManualUseCaseTest {
     @Mock
     private VentaRepositoryPort ventaRepositoryPort;
     @InjectMocks
-    private GestionarReembolsoManualUseCase useCase;
+    private ProcesarReembolsoManualUseCase useCase;
 
     private UUID ticketId;
     private Ticket ticket;

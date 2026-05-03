@@ -169,7 +169,7 @@ class InventarioRepositoryIntegrationTest {
                 .verifyComplete();
     }
 
-    // T027: flujo reservar → confirmar → asiento OCUPADO en BD
+    // T027: flujo reservar → ejecutar → asiento OCUPADO en BD
     @Test
     void flujoReservarConfirmarResultaEnAsientoOcupado() {
         UUID id = insertAsiento("DISPONIBLE");
@@ -178,7 +178,7 @@ class InventarioRepositoryIntegrationTest {
                 .assertNext(a -> assertEquals(EstadoAsiento.RESERVADO, a.getEstado()))
                 .verifyComplete();
 
-        StepVerifier.create(confirmarOcupacionUseCase.confirmar(id))
+        StepVerifier.create(confirmarOcupacionUseCase.ejecutar(id))
                 .assertNext(a -> {
                     assertEquals(EstadoAsiento.OCUPADO, a.getEstado());
                     assertNull(a.getExpiraEn());
@@ -233,7 +233,7 @@ class InventarioRepositoryIntegrationTest {
     void holdExpiradoAlConfirmarLanzaHoldExpiradoException() {
         UUID id = insertAsientoConExpiraEn("RESERVADO", LocalDateTime.now().minusSeconds(1));
 
-        StepVerifier.create(confirmarOcupacionUseCase.confirmar(id))
+        StepVerifier.create(confirmarOcupacionUseCase.ejecutar(id))
                 .expectError(HoldExpiradoException.class)
                 .verify();
     }

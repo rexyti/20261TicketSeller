@@ -1,6 +1,6 @@
 package com.ticketseller.infrastructure.adapter.in.rest.postventa;
 
-import com.ticketseller.application.postventa.GestionarReembolsoManualUseCase;
+import com.ticketseller.application.postventa.ProcesarReembolsoManualUseCase;
 import com.ticketseller.domain.model.postventa.EstadoReembolso;
 import com.ticketseller.domain.model.postventa.Reembolso;
 import com.ticketseller.domain.model.postventa.TipoReembolso;
@@ -32,7 +32,7 @@ class AdminReembolsoControllerTest {
     private WebTestClient webTestClient;
 
     @MockBean
-    private GestionarReembolsoManualUseCase gestionarReembolsoManualUseCase;
+    private ProcesarReembolsoManualUseCase procesarReembolsoManualUseCase;
     @MockBean
     private PostVentaRestMapper postVentaRestMapper;
 
@@ -48,7 +48,7 @@ class AdminReembolsoControllerTest {
                 .build();
         ReembolsoResponse response = new ReembolsoResponse(reembolso.getId(), reembolso.getEstado(), reembolso.getMonto(),
                 reembolso.getAgenteId(), reembolso.getFechaCompletado());
-        when(gestionarReembolsoManualUseCase.ejecutar(any(), any(), any(), any())).thenReturn(Mono.just(reembolso));
+        when(procesarReembolsoManualUseCase.ejecutar(any(), any(), any(), any())).thenReturn(Mono.just(reembolso));
         when(postVentaRestMapper.toReembolsoResponse(reembolso)).thenReturn(response);
 
         webTestClient.post()
@@ -73,7 +73,7 @@ class AdminReembolsoControllerTest {
                 .build();
         ReembolsoResponse response = new ReembolsoResponse(reembolso.getId(), reembolso.getEstado(), reembolso.getMonto(),
                 reembolso.getAgenteId(), reembolso.getFechaCompletado());
-        when(gestionarReembolsoManualUseCase.ejecutar(any(), any(), any(), any())).thenReturn(Mono.just(reembolso));
+        when(procesarReembolsoManualUseCase.ejecutar(any(), any(), any(), any())).thenReturn(Mono.just(reembolso));
         when(postVentaRestMapper.toReembolsoResponse(reembolso)).thenReturn(response);
 
         webTestClient.post()
@@ -86,7 +86,7 @@ class AdminReembolsoControllerTest {
 
     @Test
     void procesarColaAutomaticaRetorna200() {
-        when(gestionarReembolsoManualUseCase.procesarColaPendiente()).thenReturn(Mono.empty());
+        when(procesarReembolsoManualUseCase.procesarColaPendiente()).thenReturn(Mono.empty());
 
         webTestClient.post()
                 .uri("/api/v1/admin/reembolsos/procesar-cola")

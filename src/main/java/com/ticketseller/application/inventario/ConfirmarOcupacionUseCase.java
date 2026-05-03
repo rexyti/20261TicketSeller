@@ -1,6 +1,7 @@
 package com.ticketseller.application.inventario;
 
 import com.ticketseller.domain.exception.asiento.AsientoNoDisponibleException;
+import com.ticketseller.domain.exception.asiento.AsientoNotFoundException;
 import com.ticketseller.domain.exception.asiento.HoldExpiradoException;
 import com.ticketseller.domain.model.asiento.Asiento;
 import com.ticketseller.domain.model.asiento.EstadoAsiento;
@@ -16,18 +17,22 @@ public class ConfirmarOcupacionUseCase {
 
     private final AsientoRepositoryPort asientoRepositoryPort;
 
-    public Mono<Asiento> confirmar(UUID asientoId) {
+    public Mono<Asiento> ejecutar(UUID asientoId) {
         return asientoRepositoryPort.buscarPorId(asientoId)
-                .switchIfEmpty(Mono.error(new AsientoNoDisponibleException("Asiento no encontrado: " + asientoId)))
-                .filter(asiento -> EstadoAsiento.RESERVADO.equals(asiento.getEstado()))
+                .switchIfEmpty(Mono.error(new AsientoNotFoundException("Asiento no encontrado: " + asientoId)))
+                .filter(this::esReservado)
                 .switchIfEmpty(Mono.error(new AsientoNoDisponibleException("El asiento no está en estado RESERVADO")))
-                .filter(asiento -> asiento.getExpiraEn() == null || asiento.getExpiraEn().isAfter(LocalDateTime.now()))
+                .filter(this::holdNoExpirado)
                 .switchIfEmpty(Mono.error(new HoldExpiradoException("El hold del asiento ha expirado")))
                 .flatMap(asiento -> asientoRepositoryPort.marcarOcupado(asientoId));
     }
 
-    public Mono<Asiento> liberar(UUID asientoId) {
-        return asientoRepositoryPort.liberarHold(asientoId)
-                .switchIfEmpty(Mono.error(new AsientoNoDisponibleException("Asiento no encontrado: " + asientoId)));
+    private boolean esReservado(Asiento asiento) {
+        return EstadoAsiento.RESERVADO.equals(asiento.getEstado());
+    }
+
+    private boolean holdNoExpirado(Asiento asiento) {
+        LocalDateTime ahora = LocalDateTime.now();
+        return asiento.getExpiraEn() == null || asiento.getExpiraEn().isAfter(ahora);
     }
 }

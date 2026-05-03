@@ -36,8 +36,8 @@ public class CancelacionController {
                 .map(ResponseEntity::ok);
     }
 
-    @Operation(summary = "Cancelar tickets parcialmente")
-    @PostMapping("/cancelar-parcial")
+    @Operation(summary = "Cancelar varios tickets")
+    @PostMapping("/cancelar-varios")
     public Mono<ResponseEntity<CancelacionResponse>> cancelarParcial(@Valid @RequestBody CancelarTicketRequest request) {
         return cancelarTicketUseCase.cancelarVarios(request.ticketIds())
                 .map(postVentaRestMapper::toCancelacionResponse)
