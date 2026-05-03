@@ -8,7 +8,6 @@ import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @RequiredArgsConstructor
 public class RegistrarRecintoUseCase {
@@ -33,7 +32,6 @@ public class RegistrarRecintoUseCase {
 
     private Recinto prepararNuevoRecinto(Recinto request) {
         return request.toBuilder()
-                .id(UUID.randomUUID())
                 .fechaCreacion(LocalDateTime.now())
                 .activo(true)
                 .build();

@@ -64,7 +64,6 @@ public class CambiarEstadoVentaUseCase {
     private HistorialEstadoVenta crearRegistroHistorial(Venta venta, EstadoVenta estadoAnterior, EstadoVenta estadoNuevo,
                                                         String justificacion, UUID actorId) {
         return HistorialEstadoVenta.builder()
-                .id(UUID.randomUUID())
                 .ventaId(venta.getId())
                 .actorId(actorId)
                 .estadoAnterior(estadoAnterior)

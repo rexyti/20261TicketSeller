@@ -128,7 +128,6 @@ public class ProcesarPagoUseCase {
 
     private TransaccionFinanciera buildTransaccionFinanciera(Venta venta, ProcesarPagoCommand command, ResultadoPago resultado) {
         return TransaccionFinanciera.builder()
-                .id(UUID.randomUUID())
                 .ventaId(venta.getId())
                 .monto(venta.getTotal())
                 .metodoPago(MetodoPago.fromValor(command.metodoPago()))

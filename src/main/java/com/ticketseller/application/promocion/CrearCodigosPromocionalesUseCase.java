@@ -38,7 +38,6 @@ public class CrearCodigosPromocionalesUseCase {
     private CodigoPromocional buildCodigo(UUID promocionId, String base, Integer usosMaximos,
                                           LocalDateTime fechaInicio, LocalDateTime fechaFin) {
         return CodigoPromocional.builder()
-                .id(UUID.randomUUID())
                 .codigo(base + UUID.randomUUID().toString().replace("-", "").substring(0, 8).toUpperCase())
                 .promocionId(promocionId)
                 .usosMaximos(usosMaximos)

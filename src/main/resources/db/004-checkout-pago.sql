@@ -1,5 +1,5 @@
 CREATE TABLE ventas (
-    id UUID PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     comprador_id UUID NOT NULL,
     evento_id UUID NOT NULL REFERENCES eventos (id),
     estado VARCHAR(40) NOT NULL,
@@ -9,7 +9,7 @@ CREATE TABLE ventas (
 );
 
 CREATE TABLE tickets (
-    id UUID PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     venta_id UUID NOT NULL REFERENCES ventas (id),
     evento_id UUID NOT NULL REFERENCES eventos (id),
     zona_id UUID NOT NULL REFERENCES zonas (id),
@@ -21,7 +21,7 @@ CREATE TABLE tickets (
 );
 
 CREATE TABLE transacciones_financieras (
-    id UUID PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     venta_id UUID NOT NULL REFERENCES ventas (id),
     monto NUMERIC(12, 2) NOT NULL,
     metodo_pago VARCHAR(60) NOT NULL,

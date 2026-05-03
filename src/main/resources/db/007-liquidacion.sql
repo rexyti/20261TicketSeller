@@ -5,9 +5,9 @@ ALTER TABLE recintos
     ADD COLUMN IF NOT EXISTS modelo_negocio VARCHAR(30),
     ADD COLUMN IF NOT EXISTS monto_fijo     NUMERIC(12, 2);
 
-CREATE TABLE IF NOT EXISTS historial_cambios_estado
+CREATE TABLE historial_cambios_estado
 (
-    id              UUID PRIMARY KEY,
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     asiento_id      UUID REFERENCES asientos (id),
     evento_id       UUID,
     usuario_id      VARCHAR(100),

@@ -8,6 +8,7 @@ import com.ticketseller.domain.model.venta.ResultadoPago;
 import com.ticketseller.domain.model.ticket.Ticket;
 import com.ticketseller.domain.model.venta.Venta;
 import com.ticketseller.domain.repository.*;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -66,7 +67,7 @@ class ProcesarPagoUseCaseTest {
 
         StepVerifier.create(useCase.ejecutar(ventaId, new ProcesarPagoCommand("TARJETA", "127.0.0.1")))
                 .assertNext(detalle -> {
-                    assert detalle.venta().getEstado() == EstadoVenta.COMPLETADA;
+                    Assertions.assertEquals(EstadoVenta.COMPLETADA, detalle.venta().getEstado());
                 })
                 .verifyComplete();
     }

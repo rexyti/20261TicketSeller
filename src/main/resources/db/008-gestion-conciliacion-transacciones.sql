@@ -1,5 +1,5 @@
 CREATE TABLE historial_estado_venta (
-    id UUID PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     venta_id UUID NOT NULL REFERENCES ventas (id),
     actor_id UUID,
     estado_anterior VARCHAR(40) NOT NULL,
@@ -9,7 +9,7 @@ CREATE TABLE historial_estado_venta (
 );
 
 CREATE TABLE pagos (
-    id UUID PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     venta_id UUID NOT NULL REFERENCES ventas (id),
     id_externo_pasarela VARCHAR(120) UNIQUE,
     monto_esperado NUMERIC(12, 2) NOT NULL,

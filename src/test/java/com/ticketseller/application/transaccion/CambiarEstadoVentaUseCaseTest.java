@@ -1,7 +1,9 @@
 package com.ticketseller.application.transaccion;
 
+import com.ticketseller.domain.exception.transaccion.CambioEstadoVentaSinJustificacionException;
 import com.ticketseller.domain.exception.transaccion.TransicionVentaInvalidaException;
 import com.ticketseller.domain.exception.transaccion.VentaNoEncontradaException;
+import com.ticketseller.domain.exception.venta.EstadoVentaInvalidoException;
 import com.ticketseller.domain.model.transaccion.HistorialEstadoVenta;
 import com.ticketseller.domain.model.venta.EstadoVenta;
 import com.ticketseller.domain.model.venta.Venta;
@@ -70,7 +72,7 @@ class CambiarEstadoVentaUseCaseTest {
     void deberiaFallarSiJustificacionEsBlanca() {
         UUID ventaId = UUID.randomUUID();
         StepVerifier.create(useCase.ejecutar(ventaId, EstadoVenta.COMPLETADA, "  ", null))
-                .expectError(IllegalArgumentException.class)
+                .expectError(CambioEstadoVentaSinJustificacionException.class)
                 .verify();
     }
 
@@ -78,7 +80,7 @@ class CambiarEstadoVentaUseCaseTest {
     void deberiaFallarSiNuevoEstadoEsNulo() {
         UUID ventaId = UUID.randomUUID();
         StepVerifier.create(useCase.ejecutar(ventaId, null, "Sin estado", null))
-                .expectError(IllegalArgumentException.class)
+                .expectError(EstadoVentaInvalidoException.class)
                 .verify();
     }
 

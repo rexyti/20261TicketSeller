@@ -1,6 +1,6 @@
-CREATE TABLE IF NOT EXISTS tipos_asiento
+CREATE TABLE tipos_asiento
 (
-    id          UUID PRIMARY KEY,
+    id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     nombre      VARCHAR(100)  NOT NULL,
     descripcion VARCHAR(255),
     estado      VARCHAR(20)   NOT NULL,
@@ -10,9 +10,9 @@ CREATE TABLE IF NOT EXISTS tipos_asiento
 ALTER TABLE zonas
     ADD COLUMN IF NOT EXISTS tipo_asiento_id UUID REFERENCES tipos_asiento (id);
 
-CREATE TABLE IF NOT EXISTS asientos
+CREATE TABLE asientos
 (
-    id       UUID PRIMARY KEY,
+    id       UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     fila     INTEGER     NOT NULL,
     columna  INTEGER     NOT NULL,
     numero   VARCHAR(20) NOT NULL,

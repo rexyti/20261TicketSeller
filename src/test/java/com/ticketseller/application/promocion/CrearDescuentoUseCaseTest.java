@@ -28,14 +28,13 @@ class CrearDescuentoUseCaseTest {
 
     private DescuentoRepositoryPort descuentoRepositoryPort;
     private PromocionRepositoryPort promocionRepositoryPort;
-    private ZonaRepositoryPort zonaRepositoryPort;
     private CrearDescuentoUseCase useCase;
 
     @BeforeEach
     void setUp() {
         descuentoRepositoryPort = mock(DescuentoRepositoryPort.class);
         promocionRepositoryPort = mock(PromocionRepositoryPort.class);
-        zonaRepositoryPort = mock(ZonaRepositoryPort.class);
+        ZonaRepositoryPort zonaRepositoryPort = mock(ZonaRepositoryPort.class);
         useCase = new CrearDescuentoUseCase(descuentoRepositoryPort, promocionRepositoryPort, zonaRepositoryPort);
     }
 
@@ -44,6 +43,8 @@ class CrearDescuentoUseCaseTest {
         UUID promocionId = UUID.randomUUID();
         Promocion promocion = buildPromocionActiva(promocionId);
         Descuento request = Descuento.builder()
+                .id(UUID.randomUUID())
+                .promocionId(promocionId)
                 .tipo(TipoDescuento.PORCENTAJE)
                 .valor(new BigDecimal("20"))
                 .acumulable(false)

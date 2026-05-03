@@ -1,5 +1,6 @@
 package com.ticketseller.infrastructure.adapter.in.rest.postventa;
 
+import com.ticketseller.application.checkout.ConsultarTodosTicketsUseCase;
 import com.ticketseller.application.postventa.ConsultarEstadoReembolsoUseCase;
 import com.ticketseller.application.postventa.TicketConReembolso;
 import com.ticketseller.domain.model.postventa.EstadoReembolso;
@@ -7,6 +8,7 @@ import com.ticketseller.domain.model.postventa.Reembolso;
 import com.ticketseller.domain.model.ticket.EstadoTicket;
 import com.ticketseller.domain.model.ticket.Ticket;
 import com.ticketseller.infrastructure.adapter.in.rest.GlobalExceptionHandler;
+import com.ticketseller.infrastructure.adapter.in.rest.mapper.CheckoutRestMapper;
 import com.ticketseller.infrastructure.adapter.in.rest.postventa.dto.TicketConReembolsoResponse;
 import com.ticketseller.infrastructure.adapter.in.rest.mapper.PostVentaRestMapper;
 import org.junit.jupiter.api.Test;
@@ -32,7 +34,11 @@ class MisComprasControllerTest {
     @MockBean
     private ConsultarEstadoReembolsoUseCase consultarEstadoReembolsoUseCase;
     @MockBean
+    private ConsultarTodosTicketsUseCase consultarTodosTicketsUseCase;
+    @MockBean
     private PostVentaRestMapper postVentaRestMapper;
+    @MockBean
+    private CheckoutRestMapper checkoutRestMapper;
 
     @Test
     void misComprasRetornaEstadoReembolso() {

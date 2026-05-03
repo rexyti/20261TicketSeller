@@ -12,19 +12,12 @@ import reactor.core.publisher.Mono;
 import java.util.UUID;
 
 @RequiredArgsConstructor
-public class GestionarBloqueoUseCase {
+public class LiberarBloqueoUseCase {
 
     private final BloqueoRepositoryPort bloqueoRepositoryPort;
     private final AsientoRepositoryPort asientoRepositoryPort;
 
-    public Mono<Bloqueo> editarDestinatario(UUID bloqueoId, String nuevoDestinatario) {
-        return bloqueoRepositoryPort.buscarPorId(bloqueoId)
-                .switchIfEmpty(Mono.error(new BloqueoNoEncontradoException(bloqueoId)))
-                .map(bloqueo -> bloqueo.toBuilder().destinatario(nuevoDestinatario).build())
-                .flatMap(bloqueoRepositoryPort::guardar);
-    }
-
-    public Mono<Void> liberarBloqueo(UUID bloqueoId) {
+    public Mono<Void> ejecutar(UUID bloqueoId) {
         return bloqueoRepositoryPort.buscarPorId(bloqueoId)
                 .switchIfEmpty(Mono.error(new BloqueoNoEncontradoException(bloqueoId)))
                 .flatMap(this::liberarAsientoYBloqueo);

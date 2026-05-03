@@ -1,5 +1,6 @@
 package com.ticketseller.application.postventa;
 
+import com.ticketseller.domain.exception.postventa.MontoReembolsoInvalidoException;
 import com.ticketseller.domain.exception.postventa.ReembolsoFallidoException;
 import com.ticketseller.domain.model.postventa.EstadoReembolso;
 import com.ticketseller.domain.model.postventa.Reembolso;
@@ -103,7 +104,7 @@ class ProcesarReembolsoManualUseCaseTest {
     @Test
     void deberiaFallarSiMontoParcialEsMayorAlOriginal() {
         StepVerifier.create(useCase.ejecutar(ticketId, TipoReembolso.PARCIAL, BigDecimal.valueOf(150), UUID.randomUUID()))
-                .expectError(IllegalArgumentException.class)
+                .expectError(MontoReembolsoInvalidoException.class)
                 .verify();
     }
 }

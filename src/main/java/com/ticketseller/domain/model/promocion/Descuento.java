@@ -35,7 +35,7 @@ public class Descuento {
     }
 
     private boolean valorNegativo() {
-        return valor == null || valor.compareTo(BigDecimal.ZERO) < 0;
+        return valor == null || valor.compareTo(BigDecimal.ZERO) <= 0;
     }
 
     private boolean porcentajeExcesivo() {

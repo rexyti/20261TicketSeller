@@ -7,8 +7,6 @@ import com.ticketseller.domain.repository.TipoAsientoRepositoryPort;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 
-import java.util.UUID;
-
 @RequiredArgsConstructor
 public class CrearTipoAsientoUseCase {
     private final TipoAsientoRepositoryPort tipoAsientoRepositoryPort;
@@ -22,7 +20,6 @@ public class CrearTipoAsientoUseCase {
 
     private TipoAsiento buildTipoAsiento(String nombre, String descripcion) {
         return TipoAsiento.builder()
-                .id(UUID.randomUUID())
                 .nombre(nombre)
                 .descripcion(descripcion)
                 .estado(EstadoTipoAsiento.ACTIVO)
@@ -32,12 +29,9 @@ public class CrearTipoAsientoUseCase {
     private Mono<TipoAsiento> validarYGuardar(TipoAsiento tipoAsiento) {
         return tipoAsientoRepositoryPort.buscarPorNombre(tipoAsiento.getNombre())
                 .hasElement()
-                .flatMap(existe -> {
-                    if (existe) {
-                        return Mono.error(new TipoAsientoYaExistenteException(
-                                "Ya existe un tipo de asiento con el nombre: " + tipoAsiento.getNombre()));
-                    }
-                    return tipoAsientoRepositoryPort.guardar(tipoAsiento);
-                });
+                .filter(existe -> !existe)
+                .switchIfEmpty(Mono.error(new TipoAsientoYaExistenteException(
+                        "Ya existe un tipo de asiento con el nombre: " + tipoAsiento.getNombre())))
+                .flatMap(existe -> tipoAsientoRepositoryPort.guardar(tipoAsiento));
     }
 }

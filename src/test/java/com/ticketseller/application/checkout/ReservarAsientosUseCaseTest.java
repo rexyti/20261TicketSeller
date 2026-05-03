@@ -62,7 +62,10 @@ class ReservarAsientosUseCaseTest {
         when(aplicarDescuentoCarritoUseCase.ejecutar(any(), any(), anyList()))
                 .thenReturn(Mono.just(new DescuentoAplicado(
                         new BigDecimal("20"), BigDecimal.ZERO, new BigDecimal("20"))));
-        when(ventaRepositoryPort.guardar(any())).thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
+        when(ventaRepositoryPort.guardar(any())).thenAnswer(invocation -> {
+            com.ticketseller.domain.model.venta.Venta v = invocation.getArgument(0);
+            return Mono.just(v.toBuilder().id(UUID.randomUUID()).build());
+        });
         when(ticketRepositoryPort.guardarTodos(any())).thenAnswer(invocation -> Flux.fromIterable(invocation.getArgument(0)));
 
         ReservarAsientosCommand command = new ReservarAsientosCommand(UUID.randomUUID(), eventoId, zonaId, 2, false, null, null);
@@ -71,10 +74,10 @@ class ReservarAsientosUseCaseTest {
                 .assertNext(detalle -> {
                     assert detalle.venta().getId() != null;
                     assert detalle.tickets().size() == 2;
-                    assert detalle.tickets().get(0).getAccessDetails() != null;
-                    assert detalle.tickets().get(0).getAccessDetails().getCategoria() == CategoriaTicket.GENERAL;
-                    assert "Zona Norte".equals(detalle.tickets().get(0).getAccessDetails().getZona());
-                    assert "Compuerta Norte".equals(detalle.tickets().get(0).getAccessDetails().getCompuerta());
+                    assert detalle.tickets().getFirst().getAccessDetails() != null;
+                    assert detalle.tickets().getFirst().getAccessDetails().getCategoria() == CategoriaTicket.GENERAL;
+                    assert "Zona Norte".equals(detalle.tickets().getFirst().getAccessDetails().getZona());
+                    assert "Compuerta Norte".equals(detalle.tickets().getFirst().getAccessDetails().getCompuerta());
                 })
                 .verifyComplete();
     }

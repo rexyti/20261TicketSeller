@@ -98,7 +98,6 @@ public class ProcesarReembolsoManualUseCase {
 
     private Reembolso reembolsoNuevo(Ticket ticket, TipoReembolso tipo, BigDecimal monto, UUID agenteId) {
         return Reembolso.builder()
-                .id(UUID.randomUUID())
                 .ticketId(ticket.getId())
                 .ventaId(ticket.getVentaId())
                 .monto(monto)

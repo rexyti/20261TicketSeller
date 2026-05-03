@@ -9,8 +9,6 @@ import com.ticketseller.domain.repository.PromocionRepositoryPort;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 
-import java.util.UUID;
-
 @RequiredArgsConstructor
 public class CrearPromocionUseCase {
 
@@ -50,7 +48,6 @@ public class CrearPromocionUseCase {
 
     private Promocion buildNuevaPromocion(Promocion request) {
         return request.toBuilder()
-                .id(UUID.randomUUID())
                 .estado(EstadoPromocion.ACTIVA)
                 .build();
     }

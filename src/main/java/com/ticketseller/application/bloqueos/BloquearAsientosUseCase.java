@@ -62,7 +62,6 @@ public class BloquearAsientosUseCase {
     private Mono<Bloqueo> crearBloqueo(UUID asientoId, UUID eventoId,
                                         String destinatario, LocalDateTime fechaExpiracion) {
         Bloqueo bloqueo = Bloqueo.builder()
-                .id(UUID.randomUUID())
                 .asientoId(asientoId)
                 .eventoId(eventoId)
                 .destinatario(destinatario)

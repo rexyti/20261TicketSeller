@@ -2,7 +2,8 @@ package com.ticketseller.infrastructure.adapter.in.rest.bloqueos;
 
 import com.ticketseller.application.bloqueos.BloquearAsientosUseCase;
 import com.ticketseller.application.bloqueos.ConsultarPanelBloqueosUseCase;
-import com.ticketseller.application.bloqueos.GestionarBloqueoUseCase;
+import com.ticketseller.application.bloqueos.EditarDestinatarioBloqueoUseCase;
+import com.ticketseller.application.bloqueos.LiberarBloqueoUseCase;
 import com.ticketseller.domain.exception.bloqueos.AsientoOcupadoException;
 import com.ticketseller.domain.exception.bloqueos.AsientoYaBloqueadoException;
 import com.ticketseller.domain.exception.bloqueos.BloqueoNoEncontradoException;
@@ -43,7 +44,10 @@ class BloqueoControllerTest {
     private BloquearAsientosUseCase bloquearAsientosUseCase;
 
     @MockBean
-    private GestionarBloqueoUseCase gestionarBloqueoUseCase;
+    private EditarDestinatarioBloqueoUseCase editarDestinatarioBloqueoUseCase;
+
+    @MockBean
+    private LiberarBloqueoUseCase liberarBloqueoUseCase;
 
     @MockBean
     private ConsultarPanelBloqueosUseCase consultarPanelBloqueosUseCase;
@@ -176,7 +180,7 @@ class BloqueoControllerTest {
         Bloqueo actualizado = buildBloqueo().toBuilder().destinatario("Nuevo Sponsor").build();
         BloqueoResponse response = new BloqueoResponse(bloqueoId, List.of(asientoId), "Nuevo Sponsor", "ACTIVO", LocalDateTime.now());
 
-        when(gestionarBloqueoUseCase.editarDestinatario(eq(bloqueoId), eq("Nuevo Sponsor")))
+        when(editarDestinatarioBloqueoUseCase.ejecutar(eq(bloqueoId), eq("Nuevo Sponsor")))
                 .thenReturn(Mono.just(actualizado));
         when(bloqueoRestMapper.toBloqueoResponse(actualizado)).thenReturn(response);
 
@@ -192,7 +196,7 @@ class BloqueoControllerTest {
 
     @Test
     void deleteBloqueoLiberaAsientoADisponible() {
-        when(gestionarBloqueoUseCase.liberarBloqueo(eq(bloqueoId))).thenReturn(Mono.empty());
+        when(liberarBloqueoUseCase.ejecutar(eq(bloqueoId))).thenReturn(Mono.empty());
 
         webTestClient.delete()
                 .uri("/api/v1/admin/bloqueos/{bloqueoId}", bloqueoId)
@@ -202,7 +206,7 @@ class BloqueoControllerTest {
 
     @Test
     void deleteBloqueoNoEncontradoRetorna404() {
-        when(gestionarBloqueoUseCase.liberarBloqueo(eq(bloqueoId)))
+        when(liberarBloqueoUseCase.ejecutar(eq(bloqueoId)))
                 .thenReturn(Mono.error(new BloqueoNoEncontradoException(bloqueoId)));
 
         webTestClient.delete()

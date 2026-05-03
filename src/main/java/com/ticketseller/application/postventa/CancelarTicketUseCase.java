@@ -102,7 +102,6 @@ public class CancelarTicketUseCase {
 
     private Mono<Reembolso> crearReembolsoPendiente(Ticket ticket) {
         Reembolso reembolso = Reembolso.builder()
-                .id(UUID.randomUUID())
                 .ticketId(ticket.getId())
                 .ventaId(ticket.getVentaId())
                 .monto(ticket.getPrecio())

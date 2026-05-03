@@ -55,7 +55,10 @@ class CancelarTicketUseCaseTest {
         when(ticketRepositoryPort.buscarPorId(ticketId)).thenReturn(Mono.just(ticket));
         when(eventoRepositoryPort.buscarPorId(eventoId)).thenReturn(Mono.just(evento));
         when(ticketRepositoryPort.guardar(any(Ticket.class))).thenAnswer(i -> Mono.just(i.getArgument(0)));
-        when(reembolsoRepositoryPort.guardar(any(Reembolso.class))).thenAnswer(i -> Mono.just(i.getArgument(0)));
+        when(reembolsoRepositoryPort.guardar(any(Reembolso.class))).thenAnswer(i -> {
+            Reembolso r = i.getArgument(0);
+            return Mono.just(r.toBuilder().id(UUID.randomUUID()).build());
+        });
 
         StepVerifier.create(useCase.cancelarTicket(ticketId))
                 .assertNext(resultado -> {

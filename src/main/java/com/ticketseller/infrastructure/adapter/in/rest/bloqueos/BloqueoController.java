@@ -2,7 +2,8 @@ package com.ticketseller.infrastructure.adapter.in.rest.bloqueos;
 
 import com.ticketseller.application.bloqueos.BloquearAsientosUseCase;
 import com.ticketseller.application.bloqueos.ConsultarPanelBloqueosUseCase;
-import com.ticketseller.application.bloqueos.GestionarBloqueoUseCase;
+import com.ticketseller.application.bloqueos.EditarDestinatarioBloqueoUseCase;
+import com.ticketseller.application.bloqueos.LiberarBloqueoUseCase;
 import com.ticketseller.application.bloqueos.TipoPanelItem;
 import com.ticketseller.infrastructure.adapter.in.rest.bloqueos.dto.BloquearAsientosRequest;
 import com.ticketseller.infrastructure.adapter.in.rest.bloqueos.dto.BloqueoResponse;
@@ -36,7 +37,8 @@ import java.util.UUID;
 public class BloqueoController {
 
     private final BloquearAsientosUseCase bloquearAsientosUseCase;
-    private final GestionarBloqueoUseCase gestionarBloqueoUseCase;
+    private final EditarDestinatarioBloqueoUseCase editarDestinatarioBloqueoUseCase;
+    private final LiberarBloqueoUseCase liberarBloqueoUseCase;
     private final ConsultarPanelBloqueosUseCase consultarPanelBloqueosUseCase;
     private final BloqueoRestMapper bloqueoRestMapper;
 
@@ -67,7 +69,7 @@ public class BloqueoController {
     public Mono<ResponseEntity<BloqueoResponse>> editarBloqueo(
             @PathVariable UUID bloqueoId,
             @Valid @RequestBody EditarBloqueoRequest request) {
-        return gestionarBloqueoUseCase.editarDestinatario(bloqueoId, request.destinatario())
+        return editarDestinatarioBloqueoUseCase.ejecutar(bloqueoId, request.destinatario())
                 .map(bloqueoRestMapper::toBloqueoResponse)
                 .map(ResponseEntity::ok);
     }
@@ -75,7 +77,7 @@ public class BloqueoController {
     @Operation(summary = "Liberar un bloqueo y devolver el asiento a disponible")
     @DeleteMapping("/bloqueos/{bloqueoId}")
     public Mono<ResponseEntity<Void>> liberarBloqueo(@PathVariable UUID bloqueoId) {
-        return gestionarBloqueoUseCase.liberarBloqueo(bloqueoId)
+        return liberarBloqueoUseCase.ejecutar(bloqueoId)
                 .thenReturn(ResponseEntity.noContent().build());
     }
 }

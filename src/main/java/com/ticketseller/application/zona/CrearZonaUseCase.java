@@ -61,7 +61,6 @@ public class CrearZonaUseCase {
 
     private Zona buildZona(UUID recintoId, Zona request) {
         return request.toBuilder()
-                .id(UUID.randomUUID())
                 .recintoId(recintoId)
                 .build();
     }
