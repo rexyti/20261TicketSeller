@@ -1,8 +1,8 @@
 ALTER TABLE tickets
     ADD COLUMN IF NOT EXISTS asiento_id UUID REFERENCES asientos (id);
 
-CREATE TABLE IF NOT EXISTS reembolsos (
-    id UUID PRIMARY KEY,
+CREATE TABLE reembolsos (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     ticket_id UUID NOT NULL REFERENCES tickets (id),
     venta_id UUID NOT NULL REFERENCES ventas (id),
     monto NUMERIC(12, 2) NOT NULL,
@@ -13,8 +13,8 @@ CREATE TABLE IF NOT EXISTS reembolsos (
     agente_id UUID
 );
 
-CREATE TABLE IF NOT EXISTS historial_estado_ticket (
-    id UUID PRIMARY KEY,
+CREATE TABLE historial_estado_ticket (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     ticket_id UUID NOT NULL REFERENCES tickets (id),
     agente_id UUID,
     estado_anterior VARCHAR(40) NOT NULL,

@@ -43,7 +43,6 @@ public class Ticket {
     }
 
     public void validarDatosRegistro() {
-        validarObligatorio(id, "id");
         validarObligatorio(ventaId, "ventaId");
         validarObligatorio(eventoId, "eventoId");
         validarObligatorio(zonaId, "zonaId");

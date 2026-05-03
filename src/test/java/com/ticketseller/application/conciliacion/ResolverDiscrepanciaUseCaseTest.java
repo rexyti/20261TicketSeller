@@ -1,5 +1,6 @@
 package com.ticketseller.application.conciliacion;
 
+import com.ticketseller.domain.exception.conciliacion.JustificacionInvalidaException;
 import com.ticketseller.domain.exception.conciliacion.TransaccionNoConfirmadaException;
 import com.ticketseller.domain.model.conciliacion.EstadoConciliacion;
 import com.ticketseller.domain.model.conciliacion.Pago;
@@ -79,7 +80,7 @@ class ResolverDiscrepanciaUseCaseTest {
     void deberiaFallarSiJustificacionEsBlanca() {
         UUID pagoId = UUID.randomUUID();
         StepVerifier.create(useCase.ejecutar(pagoId, true, UUID.randomUUID(), ""))
-                .expectError(IllegalArgumentException.class)
+                .expectError(JustificacionInvalidaException.class)
                 .verify();
     }
 

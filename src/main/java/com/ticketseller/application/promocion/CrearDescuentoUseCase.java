@@ -42,7 +42,6 @@ public class CrearDescuentoUseCase {
 
     private Descuento buildNuevoDescuento(UUID promocionId, Descuento request) {
         return request.toBuilder()
-                .id(UUID.randomUUID())
                 .promocionId(promocionId)
                 .build();
     }

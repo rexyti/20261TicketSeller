@@ -11,8 +11,6 @@ import com.ticketseller.domain.repository.RecintoRepositoryPort;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 
-import java.util.UUID;
-
 @RequiredArgsConstructor
 public class RegistrarEventoUseCase {
 
@@ -51,7 +49,6 @@ public class RegistrarEventoUseCase {
 
     private Evento buildNuevoEvento(Evento request) {
         return request.toBuilder()
-                .id(UUID.randomUUID())
                 .estado(EstadoEvento.ACTIVO)
                 .build();
     }

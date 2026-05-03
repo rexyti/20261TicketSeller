@@ -3,7 +3,8 @@ package com.ticketseller.infrastructure.config;
 import com.ticketseller.application.bloqueos.BloquearAsientosUseCase;
 import com.ticketseller.application.bloqueos.ConsultarPanelBloqueosUseCase;
 import com.ticketseller.application.bloqueos.CrearCortesiaUseCase;
-import com.ticketseller.application.bloqueos.GestionarBloqueoUseCase;
+import com.ticketseller.application.bloqueos.EditarDestinatarioBloqueoUseCase;
+import com.ticketseller.application.bloqueos.LiberarBloqueoUseCase;
 import com.ticketseller.application.inventario.LiberarHoldUseCase;
 import com.ticketseller.domain.repository.BloqueoRepositoryPort;
 import com.ticketseller.domain.repository.CortesiaRepositoryPort;
@@ -744,10 +745,16 @@ public class BeanConfiguration {
     }
 
     @Bean
-    public GestionarBloqueoUseCase gestionarBloqueoUseCase(
+    public EditarDestinatarioBloqueoUseCase editarDestinatarioBloqueoUseCase(
+            BloqueoRepositoryPort bloqueoRepositoryPort) {
+        return new EditarDestinatarioBloqueoUseCase(bloqueoRepositoryPort);
+    }
+
+    @Bean
+    public LiberarBloqueoUseCase liberarBloqueoUseCase(
             BloqueoRepositoryPort bloqueoRepositoryPort,
             com.ticketseller.domain.repository.AsientoRepositoryPort asientoRepositoryPort) {
-        return new GestionarBloqueoUseCase(bloqueoRepositoryPort, asientoRepositoryPort);
+        return new LiberarBloqueoUseCase(bloqueoRepositoryPort, asientoRepositoryPort);
     }
 
     @Bean

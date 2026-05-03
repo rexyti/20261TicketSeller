@@ -98,15 +98,15 @@ public class ConfirmarTransaccionUseCase {
     }
 
     private Pago buildPago(Venta venta, String idExternoPasarela, EstadoConciliacion estado, BigDecimal montoPasarela) {
+        var ahora = LocalDateTime.now();
         return Pago.builder()
-                .id(UUID.randomUUID())
                 .ventaId(venta.getId())
                 .idExternoPasarela(idExternoPasarela)
                 .montoEsperado(venta.getTotal())
                 .montoPasarela(montoPasarela)
                 .estado(estado)
-                .fechaCreacion(LocalDateTime.now())
-                .fechaActualizacion(LocalDateTime.now())
+                .fechaCreacion(ahora)
+                .fechaActualizacion(ahora)
                 .build();
     }
 }

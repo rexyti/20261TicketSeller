@@ -41,7 +41,7 @@ public class ConfigurarPreciosUseCase {
 
                             return validarPreciosCompletos(zonas, porZona)
                                     .then(Mono.defer(() -> validarZonasValidas(zonas, porZona)))
-                                    .thenMany(eliminarYGuardarPrecios(eventoId, porZona));
+                                    .thenMany(Flux.defer(() -> eliminarYGuardarPrecios(eventoId, porZona)));
                         }));
     }
 
@@ -81,7 +81,6 @@ public class ConfigurarPreciosUseCase {
 
     private PrecioZona buildPrecioZona(PrecioZona precio, UUID eventoId){
         return precio.toBuilder()
-                .id(UUID.randomUUID())
                 .eventoId(eventoId)
                 .build();
     }

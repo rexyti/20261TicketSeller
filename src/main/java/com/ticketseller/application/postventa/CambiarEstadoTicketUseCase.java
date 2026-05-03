@@ -56,7 +56,6 @@ public class CambiarEstadoTicketUseCase {
 
     private HistorialEstadoTicket crearHistorial(Ticket ticket, EstadoTicket nuevoEstado, String justificacion, UUID agenteId) {
         return HistorialEstadoTicket.builder()
-                .id(UUID.randomUUID())
                 .ticketId(ticket.getId())
                 .agenteId(agenteId)
                 .estadoAnterior(ticket.getEstado())

@@ -1,5 +1,5 @@
-CREATE TABLE IF NOT EXISTS promociones (
-    id UUID PRIMARY KEY,
+CREATE TABLE promociones (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     nombre VARCHAR(150) NOT NULL,
     tipo VARCHAR(20) NOT NULL,
     evento_id UUID NOT NULL REFERENCES eventos(id),
@@ -9,8 +9,8 @@ CREATE TABLE IF NOT EXISTS promociones (
     tipo_usuario_restringido VARCHAR(20)
 );
 
-CREATE TABLE IF NOT EXISTS descuentos (
-    id UUID PRIMARY KEY,
+CREATE TABLE descuentos (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     promocion_id UUID NOT NULL REFERENCES promociones(id),
     tipo VARCHAR(20) NOT NULL,
     valor NUMERIC(12,2) NOT NULL,
@@ -18,8 +18,8 @@ CREATE TABLE IF NOT EXISTS descuentos (
     acumulable BOOLEAN NOT NULL DEFAULT FALSE
 );
 
-CREATE TABLE IF NOT EXISTS codigos_promocionales (
-    id UUID PRIMARY KEY,
+CREATE TABLE codigos_promocionales (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     codigo VARCHAR(100) NOT NULL UNIQUE,
     promocion_id UUID NOT NULL REFERENCES promociones(id),
     usos_maximos INTEGER,

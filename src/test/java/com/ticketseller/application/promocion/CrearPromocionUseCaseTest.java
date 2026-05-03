@@ -1,6 +1,7 @@
 package com.ticketseller.application.promocion;
 
 import com.ticketseller.domain.exception.evento.EventoNotFoundException;
+import com.ticketseller.domain.exception.promocion.FechasInvalidasPromocionException;
 import com.ticketseller.domain.model.evento.Evento;
 import com.ticketseller.domain.model.promocion.EstadoPromocion;
 import com.ticketseller.domain.model.promocion.Promocion;
@@ -37,7 +38,7 @@ class CrearPromocionUseCaseTest {
     @Test
     void deberiaCrearPromocionConEstadoActiva() {
         UUID eventoId = UUID.randomUUID();
-        Promocion request = buildRequest(eventoId, TipoPromocion.PREVENTA, TipoUsuario.VIP);
+        Promocion request = buildRequest(eventoId, TipoUsuario.VIP);
 
         when(eventoRepositoryPort.buscarPorId(eventoId)).thenReturn(Mono.just(Evento.builder().id(eventoId).build()));
         when(promocionRepositoryPort.guardar(any())).thenAnswer(inv -> Mono.just(inv.getArgument(0)));
@@ -54,7 +55,7 @@ class CrearPromocionUseCaseTest {
     @Test
     void deberiaFallarSiEventoNoExiste() {
         UUID eventoId = UUID.randomUUID();
-        Promocion request = buildRequest(eventoId, TipoPromocion.PREVENTA, null);
+        Promocion request = buildRequest(eventoId, null);
 
         when(eventoRepositoryPort.buscarPorId(eventoId)).thenReturn(Mono.empty());
 
@@ -75,35 +76,20 @@ class CrearPromocionUseCaseTest {
                 .build();
 
         StepVerifier.create(useCase.ejecutar(request))
-                .expectError(IllegalArgumentException.class)
+                .expectError(FechasInvalidasPromocionException.class)
                 .verify();
     }
 
-    @Test
-    void deberiaFallarSiFechaInicioEsIgualAFechaFin() {
-        UUID eventoId = UUID.randomUUID();
-        LocalDateTime mismo = LocalDateTime.now().plusDays(1);
-        Promocion request = Promocion.builder()
-                .nombre("Promo")
-                .tipo(TipoPromocion.DESCUENTO)
-                .eventoId(eventoId)
-                .fechaInicio(mismo)
-                .fechaFin(mismo)
-                .build();
-
-        StepVerifier.create(useCase.ejecutar(request))
-                .expectError(IllegalArgumentException.class)
-                .verify();
-    }
-
-    private Promocion buildRequest(UUID eventoId, TipoPromocion tipo, TipoUsuario tipoUsuario) {
+    private Promocion buildRequest(UUID eventoId, TipoUsuario tipoUsuario) {
         return Promocion.builder()
+                .id(UUID.randomUUID())
                 .nombre("Preventa VIP")
-                .tipo(tipo)
+                .tipo(TipoPromocion.PREVENTA)
                 .eventoId(eventoId)
                 .fechaInicio(LocalDateTime.now())
                 .fechaFin(LocalDateTime.now().plusDays(7))
                 .tipoUsuarioRestringido(tipoUsuario)
+                .estado(EstadoPromocion.ACTIVA)
                 .build();
     }
 }

@@ -34,7 +34,6 @@ public class CancelarEventoUseCase {
 
     private CancelacionEvento buildCancelacionEvento(Evento evento, String motivo) {
         return CancelacionEvento.builder()
-                .id(UUID.randomUUID())
                 .eventoId(evento.getId())
                 .fechaCancelacion(LocalDateTime.now())
                 .motivo(motivo)

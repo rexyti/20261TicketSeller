@@ -94,7 +94,7 @@ class CancelacionControllerTest {
         when(postVentaRestMapper.toCancelacionResponse(resultado)).thenReturn(response);
 
         webTestClient.post()
-                .uri("/api/v1/tickets/cancelar-parcial")
+                .uri("/api/v1/tickets/cancelar-varios")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(request)
                 .exchange()

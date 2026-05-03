@@ -28,11 +28,13 @@ class RegistrarEventoUseCaseTest {
         RegistrarEventoUseCase useCase = new RegistrarEventoUseCase(eventoRepositoryPort, recintoRepositoryPort);
 
         Evento request = Evento.builder()
+                .id(UUID.randomUUID())
                 .nombre("Concierto A")
                 .tipo("MUSICAL")
                 .recintoId(UUID.randomUUID())
                 .fechaInicio(LocalDateTime.now().plusDays(5))
                 .fechaFin(LocalDateTime.now().plusDays(6))
+                .estado(EstadoEvento.ACTIVO)
                 .build();
 
         when(recintoRepositoryPort.buscarPorId(request.getRecintoId()))

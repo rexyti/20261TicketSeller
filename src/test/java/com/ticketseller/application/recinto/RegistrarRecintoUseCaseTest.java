@@ -8,6 +8,9 @@ import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.time.LocalDateTime;
+import java.util.UUID;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.mock;
@@ -42,12 +45,15 @@ class RegistrarRecintoUseCaseTest {
         RecintoRepositoryPort repositoryPort = mock(RecintoRepositoryPort.class);
         RegistrarRecintoUseCase useCase = new RegistrarRecintoUseCase(repositoryPort);
         Recinto request = Recinto.builder()
+                .id(UUID.randomUUID())
                 .nombre("Movistar Arena")
                 .ciudad("Bogota")
                 .direccion("Calle 1")
                 .capacidadMaxima(1000)
                 .telefono("3001234567")
                 .compuertasIngreso(4)
+                .fechaCreacion(LocalDateTime.now())
+                .activo(true)
                 .build();
 
         when(repositoryPort.buscarPorNombreYCiudad("Movistar Arena", "Bogota"))

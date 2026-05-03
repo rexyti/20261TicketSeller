@@ -69,7 +69,6 @@ public class CrearCortesiaUseCase {
 
     private Ticket buildTicketCortesia(UUID eventoId, Asiento asiento, String codigoQr) {
         return Ticket.builder()
-                .id(UUID.randomUUID())
                 .eventoId(eventoId)
                 .zonaId(asiento.getZonaId())
                 .asientoId(asiento.getId())
@@ -83,7 +82,6 @@ public class CrearCortesiaUseCase {
     private Mono<Cortesia> guardarCortesia(UUID eventoId, String destinatario, CategoriaCortesia categoria,
                                             UUID asientoId, String codigoUnico, UUID ticketId) {
         Cortesia cortesia = Cortesia.builder()
-                .id(UUID.randomUUID())
                 .eventoId(eventoId)
                 .asientoId(asientoId)
                 .destinatario(destinatario)
@@ -99,7 +97,6 @@ public class CrearCortesiaUseCase {
     private Mono<Cortesia> crearCortesiaGeneral(UUID eventoId, String destinatario, CategoriaCortesia categoria) {
         String codigoUnico = UUID.randomUUID().toString();
         Cortesia cortesia = Cortesia.builder()
-                .id(UUID.randomUUID())
                 .eventoId(eventoId)
                 .destinatario(destinatario)
                 .categoria(categoria)

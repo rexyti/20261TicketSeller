@@ -50,7 +50,6 @@ public class CambiarEstadoAsientoUseCase {
     private Mono<HistorialCambioEstado> guardarHistorial(UUID eventoId, Asiento asiento, EstadoAsiento estadoAnterior,
                                                          String motivo, String usuarioId) {
         HistorialCambioEstado historial = HistorialCambioEstado.builder()
-                .id(UUID.randomUUID())
                 .asientoId(asiento.getId())
                 .eventoId(eventoId)
                 .usuarioId(usuarioId)

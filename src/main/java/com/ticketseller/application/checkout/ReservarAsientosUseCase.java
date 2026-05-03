@@ -83,11 +83,13 @@ public class ReservarAsientosUseCase {
     }
 
     private boolean solicitudReservaInvalida(ReservarAsientosCommand command) {
-        if (command == null || command.compradorId() == null || command.eventoId() == null
-                || command.zonaId() == null || command.cantidad() == null || command.cantidad() <= 0) {
-            return true;
-        }
-        return tieneAsientosEspecificos(command) && command.asientoIds().size() != command.cantidad();
+        return commandTieneDatosInvalidos(command) ||
+                (tieneAsientosEspecificos(command) && command.asientoIds().size() != command.cantidad());
+    }
+
+    private boolean commandTieneDatosInvalidos(ReservarAsientosCommand command) {
+        return command == null || command.compradorId() == null || command.eventoId() == null
+                || command.zonaId() == null || command.cantidad() == null || command.cantidad() <= 0;
     }
 
     private Mono<Zona> obtenerZona(UUID zonaId) {
@@ -129,7 +131,7 @@ public class ReservarAsientosUseCase {
             if (asientoNoPerteneceAZona(asiento, zonaId)) {
                 throw new AsientoEnZonaDiferenteException("El asiento " + asiento.getId() + " no pertenece a la zona solicitada");
             }
-            if (asientoNoDisponible(asiento)){
+            if (asientoNoDisponible(asiento)) {
                 throw new AsientoNoDisponibleException("El asiento " + asiento.getId() + " no está disponible");
             }
         });
@@ -159,17 +161,18 @@ public class ReservarAsientosUseCase {
                     Venta venta = buildVenta(command, descuentoAplicado.totalFinal());
                     venta.validarDatosRegistro();
 
-                    List<Ticket> tickets = IntStream.range(0, command.cantidad())
-                            .mapToObj(i -> buildTicket(venta, command, compuerta, precioZona, zona, evento,
-                                    asientos.isEmpty() ? null : asientos.get(i)))
-                            .peek(Ticket::validarDatosRegistro)
-                            .toList();
-
                     return ventaRepositoryPort.guardar(venta)
-                            .flatMap(savedVenta -> ticketRepositoryPort.guardarTodos(tickets)
-                                    .collectList()
-                                    .flatMap(savedTickets -> reservarAsientos(asientos)
-                                            .thenReturn(new VentaDetalle(savedVenta, savedTickets))));
+                            .flatMap(savedVenta -> {
+                                List<Ticket> tickets = IntStream.range(0, command.cantidad())
+                                        .mapToObj(i -> buildTicket(savedVenta, command, compuerta, precioZona, zona, evento,
+                                                asientos.isEmpty() ? null : asientos.get(i)))
+                                        .peek(Ticket::validarDatosRegistro)
+                                        .toList();
+                                return ticketRepositoryPort.guardarTodos(tickets)
+                                        .collectList()
+                                        .flatMap(savedTickets -> reservarAsientos(asientos)
+                                                .thenReturn(new VentaDetalle(savedVenta, savedTickets)));
+                            });
                 });
     }
 
@@ -178,7 +181,8 @@ public class ReservarAsientosUseCase {
             return Mono.empty();
         }
         return Flux.fromIterable(asientos)
-                .flatMap(asiento -> asientoRepositoryPort.guardar(asiento.toBuilder().estado(EstadoAsiento.RESERVADO).build()))
+                .flatMap(asiento ->
+                        asientoRepositoryPort.guardar(asiento.toBuilder().estado(EstadoAsiento.RESERVADO).build()))
                 .then();
     }
 
@@ -189,7 +193,6 @@ public class ReservarAsientosUseCase {
     private Venta buildVenta(ReservarAsientosCommand command, BigDecimal total) {
         LocalDateTime ahora = LocalDateTime.now();
         return Venta.builder()
-                .id(UUID.randomUUID())
                 .compradorId(command.compradorId())
                 .eventoId(command.eventoId())
                 .estado(EstadoVenta.RESERVADA)
@@ -203,7 +206,6 @@ public class ReservarAsientosUseCase {
                                PrecioZona precioZona, Zona zona, Evento evento, Asiento asiento) {
         AccessDetails accessDetails = buildAccessDetails(evento, zona, compuerta);
         return Ticket.builder()
-                .id(UUID.randomUUID())
                 .ventaId(venta.getId())
                 .eventoId(command.eventoId())
                 .zonaId(command.zonaId())

@@ -25,7 +25,6 @@ public class Reembolso {
     private UUID agenteId;
 
     public void validarDatosRegistro() {
-        validarObligatorio(id, "id");
         validarObligatorio(ticketId, "ticketId");
         validarObligatorio(ventaId, "ventaId");
         validarObligatorio(monto, "monto");

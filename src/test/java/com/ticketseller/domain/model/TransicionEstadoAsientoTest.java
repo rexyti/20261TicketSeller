@@ -28,7 +28,8 @@ class TransicionEstadoAsientoTest {
 
     @Test
     void debePermitirTransicionDeBloqueadoADisponible() {
-        Asiento asiento = Asiento.builder().estado(EstadoAsiento.BLOQUEADO).build();
+        Asiento asiento = Asiento.builder().estado(EstadoAsiento.BLOQUEADO).fila("A").columna(10).build().normalizarDatosRegistro();
+        System.out.println(asiento.getNumero());
         assertTrue(asiento.esTransicionPermitida(EstadoAsiento.DISPONIBLE));
     }
 }

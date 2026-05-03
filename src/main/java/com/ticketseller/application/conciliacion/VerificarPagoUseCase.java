@@ -43,7 +43,6 @@ public class VerificarPagoUseCase {
 
     private Pago buildPago(Venta venta, String idExterno, EstadoConciliacion estado, BigDecimal montoPasarela) {
         return Pago.builder()
-                .id(UUID.randomUUID())
                 .ventaId(venta.getId())
                 .idExternoPasarela(idExterno)
                 .montoEsperado(venta.getTotal())

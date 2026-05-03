@@ -31,7 +31,10 @@ class CrearZonaUseCaseTest {
         when(recintoPort.buscarPorId(recintoId)).thenReturn(Mono.just(Recinto.builder().id(recintoId).capacidadMaxima(100).build()));
         when(zonaPort.buscarPorRecintoId(recintoId)).thenReturn(Flux.empty());
         when(zonaPort.sumarCapacidadesPorRecinto(recintoId)).thenReturn(Mono.just(20));
-        when(zonaPort.guardar(any(Zona.class))).thenAnswer(i -> Mono.just(i.getArgument(0)));
+        when(zonaPort.guardar(any(Zona.class))).thenAnswer(i -> {
+            Zona z = i.getArgument(0);
+            return Mono.just(z.toBuilder().id(UUID.randomUUID()).build());
+        });
 
         StepVerifier.create(useCase.ejecutar(recintoId, Zona.builder().nombre("VIP").capacidad(30).build()))
                 .expectNextMatches(z -> z.getId() != null)

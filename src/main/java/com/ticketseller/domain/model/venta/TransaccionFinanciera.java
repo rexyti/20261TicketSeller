@@ -33,7 +33,6 @@ public class TransaccionFinanciera {
     }
 
     public void validarDatosRegistro() {
-        validarObligatorio(id, "id");
         validarObligatorio(ventaId, "ventaId");
         validarObligatorio(monto, "monto");
         validarObligatorio(metodoPago, "metodoPago");

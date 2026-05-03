@@ -45,7 +45,6 @@ public class CrearCompuertaUseCase {
 
     private Compuerta buildCompuerta(UUID recintoId, Compuerta request, boolean esGeneral) {
         return request.toBuilder()
-                .id(UUID.randomUUID())
                 .recintoId(recintoId)
                 .esGeneral(esGeneral)
                 .build();

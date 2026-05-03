@@ -24,7 +24,6 @@ public class Venta {
     private BigDecimal total;
 
     public void validarDatosRegistro() {
-        validarObligatorio(id, "id");
         validarObligatorio(compradorId, "compradorId");
         validarObligatorio(eventoId, "eventoId");
         validarObligatorio(estado, "estado");

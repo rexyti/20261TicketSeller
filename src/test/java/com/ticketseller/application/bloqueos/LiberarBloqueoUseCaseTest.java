@@ -17,15 +17,14 @@ import java.util.UUID;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-class GestionarBloqueoUseCaseTest {
+class LiberarBloqueoUseCaseTest {
 
     private BloqueoRepositoryPort bloqueoRepositoryPort;
     private AsientoRepositoryPort asientoRepositoryPort;
-    private GestionarBloqueoUseCase useCase;
+    private LiberarBloqueoUseCase useCase;
 
     private final UUID bloqueoId = UUID.randomUUID();
     private final UUID asientoId = UUID.randomUUID();
@@ -34,32 +33,7 @@ class GestionarBloqueoUseCaseTest {
     void setUp() {
         bloqueoRepositoryPort = mock(BloqueoRepositoryPort.class);
         asientoRepositoryPort = mock(AsientoRepositoryPort.class);
-        useCase = new GestionarBloqueoUseCase(bloqueoRepositoryPort, asientoRepositoryPort);
-    }
-
-    @Test
-    void editarDestinatarioCambiaNombreSinMoverAsiento() {
-        Bloqueo bloqueo = buildBloqueo(EstadoBloqueo.ACTIVO);
-        Bloqueo actualizado = bloqueo.toBuilder().destinatario("Nuevo Sponsor").build();
-
-        when(bloqueoRepositoryPort.buscarPorId(bloqueoId)).thenReturn(Mono.just(bloqueo));
-        when(bloqueoRepositoryPort.guardar(any())).thenReturn(Mono.just(actualizado));
-
-        StepVerifier.create(useCase.editarDestinatario(bloqueoId, "Nuevo Sponsor"))
-                .expectNextMatches(b -> "Nuevo Sponsor".equals(b.getDestinatario())
-                        && EstadoBloqueo.ACTIVO.equals(b.getEstado()))
-                .verifyComplete();
-
-        verify(asientoRepositoryPort, never()).guardar(any());
-    }
-
-    @Test
-    void editarDestinatarioNoEncontradoLanzaExcepcion() {
-        when(bloqueoRepositoryPort.buscarPorId(bloqueoId)).thenReturn(Mono.empty());
-
-        StepVerifier.create(useCase.editarDestinatario(bloqueoId, "Sponsor"))
-                .expectError(BloqueoNoEncontradoException.class)
-                .verify();
+        useCase = new LiberarBloqueoUseCase(bloqueoRepositoryPort, asientoRepositoryPort);
     }
 
     @Test
@@ -73,7 +47,7 @@ class GestionarBloqueoUseCaseTest {
         when(asientoRepositoryPort.guardar(any())).thenReturn(Mono.just(disponible));
         when(bloqueoRepositoryPort.guardar(any())).thenAnswer(inv -> Mono.just(inv.getArgument(0)));
 
-        StepVerifier.create(useCase.liberarBloqueo(bloqueoId))
+        StepVerifier.create(useCase.ejecutar(bloqueoId))
                 .verifyComplete();
 
         verify(asientoRepositoryPort).guardar(argThat(a -> EstadoAsiento.DISPONIBLE.equals(a.getEstado())));
@@ -84,7 +58,7 @@ class GestionarBloqueoUseCaseTest {
     void liberarBloqueoNoEncontradoLanzaExcepcion() {
         when(bloqueoRepositoryPort.buscarPorId(bloqueoId)).thenReturn(Mono.empty());
 
-        StepVerifier.create(useCase.liberarBloqueo(bloqueoId))
+        StepVerifier.create(useCase.ejecutar(bloqueoId))
                 .expectError(BloqueoNoEncontradoException.class)
                 .verify();
     }
