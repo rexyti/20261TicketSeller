@@ -1,12 +1,11 @@
 package com.ticketseller.application.tipoasiento;
 
+import com.ticketseller.domain.exception.asiento.TipoAsientoYaExistenteException;
 import com.ticketseller.domain.model.asiento.EstadoTipoAsiento;
 import com.ticketseller.domain.model.asiento.TipoAsiento;
 import com.ticketseller.domain.repository.TipoAsientoRepositoryPort;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
-import reactor.util.function.Tuple2;
-import reactor.util.function.Tuples;
 
 import java.util.UUID;
 
@@ -14,7 +13,7 @@ import java.util.UUID;
 public class CrearTipoAsientoUseCase {
     private final TipoAsientoRepositoryPort tipoAsientoRepositoryPort;
 
-    public Mono<Tuple2<TipoAsiento, String>> ejecutar(String nombre, String descripcion) {
+    public Mono<TipoAsiento> ejecutar(String nombre, String descripcion) {
         return Mono.fromCallable(() -> buildTipoAsiento(nombre, descripcion))
                 .map(TipoAsiento::normalizarDatosRegistro)
                 .doOnNext(TipoAsiento::validarDatosRegistro)
@@ -30,15 +29,15 @@ public class CrearTipoAsientoUseCase {
                 .build();
     }
 
-    private Mono<Tuple2<TipoAsiento, String>> validarYGuardar(TipoAsiento tipoAsiento) {
+    private Mono<TipoAsiento> validarYGuardar(TipoAsiento tipoAsiento) {
         return tipoAsientoRepositoryPort.buscarPorNombre(tipoAsiento.getNombre())
                 .hasElement()
-                .flatMap(existe -> guardarConAdvertencia(tipoAsiento, existe));
-    }
-
-    private Mono<Tuple2<TipoAsiento, String>> guardarConAdvertencia(TipoAsiento tipoAsiento, boolean existe) {
-        String advertencia = existe ? "Ya existe un tipo de asiento con este nombre" : "";
-        return tipoAsientoRepositoryPort.guardar(tipoAsiento)
-                .map(guardado -> Tuples.of(guardado, advertencia));
+                .flatMap(existe -> {
+                    if (existe) {
+                        return Mono.error(new TipoAsientoYaExistenteException(
+                                "Ya existe un tipo de asiento con el nombre: " + tipoAsiento.getNombre()));
+                    }
+                    return tipoAsientoRepositoryPort.guardar(tipoAsiento);
+                });
     }
 }

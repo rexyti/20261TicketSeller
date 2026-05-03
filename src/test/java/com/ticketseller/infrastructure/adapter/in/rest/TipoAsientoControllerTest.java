@@ -21,9 +21,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Flux;
-import reactor.util.function.Tuple2;
-import reactor.util.function.Tuples;
+
 import java.util.UUID;
+
 import static org.mockito.Mockito.when;
 
 @WebFluxTest(controllers = TipoAsientoController.class)
@@ -56,9 +56,8 @@ class TipoAsientoControllerTest {
                 .descripcion("desc")
                 .estado(EstadoTipoAsiento.ACTIVO)
                 .build();
-        Tuple2<TipoAsiento, String> tuple = Tuples.of(tipo, "");
         var response = new TipoAsientoResponse(tipoId, "VIP", "desc", "ACTIVO", false, null);
-        when(crearTipoAsientoUseCase.ejecutar("VIP", "desc")).thenReturn(Mono.just(tuple));
+        when(crearTipoAsientoUseCase.ejecutar("VIP", "desc")).thenReturn(Mono.just(tipo));
         when(tipoAsientoRestMapper.toResponse(tipo, false, null)).thenReturn(response);
         webTestClient.post()
                 .uri("/api/v1/tipos-asiento")
@@ -73,6 +72,20 @@ class TipoAsientoControllerTest {
                 .jsonPath("$.estado").isEqualTo("ACTIVO")
                 .jsonPath("$.enUso").isEqualTo(false)
                 .jsonPath("$.advertencia").doesNotExist();
+    }
+
+    @Test
+    void crearTipoAsientoDuplicadoRetorna400() {
+        when(crearTipoAsientoUseCase.ejecutar("VIP", "desc"))
+                .thenReturn(Mono.error(new IllegalArgumentException("Ya existe un tipo de asiento con el nombre: VIP")));
+        webTestClient.post()
+                .uri("/api/v1/tipos-asiento")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(new CrearTipoAsientoRequest("VIP", "desc"))
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.codigo").isEqualTo("VALIDATION_ERROR");
     }
 
     @Test

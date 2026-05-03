@@ -1,7 +1,10 @@
 package com.ticketseller.infrastructure.adapter.in.rest.postventa;
 
+import com.ticketseller.application.checkout.ConsultarTodosTicketsUseCase;
 import com.ticketseller.application.postventa.ConsultarEstadoReembolsoUseCase;
+import com.ticketseller.infrastructure.adapter.in.rest.checkout.dto.TicketResponse;
 import com.ticketseller.infrastructure.adapter.in.rest.postventa.dto.TicketConReembolsoResponse;
+import com.ticketseller.infrastructure.adapter.in.rest.mapper.CheckoutRestMapper;
 import com.ticketseller.infrastructure.adapter.in.rest.mapper.PostVentaRestMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -20,7 +23,9 @@ import java.util.UUID;
 @Tag(name = "Postventa - Mis Compras", description = "Consulta del estado de reembolsos del comprador")
 public class MisComprasController {
     private final ConsultarEstadoReembolsoUseCase consultarEstadoReembolsoUseCase;
+    private final ConsultarTodosTicketsUseCase consultarTodosTicketsUseCase;
     private final PostVentaRestMapper postVentaRestMapper;
+    private final CheckoutRestMapper checkoutRestMapper;
 
     @Operation(summary = "Consultar tickets cancelados/reembolsados del comprador autenticado")
     @GetMapping("/mis-compras")
@@ -28,5 +33,11 @@ public class MisComprasController {
         return consultarEstadoReembolsoUseCase.ejecutar(compradorId)
                 .map(postVentaRestMapper::toTicketConReembolsoResponse);
     }
-}
 
+    @Operation(summary = "Consultar todos los tickets del comprador autenticado")
+    @GetMapping("/mis-tickets")
+    public Flux<TicketResponse> misTickets(@RequestHeader("X-Comprador-Id") UUID compradorId) {
+        return consultarTodosTicketsUseCase.ejecutar(compradorId)
+                .map(checkoutRestMapper::toTicketResponse);
+    }
+}

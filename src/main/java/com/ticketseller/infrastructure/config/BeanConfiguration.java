@@ -78,6 +78,7 @@ import com.ticketseller.application.asiento.CambiarEstadoAsientoUseCase;
 import com.ticketseller.application.asiento.CambiarEstadoMasivoUseCase;
 import com.ticketseller.application.asiento.ConsultarHistorialAsientoUseCase;
 import com.ticketseller.application.checkout.ConsultarEstadoTicketUseCase;
+import com.ticketseller.application.checkout.ConsultarTodosTicketsUseCase;
 import com.ticketseller.application.recinto.ConsultarEstructuraRecintoUseCase;
 import com.ticketseller.domain.repository.AsientoRepositoryPort;
 import com.ticketseller.domain.repository.CompuertaRepositoryPort;
@@ -452,6 +453,12 @@ public class BeanConfiguration {
     public ConsultarVentaUseCase consultarVentaUseCase(VentaRepositoryPort ventaRepositoryPort,
                                                        TicketRepositoryPort ticketRepositoryPort) {
         return new ConsultarVentaUseCase(ventaRepositoryPort, ticketRepositoryPort);
+    }
+
+    @Bean
+    public ConsultarTodosTicketsUseCase consultarTodosTicketsUseCase(VentaRepositoryPort ventaRepositoryPort,
+                                                                     TicketRepositoryPort ticketRepositoryPort) {
+        return new ConsultarTodosTicketsUseCase(ventaRepositoryPort, ticketRepositoryPort);
     }
 
     @Bean

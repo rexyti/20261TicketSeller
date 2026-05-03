@@ -1,7 +1,7 @@
 package com.ticketseller.application.asiento;
 
-import com.ticketseller.domain.exception.asiento.TransicionEstadoInvalidaException;
 import com.ticketseller.domain.exception.asiento.AsientoEnCompraException;
+import com.ticketseller.domain.exception.asiento.TransicionEstadoInvalidaException;
 import com.ticketseller.domain.model.asiento.Asiento;
 import com.ticketseller.domain.model.asiento.EstadoAsiento;
 import com.ticketseller.domain.model.asiento.HistorialCambioEstado;
@@ -22,7 +22,7 @@ public class CambiarEstadoAsientoUseCase {
         return asientoRepositoryPort.buscarPorId(asientoId)
                 .switchIfEmpty(Mono.error(new IllegalArgumentException("Asiento no encontrado")))
                 .flatMap(asiento -> validarTransicion(asiento, estadoDestino))
-                .flatMap(asiento -> validarSinCompraActiva(asientoId).thenReturn(asiento))
+                .flatMap(asiento -> validarSinCompraActiva(asiento).thenReturn(asiento))
                 .flatMap(asiento -> aplicarCambioEstado(asiento, estadoDestino, eventoId, motivo, usuarioId));
     }
 
@@ -32,10 +32,10 @@ public class CambiarEstadoAsientoUseCase {
                 .switchIfEmpty(Mono.error(new TransicionEstadoInvalidaException(asiento.getEstado(), estadoDestino)));
     }
 
-    private Mono<Void> validarSinCompraActiva(UUID asientoId) {
-        // TODO: integrar con carrito cuando feature 004 esté implementado
-        return Mono.just(false)
-                .filter(enCompra -> !enCompra)
+    private Mono<Void> validarSinCompraActiva(Asiento asiento) {
+        boolean enCompra = EstadoAsiento.RESERVADO.equals(asiento.getEstado());
+        return Mono.just(enCompra)
+                .filter(en -> !en)
                 .switchIfEmpty(Mono.error(new AsientoEnCompraException("El asiento está siendo reservado por un cliente.")))
                 .then();
     }
