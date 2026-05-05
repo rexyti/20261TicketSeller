@@ -66,6 +66,8 @@ import com.ticketseller.application.recinto.ListarRecintosFiltradosUseCase;
 import com.ticketseller.application.recinto.ListarRecintosUseCase;
 import com.ticketseller.application.recinto.RegistrarRecintoUseCase;
 import com.ticketseller.application.tipoasiento.AsignarTipoAsientoAZonaUseCase;
+import com.ticketseller.application.asiento.AsignarAsientosAZonaUseCase;
+import com.ticketseller.application.asiento.ConsultarMapaAsientosUseCase;
 import com.ticketseller.application.asiento.CrearMapaAsientosUseCase;
 import com.ticketseller.application.tipoasiento.CrearTipoAsientoUseCase;
 import com.ticketseller.application.tipoasiento.DesactivarTipoAsientoUseCase;
@@ -376,6 +378,17 @@ public class BeanConfiguration {
     public CrearMapaAsientosUseCase crearMapaAsientosUseCase(AsientoRepositoryPort asientoRepositoryPort,
                                                              MapaAsientosRepositoryPort mapaAsientosRepositoryPort) {
         return new CrearMapaAsientosUseCase(asientoRepositoryPort, mapaAsientosRepositoryPort);
+    }
+
+    @Bean
+    public AsignarAsientosAZonaUseCase asignarAsientosAZonaUseCase(AsientoRepositoryPort asientoRepositoryPort,
+                                                                    ZonaRepositoryPort zonaRepositoryPort) {
+        return new AsignarAsientosAZonaUseCase(asientoRepositoryPort, zonaRepositoryPort);
+    }
+
+    @Bean
+    public ConsultarMapaAsientosUseCase consultarMapaAsientosUseCase(AsientoRepositoryPort asientoRepositoryPort) {
+        return new ConsultarMapaAsientosUseCase(asientoRepositoryPort);
     }
 
     @Bean

@@ -41,6 +41,11 @@ public class AsientoRepositoryAdapter implements AsientoRepositoryPort {
     }
 
     @Override
+    public Flux<Asiento> buscarPorRecintoId(UUID recintoId) {
+        return repository.findByRecintoId(recintoId).map(mapper::toDomain);
+    }
+
+    @Override
     public Mono<Asiento> reservarConHold(UUID id, LocalDateTime expiraEn) {
         return repository.findById(id)
                 .flatMap(entity -> {

@@ -13,6 +13,7 @@ public interface AsientoRepositoryPort {
     Flux<Asiento> guardarTodos(List<Asiento> asientos);
     Mono<Asiento> buscarPorId(UUID id);
     Flux<Asiento> buscarPorZonaId(UUID zonaId);
+    Flux<Asiento> buscarPorRecintoId(UUID recintoId);
     Mono<Asiento> reservarConHold(UUID id, LocalDateTime expiraEn);
     Mono<Asiento> liberarHold(UUID id);
     Mono<Asiento> marcarOcupado(UUID id);
