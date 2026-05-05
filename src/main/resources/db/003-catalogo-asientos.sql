@@ -13,7 +13,7 @@ ALTER TABLE zonas
 CREATE TABLE asientos
 (
     id       UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    fila     INTEGER     NOT NULL,
+    fila     VARCHAR     NOT NULL,
     columna  INTEGER     NOT NULL,
     numero   VARCHAR(20) NOT NULL,
     zona_id  UUID REFERENCES zonas (id),

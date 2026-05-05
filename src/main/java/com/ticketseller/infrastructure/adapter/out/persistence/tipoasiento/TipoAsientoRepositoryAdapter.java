@@ -3,25 +3,29 @@ package com.ticketseller.infrastructure.adapter.out.persistence.tipoasiento;
 import com.ticketseller.domain.model.asiento.TipoAsiento;
 import com.ticketseller.domain.repository.TipoAsientoRepositoryPort;
 import com.ticketseller.infrastructure.adapter.out.persistence.tipoasiento.mapper.TipoAsientoPersistenceMapper;
+import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.UUID;
 
+@RequiredArgsConstructor
 public class TipoAsientoRepositoryAdapter implements TipoAsientoRepositoryPort {
 
     private final TipoAsientoR2dbcRepository repository;
     private final TipoAsientoPersistenceMapper mapper;
 
-    public TipoAsientoRepositoryAdapter(TipoAsientoR2dbcRepository repository,
-                                        TipoAsientoPersistenceMapper mapper) {
-        this.repository = repository;
-        this.mapper = mapper;
-    }
-
     @Override
     public Mono<TipoAsiento> guardar(TipoAsiento tipoAsiento) {
-        return repository.save(mapper.toEntity(tipoAsiento)).map(mapper::toDomain);
+        TipoAsientoEntity entity = mapper.toEntity(tipoAsiento);
+        if (entity.getId() != null) {
+            return repository.findById(entity.getId())
+                    .map(existing -> entity.toBuilder().createdAt(existing.getCreatedAt()).build())
+                    .defaultIfEmpty(entity)
+                    .flatMap(repository::save)
+                    .map(mapper::toDomain);
+        }
+        return repository.save(entity).map(mapper::toDomain);
     }
 
     @Override

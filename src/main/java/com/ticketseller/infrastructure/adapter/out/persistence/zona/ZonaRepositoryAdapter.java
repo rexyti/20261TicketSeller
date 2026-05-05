@@ -3,20 +3,17 @@ package com.ticketseller.infrastructure.adapter.out.persistence.zona;
 import com.ticketseller.domain.model.zona.Zona;
 import com.ticketseller.domain.repository.ZonaRepositoryPort;
 import com.ticketseller.infrastructure.adapter.out.persistence.zona.mapper.ZonaPersistenceMapper;
+import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.UUID;
 
+@RequiredArgsConstructor
 public class ZonaRepositoryAdapter implements ZonaRepositoryPort {
 
     private final ZonaR2dbcRepository repository;
     private final ZonaPersistenceMapper mapper;
-
-    public ZonaRepositoryAdapter(ZonaR2dbcRepository repository, ZonaPersistenceMapper mapper) {
-        this.repository = repository;
-        this.mapper = mapper;
-    }
 
     @Override
     public Mono<Zona> guardar(Zona zona) {

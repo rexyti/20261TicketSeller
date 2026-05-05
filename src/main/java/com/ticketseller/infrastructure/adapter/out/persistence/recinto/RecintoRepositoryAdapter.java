@@ -6,6 +6,7 @@ import com.ticketseller.domain.model.recinto.Recinto;
 import com.ticketseller.domain.shared.Pagina;
 import com.ticketseller.domain.repository.RecintoRepositoryPort;
 import com.ticketseller.infrastructure.adapter.out.persistence.recinto.mapper.RecintoPersistenceMapper;
+import lombok.RequiredArgsConstructor;
 import org.springframework.r2dbc.core.DatabaseClient;
 import org.springframework.util.StringUtils;
 import org.springframework.r2dbc.core.DatabaseClient.GenericExecuteSpec;
@@ -21,19 +22,12 @@ import java.util.Map;
 import java.util.UUID;
 import java.time.LocalDateTime;
 
+@RequiredArgsConstructor
 public class RecintoRepositoryAdapter implements RecintoRepositoryPort {
 
     private final RecintoR2dbcRepository repository;
     private final RecintoPersistenceMapper mapper;
     private final DatabaseClient databaseClient;
-
-    public RecintoRepositoryAdapter(RecintoR2dbcRepository repository,
-                                    RecintoPersistenceMapper mapper,
-                                    DatabaseClient databaseClient) {
-        this.repository = repository;
-        this.mapper = mapper;
-        this.databaseClient = databaseClient;
-    }
 
     @Override
     public Mono<Recinto> guardar(Recinto recinto) {
@@ -89,8 +83,7 @@ public class RecintoRepositoryAdapter implements RecintoRepositoryPort {
 
         SortSpec sortSpec = resolveSort(sort);
 
-        String selectSql = "SELECT id, nombre, ciudad, direccion, capacidad_maxima, telefono, fecha_creacion, "
-                + "compuertas_ingreso, activo, categoria FROM recintos"
+        String selectSql = "SELECT * FROM recintos"
                 + whereClause
                 + " ORDER BY " + sortSpec.field() + " " + sortSpec.direction()
                 + " LIMIT :limit OFFSET :offset";

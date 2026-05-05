@@ -6,7 +6,6 @@ import com.ticketseller.application.tipoasiento.DesactivarTipoAsientoUseCase;
 import com.ticketseller.application.tipoasiento.EditarTipoAsientoUseCase;
 import com.ticketseller.application.tipoasiento.ListarTiposAsientoUseCase;
 import com.ticketseller.infrastructure.adapter.in.rest.tipoasiento.dto.AsignarTipoAsientoRequest;
-import com.ticketseller.infrastructure.adapter.in.rest.tipoasiento.dto.CambiarEstadoTipoAsientoRequest;
 import com.ticketseller.infrastructure.adapter.in.rest.tipoasiento.dto.CrearTipoAsientoRequest;
 import com.ticketseller.infrastructure.adapter.in.rest.tipoasiento.dto.EditarTipoAsientoRequest;
 import com.ticketseller.infrastructure.adapter.in.rest.tipoasiento.dto.TipoAsientoResponse;
@@ -52,7 +51,7 @@ public class TipoAsientoController {
     public Mono<ResponseEntity<TipoAsientoResponse>> crear(@Valid @RequestBody CrearTipoAsientoRequest request) {
         return crearTipoAsientoUseCase.ejecutar(request.nombre(), request.descripcion())
                 .map(tipo -> ResponseEntity.status(HttpStatus.CREATED)
-                        .body(tipoAsientoRestMapper.toResponse(tipo, false, null)));
+                        .body(tipoAsientoRestMapper.toResponse(tipo, false)));
     }
 
     @Operation(summary = "Listar tipos de asiento")
@@ -62,7 +61,7 @@ public class TipoAsientoController {
                 .flatMap(tipo -> listarTiposAsientoUseCase.calcularEnUso(tipo)
                         .next()
                         .defaultIfEmpty(false)
-                        .map(enUso -> tipoAsientoRestMapper.toResponse(tipo, enUso, null)));
+                        .map(enUso -> tipoAsientoRestMapper.toResponse(tipo, enUso)));
     }
 
     @Operation(summary = "Editar un tipo de asiento")
@@ -70,15 +69,14 @@ public class TipoAsientoController {
     public Mono<ResponseEntity<TipoAsientoResponse>> editar(@PathVariable UUID id,
                                                              @Valid @RequestBody EditarTipoAsientoRequest request) {
         return editarTipoAsientoUseCase.ejecutar(id, request.nombre(), request.descripcion())
-                .map(tipo -> ResponseEntity.ok(tipoAsientoRestMapper.toResponse(tipo, false, null)));
+                .map(tipo -> ResponseEntity.ok(tipoAsientoRestMapper.toResponse(tipo, false)));
     }
 
     @Operation(summary = "Desactivar un tipo de asiento")
-    @PatchMapping("/tipos-asiento/{id}/estado")
-    public Mono<ResponseEntity<TipoAsientoResponse>> cambiarEstado(@PathVariable UUID id,
-                                                                    @Valid @RequestBody CambiarEstadoTipoAsientoRequest request) {
+    @PatchMapping("/tipos-asiento/{id}/desactivar")
+    public Mono<ResponseEntity<TipoAsientoResponse>> desactivar(@PathVariable UUID id) {
         return desactivarTipoAsientoUseCase.ejecutar(id)
-                .map(tipo -> ResponseEntity.ok(tipoAsientoRestMapper.toResponse(tipo, false, null)));
+                .map(tipo -> ResponseEntity.ok(tipoAsientoRestMapper.toResponse(tipo, false)));
     }
 
     @Operation(summary = "Asignar un tipo de asiento a una zona")

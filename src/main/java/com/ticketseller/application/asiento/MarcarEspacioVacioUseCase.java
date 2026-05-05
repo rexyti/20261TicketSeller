@@ -1,5 +1,6 @@
 package com.ticketseller.application.asiento;
 
+import com.ticketseller.domain.exception.asiento.AsientoNotFoundException;
 import com.ticketseller.domain.model.asiento.Asiento;
 import com.ticketseller.domain.model.asiento.EstadoAsiento;
 import com.ticketseller.domain.repository.AsientoRepositoryPort;
@@ -15,7 +16,7 @@ public class MarcarEspacioVacioUseCase {
 
     public Mono<Asiento> ejecutar(UUID asientoId) {
         return asientoRepositoryPort.buscarPorId(asientoId)
-                .switchIfEmpty(Mono.error(new IllegalArgumentException("Asiento no encontrado")))
+                .switchIfEmpty(Mono.error(new AsientoNotFoundException("Asiento no encontrado")))
                 .flatMap(this::marcarComoEnMantenimientoYGuardar);
     }
 

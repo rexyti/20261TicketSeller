@@ -23,7 +23,8 @@ public class CrearTipoAsientoUseCase {
                 .nombre(nombre)
                 .descripcion(descripcion)
                 .estado(EstadoTipoAsiento.ACTIVO)
-                .build();
+                .build()
+                .normalizarDatosRegistro();
     }
 
     private Mono<TipoAsiento> validarYGuardar(TipoAsiento tipoAsiento) {

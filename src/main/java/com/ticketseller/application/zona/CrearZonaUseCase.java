@@ -56,7 +56,7 @@ public class CrearZonaUseCase {
     }
 
     private boolean capacidadNoSuperada(int capacidadUsada, int capacidadMaxima) {
-        return capacidadUsada < capacidadMaxima;
+        return capacidadUsada <= capacidadMaxima;
     }
 
     private Zona buildZona(UUID recintoId, Zona request) {

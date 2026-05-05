@@ -7,7 +7,6 @@ public record TipoAsientoResponse(
         String nombre,
         String descripcion,
         String estado,
-        boolean enUso,
-        String advertencia
+        boolean enUso
 ) {
 }
