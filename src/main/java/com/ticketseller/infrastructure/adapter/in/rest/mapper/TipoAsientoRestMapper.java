@@ -7,14 +7,13 @@ import org.mapstruct.Mapper;
 @Mapper(componentModel = "spring")
 public interface TipoAsientoRestMapper {
 
-    default TipoAsientoResponse toResponse(TipoAsiento tipo, boolean enUso, String advertencia) {
+    default TipoAsientoResponse toResponse(TipoAsiento tipo, boolean enUso) {
         return new TipoAsientoResponse(
                 tipo.getId(),
                 tipo.getNombre(),
                 tipo.getDescripcion(),
                 tipo.getEstado().name(),
-                enUso,
-                advertencia
+                enUso
         );
     }
 }

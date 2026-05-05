@@ -3,6 +3,7 @@ package com.ticketseller.infrastructure.adapter.out.persistence.promocion;
 import com.ticketseller.domain.model.promocion.CodigoPromocional;
 import com.ticketseller.domain.repository.CodigoPromocionalRepositoryPort;
 import com.ticketseller.infrastructure.adapter.out.persistence.promocion.mapper.CodigoPromocionalPersistenceMapper;
+import lombok.RequiredArgsConstructor;
 import org.springframework.r2dbc.core.DatabaseClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -10,19 +11,12 @@ import reactor.core.publisher.Mono;
 import java.util.List;
 import java.util.UUID;
 
+@RequiredArgsConstructor
 public class CodigoPromocionalRepositoryAdapter implements CodigoPromocionalRepositoryPort {
 
     private final CodigoPromocionalR2dbcRepository repository;
     private final CodigoPromocionalPersistenceMapper mapper;
     private final DatabaseClient databaseClient;
-
-    public CodigoPromocionalRepositoryAdapter(CodigoPromocionalR2dbcRepository repository,
-                                              CodigoPromocionalPersistenceMapper mapper,
-                                              DatabaseClient databaseClient) {
-        this.repository = repository;
-        this.mapper = mapper;
-        this.databaseClient = databaseClient;
-    }
 
     @Override
     public Flux<CodigoPromocional> guardarTodos(List<CodigoPromocional> codigos) {

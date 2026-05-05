@@ -3,20 +3,17 @@ package com.ticketseller.infrastructure.adapter.out.persistence.promocion;
 import com.ticketseller.domain.model.promocion.Promocion;
 import com.ticketseller.domain.repository.PromocionRepositoryPort;
 import com.ticketseller.infrastructure.adapter.out.persistence.promocion.mapper.PromocionPersistenceMapper;
+import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.UUID;
 
+@RequiredArgsConstructor
 public class PromocionRepositoryAdapter implements PromocionRepositoryPort {
 
     private final PromocionR2dbcRepository repository;
     private final PromocionPersistenceMapper mapper;
-
-    public PromocionRepositoryAdapter(PromocionR2dbcRepository repository, PromocionPersistenceMapper mapper) {
-        this.repository = repository;
-        this.mapper = mapper;
-    }
 
     @Override
     public Mono<Promocion> guardar(Promocion promocion) {

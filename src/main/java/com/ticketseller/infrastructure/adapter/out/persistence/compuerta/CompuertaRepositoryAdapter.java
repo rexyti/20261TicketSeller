@@ -3,20 +3,17 @@ package com.ticketseller.infrastructure.adapter.out.persistence.compuerta;
 import com.ticketseller.domain.model.zona.Compuerta;
 import com.ticketseller.domain.repository.CompuertaRepositoryPort;
 import com.ticketseller.infrastructure.adapter.out.persistence.compuerta.mapper.CompuertaPersistenceMapper;
+import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.UUID;
 
+@RequiredArgsConstructor
 public class CompuertaRepositoryAdapter implements CompuertaRepositoryPort {
 
     private final CompuertaR2dbcRepository repository;
     private final CompuertaPersistenceMapper mapper;
-
-    public CompuertaRepositoryAdapter(CompuertaR2dbcRepository repository, CompuertaPersistenceMapper mapper) {
-        this.repository = repository;
-        this.mapper = mapper;
-    }
 
     @Override
     public Mono<Compuerta> guardar(Compuerta compuerta) {
