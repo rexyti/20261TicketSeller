@@ -10,6 +10,7 @@ DROP TABLE IF EXISTS reembolsos;
 DROP TABLE IF EXISTS historial_cambios_estado;
 DROP TABLE IF EXISTS tickets;
 DROP TABLE IF EXISTS transacciones_financieras;
+DROP TABLE IF EXISTS asiento_holds;
 DROP TABLE IF EXISTS asientos;
 DROP TABLE IF EXISTS precios_zona;
 DROP TABLE IF EXISTS ventas;
@@ -67,9 +68,16 @@ CREATE TABLE asientos (
     zona_id UUID REFERENCES zonas(id),
     tipo VARCHAR(50),
     estado VARCHAR(20),
-    existente BOOLEAN NOT NULL DEFAULT TRUE,
-    version BIGINT NOT NULL DEFAULT 0,
-    expira_en TIMESTAMP
+    existente BOOLEAN NOT NULL DEFAULT TRUE
+);
+
+CREATE TABLE asiento_holds (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    asiento_id UUID NOT NULL REFERENCES asientos(id),
+    venta_id UUID NOT NULL,
+    numero VARCHAR(20) NOT NULL,
+    expira_en TIMESTAMP NOT NULL,
+    estado VARCHAR(20) NOT NULL
 );
 CREATE TABLE eventos (
     id UUID PRIMARY KEY,

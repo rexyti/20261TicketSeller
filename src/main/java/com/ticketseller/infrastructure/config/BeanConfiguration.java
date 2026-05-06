@@ -159,7 +159,6 @@ import com.ticketseller.infrastructure.adapter.out.persistence.zona.mapper.ZonaP
 import com.ticketseller.infrastructure.adapter.out.persistence.historialestadoasiento.HistorialCambioEstadoR2dbcRepository;
 import com.ticketseller.infrastructure.adapter.out.persistence.historialestadoasiento.HistorialCambioEstadoRepositoryAdapter;
 import com.ticketseller.infrastructure.adapter.out.persistence.historialestadoasiento.mapper.HistorialCambioEstadoPersistenceMapper;
-import com.ticketseller.infrastructure.adapter.out.payment.PasarelaPagoAdapter;
 import com.ticketseller.infrastructure.adapter.out.email.EmailNotificacionAdapter;
 import com.ticketseller.infrastructure.adapter.out.qr.ZxingCodigoQrAdapter;
 import org.springframework.beans.factory.annotation.Value;
@@ -264,11 +263,6 @@ public class BeanConfiguration {
             HistorialEstadoTicketR2dbcRepository repository,
             HistorialEstadoTicketPersistenceMapper mapper) {
         return new HistorialEstadoTicketRepositoryAdapter(repository, mapper);
-    }
-
-    @Bean
-    public PasarelaPagoPort pasarelaPagoPort() {
-        return new PasarelaPagoAdapter();
     }
 
     @Bean
@@ -491,7 +485,7 @@ public class BeanConfiguration {
     }
 
     @Bean
-    public PasarelaPagoPort wompiAdapter(
+    public PasarelaPagoPort pasarelaPagoPort(
             @Value("${wompi.base-url}") String baseUrl,
             @Value("${wompi.private-key}") String privateKey) {
         return new WompiAdapter(baseUrl, privateKey);

@@ -4,14 +4,18 @@ import com.ticketseller.application.inventario.ConfirmarOcupacionUseCase;
 import com.ticketseller.application.inventario.LiberarHoldsVencidosUseCase;
 import com.ticketseller.application.inventario.VerificarDisponibilidadUseCase;
 import com.ticketseller.domain.exception.asiento.HoldExpiradoException;
+import com.ticketseller.domain.model.asiento.AsientoHold;
 import com.ticketseller.domain.model.asiento.EstadoAsiento;
+import com.ticketseller.domain.model.asiento.EstadoHold;
 import com.ticketseller.infrastructure.adapter.out.persistence.asiento.mapper.AsientoPersistenceMapper;
+import com.ticketseller.infrastructure.adapter.out.persistence.asientohold.AsientoHoldR2dbcRepository;
+import com.ticketseller.infrastructure.adapter.out.persistence.asientohold.AsientoHoldRepositoryAdapter;
+import com.ticketseller.infrastructure.adapter.out.persistence.asientohold.mapper.AsientoHoldPersistenceMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.r2dbc.DataR2dbcTest;
-import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.r2dbc.core.DatabaseClient;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -19,6 +23,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.nio.file.Files;
@@ -30,7 +35,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DataR2dbcTest
@@ -55,9 +59,13 @@ class InventarioRepositoryIntegrationTest {
     private AsientoR2dbcRepository repository;
 
     @Autowired
+    private AsientoHoldR2dbcRepository holdRepository;
+
+    @Autowired
     private DatabaseClient databaseClient;
 
     private AsientoRepositoryAdapter adapter;
+    private AsientoHoldRepositoryAdapter holdAdapter;
     private VerificarDisponibilidadUseCase verificarDisponibilidadUseCase;
     private LiberarHoldsVencidosUseCase liberarHoldsVencidosUseCase;
     private ConfirmarOcupacionUseCase confirmarOcupacionUseCase;
@@ -68,10 +76,12 @@ class InventarioRepositoryIntegrationTest {
     @BeforeEach
     void setup() throws Exception {
         AsientoPersistenceMapper mapper = Mappers.getMapper(AsientoPersistenceMapper.class);
+        AsientoHoldPersistenceMapper holdMapper = Mappers.getMapper(AsientoHoldPersistenceMapper.class);
         adapter = new AsientoRepositoryAdapter(repository, mapper);
+        holdAdapter = new AsientoHoldRepositoryAdapter(holdRepository, holdMapper);
         verificarDisponibilidadUseCase = new VerificarDisponibilidadUseCase(adapter);
-        liberarHoldsVencidosUseCase = new LiberarHoldsVencidosUseCase(adapter);
-        confirmarOcupacionUseCase = new ConfirmarOcupacionUseCase(adapter);
+        liberarHoldsVencidosUseCase = new LiberarHoldsVencidosUseCase(holdAdapter, adapter);
+        confirmarOcupacionUseCase = new ConfirmarOcupacionUseCase(adapter, holdAdapter);
 
         String script = Files.readString(Path.of("src/test/resources/schema.sql"));
         Flux.fromArray(script.split(";"))
@@ -99,7 +109,7 @@ class InventarioRepositoryIntegrationTest {
     private UUID insertAsiento(String estado) {
         UUID id = UUID.randomUUID();
         databaseClient.sql(
-                        "INSERT INTO asientos(id, fila, columna, numero, zona_id, estado, version) VALUES ($1, 1, 1, 'A1', $2, $3, 0)")
+                        "INSERT INTO asientos(id, fila, columna, numero, zona_id, estado) VALUES ($1, 'A', 1, 'A1', $2, $3)")
                 .bind(0, id)
                 .bind(1, zonaId)
                 .bind(2, estado)
@@ -107,16 +117,16 @@ class InventarioRepositoryIntegrationTest {
         return id;
     }
 
-    private UUID insertAsientoConExpiraEn(String estado, LocalDateTime expiraEn) {
-        UUID id = UUID.randomUUID();
-        databaseClient.sql(
-                        "INSERT INTO asientos(id, fila, columna, numero, zona_id, estado, version, expira_en) VALUES ($1, 1, 1, 'A1', $2, $3, 0, $4)")
-                .bind(0, id)
-                .bind(1, zonaId)
-                .bind(2, estado)
-                .bind(3, expiraEn)
-                .fetch().rowsUpdated().block();
-        return id;
+    private Mono<AsientoHold> reservarAsiento(UUID asientoId, LocalDateTime expiraEn) {
+        return adapter.buscarPorId(asientoId)
+                .flatMap(a -> adapter.guardar(a.toBuilder().estado(EstadoAsiento.RESERVADO).build()))
+                .then(holdAdapter.guardar(AsientoHold.builder()
+                        .asientoId(asientoId)
+                        .ventaId(UUID.randomUUID())
+                        .numero("A1")
+                        .expiraEn(expiraEn)
+                        .estado(EstadoHold.RESERVADO)
+                        .build()));
     }
 
     // T011: verificación con asientos en distintos estados sobre PostgreSQL real
@@ -139,20 +149,21 @@ class InventarioRepositoryIntegrationTest {
                 .verifyComplete();
     }
 
-    // T019: reservar → verificar expiraEn en BD → scheduler libera hold
+    // T019: reservar → verificar expiraEn en hold → scheduler libera hold
     @Test
     void reservarVerificaExpiraEnYSchedulerLiberaHold() {
         UUID id = insertAsiento("DISPONIBLE");
+        LocalDateTime expiraEn = LocalDateTime.now().plusMinutes(15);
 
-        StepVerifier.create(adapter.reservarConHold(id, LocalDateTime.now().plusMinutes(15)))
-                .assertNext(a -> {
-                    assertEquals(EstadoAsiento.RESERVADO, a.getEstado());
-                    assertNotNull(a.getExpiraEn());
-                    assertTrue(a.getExpiraEn().isAfter(LocalDateTime.now()));
+        StepVerifier.create(reservarAsiento(id, expiraEn))
+                .assertNext(hold -> {
+                    assertEquals(EstadoHold.RESERVADO, hold.getEstado());
+                    assertNotNull(hold.getExpiraEn());
+                    assertTrue(hold.getExpiraEn().isAfter(LocalDateTime.now()));
                 })
                 .verifyComplete();
 
-        databaseClient.sql("UPDATE asientos SET expira_en = $1 WHERE id = $2")
+        databaseClient.sql("UPDATE asiento_holds SET expira_en = $1 WHERE asiento_id = $2")
                 .bind(0, LocalDateTime.now().minusMinutes(1))
                 .bind(1, id)
                 .fetch().rowsUpdated().block();
@@ -162,33 +173,27 @@ class InventarioRepositoryIntegrationTest {
                 .verifyComplete();
 
         StepVerifier.create(verificarDisponibilidadUseCase.ejecutar(id))
-                .assertNext(a -> {
-                    assertEquals(EstadoAsiento.DISPONIBLE, a.getEstado());
-                    assertNull(a.getExpiraEn());
-                })
+                .assertNext(a -> assertEquals(EstadoAsiento.DISPONIBLE, a.getEstado()))
                 .verifyComplete();
     }
 
-    // T027: flujo reservar → ejecutar → asiento OCUPADO en BD
+    // T027: flujo reservar → confirmar → asiento OCUPADO en BD
     @Test
     void flujoReservarConfirmarResultaEnAsientoOcupado() {
         UUID id = insertAsiento("DISPONIBLE");
 
-        StepVerifier.create(adapter.reservarConHold(id, LocalDateTime.now().plusMinutes(15)))
-                .assertNext(a -> assertEquals(EstadoAsiento.RESERVADO, a.getEstado()))
+        StepVerifier.create(reservarAsiento(id, LocalDateTime.now().plusMinutes(15)))
+                .assertNext(hold -> assertEquals(EstadoHold.RESERVADO, hold.getEstado()))
                 .verifyComplete();
 
         StepVerifier.create(confirmarOcupacionUseCase.ejecutar(id))
-                .assertNext(a -> {
-                    assertEquals(EstadoAsiento.OCUPADO, a.getEstado());
-                    assertNull(a.getExpiraEn());
-                })
+                .assertNext(a -> assertEquals(EstadoAsiento.OCUPADO, a.getEstado()))
                 .verifyComplete();
     }
 
-    // T033: concurrencia real — dos hilos simultáneos, cero sobreventa
+    // T033: concurrencia real a nivel de adapter — la prevención de sobreventas está en ReservarAsientosUseCase
     @Test
-    void concurrenciaRealCeroSobreventa() throws InterruptedException {
+    void concurrenciaRealAdapterAmbosGuardadosExitosos() throws InterruptedException {
         UUID id = insertAsiento("DISPONIBLE");
         CountDownLatch latch = new CountDownLatch(1);
         AtomicInteger exitosas = new AtomicInteger(0);
@@ -197,23 +202,23 @@ class InventarioRepositoryIntegrationTest {
         Thread t1 = new Thread(() -> {
             try {
                 latch.await();
-                adapter.reservarConHold(id, LocalDateTime.now().plusMinutes(15)).block();
+                reservarAsiento(id, LocalDateTime.now().plusMinutes(15)).block();
                 exitosas.incrementAndGet();
-            } catch (OptimisticLockingFailureException e) {
-                fallidas.incrementAndGet();
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
+            } catch (Exception e) {
+                fallidas.incrementAndGet();
             }
         });
         Thread t2 = new Thread(() -> {
             try {
                 latch.await();
-                adapter.reservarConHold(id, LocalDateTime.now().plusMinutes(15)).block();
+                reservarAsiento(id, LocalDateTime.now().plusMinutes(15)).block();
                 exitosas.incrementAndGet();
-            } catch (OptimisticLockingFailureException e) {
-                fallidas.incrementAndGet();
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
+            } catch (Exception e) {
+                fallidas.incrementAndGet();
             }
         });
 
@@ -224,14 +229,24 @@ class InventarioRepositoryIntegrationTest {
         t2.join();
 
         assertEquals(2, exitosas.get() + fallidas.get(), "Deben sumar exactamente 2 resultados");
-        assertEquals(1, exitosas.get(), "Solo una reserva debe ser exitosa");
-        assertEquals(1, fallidas.get(), "La segunda debe fallar con OptimisticLockingFailureException");
+        assertTrue(exitosas.get() >= 1, "Al menos una reserva debe ser exitosa");
     }
 
-    // T036: edge case — hold expira exactamente durante confirmación
+    // T036: edge case — hold expirado durante confirmación lanza HoldExpiradoException
     @Test
     void holdExpiradoAlConfirmarLanzaHoldExpiradoException() {
-        UUID id = insertAsientoConExpiraEn("RESERVADO", LocalDateTime.now().minusSeconds(1));
+        UUID id = insertAsiento("RESERVADO");
+
+        databaseClient.sql(
+                        "INSERT INTO asiento_holds(id, asiento_id, venta_id, numero, expira_en, estado) "
+                        + "VALUES ($1, $2, $3, $4, $5, $6)")
+                .bind(0, UUID.randomUUID())
+                .bind(1, id)
+                .bind(2, UUID.randomUUID())
+                .bind(3, "A1")
+                .bind(4, LocalDateTime.now().minusSeconds(1))
+                .bind(5, "RESERVADO")
+                .fetch().rowsUpdated().block();
 
         StepVerifier.create(confirmarOcupacionUseCase.ejecutar(id))
                 .expectError(HoldExpiradoException.class)

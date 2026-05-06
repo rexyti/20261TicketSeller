@@ -114,7 +114,7 @@ public class ReservarAsientosUseCase {
                 throw new AsientoEnZonaDiferenteException("El asiento %s no pertenece a la zona solicitada".formatted(asiento.getId()));
             }
             if (asientoNoDisponible(asiento)) {
-                throw new AsientoNoDisponibleException("El asiento %s no pertenece a la zona solicitada".formatted(asiento.getId()));
+                throw new AsientoNoDisponibleException("El asiento %s no está disponible".formatted(asiento.getId()));
             }
         });
         return Mono.just(asientos);
