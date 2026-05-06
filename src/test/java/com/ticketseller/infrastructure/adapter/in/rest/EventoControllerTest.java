@@ -8,6 +8,7 @@ import com.ticketseller.domain.exception.evento.EventoNotFoundException;
 import com.ticketseller.domain.exception.evento.EventoSolapamientoException;
 import com.ticketseller.domain.model.evento.EstadoEvento;
 import com.ticketseller.domain.model.evento.Evento;
+import com.ticketseller.domain.model.evento.TipoEvento;
 import com.ticketseller.infrastructure.adapter.in.rest.evento.dto.CrearEventoRequest;
 import com.ticketseller.infrastructure.adapter.in.rest.evento.dto.EventoResponse;
 import com.ticketseller.infrastructure.adapter.in.rest.evento.EventoController;
@@ -57,7 +58,7 @@ class EventoControllerTest {
                 "Concierto A",
                 LocalDateTime.now().plusDays(3),
                 LocalDateTime.now().plusDays(4),
-                "MUSICAL",
+                TipoEvento.CONCIERTO,
                 recintoId
         );
 
@@ -67,7 +68,7 @@ class EventoControllerTest {
                 .nombre("Concierto A")
                 .fechaInicio(request.fechaInicio())
                 .fechaFin(request.fechaFin())
-                .tipo("MUSICAL")
+                .tipo(TipoEvento.CONCIERTO)
                 .recintoId(recintoId)
                 .estado(EstadoEvento.ACTIVO)
                 .build();
@@ -119,7 +120,7 @@ class EventoControllerTest {
                 "Concierto A",
                 LocalDateTime.now().plusDays(3),
                 LocalDateTime.now().plusDays(4),
-                "MUSICAL",
+                TipoEvento.FESTIVAL,
                 recintoId
         );
         Evento eventoDomain = Evento.builder().nombre("Concierto A").build();
@@ -153,4 +154,3 @@ class EventoControllerTest {
                 .expectStatus().isNotFound();
     }
 }
-

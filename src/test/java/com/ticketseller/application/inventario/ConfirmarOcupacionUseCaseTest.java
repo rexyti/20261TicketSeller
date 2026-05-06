@@ -3,7 +3,10 @@ package com.ticketseller.application.inventario;
 import com.ticketseller.domain.exception.asiento.AsientoNoDisponibleException;
 import com.ticketseller.domain.exception.asiento.HoldExpiradoException;
 import com.ticketseller.domain.model.asiento.Asiento;
+import com.ticketseller.domain.model.asiento.AsientoHold;
 import com.ticketseller.domain.model.asiento.EstadoAsiento;
+import com.ticketseller.domain.model.asiento.EstadoHold;
+import com.ticketseller.domain.repository.AsientoHoldRepositoryPort;
 import com.ticketseller.domain.repository.AsientoRepositoryPort;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
@@ -13,23 +16,30 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 class ConfirmarOcupacionUseCaseTest {
 
     private final AsientoRepositoryPort asientoRepositoryPort = mock(AsientoRepositoryPort.class);
-    private final ConfirmarOcupacionUseCase useCase = new ConfirmarOcupacionUseCase(asientoRepositoryPort);
+    private final AsientoHoldRepositoryPort asientoHoldRepositoryPort = mock(AsientoHoldRepositoryPort.class);
+    private final ConfirmarOcupacionUseCase useCase = new ConfirmarOcupacionUseCase(asientoRepositoryPort, asientoHoldRepositoryPort);
 
     @Test
     void confirmaOcupacionExitosaCuandoHoldVigente() {
         UUID id = UUID.randomUUID();
-        Asiento reservado = Asiento.builder().id(id).estado(EstadoAsiento.RESERVADO)
-                .expiraEn(LocalDateTime.now().plusMinutes(10)).build();
+        Asiento reservado = Asiento.builder().id(id).estado(EstadoAsiento.RESERVADO).build();
         Asiento ocupado = Asiento.builder().id(id).estado(EstadoAsiento.OCUPADO).build();
+        AsientoHold hold = AsientoHold.builder()
+                .asientoId(id)
+                .expiraEn(LocalDateTime.now().plusMinutes(10))
+                .estado(EstadoHold.RESERVADO)
+                .build();
 
         when(asientoRepositoryPort.buscarPorId(id)).thenReturn(Mono.just(reservado));
-        when(asientoRepositoryPort.marcarOcupado(id)).thenReturn(Mono.just(ocupado));
+        when(asientoHoldRepositoryPort.buscarActivoPorAsientoId(id)).thenReturn(Mono.just(hold));
+        when(asientoRepositoryPort.guardar(any())).thenReturn(Mono.just(ocupado));
 
         StepVerifier.create(useCase.ejecutar(id))
                 .assertNext(a -> assertEquals(EstadoAsiento.OCUPADO, a.getEstado()))
@@ -39,10 +49,15 @@ class ConfirmarOcupacionUseCaseTest {
     @Test
     void fallaConHoldExpiradoCuandoExpiraEnEsPasado() {
         UUID id = UUID.randomUUID();
-        Asiento reservado = Asiento.builder().id(id).estado(EstadoAsiento.RESERVADO)
-                .expiraEn(LocalDateTime.now().minusMinutes(1)).build();
+        Asiento reservado = Asiento.builder().id(id).estado(EstadoAsiento.RESERVADO).build();
+        AsientoHold holdExpirado = AsientoHold.builder()
+                .asientoId(id)
+                .expiraEn(LocalDateTime.now().minusMinutes(1))
+                .estado(EstadoHold.RESERVADO)
+                .build();
 
         when(asientoRepositoryPort.buscarPorId(id)).thenReturn(Mono.just(reservado));
+        when(asientoHoldRepositoryPort.buscarActivoPorAsientoId(id)).thenReturn(Mono.just(holdExpirado));
 
         StepVerifier.create(useCase.ejecutar(id))
                 .expectError(HoldExpiradoException.class)

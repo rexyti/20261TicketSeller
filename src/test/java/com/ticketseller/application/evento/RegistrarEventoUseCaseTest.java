@@ -4,6 +4,7 @@ import com.ticketseller.domain.exception.evento.EventoSolapamientoException;
 import com.ticketseller.domain.exception.recinto.RecintoNoDisponibleException;
 import com.ticketseller.domain.model.evento.EstadoEvento;
 import com.ticketseller.domain.model.evento.Evento;
+import com.ticketseller.domain.model.evento.TipoEvento;
 import com.ticketseller.domain.model.recinto.Recinto;
 import com.ticketseller.domain.repository.EventoRepositoryPort;
 import com.ticketseller.domain.repository.RecintoRepositoryPort;
@@ -30,7 +31,7 @@ class RegistrarEventoUseCaseTest {
         Evento request = Evento.builder()
                 .id(UUID.randomUUID())
                 .nombre("Concierto A")
-                .tipo("MUSICAL")
+                .tipo(TipoEvento.CONCIERTO)
                 .recintoId(UUID.randomUUID())
                 .fechaInicio(LocalDateTime.now().plusDays(5))
                 .fechaFin(LocalDateTime.now().plusDays(6))
@@ -58,7 +59,7 @@ class RegistrarEventoUseCaseTest {
 
         Evento request = Evento.builder()
                 .nombre("Concierto A")
-                .tipo("MUSICAL")
+                .tipo(TipoEvento.CONCIERTO)
                 .recintoId(UUID.randomUUID())
                 .fechaInicio(LocalDateTime.now().plusDays(5))
                 .fechaFin(LocalDateTime.now().plusDays(6))
@@ -79,7 +80,7 @@ class RegistrarEventoUseCaseTest {
 
         Evento request = Evento.builder()
                 .nombre("Concierto A")
-                .tipo("MUSICAL")
+                .tipo(TipoEvento.CONCIERTO)
                 .recintoId(UUID.randomUUID())
                 .fechaInicio(LocalDateTime.now().plusDays(5))
                 .fechaFin(LocalDateTime.now().plusDays(6))

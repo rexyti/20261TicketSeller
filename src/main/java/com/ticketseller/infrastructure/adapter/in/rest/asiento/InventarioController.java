@@ -63,6 +63,7 @@ public class InventarioController {
     @PostMapping("/{id}/liberar")
     public Mono<ResponseEntity<DisponibilidadResponse>> liberar(@PathVariable UUID id) {
         return liberarHoldUseCase.ejecutar(id)
+                .flatMap(hold -> verificarDisponibilidadUseCase.ejecutar(id))
                 .map(asiento -> ResponseEntity.ok(asientoRestMapper.toDisponibilidadResponse(asiento)));
     }
 }
