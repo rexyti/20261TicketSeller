@@ -119,7 +119,7 @@ public class ProcesarPagoUseCase {
 
                     List<Ticket> tickets = IntStream.range(0, venta.getCantidad())
                             .mapToObj(i -> buildTicket(venta, compuerta, precioZona, zona, evento,
-                                    holds.isEmpty() ? null : holds.get(i).getAsientoId()))
+                                    i < holds.size() ? holds.get(i).getAsientoId() : null))
                             .peek(Ticket::validarDatosRegistro)
                             .toList();
 
