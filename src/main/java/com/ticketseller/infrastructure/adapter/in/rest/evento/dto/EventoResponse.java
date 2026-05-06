@@ -1,6 +1,7 @@
 package com.ticketseller.infrastructure.adapter.in.rest.evento.dto;
 
 import com.ticketseller.domain.model.evento.EstadoEvento;
+import com.ticketseller.domain.model.evento.TipoEvento;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -10,9 +11,8 @@ public record EventoResponse(
         String nombre,
         LocalDateTime fechaInicio,
         LocalDateTime fechaFin,
-        String tipo,
+        TipoEvento tipo,
         UUID recintoId,
         EstadoEvento estado
 ) {
 }
-

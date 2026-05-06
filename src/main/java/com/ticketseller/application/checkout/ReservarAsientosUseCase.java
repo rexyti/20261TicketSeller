@@ -5,25 +5,20 @@ import com.ticketseller.application.promocion.ItemCarrito;
 import com.ticketseller.domain.exception.asiento.AsientoEnZonaDiferenteException;
 import com.ticketseller.domain.exception.asiento.AsientoNoDisponibleException;
 import com.ticketseller.domain.exception.asiento.AsientoNotFoundException;
-import com.ticketseller.domain.exception.evento.EventoNotFoundException;
-import com.ticketseller.domain.exception.venta.SolicitudReservaInvalidaException;
 import com.ticketseller.domain.exception.zona.ZonaNotFoundException;
 import com.ticketseller.domain.exception.zona.ZonaSinPrecioException;
+import com.ticketseller.domain.exception.venta.SolicitudReservaInvalidaException;
 import com.ticketseller.domain.model.asiento.Asiento;
+import com.ticketseller.domain.model.asiento.AsientoHold;
 import com.ticketseller.domain.model.asiento.EstadoAsiento;
-import com.ticketseller.domain.model.evento.Evento;
-import com.ticketseller.domain.model.ticket.AccessDetails;
-import com.ticketseller.domain.model.ticket.CategoriaTicket;
-import com.ticketseller.domain.model.zona.Compuerta;
+import com.ticketseller.domain.model.asiento.EstadoHold;
 import com.ticketseller.domain.model.ticket.EstadoTicket;
 import com.ticketseller.domain.model.venta.EstadoVenta;
 import com.ticketseller.domain.model.zona.PrecioZona;
-import com.ticketseller.domain.model.ticket.Ticket;
 import com.ticketseller.domain.model.venta.Venta;
 import com.ticketseller.domain.model.zona.Zona;
+import com.ticketseller.domain.repository.AsientoHoldRepositoryPort;
 import com.ticketseller.domain.repository.AsientoRepositoryPort;
-import com.ticketseller.domain.repository.CompuertaRepositoryPort;
-import com.ticketseller.domain.repository.EventoRepositoryPort;
 import com.ticketseller.domain.repository.PrecioZonaRepositoryPort;
 import com.ticketseller.domain.repository.TicketRepositoryPort;
 import com.ticketseller.domain.repository.VentaRepositoryPort;
@@ -38,7 +33,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.IntStream;
 
 @RequiredArgsConstructor
 public class ReservarAsientosUseCase {
@@ -49,9 +43,8 @@ public class ReservarAsientosUseCase {
     private final VentaRepositoryPort ventaRepositoryPort;
     private final ZonaRepositoryPort zonaRepositoryPort;
     private final PrecioZonaRepositoryPort precioZonaRepositoryPort;
-    private final CompuertaRepositoryPort compuertaRepositoryPort;
-    private final EventoRepositoryPort eventoRepositoryPort;
     private final AsientoRepositoryPort asientoRepositoryPort;
+    private final AsientoHoldRepositoryPort asientoHoldRepositoryPort;
     private final AplicarDescuentoCarritoUseCase aplicarDescuentoCarritoUseCase;
 
     public Mono<VentaDetalle> ejecutar(ReservarAsientosCommand command) {
@@ -64,12 +57,10 @@ public class ReservarAsientosUseCase {
         return Mono.zip(
                         obtenerZona(command.zonaId()),
                         obtenerPrecio(command.eventoId(), command.zonaId()),
-                        obtenerCompuerta(command.zonaId()),
                         ticketsOcupados(command.eventoId(), command.zonaId()),
-                        obtenerEvento(command.eventoId()),
                         asientosMono
                 )
-                .flatMap(tuple -> reservar(command, tuple.getT1(), tuple.getT2(), tuple.getT3(), tuple.getT4(), tuple.getT5(), tuple.getT6()));
+                .flatMap(tuple -> reservar(command, tuple.getT1(), tuple.getT2(), tuple.getT3(), tuple.getT4()));
     }
 
     private boolean tieneAsientosEspecificos(ReservarAsientosCommand command) {
@@ -94,7 +85,7 @@ public class ReservarAsientosUseCase {
 
     private Mono<Zona> obtenerZona(UUID zonaId) {
         return zonaRepositoryPort.buscarPorId(zonaId)
-                .switchIfEmpty(Mono.error(new ZonaNotFoundException("Zona no encontrada")));
+                .switchIfEmpty(Mono.error(new ZonaNotFoundException("Zona no encontrada: %s".formatted(zonaId))));
     }
 
     private Mono<PrecioZona> obtenerPrecio(UUID eventoId, UUID zonaId) {
@@ -104,24 +95,15 @@ public class ReservarAsientosUseCase {
                 .switchIfEmpty(Mono.error(new ZonaSinPrecioException("No existe precio configurado para la zona en este evento")));
     }
 
-    private Mono<Compuerta> obtenerCompuerta(UUID zonaId) {
-        return compuertaRepositoryPort.buscarPorZonaId(zonaId).next().defaultIfEmpty(Compuerta.builder().build());
-    }
-
     private Mono<Long> ticketsOcupados(UUID eventoId, UUID zonaId) {
         return ticketRepositoryPort.contarPorEventoYZonaYEstados(eventoId, zonaId,
                 Set.of(EstadoTicket.VENDIDO));
     }
 
-    private Mono<Evento> obtenerEvento(UUID eventoId) {
-        return eventoRepositoryPort.buscarPorId(eventoId)
-                .switchIfEmpty(Mono.error(new EventoNotFoundException("Evento no encontrado")));
-    }
-
     private Mono<List<Asiento>> obtenerYValidarAsientos(ReservarAsientosCommand command) {
         return Flux.fromIterable(command.asientoIds())
                 .flatMap(id -> asientoRepositoryPort.buscarPorId(id)
-                        .switchIfEmpty(Mono.error(new AsientoNotFoundException("Asiento no encontrado: " + id))))
+                        .switchIfEmpty(Mono.error(new AsientoNotFoundException("Asiento no encontrado: %s".formatted(id)))))
                 .collectList()
                 .flatMap(asientos -> validarEstadoAsientos(asientos, command.zonaId()));
     }
@@ -129,10 +111,10 @@ public class ReservarAsientosUseCase {
     private Mono<List<Asiento>> validarEstadoAsientos(List<Asiento> asientos, UUID zonaId) {
         asientos.forEach(asiento -> {
             if (asientoNoPerteneceAZona(asiento, zonaId)) {
-                throw new AsientoEnZonaDiferenteException("El asiento " + asiento.getId() + " no pertenece a la zona solicitada");
+                throw new AsientoEnZonaDiferenteException("El asiento %s no pertenece a la zona solicitada".formatted(asiento.getId()));
             }
             if (asientoNoDisponible(asiento)) {
-                throw new AsientoNoDisponibleException("El asiento " + asiento.getId() + " no está disponible");
+                throw new AsientoNoDisponibleException("El asiento %s no pertenece a la zona solicitada".formatted(asiento.getId()));
             }
         });
         return Mono.just(asientos);
@@ -147,8 +129,7 @@ public class ReservarAsientosUseCase {
     }
 
     private Mono<VentaDetalle> reservar(ReservarAsientosCommand command, Zona zona,
-                                        PrecioZona precioZona, Compuerta compuerta, Long ocupados, Evento evento,
-                                        List<Asiento> asientos) {
+                                        PrecioZona precioZona, Long ocupados, List<Asiento> asientos) {
         if (zonaSinCuposDisponibles(ocupados, command, zona)) {
             return Mono.error(new AsientoNoDisponibleException("No hay cupos disponibles en la zona solicitada"));
         }
@@ -162,28 +143,33 @@ public class ReservarAsientosUseCase {
                     venta.validarDatosRegistro();
 
                     return ventaRepositoryPort.guardar(venta)
-                            .flatMap(savedVenta -> {
-                                List<Ticket> tickets = IntStream.range(0, command.cantidad())
-                                        .mapToObj(i -> buildTicket(savedVenta, command, compuerta, precioZona, zona, evento,
-                                                asientos.isEmpty() ? null : asientos.get(i)))
-                                        .peek(Ticket::validarDatosRegistro)
-                                        .toList();
-                                return ticketRepositoryPort.guardarTodos(tickets)
-                                        .collectList()
-                                        .flatMap(savedTickets -> reservarAsientos(asientos)
-                                                .thenReturn(new VentaDetalle(savedVenta, savedTickets)));
-                            });
+                            .flatMap(savedVenta -> crearHolds(savedVenta, asientos)
+                                    .thenReturn(new VentaDetalle(savedVenta, List.of())));
                 });
     }
 
-    private Mono<Void> reservarAsientos(List<Asiento> asientos) {
+    private Mono<Void> crearHolds(Venta venta, List<Asiento> asientos) {
         if (asientos.isEmpty()) {
             return Mono.empty();
         }
         return Flux.fromIterable(asientos)
-                .flatMap(asiento ->
-                        asientoRepositoryPort.guardar(asiento.toBuilder().estado(EstadoAsiento.RESERVADO).build()))
+                .flatMap(asiento -> {
+                    AsientoHold hold = buildHold(venta, asiento);
+                    return asientoHoldRepositoryPort.guardar(hold)
+                            .then(asientoRepositoryPort.guardar(
+                                    asiento.toBuilder().estado(EstadoAsiento.RESERVADO).build()));
+                })
                 .then();
+    }
+
+    private AsientoHold buildHold(Venta venta, Asiento asiento) {
+        return AsientoHold.builder()
+                .asientoId(asiento.getId())
+                .ventaId(venta.getId())
+                .numero(asiento.getNumero())
+                .expiraEn(venta.getFechaExpiracion())
+                .estado(EstadoHold.RESERVADO)
+                .build();
     }
 
     private boolean zonaSinCuposDisponibles(Long ocupados, ReservarAsientosCommand command, Zona zona) {
@@ -195,35 +181,13 @@ public class ReservarAsientosUseCase {
         return Venta.builder()
                 .compradorId(command.compradorId())
                 .eventoId(command.eventoId())
+                .zonaId(command.zonaId())
+                .cantidad(command.cantidad())
+                .esCortesia(Boolean.TRUE.equals(command.esCortesia()))
                 .estado(EstadoVenta.RESERVADA)
                 .fechaCreacion(ahora)
                 .fechaExpiracion(ahora.plusMinutes(TTL_MINUTOS))
                 .total(total)
-                .build();
-    }
-
-    private Ticket buildTicket(Venta venta, ReservarAsientosCommand command, Compuerta compuerta,
-                               PrecioZona precioZona, Zona zona, Evento evento, Asiento asiento) {
-        AccessDetails accessDetails = buildAccessDetails(evento, zona, compuerta);
-        return Ticket.builder()
-                .ventaId(venta.getId())
-                .eventoId(command.eventoId())
-                .zonaId(command.zonaId())
-                .compuertaId(compuerta.getId())
-                .precio(precioZona.getPrecio())
-                .esCortesia(Boolean.TRUE.equals(command.esCortesia()))
-                .asientoId(asiento != null ? asiento.getId() : null)
-                .accessDetails(accessDetails)
-                .build()
-                .normalizarDatosRegistro();
-    }
-
-    private AccessDetails buildAccessDetails(Evento evento, Zona zona, Compuerta compuerta) {
-        return AccessDetails.builder()
-                .categoria(compuerta.isEsGeneral() ? CategoriaTicket.GENERAL : CategoriaTicket.VIP)
-                .zona(zona.getNombre())
-                .compuerta(compuerta.getNombre())
-                .fechaEvento(evento.getFechaInicio())
                 .build();
     }
 }

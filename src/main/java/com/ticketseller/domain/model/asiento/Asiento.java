@@ -5,7 +5,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
@@ -20,8 +19,6 @@ public class Asiento {
     private UUID zonaId;
     private TipoAsiento tipoAsiento;
     private EstadoAsiento estado;
-    private LocalDateTime expiraEn;
-    private Long version;
 
     public Asiento normalizarDatosRegistro() {
         return this.toBuilder()
@@ -49,13 +46,13 @@ public class Asiento {
         return valor == null ? null : valor.trim();
     }
 
-    public boolean esTransicionPermitida(EstadoAsiento nuevoEstado){
+    public boolean esTransicionPermitida(EstadoAsiento nuevoEstado) {
         return transicionPermitida(this.estado, nuevoEstado);
     }
 
     private boolean transicionPermitida(EstadoAsiento actual, EstadoAsiento nuevo) {
         validarEstados(actual, nuevo);
-        return switch (actual){
+        return switch (actual) {
             case DISPONIBLE -> validoFromDisponible(nuevo);
             case BLOQUEADO -> validoFromBloqueado(nuevo);
             case RESERVADO -> validoFromReservado(nuevo);

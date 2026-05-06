@@ -2,6 +2,9 @@ CREATE TABLE ventas (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     comprador_id UUID NOT NULL,
     evento_id UUID NOT NULL REFERENCES eventos (id),
+    zona_id UUID REFERENCES zonas (id),
+    cantidad INTEGER,
+    es_cortesia BOOLEAN NOT NULL DEFAULT FALSE,
     estado VARCHAR(40) NOT NULL,
     fecha_creacion TIMESTAMP NOT NULL,
     fecha_expiracion TIMESTAMP NOT NULL,
@@ -34,4 +37,3 @@ CREATE TABLE transacciones_financieras (
 
 CREATE INDEX idx_tickets_evento_zona_estado ON tickets (evento_id, zona_id, estado);
 CREATE INDEX idx_ventas_estado_expiracion ON ventas (estado, fecha_expiracion);
-

@@ -24,6 +24,11 @@ public class VentaEntity {
     private UUID compradorId;
     @Column("evento_id")
     private UUID eventoId;
+    @Column("zona_id")
+    private UUID zonaId;
+    private Integer cantidad;
+    @Column("es_cortesia")
+    private boolean esCortesia;
     private String estado;
     @Column("fecha_creacion")
     private LocalDateTime fechaCreacion;
@@ -31,4 +36,3 @@ public class VentaEntity {
     private LocalDateTime fechaExpiracion;
     private BigDecimal total;
 }
-

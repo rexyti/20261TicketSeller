@@ -4,7 +4,7 @@ import com.ticketseller.application.asiento.AsignarAsientosAZonaUseCase;
 import com.ticketseller.application.asiento.ConsultarMapaAsientosUseCase;
 import com.ticketseller.application.asiento.CrearMapaAsientosUseCase;
 import com.ticketseller.application.asiento.MarcarEspacioVacioUseCase;
-import com.ticketseller.infrastructure.adapter.in.rest.tipoasiento.dto.AsientoMapaResponse;
+import com.ticketseller.infrastructure.adapter.in.rest.asiento.dto.AsientoResponse;
 import com.ticketseller.infrastructure.adapter.in.rest.asiento.dto.AsignarAsientosAZonaRequest;
 import com.ticketseller.infrastructure.adapter.in.rest.asiento.dto.CrearMapaAsientosRequest;
 import com.ticketseller.infrastructure.adapter.in.rest.mapper.AsientoRestMapper;
@@ -44,39 +44,39 @@ public class MapaAsientosController {
 
     @Operation(summary = "Crear mapa de asientos NxM para un recinto")
     @PostMapping("/{recintoId}/mapa")
-    public Flux<AsientoMapaResponse> crearMapa(@PathVariable UUID recintoId,
+    public Flux<AsientoResponse> crearMapa(@PathVariable UUID recintoId,
                                                @Valid @RequestBody CrearMapaAsientosRequest request) {
         return crearMapaAsientosUseCase.ejecutar(recintoId, request.filas(), request.columnasPorFila())
-                .map(asientoRestMapper::toResponse);
+                .map(asientoRestMapper::toAsientoResponse);
     }
 
     @Operation(summary = "Marcar un asiento como espacio vacío")
     @PatchMapping("/{recintoId}/mapa/asientos/{asientoId}")
-    public Mono<ResponseEntity<AsientoMapaResponse>> marcarEspacioVacio(@PathVariable UUID recintoId,
+    public Mono<ResponseEntity<AsientoResponse>> marcarEspacioVacio(@PathVariable UUID recintoId,
                                                                         @PathVariable UUID asientoId) {
         return marcarEspacioVacioUseCase.ejecutar(asientoId)
-                .map(asientoRestMapper::toResponse)
+                .map(asientoRestMapper::toAsientoResponse)
                 .map(ResponseEntity::ok);
     }
 
     @Operation(summary = "Asignar una lista de asientos a una zona")
     @PostMapping("/{recintoId}/zonas/{zonaId}/asientos")
-    public Flux<AsientoMapaResponse> asignarAsientosAZona(@PathVariable UUID recintoId,
+    public Flux<AsientoResponse> asignarAsientosAZona(@PathVariable UUID recintoId,
                                                           @PathVariable UUID zonaId,
                                                           @Valid @RequestBody AsignarAsientosAZonaRequest request) {
         return asignarAsientosAZonaUseCase.ejecutar(request.asientoIds(), zonaId)
-                .map(asientoRestMapper::toResponse);
+                .map(asientoRestMapper::toAsientoResponse);
     }
 
     @Operation(summary = "Consultar mapa de asientos del recinto paginado")
     @GetMapping("/{recintoId}/mapa/asientos")
-    public Mono<Page<AsientoMapaResponse>> consultarMapa(@PathVariable UUID recintoId,
+    public Mono<Page<AsientoResponse>> consultarMapa(@PathVariable UUID recintoId,
                                                          @RequestParam(defaultValue = "0") int pagina,
                                                          @RequestParam(defaultValue = "20") int size) {
         return consultarMapaAsientosUseCase.ejecutar(recintoId, pagina, size)
                 .map(p -> {
-                    List<AsientoMapaResponse> responses = p.contenido().stream()
-                            .map(asientoRestMapper::toResponse)
+                    List<AsientoResponse> responses = p.contenido().stream()
+                            .map(asientoRestMapper::toAsientoResponse)
                             .toList();
                     return new PageImpl<>(responses, PageRequest.of(p.pagina(), p.size()), p.totalElementos());
                 });

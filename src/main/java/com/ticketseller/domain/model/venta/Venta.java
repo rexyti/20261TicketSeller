@@ -18,6 +18,9 @@ public class Venta {
     private UUID id;
     private UUID compradorId;
     private UUID eventoId;
+    private UUID zonaId;
+    private Integer cantidad;
+    private boolean esCortesia;
     private EstadoVenta estado;
     private LocalDateTime fechaCreacion;
     private LocalDateTime fechaExpiracion;

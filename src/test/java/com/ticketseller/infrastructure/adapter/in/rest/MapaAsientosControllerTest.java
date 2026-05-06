@@ -11,7 +11,7 @@ import com.ticketseller.domain.model.asiento.EstadoAsiento;
 import com.ticketseller.domain.shared.Pagina;
 import com.ticketseller.infrastructure.adapter.in.rest.asiento.MapaAsientosController;
 import com.ticketseller.infrastructure.adapter.in.rest.mapper.AsientoRestMapper;
-import com.ticketseller.infrastructure.adapter.in.rest.tipoasiento.dto.AsientoMapaResponse;
+import com.ticketseller.infrastructure.adapter.in.rest.asiento.dto.AsientoResponse;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
@@ -66,10 +66,10 @@ class MapaAsientosControllerTest {
                 .estado(EstadoAsiento.DISPONIBLE)
                 .build();
 
-        AsientoMapaResponse response = new AsientoMapaResponse(asientoId, "A", 1, "A1", true, "DISPONIBLE");
+        AsientoResponse response = new AsientoResponse(asientoId, "A", 1, "A1", zonaId, EstadoAsiento.DISPONIBLE);
 
         when(asignarAsientosAZonaUseCase.ejecutar(any(), any())).thenReturn(Flux.just(asiento));
-        when(asientoRestMapper.toResponse(asiento)).thenReturn(response);
+        when(asientoRestMapper.toAsientoResponse(asiento)).thenReturn(response);
 
         String body = """
                 {"asientoIds": ["%s"]}
@@ -157,10 +157,10 @@ class MapaAsientosControllerTest {
                 .build();
 
         Pagina<Asiento> pagina = new Pagina<>(List.of(asiento), 1L, 0, 20);
-        AsientoMapaResponse response = new AsientoMapaResponse(asiento.getId(), "A", 1, "A1", true, "DISPONIBLE");
+        AsientoResponse response = new AsientoResponse(asiento.getId(), "A", 1, "A1", zonaId, EstadoAsiento.DISPONIBLE);
 
         when(consultarMapaAsientosUseCase.ejecutar(any(), anyInt(), anyInt())).thenReturn(Mono.just(pagina));
-        when(asientoRestMapper.toResponse(asiento)).thenReturn(response);
+        when(asientoRestMapper.toAsientoResponse(asiento)).thenReturn(response);
 
         webTestClient.get()
                 .uri("/api/v1/recintos/{recintoId}/mapa/asientos?pagina=0&size=20", recintoId)

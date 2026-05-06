@@ -18,20 +18,19 @@ public class Evento {
     private String nombre;
     private LocalDateTime fechaInicio;
     private LocalDateTime fechaFin;
-    private String tipo;
+    private TipoEvento tipo;
     private UUID recintoId;
     private EstadoEvento estado;
 
     public Evento normalizarDatosRegistro() {
         return toBuilder()
                 .nombre(trimOrNull(nombre))
-                .tipo(trimOrNull(tipo))
                 .build();
     }
 
     public void validarDatosRegistro() {
         validarTextoObligatorio(nombre, "nombre");
-        validarTextoObligatorio(tipo, "tipo");
+        validarObligatorio(tipo, "tipo");
         validarObligatorio(recintoId, "recintoId");
         validarObligatorio(fechaInicio, "fechaInicio");
         validarObligatorio(fechaFin, "fechaFin");

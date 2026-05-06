@@ -55,7 +55,7 @@ public class VentaRepositoryAdapter implements VentaRepositoryPort {
     @Override
     public Flux<Venta> buscarConFiltros(EstadoVenta estado, LocalDateTime fechaInicio, LocalDateTime fechaFin, UUID eventoId) {
         StringBuilder sql = new StringBuilder(
-                "SELECT id, comprador_id, evento_id, estado, fecha_creacion, fecha_expiracion, total FROM ventas WHERE 1=1");
+                "SELECT id, comprador_id, evento_id, zona_id, cantidad, es_cortesia, estado, fecha_creacion, fecha_expiracion, total FROM ventas WHERE 1=1");
         Map<String, Object> params = new HashMap<>();
 
         if (estado != null) {
@@ -107,6 +107,9 @@ public class VentaRepositoryAdapter implements VentaRepositoryPort {
                 .id(row.get("id", UUID.class))
                 .compradorId(row.get("comprador_id", UUID.class))
                 .eventoId(row.get("evento_id", UUID.class))
+                .zonaId(row.get("zona_id", UUID.class))
+                .cantidad(row.get("cantidad", Integer.class))
+                .esCortesia(Boolean.TRUE.equals(row.get("es_cortesia", Boolean.class)))
                 .estado(row.get("estado", String.class))
                 .fechaCreacion(row.get("fecha_creacion", LocalDateTime.class))
                 .fechaExpiracion(row.get("fecha_expiracion", LocalDateTime.class))

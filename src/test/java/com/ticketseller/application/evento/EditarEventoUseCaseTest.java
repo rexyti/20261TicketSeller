@@ -4,6 +4,7 @@ import com.ticketseller.domain.exception.evento.EventoEnProgresoException;
 import com.ticketseller.domain.exception.evento.EventoNotFoundException;
 import com.ticketseller.domain.model.evento.EstadoEvento;
 import com.ticketseller.domain.model.evento.Evento;
+import com.ticketseller.domain.model.evento.TipoEvento;
 import com.ticketseller.domain.repository.EventoRepositoryPort;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
@@ -53,7 +54,7 @@ class EditarEventoUseCaseTest {
         Evento actual = Evento.builder()
                 .id(id)
                 .nombre("Concierto")
-                .tipo("MUSICAL")
+                .tipo(TipoEvento.CONCIERTO)
                 .recintoId(UUID.randomUUID())
                 .fechaInicio(LocalDateTime.now().plusDays(3))
                 .fechaFin(LocalDateTime.now().plusDays(4))

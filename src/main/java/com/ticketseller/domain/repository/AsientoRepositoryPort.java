@@ -4,7 +4,6 @@ import com.ticketseller.domain.model.asiento.Asiento;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -14,8 +13,4 @@ public interface AsientoRepositoryPort {
     Mono<Asiento> buscarPorId(UUID id);
     Flux<Asiento> buscarPorZonaId(UUID zonaId);
     Flux<Asiento> buscarPorRecintoId(UUID recintoId);
-    Mono<Asiento> reservarConHold(UUID id, LocalDateTime expiraEn);
-    Mono<Asiento> liberarHold(UUID id);
-    Mono<Asiento> marcarOcupado(UUID id);
-    Flux<Asiento> findHoldsVencidos(LocalDateTime ahora);
 }
