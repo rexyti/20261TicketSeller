@@ -24,6 +24,8 @@ import com.ticketseller.application.promocion.CrearCodigosPromocionalesUseCase;
 import com.ticketseller.application.promocion.CrearDescuentoUseCase;
 import com.ticketseller.application.promocion.CrearPromocionUseCase;
 import com.ticketseller.application.promocion.GestionarEstadoPromocionUseCase;
+import com.ticketseller.application.promocion.ListarDescuentosUseCase;
+import com.ticketseller.application.promocion.ListarPromocionesUseCase;
 import com.ticketseller.application.promocion.ValidarCodigoPromocionalUseCase;
 import com.ticketseller.domain.repository.CodigoPromocionalRepositoryPort;
 import com.ticketseller.domain.repository.DescuentoRepositoryPort;
@@ -705,6 +707,18 @@ public class BeanConfiguration {
     public CrearPromocionUseCase crearPromocionUseCase(PromocionRepositoryPort promocionRepositoryPort,
                                                        EventoRepositoryPort eventoRepositoryPort) {
         return new CrearPromocionUseCase(promocionRepositoryPort, eventoRepositoryPort);
+    }
+
+    @Bean
+    public ListarPromocionesUseCase listarPromocionesUseCase(PromocionRepositoryPort promocionRepositoryPort,
+                                                             EventoRepositoryPort eventoRepositoryPort) {
+        return new ListarPromocionesUseCase(promocionRepositoryPort, eventoRepositoryPort);
+    }
+
+    @Bean
+    public ListarDescuentosUseCase listarDescuentosUseCase(DescuentoRepositoryPort descuentoRepositoryPort,
+                                                           PromocionRepositoryPort promocionRepositoryPort) {
+        return new ListarDescuentosUseCase(descuentoRepositoryPort, promocionRepositoryPort);
     }
 
     @Bean

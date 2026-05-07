@@ -1,2 +1,1 @@
-ALTER TABLE asientos
-    ADD COLUMN IF NOT EXISTS existente BOOLEAN NOT NULL DEFAULT TRUE;
+-- existente column removed; use EstadoAsiento.MANTENIMIENTO via MarcarEspacioVacioUseCase instead

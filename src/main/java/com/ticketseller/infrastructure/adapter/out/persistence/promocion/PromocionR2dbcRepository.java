@@ -10,4 +10,7 @@ public interface PromocionR2dbcRepository extends ReactiveCrudRepository<Promoci
 
     @Query("SELECT * FROM promociones WHERE evento_id = :eventoId AND estado = 'ACTIVA'")
     Flux<PromocionEntity> findActivasByEventoId(UUID eventoId);
+
+    @Query("SELECT * FROM promociones WHERE evento_id = :eventoId ORDER BY fecha_inicio DESC")
+    Flux<PromocionEntity> findByEventoId(UUID eventoId);
 }

@@ -1,6 +1,7 @@
 package com.ticketseller.infrastructure.adapter.in.rest.promocion;
 
 import com.ticketseller.application.promocion.CrearDescuentoUseCase;
+import com.ticketseller.application.promocion.ListarDescuentosUseCase;
 import com.ticketseller.application.promocion.ValidarCodigoPromocionalUseCase;
 import com.ticketseller.infrastructure.adapter.in.rest.mapper.PromocionRestMapper;
 import com.ticketseller.infrastructure.adapter.in.rest.promocion.dto.AplicarCodigoRequest;
@@ -12,11 +13,13 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.UUID;
@@ -28,8 +31,15 @@ import java.util.UUID;
 public class DescuentoController {
 
     private final CrearDescuentoUseCase crearDescuentoUseCase;
+    private final ListarDescuentosUseCase listarDescuentosUseCase;
     private final ValidarCodigoPromocionalUseCase validarCodigoPromocionalUseCase;
     private final PromocionRestMapper mapper;
+
+    @Operation(summary = "Listar descuentos de una promoción")
+    @GetMapping("/admin/promociones/{id}/descuentos")
+    public Flux<DescuentoResponse> listarDescuentos(@PathVariable UUID id) {
+        return listarDescuentosUseCase.ejecutar(id).map(mapper::toResponse);
+    }
 
     @Operation(summary = "Crear un descuento para una promoción")
     @PostMapping("/admin/promociones/{id}/descuentos")
