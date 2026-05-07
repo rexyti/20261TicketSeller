@@ -234,7 +234,7 @@ public class GlobalExceptionHandler {
                 && decoding.getCause() instanceof InvalidFormatException jackson
                 && jackson.getTargetType().isEnum()) {
             String campo = jackson.getPath().isEmpty() ? "campo desconocido"
-                    : jackson.getPath().get(0).getFieldName();
+                    : jackson.getPath().getFirst().getFieldName();
             String permitidos = Arrays.stream(jackson.getTargetType().getEnumConstants())
                     .map(Object::toString)
                     .collect(Collectors.joining(", "));
