@@ -67,8 +67,7 @@ CREATE TABLE asientos (
     numero VARCHAR(20) NOT NULL,
     zona_id UUID REFERENCES zonas(id),
     tipo VARCHAR(50),
-    estado VARCHAR(20),
-    existente BOOLEAN NOT NULL DEFAULT TRUE
+    estado VARCHAR(20)
 );
 
 CREATE TABLE asiento_holds (
@@ -107,6 +106,9 @@ CREATE TABLE ventas (
     id UUID PRIMARY KEY,
     comprador_id UUID NOT NULL,
     evento_id UUID NOT NULL REFERENCES eventos(id),
+    zona_id UUID REFERENCES zonas(id),
+    cantidad INTEGER,
+    es_cortesia BOOLEAN NOT NULL DEFAULT FALSE,
     estado VARCHAR(40) NOT NULL,
     fecha_creacion TIMESTAMP NOT NULL,
     fecha_expiracion TIMESTAMP NOT NULL,

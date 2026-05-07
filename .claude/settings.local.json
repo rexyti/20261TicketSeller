@@ -17,7 +17,10 @@
       "Bash(Remove-Item \"C:\\\\Users\\\\USUARIO\\\\Documents\\\\Mis GitProyectos\\\\20261TicketSeller\\\\src\\\\main\\\\java\\\\com\\\\ticketseller\\\\infrastructure\\\\adapter\\\\in\\\\rest\\\\asiento\\\\dto\\\\ReservarAsientoRequest.java\")",
       "Bash(Remove-Item \"C:\\\\Users\\\\USUARIO\\\\Documents\\\\Mis GitProyectos\\\\20261TicketSeller\\\\src\\\\test\\\\java\\\\com\\\\ticketseller\\\\application\\\\inventario\\\\ReservarAsientoUseCaseTest.java\")",
       "Bash(./gradlew compileJava compileTestJava)",
-      "Bash(./gradlew compileJava compileTestJava --no-daemon)"
+      "Bash(./gradlew compileJava compileTestJava --no-daemon)",
+      "PowerShell(cd \"C:\\\\Users\\\\USUARIO\\\\Documents\\\\Mis GitProyectos\\\\20261TicketSeller\"; Get-ChildItem -Recurse -Directory | Select-Object -First 50 FullName | ForEach-Object { $_.FullName })",
+      "PowerShell(cd \"C:\\\\Users\\\\USUARIO\\\\Documents\\\\Mis GitProyectos\\\\20261TicketSeller\"; Get-ChildItem -Path \"src/main/java/com/ticketseller\" -Recurse -Directory | Select-Object -First 30 | ForEach-Object { $_.Name })",
+      "Bash(grep -v \"//\")"
     ]
   }
 }
