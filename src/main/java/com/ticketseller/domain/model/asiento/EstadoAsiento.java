@@ -7,5 +7,6 @@ public enum EstadoAsiento {
     VENDIDO,
     OCUPADO,
     MANTENIMIENTO,
-    ANULADO
+    ANULADO,
+    INACTIVO
 }

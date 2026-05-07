@@ -27,7 +27,7 @@ public class MarcarEspacioVacioUseCase {
 
     private Asiento marcarComoEnMantenimiento(Asiento asiento) {
         return asiento.toBuilder()
-                .estado(EstadoAsiento.MANTENIMIENTO)
+                .estado(EstadoAsiento.INACTIVO)
                 .build();
     }
 }
