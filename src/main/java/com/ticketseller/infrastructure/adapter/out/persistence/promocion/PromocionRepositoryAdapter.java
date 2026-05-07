@@ -29,4 +29,9 @@ public class PromocionRepositoryAdapter implements PromocionRepositoryPort {
     public Flux<Promocion> buscarActivasPorEvento(UUID eventoId) {
         return repository.findActivasByEventoId(eventoId).map(mapper::toDomain);
     }
+
+    @Override
+    public Flux<Promocion> buscarPorEvento(UUID eventoId) {
+        return repository.findByEventoId(eventoId).map(mapper::toDomain);
+    }
 }

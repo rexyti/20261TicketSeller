@@ -13,4 +13,6 @@ public interface PromocionRepositoryPort {
     Mono<Promocion> buscarPorId(UUID id);
 
     Flux<Promocion> buscarActivasPorEvento(UUID eventoId);
+
+    Flux<Promocion> buscarPorEvento(UUID eventoId);
 }

@@ -60,13 +60,17 @@ import com.ticketseller.domain.exception.zona.ZonaInvalidaException;
 import com.ticketseller.domain.exception.zona.ZonaNombreDuplicadoException;
 import com.ticketseller.domain.exception.zona.ZonaNotFoundException;
 import com.ticketseller.domain.exception.zona.ZonaSinPrecioException;
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import org.springframework.core.codec.DecodingException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.support.WebExchangeBindException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.server.ServerWebInputException;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
@@ -222,6 +226,24 @@ public class GlobalExceptionHandler {
                 .map(fieldError -> fieldError.getField() + ": " + fieldError.getDefaultMessage())
                 .collect(Collectors.joining(", "));
         return error("VALIDATION_ERROR", message, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(ServerWebInputException.class)
+    public ResponseEntity<ApiErrorResponse> inputInvalido(ServerWebInputException ex) {
+        if (ex.getCause() instanceof DecodingException decoding
+                && decoding.getCause() instanceof InvalidFormatException jackson
+                && jackson.getTargetType().isEnum()) {
+            String campo = jackson.getPath().isEmpty() ? "campo desconocido"
+                    : jackson.getPath().get(0).getFieldName();
+            String permitidos = Arrays.stream(jackson.getTargetType().getEnumConstants())
+                    .map(Object::toString)
+                    .collect(Collectors.joining(", "));
+            return error("VALIDATION_ERROR",
+                    "Valor inválido '%s' para '%s'. Valores permitidos: %s"
+                            .formatted(jackson.getValue(), campo, permitidos),
+                    HttpStatus.BAD_REQUEST);
+        }
+        return error("VALIDATION_ERROR", "Solicitud con formato inválido", HttpStatus.BAD_REQUEST);
     }
 
     private ResponseEntity<ApiErrorResponse> error(String code, String message, HttpStatus status) {
