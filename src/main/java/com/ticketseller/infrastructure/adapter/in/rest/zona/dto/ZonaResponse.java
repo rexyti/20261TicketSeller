@@ -6,5 +6,6 @@ public record ZonaResponse(
                 UUID id,
                 UUID recintoId,
                 String nombre,
-                Integer capacidad) {
+                Integer capacidad,
+                UUID tipoAsientoId) {
 }

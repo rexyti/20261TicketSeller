@@ -1,9 +1,10 @@
 package com.ticketseller.application.compuerta;
 
-import com.ticketseller.domain.exception.recinto.RecintoNotFoundException;
-import com.ticketseller.domain.exception.zona.ZonaCapacidadExcedidaException;
 import com.ticketseller.domain.exception.compuerta.CompuertaInvalidaException;
+import com.ticketseller.domain.exception.compuerta.CompuertaLimiteExcedidoException;
+import com.ticketseller.domain.exception.recinto.RecintoNotFoundException;
 import com.ticketseller.domain.exception.zona.ZonaNotFoundException;
+import com.ticketseller.domain.model.recinto.Recinto;
 import com.ticketseller.domain.model.zona.Compuerta;
 import com.ticketseller.domain.repository.CompuertaRepositoryPort;
 import com.ticketseller.domain.repository.RecintoRepositoryPort;
@@ -36,7 +37,31 @@ public class CrearCompuertaUseCase {
         }
         return zonaRepositoryPort.buscarPorId(request.getZonaId())
                 .switchIfEmpty(Mono.error(new ZonaNotFoundException("La zona indicada no existe")))
-                .flatMap(zona -> compuertaRepositoryPort.guardar(buildCompuerta(recintoId, request, false)));
+                .flatMap(zona -> validarLimiteCompuertas(recintoId)
+                        .then(Mono.defer(() -> compuertaRepositoryPort.guardar(buildCompuerta(recintoId, request, false)))));
+    }
+
+    private Mono<Void> validarLimiteCompuertas(UUID recintoId) {
+        return recintoRepositoryPort.buscarPorId(recintoId)
+                .switchIfEmpty(Mono.error(new RecintoNotFoundException("Recinto no encontrado: " + recintoId)))
+                .flatMap(recinto -> compuertaRepositoryPort.buscarPorRecintoId(recintoId)
+                        .filter(this::compuertaConZona)
+                        .count()
+                        .flatMap(asignadas -> cantidadMaximaCompuertasNoSuperada(asignadas, recinto)
+                            ? Mono.empty()
+                            : Mono.error(new CompuertaLimiteExcedidoException(
+                            "El recinto ya tiene %d compuertas asignadas, límite máximo: %d"
+                            .formatted(asignadas, recinto.getCompuertasIngreso())))
+                        ));
+
+    }
+
+    private boolean compuertaConZona(Compuerta compuerta){
+        return compuerta.getZonaId() != null;
+    }
+
+    private boolean cantidadMaximaCompuertasNoSuperada(Long compuertas, Recinto recinto){
+        return compuertas < recinto.getCompuertasIngreso();
     }
 
     private boolean compuertaSinZona(Compuerta request) {

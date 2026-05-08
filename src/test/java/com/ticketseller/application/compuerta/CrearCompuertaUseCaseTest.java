@@ -1,6 +1,7 @@
 package com.ticketseller.application.compuerta;
 
 import com.ticketseller.domain.exception.compuerta.CompuertaInvalidaException;
+import com.ticketseller.domain.exception.compuerta.CompuertaLimiteExcedidoException;
 import com.ticketseller.domain.model.zona.Compuerta;
 import com.ticketseller.domain.model.recinto.Recinto;
 import com.ticketseller.domain.model.zona.Zona;
@@ -8,6 +9,7 @@ import com.ticketseller.domain.repository.CompuertaRepositoryPort;
 import com.ticketseller.domain.repository.RecintoRepositoryPort;
 import com.ticketseller.domain.repository.ZonaRepositoryPort;
 import org.junit.jupiter.api.Test;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -46,8 +48,9 @@ class CrearCompuertaUseCaseTest {
         ZonaRepositoryPort zonaPort = mock(ZonaRepositoryPort.class);
         CrearCompuertaUseCase useCase = new CrearCompuertaUseCase(compuertaPort, recintoPort, zonaPort);
 
-        when(recintoPort.buscarPorId(recintoId)).thenReturn(Mono.just(Recinto.builder().id(recintoId).build()));
+        when(recintoPort.buscarPorId(recintoId)).thenReturn(Mono.just(Recinto.builder().id(recintoId).compuertasIngreso(5).build()));
         when(zonaPort.buscarPorId(zonaId)).thenReturn(Mono.just(Zona.builder().id(zonaId).recintoId(recintoId).build()));
+        when(compuertaPort.buscarPorRecintoId(recintoId)).thenReturn(Flux.empty());
         when(compuertaPort.guardar(any(Compuerta.class))).thenAnswer(i -> Mono.just(i.getArgument(0)));
 
         StepVerifier.create(useCase.ejecutar(recintoId, Compuerta.builder().nombre("Puerta B").zonaId(zonaId).build()))
@@ -69,5 +72,23 @@ class CrearCompuertaUseCaseTest {
 
         verify(recintoPort, never()).buscarPorId(any());
     }
-}
 
+    @Test
+    void deberiaFallarCuandoSeExcedeLimiteDeCompuertas() {
+        UUID recintoId = UUID.randomUUID();
+        UUID zonaId = UUID.randomUUID();
+        CompuertaRepositoryPort compuertaPort = mock(CompuertaRepositoryPort.class);
+        RecintoRepositoryPort recintoPort = mock(RecintoRepositoryPort.class);
+        ZonaRepositoryPort zonaPort = mock(ZonaRepositoryPort.class);
+        CrearCompuertaUseCase useCase = new CrearCompuertaUseCase(compuertaPort, recintoPort, zonaPort);
+
+        Compuerta asignada = Compuerta.builder().id(UUID.randomUUID()).recintoId(recintoId).zonaId(zonaId).esGeneral(false).build();
+        when(recintoPort.buscarPorId(recintoId)).thenReturn(Mono.just(Recinto.builder().id(recintoId).compuertasIngreso(1).build()));
+        when(zonaPort.buscarPorId(zonaId)).thenReturn(Mono.just(Zona.builder().id(zonaId).recintoId(recintoId).build()));
+        when(compuertaPort.buscarPorRecintoId(recintoId)).thenReturn(Flux.just(asignada));
+
+        StepVerifier.create(useCase.ejecutar(recintoId, Compuerta.builder().nombre("Puerta C").zonaId(zonaId).build()))
+                .expectError(CompuertaLimiteExcedidoException.class)
+                .verify();
+    }
+}

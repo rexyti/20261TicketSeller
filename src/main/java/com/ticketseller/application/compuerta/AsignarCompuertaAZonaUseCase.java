@@ -1,7 +1,6 @@
 package com.ticketseller.application.compuerta;
 
 import com.ticketseller.domain.exception.compuerta.CompuertaNotFoundException;
-import com.ticketseller.domain.exception.recinto.RecintoNotFoundException;
 import com.ticketseller.domain.exception.zona.ZonaNotFoundException;
 import com.ticketseller.domain.model.zona.Compuerta;
 import com.ticketseller.domain.repository.CompuertaRepositoryPort;

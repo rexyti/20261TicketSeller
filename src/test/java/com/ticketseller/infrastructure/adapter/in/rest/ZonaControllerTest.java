@@ -50,7 +50,7 @@ class ZonaControllerTest {
                 .nombre("Platea")
                 .capacidad(100)
                 .build();
-        ZonaResponse response = new ZonaResponse(zonaSaved.getId(), recintoId, "Platea", 100);
+        ZonaResponse response = new ZonaResponse(zonaSaved.getId(), recintoId, "Platea", 100, null);
 
         when(zonaRestMapper.toDomain(any(CrearZonaRequest.class))).thenReturn(zonaDomain);
         when(crearZonaUseCase.ejecutar(recintoId, zonaDomain)).thenReturn(Mono.just(zonaSaved));
@@ -93,7 +93,7 @@ class ZonaControllerTest {
                 .nombre("VIP")
                 .capacidad(50)
                 .build();
-        ZonaResponse response = new ZonaResponse(zona.getId(), recintoId, "VIP", 50);
+        ZonaResponse response = new ZonaResponse(zona.getId(), recintoId, "VIP", 50, null);
 
         when(listarZonasUseCase.ejecutar(recintoId)).thenReturn(Flux.just(zona));
         when(zonaRestMapper.toResponse(zona)).thenReturn(response);

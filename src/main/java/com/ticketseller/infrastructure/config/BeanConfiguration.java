@@ -550,8 +550,9 @@ public class BeanConfiguration {
 
     @Bean
     public ConsultarEstructuraRecintoUseCase consultarEstructuraRecintoUseCase(RecintoRepositoryPort recintoRepositoryPort,
-                                                                                ZonaRepositoryPort zonaRepositoryPort) {
-        return new ConsultarEstructuraRecintoUseCase(recintoRepositoryPort, zonaRepositoryPort);
+                                                                                ZonaRepositoryPort zonaRepositoryPort,
+                                                                                CompuertaRepositoryPort compuertaRepositoryPort) {
+        return new ConsultarEstructuraRecintoUseCase(recintoRepositoryPort, zonaRepositoryPort, compuertaRepositoryPort);
     }
 
     @Bean

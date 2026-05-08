@@ -11,6 +11,7 @@ public interface ZonaRestMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "recintoId", ignore = true)
+    @Mapping(target = "tipoAsientoId", ignore = true)
     Zona toDomain(CrearZonaRequest request);
 
     ZonaResponse toResponse(Zona zona);
