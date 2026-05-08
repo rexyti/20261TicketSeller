@@ -1,5 +1,6 @@
 package com.ticketseller.application.bloqueos;
 
+import com.ticketseller.domain.exception.asiento.AsientoNotFoundException;
 import com.ticketseller.domain.exception.bloqueos.AsientoOcupadoException;
 import com.ticketseller.domain.model.asiento.Asiento;
 import com.ticketseller.domain.model.asiento.EstadoAsiento;
@@ -24,12 +25,12 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-class CrearCortesiaUseCaseTest {
+class CrearCortesiaConAsientoUseCaseTest {
 
     private AsientoRepositoryPort asientoRepositoryPort;
     private CortesiaRepositoryPort cortesiaRepositoryPort;
     private TicketRepositoryPort ticketRepositoryPort;
-    private CrearCortesiaUseCase useCase;
+    private CrearCortesiaConAsientoUseCase useCase;
 
     private final UUID eventoId = UUID.randomUUID();
     private final UUID asientoId = UUID.randomUUID();
@@ -40,11 +41,11 @@ class CrearCortesiaUseCaseTest {
         asientoRepositoryPort = mock(AsientoRepositoryPort.class);
         cortesiaRepositoryPort = mock(CortesiaRepositoryPort.class);
         ticketRepositoryPort = mock(TicketRepositoryPort.class);
-        useCase = new CrearCortesiaUseCase(asientoRepositoryPort, cortesiaRepositoryPort, ticketRepositoryPort);
+        useCase = new CrearCortesiaConAsientoUseCase(asientoRepositoryPort, cortesiaRepositoryPort, ticketRepositoryPort);
     }
 
     @Test
-    void cortesiaConAsientoDisponibleCreaTicketYBloquea() {
+    void asientoDisponibleCreaTicketBloqueasientoYGuardaCortesia() {
         Asiento disponible = buildAsiento(asientoId, EstadoAsiento.DISPONIBLE);
         Asiento bloqueado = disponible.toBuilder().estado(EstadoAsiento.BLOQUEADO).build();
         Ticket ticket = buildTicket();
@@ -63,24 +64,11 @@ class CrearCortesiaUseCaseTest {
 
         verify(asientoRepositoryPort).guardar(any());
         verify(ticketRepositoryPort).guardar(any());
+        verify(cortesiaRepositoryPort).guardar(any());
     }
 
     @Test
-    void cortesiaSinAsientoNoCrearTicket() {
-        Cortesia cortesia = buildCortesia(null, null);
-        when(cortesiaRepositoryPort.guardar(any())).thenReturn(Mono.just(cortesia));
-
-        StepVerifier.create(useCase.ejecutar(eventoId, "Prensa ABC", CategoriaCortesia.PRENSA, null))
-                .expectNextMatches(c -> EstadoCortesia.GENERADA.equals(c.getEstado())
-                        && c.getCodigoUnico() != null)
-                .verifyComplete();
-
-        verify(asientoRepositoryPort, never()).buscarPorId(any());
-        verify(ticketRepositoryPort, never()).guardar(any());
-    }
-
-    @Test
-    void cortesiaConAsientoOcupadoLanzaExcepcion() {
+    void asientoOcupadoLanzaExcepcion() {
         Asiento ocupado = buildAsiento(asientoId, EstadoAsiento.OCUPADO);
         when(asientoRepositoryPort.buscarPorId(asientoId)).thenReturn(Mono.just(ocupado));
 
@@ -89,6 +77,18 @@ class CrearCortesiaUseCaseTest {
                 .verify();
 
         verify(asientoRepositoryPort, never()).guardar(any());
+        verify(ticketRepositoryPort, never()).guardar(any());
+        verify(cortesiaRepositoryPort, never()).guardar(any());
+    }
+
+    @Test
+    void asientoNoEncontradoLanzaExcepcion() {
+        when(asientoRepositoryPort.buscarPorId(asientoId)).thenReturn(Mono.empty());
+
+        StepVerifier.create(useCase.ejecutar(eventoId, "Invitado", CategoriaCortesia.ARTISTA, asientoId))
+                .expectError(AsientoNotFoundException.class)
+                .verify();
+
         verify(ticketRepositoryPort, never()).guardar(any());
         verify(cortesiaRepositoryPort, never()).guardar(any());
     }
@@ -113,7 +113,7 @@ class CrearCortesiaUseCaseTest {
                 .id(UUID.randomUUID())
                 .eventoId(eventoId)
                 .asientoId(asientoIdRef)
-                .destinatario("Invitado")
+                .destinatario("Invitado VIP")
                 .categoria(CategoriaCortesia.PATROCINADOR)
                 .codigoUnico(UUID.randomUUID().toString())
                 .ticketId(ticketIdRef)

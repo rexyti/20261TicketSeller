@@ -1,7 +1,6 @@
 package com.ticketseller.domain.repository;
 
 import com.ticketseller.domain.model.recinto.CategoriaRecinto;
-import com.ticketseller.domain.model.recinto.ConfiguracionLiquidacion;
 import com.ticketseller.domain.model.recinto.Recinto;
 import com.ticketseller.domain.shared.Pagina;
 import reactor.core.publisher.Flux;
@@ -34,8 +33,6 @@ public interface RecintoRepositoryPort {
     Flux<Recinto> buscarPorCiudad(String ciudad);
 
     Mono<Boolean> tieneTicketsVendidos(UUID recintoId);
-
-    Mono<ConfiguracionLiquidacion> buscarConfiguracionLiquidacion(UUID recintoId);
 }
 
 

@@ -4,6 +4,7 @@ import com.ticketseller.domain.exception.liquidacion.ModeloNegocioInvalidoExcept
 import com.ticketseller.domain.exception.liquidacion.MontoFijoInvalidoException;
 import com.ticketseller.domain.exception.recinto.RecintoNoCategorizadoException;
 import com.ticketseller.domain.exception.recinto.RecintoNotFoundException;
+import com.ticketseller.domain.model.recinto.ConfiguracionLiquidacion;
 import com.ticketseller.domain.model.recinto.ModeloNegocio;
 import com.ticketseller.domain.model.recinto.Recinto;
 import com.ticketseller.domain.repository.RecintoRepositoryPort;
@@ -29,9 +30,12 @@ public class ConfigurarModeloNegocioUseCase {
     }
 
     private Recinto buildRecintoActualizado(Recinto recinto, ModeloNegocio modelo, BigDecimal montoFijo) {
-        return recinto.toBuilder()
+        ConfiguracionLiquidacion config = ConfiguracionLiquidacion.builder()
                 .modeloNegocio(modelo)
                 .montoFijo(ModeloNegocio.TARIFA_PLANA.equals(modelo) ? montoFijo : null)
+                .build();
+        return recinto.toBuilder()
+                .configuracionLiquidacion(config)
                 .build();
     }
 

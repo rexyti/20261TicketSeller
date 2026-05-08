@@ -6,7 +6,8 @@ import com.ticketseller.infrastructure.adapter.out.persistence.asientohold.Asien
 import com.ticketseller.infrastructure.adapter.out.persistence.asientohold.mapper.AsientoHoldPersistenceMapper;
 import com.ticketseller.application.bloqueos.BloquearAsientosUseCase;
 import com.ticketseller.application.bloqueos.ConsultarPanelBloqueosUseCase;
-import com.ticketseller.application.bloqueos.CrearCortesiaUseCase;
+import com.ticketseller.application.bloqueos.CrearCortesiaConAsientoUseCase;
+import com.ticketseller.application.bloqueos.CrearCortesiaGeneralUseCase;
 import com.ticketseller.application.bloqueos.EditarDestinatarioBloqueoUseCase;
 import com.ticketseller.application.bloqueos.LiberarBloqueoUseCase;
 import com.ticketseller.application.inventario.LiberarHoldUseCase;
@@ -433,8 +434,9 @@ public class BeanConfiguration {
 
     @Bean
     public CancelarEventoUseCase cancelarEventoUseCase(EventoRepositoryPort eventoRepositoryPort,
-                                                       CancelacionEventoRepositoryPort cancelacionEventoRepositoryPort) {
-        return new CancelarEventoUseCase(eventoRepositoryPort, cancelacionEventoRepositoryPort);
+                                                       CancelacionEventoRepositoryPort cancelacionEventoRepositoryPort,
+                                                       ProcesarReembolsoMasivoUseCase procesarReembolsoMasivoUseCase) {
+        return new CancelarEventoUseCase(eventoRepositoryPort, cancelacionEventoRepositoryPort, procesarReembolsoMasivoUseCase);
     }
 
     @Bean
@@ -550,8 +552,9 @@ public class BeanConfiguration {
 
     @Bean
     public ConsultarEstructuraRecintoUseCase consultarEstructuraRecintoUseCase(RecintoRepositoryPort recintoRepositoryPort,
-                                                                                ZonaRepositoryPort zonaRepositoryPort) {
-        return new ConsultarEstructuraRecintoUseCase(recintoRepositoryPort, zonaRepositoryPort);
+                                                                                ZonaRepositoryPort zonaRepositoryPort,
+                                                                                CompuertaRepositoryPort compuertaRepositoryPort) {
+        return new ConsultarEstructuraRecintoUseCase(recintoRepositoryPort, zonaRepositoryPort, compuertaRepositoryPort);
     }
 
     @Bean
@@ -776,11 +779,18 @@ public class BeanConfiguration {
     }
 
     @Bean
-    public CrearCortesiaUseCase crearCortesiaUseCase(
+    public CrearCortesiaConAsientoUseCase crearCortesiaConAsientoUseCase(
             com.ticketseller.domain.repository.AsientoRepositoryPort asientoRepositoryPort,
             CortesiaRepositoryPort cortesiaRepositoryPort,
             com.ticketseller.domain.repository.TicketRepositoryPort ticketRepositoryPort) {
-        return new CrearCortesiaUseCase(asientoRepositoryPort, cortesiaRepositoryPort, ticketRepositoryPort);
+        return new CrearCortesiaConAsientoUseCase(asientoRepositoryPort, cortesiaRepositoryPort, ticketRepositoryPort);
+    }
+
+    @Bean
+    public CrearCortesiaGeneralUseCase crearCortesiaGeneralUseCase(
+            CortesiaRepositoryPort cortesiaRepositoryPort,
+            com.ticketseller.domain.repository.TicketRepositoryPort ticketRepositoryPort) {
+        return new CrearCortesiaGeneralUseCase(cortesiaRepositoryPort, ticketRepositoryPort);
     }
 
     @Bean

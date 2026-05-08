@@ -20,12 +20,13 @@ class AsignarCompuertaAZonaUseCaseTest {
     void deberiaAsignarCompuertaAZona() {
         UUID compuertaId = UUID.randomUUID();
         UUID zonaId = UUID.randomUUID();
+        UUID recintoId = UUID.randomUUID();
         CompuertaRepositoryPort compuertaPort = mock(CompuertaRepositoryPort.class);
         ZonaRepositoryPort zonaPort = mock(ZonaRepositoryPort.class);
         AsignarCompuertaAZonaUseCase useCase = new AsignarCompuertaAZonaUseCase(compuertaPort, zonaPort);
 
         when(compuertaPort.buscarPorId(compuertaId)).thenReturn(Mono.just(Compuerta.builder().id(compuertaId).esGeneral(true).build()));
-        when(zonaPort.buscarPorId(zonaId)).thenReturn(Mono.just(Zona.builder().id(zonaId).build()));
+        when(zonaPort.buscarPorId(zonaId)).thenReturn(Mono.just(Zona.builder().id(zonaId).recintoId(recintoId).build()));
         when(compuertaPort.guardar(any(Compuerta.class))).thenAnswer(i -> Mono.just(i.getArgument(0)));
 
         StepVerifier.create(useCase.ejecutar(compuertaId, zonaId))
@@ -33,4 +34,3 @@ class AsignarCompuertaAZonaUseCaseTest {
                 .verifyComplete();
     }
 }
-

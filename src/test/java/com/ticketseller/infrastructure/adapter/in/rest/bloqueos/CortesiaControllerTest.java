@@ -1,6 +1,7 @@
 package com.ticketseller.infrastructure.adapter.in.rest.bloqueos;
 
-import com.ticketseller.application.bloqueos.CrearCortesiaUseCase;
+import com.ticketseller.application.bloqueos.CrearCortesiaConAsientoUseCase;
+import com.ticketseller.application.bloqueos.CrearCortesiaGeneralUseCase;
 import com.ticketseller.domain.exception.bloqueos.AsientoOcupadoException;
 import com.ticketseller.domain.model.bloqueos.CategoriaCortesia;
 import com.ticketseller.domain.model.bloqueos.Cortesia;
@@ -31,21 +32,25 @@ class CortesiaControllerTest {
     private WebTestClient webTestClient;
 
     @MockBean
-    private CrearCortesiaUseCase crearCortesiaUseCase;
+    private CrearCortesiaConAsientoUseCase crearCortesiaConAsientoUseCase;
+
+    @MockBean
+    private CrearCortesiaGeneralUseCase crearCortesiaGeneralUseCase;
 
     @MockBean
     private CortesiaRestMapper cortesiaRestMapper;
 
     private final UUID eventoId = UUID.randomUUID();
     private final UUID asientoId = UUID.randomUUID();
+    private final UUID zonaId = UUID.randomUUID();
     private final UUID cortesiaId = UUID.randomUUID();
 
     @Test
-    void postCortesiaConAsientoRetorna201ConCodigoUnico() {
+    void postCortesiaConAsientoRetorna201() {
         Cortesia cortesia = buildCortesia(asientoId);
         CortesiaResponse response = buildResponse(cortesia);
 
-        when(crearCortesiaUseCase.ejecutar(eq(eventoId), eq("Patrocinador VIP"),
+        when(crearCortesiaConAsientoUseCase.ejecutar(eq(eventoId), eq("Patrocinador VIP"),
                 eq(CategoriaCortesia.PATROCINADOR), eq(asientoId)))
                 .thenReturn(Mono.just(cortesia));
         when(cortesiaRestMapper.toCortesiaResponse(cortesia)).thenReturn(response);
@@ -55,7 +60,7 @@ class CortesiaControllerTest {
                 """.formatted(asientoId);
 
         webTestClient.post()
-                .uri("/api/v1/admin/eventos/{eventoId}/cortesias", eventoId)
+                .uri("/api/v1/admin/eventos/{eventoId}/cortesias/con-asiento", eventoId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(body)
                 .exchange()
@@ -66,21 +71,21 @@ class CortesiaControllerTest {
     }
 
     @Test
-    void postCortesiaSinAsientoRetorna201ConAccesoGeneral() {
+    void postCortesiaGeneralRetorna201() {
         Cortesia cortesia = buildCortesia(null);
         CortesiaResponse response = buildResponse(cortesia);
 
-        when(crearCortesiaUseCase.ejecutar(eq(eventoId), eq("Prensa ABC"),
-                eq(CategoriaCortesia.PRENSA), eq(null)))
+        when(crearCortesiaGeneralUseCase.ejecutar(eq(eventoId), eq("Prensa ABC"),
+                eq(CategoriaCortesia.PRENSA), eq(zonaId)))
                 .thenReturn(Mono.just(cortesia));
         when(cortesiaRestMapper.toCortesiaResponse(cortesia)).thenReturn(response);
 
         String body = """
-                {"destinatario":"Prensa ABC","categoria":"PRENSA"}
-                """;
+                {"destinatario":"Prensa ABC","categoria":"PRENSA","zonaId":"%s"}
+                """.formatted(zonaId);
 
         webTestClient.post()
-                .uri("/api/v1/admin/eventos/{eventoId}/cortesias", eventoId)
+                .uri("/api/v1/admin/eventos/{eventoId}/cortesias/general", eventoId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(body)
                 .exchange()
@@ -90,8 +95,32 @@ class CortesiaControllerTest {
     }
 
     @Test
-    void postCortesiaAsientoOcupadoRetorna409() {
-        when(crearCortesiaUseCase.ejecutar(eq(eventoId), any(), any(), eq(asientoId)))
+    void postCortesiaGeneralSinZonaRetorna201() {
+        Cortesia cortesia = buildCortesia(null);
+        CortesiaResponse response = buildResponse(cortesia);
+
+        when(crearCortesiaGeneralUseCase.ejecutar(eq(eventoId), eq("Artista Invitado"),
+                eq(CategoriaCortesia.ARTISTA), eq(null)))
+                .thenReturn(Mono.just(cortesia));
+        when(cortesiaRestMapper.toCortesiaResponse(cortesia)).thenReturn(response);
+
+        String body = """
+                {"destinatario":"Artista Invitado","categoria":"ARTISTA"}
+                """;
+
+        webTestClient.post()
+                .uri("/api/v1/admin/eventos/{eventoId}/cortesias/general", eventoId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(body)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectBody()
+                .jsonPath("$.codigoUnico").isNotEmpty();
+    }
+
+    @Test
+    void postCortesiaConAsientoOcupadoRetorna409() {
+        when(crearCortesiaConAsientoUseCase.ejecutar(eq(eventoId), any(), any(), eq(asientoId)))
                 .thenReturn(Mono.error(new AsientoOcupadoException(asientoId)));
 
         String body = """
@@ -99,7 +128,7 @@ class CortesiaControllerTest {
                 """.formatted(asientoId);
 
         webTestClient.post()
-                .uri("/api/v1/admin/eventos/{eventoId}/cortesias", eventoId)
+                .uri("/api/v1/admin/eventos/{eventoId}/cortesias/con-asiento", eventoId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(body)
                 .exchange()

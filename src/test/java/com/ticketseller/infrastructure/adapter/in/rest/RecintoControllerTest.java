@@ -13,6 +13,7 @@ import com.ticketseller.domain.exception.recinto.RecintoInvalidoException;
 import com.ticketseller.domain.exception.recinto.RecintoNotFoundException;
 import com.ticketseller.domain.model.recinto.CategoriaRecinto;
 import com.ticketseller.domain.model.recinto.Recinto;
+import com.ticketseller.domain.model.zona.Compuerta;
 import com.ticketseller.domain.model.zona.Zona;
 import com.ticketseller.domain.shared.Pagina;
 import com.ticketseller.infrastructure.adapter.in.rest.recinto.dto.CrearRecintoRequest;
@@ -390,8 +391,9 @@ class RecintoControllerTest {
         List<Zona> zonas = List.of();
         RecintoEstructuraResponse estructura = new RecintoEstructuraResponse(id, List.of());
 
-        when(consultarEstructuraRecintoUseCase.ejecutar(id)).thenReturn(Mono.just(Tuples.of(recinto, zonas)));
-        when(recintoRestMapper.toEstructuraResponse(recinto, zonas)).thenReturn(estructura);
+        List<Compuerta> compuertas = List.of();
+        when(consultarEstructuraRecintoUseCase.ejecutar(id)).thenReturn(Mono.just(Tuples.of(recinto, zonas, compuertas)));
+        when(recintoRestMapper.toEstructuraResponse(recinto, zonas, compuertas)).thenReturn(estructura);
 
         webTestClient.get()
                 .uri("/api/v1/recintos/{id}", id)

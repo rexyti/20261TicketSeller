@@ -2,7 +2,6 @@ package com.ticketseller.application.liquidacion;
 
 import com.ticketseller.domain.exception.liquidacion.LiquidacionNoConfiguradaException;
 import com.ticketseller.domain.exception.recinto.RecintoNotFoundException;
-import com.ticketseller.domain.model.recinto.CategoriaRecinto;
 import com.ticketseller.domain.model.recinto.ConfiguracionLiquidacion;
 import com.ticketseller.domain.model.recinto.ModeloNegocio;
 import com.ticketseller.domain.model.recinto.Recinto;
@@ -25,15 +24,13 @@ class ConsultarModeloNegocioUseCaseTest {
     @Test
     void deberiaRetornarConfiguracionCuandoModeloConfigurado() {
         UUID recintoId = UUID.randomUUID();
-        Recinto recinto = Recinto.builder().id(recintoId).modeloNegocio(ModeloNegocio.TARIFA_PLANA).build();
         ConfiguracionLiquidacion config = ConfiguracionLiquidacion.builder()
-                .recintoId(recintoId)
                 .modeloNegocio(ModeloNegocio.TARIFA_PLANA)
                 .montoFijo(BigDecimal.valueOf(5000))
                 .build();
+        Recinto recinto = Recinto.builder().id(recintoId).configuracionLiquidacion(config).build();
 
         when(recintoRepositoryPort.buscarPorId(recintoId)).thenReturn(Mono.just(recinto));
-        when(recintoRepositoryPort.buscarConfiguracionLiquidacion(recintoId)).thenReturn(Mono.just(config));
 
         StepVerifier.create(useCase.ejecutar(recintoId))
                 .assertNext(result -> {
@@ -46,20 +43,16 @@ class ConsultarModeloNegocioUseCaseTest {
     @Test
     void deberiaRetornarConfiguracionRepartoIngresos() {
         UUID recintoId = UUID.randomUUID();
-        Recinto recinto = Recinto.builder().id(recintoId).modeloNegocio(ModeloNegocio.REPARTO_INGRESOS).build();
         ConfiguracionLiquidacion config = ConfiguracionLiquidacion.builder()
-                .recintoId(recintoId)
                 .modeloNegocio(ModeloNegocio.REPARTO_INGRESOS)
-                .tipoRecinto(CategoriaRecinto.ESTADIO)
                 .build();
+        Recinto recinto = Recinto.builder().id(recintoId).configuracionLiquidacion(config).build();
 
         when(recintoRepositoryPort.buscarPorId(recintoId)).thenReturn(Mono.just(recinto));
-        when(recintoRepositoryPort.buscarConfiguracionLiquidacion(recintoId)).thenReturn(Mono.just(config));
 
         StepVerifier.create(useCase.ejecutar(recintoId))
                 .assertNext(result -> {
                     assert result.getModeloNegocio().equals(ModeloNegocio.REPARTO_INGRESOS);
-                    assert result.getTipoRecinto().equals(CategoriaRecinto.ESTADIO);
                 })
                 .verifyComplete();
     }
@@ -70,7 +63,6 @@ class ConsultarModeloNegocioUseCaseTest {
         Recinto recinto = Recinto.builder().id(recintoId).build();
 
         when(recintoRepositoryPort.buscarPorId(recintoId)).thenReturn(Mono.just(recinto));
-        when(recintoRepositoryPort.buscarConfiguracionLiquidacion(recintoId)).thenReturn(Mono.empty());
 
         StepVerifier.create(useCase.ejecutar(recintoId))
                 .expectError(LiquidacionNoConfiguradaException.class)

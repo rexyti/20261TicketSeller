@@ -145,7 +145,7 @@ public class RecintoController {
     @GetMapping("/{id}")
     public Mono<ResponseEntity<RecintoEstructuraResponse>> consultarEstructura(@PathVariable UUID id) {
         return consultarEstructuraRecintoUseCase.ejecutar(id)
-                .map(tuple -> recintoRestMapper.toEstructuraResponse(tuple.getT1(), tuple.getT2()))
+                .map(tuple -> recintoRestMapper.toEstructuraResponse(tuple.getT1(), tuple.getT2(), tuple.getT3()))
                 .map(ResponseEntity::ok);
     }
 }

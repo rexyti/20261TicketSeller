@@ -19,12 +19,14 @@ import java.util.UUID;
 public interface LiquidacionRestMapper {
 
     @Mapping(source = "modeloNegocio", target = "modelo")
-    @Mapping(source = "tipoRecinto", target = "tipoRecinto")
+    @Mapping(target = "tipoRecinto", ignore = true)
+    @Mapping(target = "recintoId", ignore = true)
     ModeloNegocioResponse toModeloNegocioResponse(ConfiguracionLiquidacion config);
 
     @Mapping(source = "id", target = "recintoId")
-    @Mapping(source = "modeloNegocio", target = "modelo")
+    @Mapping(source = "configuracionLiquidacion.modeloNegocio", target = "modelo")
     @Mapping(source = "categoria", target = "tipoRecinto")
+    @Mapping(source = "configuracionLiquidacion.montoFijo", target = "montoFijo")
     ModeloNegocioResponse toModeloNegocioResponseFromRecinto(Recinto recinto);
 
     CondicionTicketResponse toCondicionResponse(SnapshotLiquidacion.CondicionLiquidacion condicion);
