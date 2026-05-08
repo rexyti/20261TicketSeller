@@ -17,7 +17,7 @@ public class ConsultarModeloNegocioUseCase {
     public Mono<ConfiguracionLiquidacion> ejecutar(UUID recintoId) {
         return recintoRepositoryPort.buscarPorId(recintoId)
                 .switchIfEmpty(Mono.error(new RecintoNotFoundException("Recinto no encontrado con id: " + recintoId)))
-                .flatMap(recinto -> recintoRepositoryPort.buscarConfiguracionLiquidacion(recintoId)
+                .flatMap(recinto -> Mono.justOrEmpty(recinto.getConfiguracionLiquidacion())
                         .switchIfEmpty(Mono.error(new LiquidacionNoConfiguradaException(
                                 "El recinto no tiene modelo de negocio configurado"))));
     }

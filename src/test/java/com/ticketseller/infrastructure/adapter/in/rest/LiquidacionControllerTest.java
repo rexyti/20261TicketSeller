@@ -62,7 +62,6 @@ class LiquidacionControllerTest {
     void getModeloNegocioTarifaPlanaRetorna200ConMontoFijo() {
         UUID recintoId = UUID.randomUUID();
         ConfiguracionLiquidacion config = ConfiguracionLiquidacion.builder()
-                .recintoId(recintoId)
                 .modeloNegocio(ModeloNegocio.TARIFA_PLANA)
                 .montoFijo(BigDecimal.valueOf(5000))
                 .build();
@@ -89,9 +88,7 @@ class LiquidacionControllerTest {
     void getModeloNegocioRepartoIngresosRetorna200ConTipoRecinto() {
         UUID recintoId = UUID.randomUUID();
         ConfiguracionLiquidacion config = ConfiguracionLiquidacion.builder()
-                .recintoId(recintoId)
                 .modeloNegocio(ModeloNegocio.REPARTO_INGRESOS)
-                .tipoRecinto(CategoriaRecinto.ESTADIO)
                 .build();
         ModeloNegocioResponse response = new ModeloNegocioResponse(
                 recintoId,

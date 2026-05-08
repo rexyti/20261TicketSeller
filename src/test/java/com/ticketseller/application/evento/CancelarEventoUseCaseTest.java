@@ -1,5 +1,6 @@
 package com.ticketseller.application.evento;
 
+import com.ticketseller.application.postventa.ProcesarReembolsoMasivoUseCase;
 import com.ticketseller.domain.exception.evento.EventoNotFoundException;
 import com.ticketseller.domain.model.evento.CancelacionEvento;
 import com.ticketseller.domain.model.evento.EstadoEvento;
@@ -22,7 +23,8 @@ class CancelarEventoUseCaseTest {
     void deberiaFallarSiNoExiste() {
         EventoRepositoryPort repositoryPort = mock(EventoRepositoryPort.class);
         CancelacionEventoRepositoryPort cancelacionRepositoryPort = mock(CancelacionEventoRepositoryPort.class);
-        CancelarEventoUseCase useCase = new CancelarEventoUseCase(repositoryPort, cancelacionRepositoryPort);
+        ProcesarReembolsoMasivoUseCase procesarReembolsoMasivoUseCase = mock(ProcesarReembolsoMasivoUseCase.class);
+        CancelarEventoUseCase useCase = new CancelarEventoUseCase(repositoryPort, cancelacionRepositoryPort, procesarReembolsoMasivoUseCase);
 
         when(repositoryPort.buscarPorId(any(UUID.class))).thenReturn(Mono.empty());
 
@@ -35,17 +37,18 @@ class CancelarEventoUseCaseTest {
     void deberiaCancelarEvento() {
         EventoRepositoryPort repositoryPort = mock(EventoRepositoryPort.class);
         CancelacionEventoRepositoryPort cancelacionRepositoryPort = mock(CancelacionEventoRepositoryPort.class);
-        CancelarEventoUseCase useCase = new CancelarEventoUseCase(repositoryPort, cancelacionRepositoryPort);
+        ProcesarReembolsoMasivoUseCase procesarReembolsoMasivoUseCase = mock(ProcesarReembolsoMasivoUseCase.class);
+        CancelarEventoUseCase useCase = new CancelarEventoUseCase(repositoryPort, cancelacionRepositoryPort, procesarReembolsoMasivoUseCase);
 
         UUID id = UUID.randomUUID();
         when(repositoryPort.buscarPorId(id)).thenReturn(Mono.just(Evento.builder().id(id).estado(EstadoEvento.ACTIVO).build()));
         when(repositoryPort.guardar(any(Evento.class))).thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
         when(cancelacionRepositoryPort.guardar(any(CancelacionEvento.class)))
                 .thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
+        when(procesarReembolsoMasivoUseCase.ejecutar(id)).thenReturn(Mono.empty());
 
         StepVerifier.create(useCase.ejecutar(id, "Fuerza mayor"))
                 .expectNextMatches(evento -> evento.getEstado() == EstadoEvento.CANCELADO)
                 .verifyComplete();
     }
 }
-

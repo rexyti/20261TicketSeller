@@ -19,21 +19,13 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 @RequiredArgsConstructor
-public class CrearCortesiaUseCase {
+public class CrearCortesiaConAsientoUseCase {
 
     private final AsientoRepositoryPort asientoRepositoryPort;
     private final CortesiaRepositoryPort cortesiaRepositoryPort;
     private final TicketRepositoryPort ticketRepositoryPort;
 
-    public Mono<Cortesia> ejecutar(UUID eventoId, String destinatario,
-                                   CategoriaCortesia categoria, UUID asientoId) {
-        return Mono.justOrEmpty(asientoId)
-                .flatMap(id -> crearCortesiaConAsiento(eventoId, destinatario, categoria, id))
-                .switchIfEmpty(Mono.defer(() -> crearCortesiaGeneral(eventoId, destinatario, categoria)));
-    }
-
-    private Mono<Cortesia> crearCortesiaConAsiento(UUID eventoId, String destinatario,
-                                                    CategoriaCortesia categoria, UUID asientoId) {
+    public Mono<Cortesia> ejecutar(UUID eventoId, String destinatario, CategoriaCortesia categoria, UUID asientoId) {
         return asientoRepositoryPort.buscarPorId(asientoId)
                 .switchIfEmpty(Mono.error(new AsientoNotFoundException(
                         "Asiento %s no encontrado".formatted(asientoId))))
@@ -43,67 +35,45 @@ public class CrearCortesiaUseCase {
 
     private Mono<Asiento> validarYBloquear(Asiento asiento) {
         return Mono.just(asiento)
-                .filter(this::asientoDisponible)
+                .filter(a -> EstadoAsiento.DISPONIBLE.equals(a.getEstado()))
                 .switchIfEmpty(Mono.error(new AsientoOcupadoException(asiento.getId())))
-                .flatMap(a -> asientoRepositoryPort.guardar(buildAsientoBloqueado(a)));
-    }
-
-    private boolean asientoDisponible(Asiento asiento) {
-        return EstadoAsiento.DISPONIBLE.equals(asiento.getEstado());
-    }
-
-    private Asiento buildAsientoBloqueado(Asiento asiento){
-        return asiento.toBuilder()
-                .estado(EstadoAsiento.BLOQUEADO)
-                .build();
+                .flatMap(a -> asientoRepositoryPort.guardar(a.toBuilder().estado(EstadoAsiento.BLOQUEADO).build()));
     }
 
     private Mono<Cortesia> crearTicketYCortesia(UUID eventoId, String destinatario,
                                                  CategoriaCortesia categoria, Asiento asiento) {
         String codigoUnico = UUID.randomUUID().toString();
-        Ticket ticket = buildTicketCortesia(eventoId, asiento, codigoUnico);
+        Ticket ticket = crearTicket(eventoId, asiento, codigoUnico);
         return ticketRepositoryPort.guardar(ticket)
-                .flatMap(savedTicket -> guardarCortesia(eventoId, destinatario, categoria,
-                        asiento.getId(), codigoUnico, savedTicket.getId()));
+                .flatMap(savedTicket -> {
+                    Cortesia cortesia = crearCortesia(destinatario, categoria, codigoUnico, savedTicket);
+                    cortesia.validar();
+                    return cortesiaRepositoryPort.guardar(cortesia);
+                });
     }
 
-    private Ticket buildTicketCortesia(UUID eventoId, Asiento asiento, String codigoQr) {
+    private Ticket crearTicket(UUID eventoId, Asiento asiento, String codigoUnico) {
         return Ticket.builder()
                 .eventoId(eventoId)
                 .zonaId(asiento.getZonaId())
                 .asientoId(asiento.getId())
-                .codigoQr(codigoQr)
+                .codigoQr(codigoUnico)
                 .estado(EstadoTicket.VENDIDO)
                 .precio(BigDecimal.ZERO)
                 .esCortesia(true)
                 .build();
     }
 
-    private Mono<Cortesia> guardarCortesia(UUID eventoId, String destinatario, CategoriaCortesia categoria,
-                                            UUID asientoId, String codigoUnico, UUID ticketId) {
-        Cortesia cortesia = Cortesia.builder()
-                .eventoId(eventoId)
-                .asientoId(asientoId)
+    private Cortesia crearCortesia(String destinatario, CategoriaCortesia categoria,
+                                  String codigoUnico, Ticket ticket) {
+        return Cortesia.builder()
+                .eventoId(ticket.getEventoId())
+                .asientoId(ticket.getAsientoId())
                 .destinatario(destinatario)
                 .categoria(categoria)
                 .codigoUnico(codigoUnico)
-                .ticketId(ticketId)
+                .ticketId(ticket.getId())
                 .estado(EstadoCortesia.GENERADA)
                 .build();
-        cortesia.validar();
-        return cortesiaRepositoryPort.guardar(cortesia);
-    }
-
-    private Mono<Cortesia> crearCortesiaGeneral(UUID eventoId, String destinatario, CategoriaCortesia categoria) {
-        String codigoUnico = UUID.randomUUID().toString();
-        Cortesia cortesia = Cortesia.builder()
-                .eventoId(eventoId)
-                .destinatario(destinatario)
-                .categoria(categoria)
-                .codigoUnico(codigoUnico)
-                .estado(EstadoCortesia.GENERADA)
-                .build();
-        cortesia.validar();
-        return cortesiaRepositoryPort.guardar(cortesia);
     }
 }

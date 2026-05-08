@@ -20,6 +20,7 @@ public interface RecintoRestMapper {
     @Mapping(target = "fechaCreacion", ignore = true)
     @Mapping(target = "activo", constant = "true")
     @Mapping(target = "categoria", ignore = true)
+    @Mapping(target = "configuracionLiquidacion", ignore = true)
     Recinto toDomain(CrearRecintoRequest request);
 
     RecintoResponse toResponse(Recinto recinto);

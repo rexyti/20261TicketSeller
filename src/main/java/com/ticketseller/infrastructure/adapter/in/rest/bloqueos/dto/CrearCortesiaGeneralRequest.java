@@ -6,9 +6,9 @@ import jakarta.validation.constraints.NotNull;
 
 import java.util.UUID;
 
-public record CrearCortesiaRequest(
+public record CrearCortesiaGeneralRequest(
         @NotBlank String destinatario,
         @NotNull CategoriaCortesia categoria,
-        @NotNull UUID asientoId
+        UUID zonaId
 ) {
 }

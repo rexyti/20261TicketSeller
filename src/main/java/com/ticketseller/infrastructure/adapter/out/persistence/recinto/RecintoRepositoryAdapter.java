@@ -1,7 +1,6 @@
 package com.ticketseller.infrastructure.adapter.out.persistence.recinto;
 
 import com.ticketseller.domain.model.recinto.CategoriaRecinto;
-import com.ticketseller.domain.model.recinto.ConfiguracionLiquidacion;
 import com.ticketseller.domain.model.recinto.Recinto;
 import com.ticketseller.domain.shared.Pagina;
 import com.ticketseller.domain.repository.RecintoRepositoryPort;
@@ -149,19 +148,6 @@ public class RecintoRepositoryAdapter implements RecintoRepositoryPort {
                 .map((row, metadata) -> row.get("existe", Boolean.class))
                 .one()
                 .defaultIfEmpty(false);
-    }
-
-    @Override
-    public Mono<ConfiguracionLiquidacion> buscarConfiguracionLiquidacion(UUID recintoId) {
-        return repository.findById(recintoId)
-                .map(mapper::toDomain)
-                .filter(recinto -> recinto.getModeloNegocio() != null)
-                .map(recinto -> ConfiguracionLiquidacion.builder()
-                        .recintoId(recinto.getId())
-                        .modeloNegocio(recinto.getModeloNegocio())
-                        .tipoRecinto(recinto.getCategoria())
-                        .montoFijo(recinto.getMontoFijo())
-                        .build());
     }
 
     private GenericExecuteSpec bindAll(GenericExecuteSpec spec, Map<String, Object> params) {

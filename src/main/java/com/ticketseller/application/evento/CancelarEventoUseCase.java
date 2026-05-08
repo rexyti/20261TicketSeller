@@ -1,5 +1,6 @@
 package com.ticketseller.application.evento;
 
+import com.ticketseller.application.postventa.ProcesarReembolsoMasivoUseCase;
 import com.ticketseller.domain.exception.evento.EventoCanceladoSinMotivoException;
 import com.ticketseller.domain.exception.evento.EventoNotFoundException;
 import com.ticketseller.domain.model.evento.CancelacionEvento;
@@ -17,6 +18,7 @@ public class CancelarEventoUseCase {
 
     private final EventoRepositoryPort eventoRepositoryPort;
     private final CancelacionEventoRepositoryPort cancelacionEventoRepositoryPort;
+    private final ProcesarReembolsoMasivoUseCase procesarReembolsoMasivoUseCase;
 
     public Mono<Evento> ejecutar(UUID id, String motivo) {
         String motivoNormalizado = normalizarMotivo(motivo);
@@ -25,6 +27,7 @@ public class CancelarEventoUseCase {
                 .map(Evento::cancelar)
                 .flatMap(eventoRepositoryPort::guardar)
                 .flatMap(eventoCancelado -> guardarCancelacion(eventoCancelado, motivoNormalizado)
+                        .then(procesarReembolsoMasivoUseCase.ejecutar(eventoCancelado.getId()))
                         .thenReturn(eventoCancelado));
     }
 
