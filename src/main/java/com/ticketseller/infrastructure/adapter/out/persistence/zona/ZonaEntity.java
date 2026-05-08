@@ -26,4 +26,5 @@ public class ZonaEntity {
     private Integer capacidad;
     @Column("tipo_asiento_id")
     private UUID tipoAsientoId;
+    private String tipo;
 }

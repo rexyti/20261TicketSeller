@@ -17,19 +17,19 @@ public class LiberarBloqueoUseCase {
     private final BloqueoRepositoryPort bloqueoRepositoryPort;
     private final AsientoRepositoryPort asientoRepositoryPort;
 
-    public Mono<Void> ejecutar(UUID bloqueoId) {
+    public Mono<Bloqueo> ejecutar(UUID bloqueoId) {
         return bloqueoRepositoryPort.buscarPorId(bloqueoId)
                 .switchIfEmpty(Mono.error(new BloqueoNoEncontradoException(bloqueoId)))
                 .flatMap(this::liberarAsientoYBloqueo);
     }
 
-    private Mono<Void> liberarAsientoYBloqueo(Bloqueo bloqueo) {
+    private Mono<Bloqueo> liberarAsientoYBloqueo(Bloqueo bloqueo) {
         Mono<Void> liberarAsiento = asientoRepositoryPort.buscarPorId(bloqueo.getAsientoId())
                 .flatMap(asiento -> asientoRepositoryPort.guardar(
                         asiento.toBuilder().estado(EstadoAsiento.DISPONIBLE).build()))
                 .then();
-        Mono<Void> actualizarBloqueo = bloqueoRepositoryPort.guardar(
-                bloqueo.toBuilder().estado(EstadoBloqueo.LIBERADO).build()).then();
-        return liberarAsiento.then(actualizarBloqueo);
+
+        Bloqueo bloqueoLiberado = bloqueo.toBuilder().estado(EstadoBloqueo.LIBERADO).build();
+        return liberarAsiento.then(bloqueoRepositoryPort.guardar(bloqueoLiberado));
     }
 }

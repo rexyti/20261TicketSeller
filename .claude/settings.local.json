@@ -24,7 +24,8 @@
       "Bash(curl *)",
       "Bash(python -m json.tool)",
       "Bash(./gradlew compileJava -q)",
-      "Bash(awk -F'.java:' '{print $1}')"
+      "Bash(awk -F'.java:' '{print $1}')",
+      "Bash(grep -E \"\\\\.\\(java\\)$\")"
     ]
   }
 }

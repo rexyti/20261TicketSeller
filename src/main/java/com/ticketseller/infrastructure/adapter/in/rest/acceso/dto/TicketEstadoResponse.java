@@ -9,7 +9,7 @@ public record TicketEstadoResponse(
     UUID eventoId,
     EstadoTicket estado,
     String categoria,
-    String bloque,
-    String coordenadaAcceso,
+    String zona,
+    String compuertaAsignada,
     LocalDateTime fechaEvento
 ) {}

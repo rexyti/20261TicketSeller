@@ -49,7 +49,8 @@ CREATE TABLE zonas (
     recinto_id UUID NOT NULL REFERENCES recintos(id),
     nombre VARCHAR(100) NOT NULL,
     capacidad INTEGER NOT NULL,
-    tipo_asiento_id UUID REFERENCES tipos_asiento(id)
+    tipo_asiento_id UUID REFERENCES tipos_asiento(id),
+    tipo VARCHAR(20)
 );
 
 CREATE TABLE compuertas (

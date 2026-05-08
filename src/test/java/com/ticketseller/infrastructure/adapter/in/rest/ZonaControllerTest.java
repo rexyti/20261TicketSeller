@@ -6,6 +6,7 @@ import com.ticketseller.domain.exception.zona.ZonaCapacidadExcedidaException;
 import com.ticketseller.domain.model.zona.Zona;
 import com.ticketseller.infrastructure.adapter.in.rest.zona.dto.CrearZonaRequest;
 import com.ticketseller.infrastructure.adapter.in.rest.zona.dto.ZonaResponse;
+import com.ticketseller.domain.model.zona.TipoZona;
 import com.ticketseller.infrastructure.adapter.in.rest.mapper.ZonaRestMapper;
 import com.ticketseller.infrastructure.adapter.in.rest.zona.ZonaController;
 import org.junit.jupiter.api.Test;
@@ -42,7 +43,7 @@ class ZonaControllerTest {
     @Test
     void postZonaValidaRetorna201() {
         UUID recintoId = UUID.randomUUID();
-        CrearZonaRequest request = new CrearZonaRequest("Platea", 100);
+        CrearZonaRequest request = new CrearZonaRequest("Platea", 100, null);
         Zona zonaDomain = Zona.builder().nombre("Platea").capacidad(100).build();
         Zona zonaSaved = Zona.builder()
                 .id(UUID.randomUUID())
@@ -50,7 +51,7 @@ class ZonaControllerTest {
                 .nombre("Platea")
                 .capacidad(100)
                 .build();
-        ZonaResponse response = new ZonaResponse(zonaSaved.getId(), recintoId, "Platea", 100, null);
+        ZonaResponse response = new ZonaResponse(zonaSaved.getId(), recintoId, "Platea", 100, null, null);
 
         when(zonaRestMapper.toDomain(any(CrearZonaRequest.class))).thenReturn(zonaDomain);
         when(crearZonaUseCase.ejecutar(recintoId, zonaDomain)).thenReturn(Mono.just(zonaSaved));
@@ -93,7 +94,7 @@ class ZonaControllerTest {
                 .nombre("VIP")
                 .capacidad(50)
                 .build();
-        ZonaResponse response = new ZonaResponse(zona.getId(), recintoId, "VIP", 50, null);
+        ZonaResponse response = new ZonaResponse(zona.getId(), recintoId, "VIP", 50, null, null);
 
         when(listarZonasUseCase.ejecutar(recintoId)).thenReturn(Flux.just(zona));
         when(zonaRestMapper.toResponse(zona)).thenReturn(response);
@@ -109,7 +110,7 @@ class ZonaControllerTest {
     @Test
     void postZonaExcedidaRetorna400() {
         UUID recintoId = UUID.randomUUID();
-        CrearZonaRequest request = new CrearZonaRequest("Platea", 1000);
+        CrearZonaRequest request = new CrearZonaRequest("Platea", 1000, null);
         Zona zonaDomain = Zona.builder().nombre("Platea").capacidad(1000).build();
 
         when(zonaRestMapper.toDomain(any(CrearZonaRequest.class))).thenReturn(zonaDomain);

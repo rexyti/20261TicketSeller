@@ -18,6 +18,7 @@ public class Zona {
     private String nombre;
     private Integer capacidad;
     private UUID tipoAsientoId;
+    private TipoZona tipo;
 
     public Zona normalizarDatosRegistro() {
         return this.toBuilder()

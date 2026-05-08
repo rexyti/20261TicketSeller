@@ -370,8 +370,9 @@ public class BeanConfiguration {
     @Bean
     public AsignarTipoAsientoAZonaUseCase asignarTipoAsientoAZonaUseCase(
             TipoAsientoRepositoryPort tipoAsientoRepositoryPort,
-            ZonaRepositoryPort zonaRepositoryPort) {
-        return new AsignarTipoAsientoAZonaUseCase(tipoAsientoRepositoryPort, zonaRepositoryPort);
+            ZonaRepositoryPort zonaRepositoryPort,
+            AsientoRepositoryPort asientoRepositoryPort) {
+        return new AsignarTipoAsientoAZonaUseCase(tipoAsientoRepositoryPort, zonaRepositoryPort, asientoRepositoryPort);
     }
 
     @Bean
@@ -773,15 +774,23 @@ public class BeanConfiguration {
     public CrearCortesiaConAsientoUseCase crearCortesiaConAsientoUseCase(
             com.ticketseller.domain.repository.AsientoRepositoryPort asientoRepositoryPort,
             CortesiaRepositoryPort cortesiaRepositoryPort,
-            com.ticketseller.domain.repository.TicketRepositoryPort ticketRepositoryPort) {
-        return new CrearCortesiaConAsientoUseCase(asientoRepositoryPort, cortesiaRepositoryPort, ticketRepositoryPort);
+            com.ticketseller.domain.repository.TicketRepositoryPort ticketRepositoryPort,
+            ZonaRepositoryPort zonaRepositoryPort,
+            CompuertaRepositoryPort compuertaRepositoryPort,
+            EventoRepositoryPort eventoRepositoryPort) {
+        return new CrearCortesiaConAsientoUseCase(asientoRepositoryPort, cortesiaRepositoryPort, ticketRepositoryPort,
+                zonaRepositoryPort, compuertaRepositoryPort, eventoRepositoryPort);
     }
 
     @Bean
     public CrearCortesiaGeneralUseCase crearCortesiaGeneralUseCase(
             CortesiaRepositoryPort cortesiaRepositoryPort,
-            com.ticketseller.domain.repository.TicketRepositoryPort ticketRepositoryPort) {
-        return new CrearCortesiaGeneralUseCase(cortesiaRepositoryPort, ticketRepositoryPort);
+            com.ticketseller.domain.repository.TicketRepositoryPort ticketRepositoryPort,
+            ZonaRepositoryPort zonaRepositoryPort,
+            CompuertaRepositoryPort compuertaRepositoryPort,
+            EventoRepositoryPort eventoRepositoryPort) {
+        return new CrearCortesiaGeneralUseCase(cortesiaRepositoryPort, ticketRepositoryPort,
+                zonaRepositoryPort, compuertaRepositoryPort, eventoRepositoryPort);
     }
 
     @Bean

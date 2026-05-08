@@ -1,7 +1,6 @@
 package com.ticketseller.infrastructure.adapter.out.persistence.checkout.mapper;
 
 import com.ticketseller.domain.model.ticket.AccessDetails;
-import com.ticketseller.domain.model.ticket.CategoriaTicket;
 import com.ticketseller.domain.model.ticket.EstadoTicket;
 import com.ticketseller.domain.model.ticket.Ticket;
 import com.ticketseller.infrastructure.adapter.out.persistence.checkout.TicketEntity;
@@ -12,7 +11,7 @@ import org.mapstruct.Mapping;
 public interface TicketPersistenceMapper {
 
     @Mapping(target = "estado", expression = "java(ticket.getEstado() == null ? null : ticket.getEstado().name())")
-    @Mapping(target = "categoria", expression = "java(ticket.getAccessDetails() != null && ticket.getAccessDetails().getCategoria() != null ? ticket.getAccessDetails().getCategoria().name() : null)")
+    @Mapping(target = "categoria", expression = "java(ticket.getAccessDetails() != null ? ticket.getAccessDetails().getCategoria() : null)")
     @Mapping(target = "fechaEvento", expression = "java(ticket.getAccessDetails() != null ? ticket.getAccessDetails().getFechaEvento() : null)")
     @Mapping(target = "zonaNombre", expression = "java(ticket.getAccessDetails() != null ? ticket.getAccessDetails().getZona() : null)")
     @Mapping(target = "compuertaNombre", expression = "java(ticket.getAccessDetails() != null ? ticket.getAccessDetails().getCompuerta() : null)")
@@ -32,7 +31,7 @@ public interface TicketPersistenceMapper {
             return null;
         }
         return AccessDetails.builder()
-                .categoria(entity.getCategoria() != null ? CategoriaTicket.valueOf(entity.getCategoria()) : null)
+                .categoria(entity.getCategoria())
                 .zona(entity.getZonaNombre())
                 .compuerta(entity.getCompuertaNombre())
                 .fechaEvento(entity.getFechaEvento())

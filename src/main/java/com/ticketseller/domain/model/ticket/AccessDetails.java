@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AccessDetails {
-    private CategoriaTicket categoria;
+    private String categoria;
     private String zona;
     private String compuerta;
     private LocalDateTime fechaEvento;
@@ -32,8 +32,8 @@ public class AccessDetails {
         }
     }
 
-    private boolean sinCategoria(){
-        return categoria == null;
+    private boolean sinCategoria() {
+        return categoria == null || categoria.isBlank();
     }
 
     private boolean sinZona(){

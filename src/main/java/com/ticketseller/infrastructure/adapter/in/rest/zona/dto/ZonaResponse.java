@@ -1,5 +1,6 @@
 package com.ticketseller.infrastructure.adapter.in.rest.zona.dto;
 
+import com.ticketseller.domain.model.zona.TipoZona;
 import java.util.UUID;
 
 public record ZonaResponse(
@@ -7,5 +8,6 @@ public record ZonaResponse(
                 UUID recintoId,
                 String nombre,
                 Integer capacidad,
-                UUID tipoAsientoId) {
+                UUID tipoAsientoId,
+                TipoZona tipo) {
 }
