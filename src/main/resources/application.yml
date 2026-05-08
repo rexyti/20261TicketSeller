@@ -10,12 +10,18 @@ spring:
     port: ${SPRING_MAIL_PORT:1025}
     username: ${SPRING_MAIL_USERNAME:}
     password: ${SPRING_MAIL_PASSWORD:}
+    protocol: smtp
+    test-connection: false
     properties:
       mail:
         smtp:
           auth: false
           starttls:
             enable: false
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+        debug: true
 
 server:
   port: ${SERVER_PORT:8080}

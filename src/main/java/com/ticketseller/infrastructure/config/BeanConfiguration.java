@@ -118,7 +118,7 @@ import com.ticketseller.domain.repository.HistorialEstadoTicketRepositoryPort;
 import com.ticketseller.domain.repository.HistorialEstadoVentaRepositoryPort;
 import com.ticketseller.domain.repository.PagoRepositoryPort;
 import com.ticketseller.domain.repository.ReembolsoRepositoryPort;
-import com.ticketseller.infrastructure.adapter.out.payment.WompiAdapter;
+import com.ticketseller.infrastructure.adapter.out.payment.PasarelaPagoAdapter;
 import com.ticketseller.infrastructure.adapter.out.persistence.cancelacionevento.CancelacionEventoR2dbcRepository;
 import com.ticketseller.infrastructure.adapter.out.persistence.cancelacionevento.CancelacionEventoRepositoryAdapter;
 import com.ticketseller.infrastructure.adapter.out.persistence.cancelacionevento.mapper.CancelacionEventoPersistenceMapper;
@@ -164,12 +164,10 @@ import com.ticketseller.infrastructure.adapter.out.persistence.historialestadoas
 import com.ticketseller.infrastructure.adapter.out.persistence.historialestadoasiento.mapper.HistorialCambioEstadoPersistenceMapper;
 import com.ticketseller.infrastructure.adapter.out.email.EmailNotificacionAdapter;
 import com.ticketseller.infrastructure.adapter.out.qr.ZxingCodigoQrAdapter;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.mail.javamail.JavaMailSenderImpl;
-import org.springframework.r2dbc.core.DatabaseClient;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.r2dbc.core.DatabaseClient;
 
 @Configuration
 public class BeanConfiguration {
@@ -269,13 +267,8 @@ public class BeanConfiguration {
     }
 
     @Bean
-    public NotificacionEmailPort notificacionEmailPort() {
-        return new EmailNotificacionAdapter(javaMailSender());
-    }
-
-    @Bean
-    public JavaMailSender javaMailSender() {
-        return new JavaMailSenderImpl();
+    public NotificacionEmailPort notificacionEmailPort(JavaMailSender javaMailSender) {
+        return new EmailNotificacionAdapter(javaMailSender);
     }
 
     @Bean
@@ -489,10 +482,8 @@ public class BeanConfiguration {
     }
 
     @Bean
-    public PasarelaPagoPort pasarelaPagoPort(
-            @Value("${wompi.base-url}") String baseUrl,
-            @Value("${wompi.private-key}") String privateKey) {
-        return new WompiAdapter(baseUrl, privateKey);
+    public PasarelaPagoPort pasarelaPagoPort() {
+        return new PasarelaPagoAdapter();
     }
 
     @Bean

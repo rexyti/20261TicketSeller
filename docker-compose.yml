@@ -6,6 +6,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      mailhog:
+        condition: service_healthy
     environment:
       SPRING_R2DBC_URL: r2dbc:postgresql://db:5432/ticketseller
       SPRING_R2DBC_USERNAME: postgres
@@ -37,6 +39,11 @@ services:
     ports:
       - "1025:1025"
       - "8025:8025"
+    healthcheck:
+      test: [ "CMD", "nc", "-z", "localhost", "1025" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
 volumes:
   pgdata:
