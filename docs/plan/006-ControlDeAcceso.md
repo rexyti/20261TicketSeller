@@ -49,34 +49,32 @@ src/main/java/com/ticketseller/
 │
 ├── domain/
 │   └── repository/
-│       # Reutiliza TicketRepositoryPort (feature 005) y RecintoRepositoryPort (features 001/002)
+│       # Solo lectura — reutiliza TicketRepositoryPort (feature 004)
+│       # y RecintoRepositoryPort / ZonaRepositoryPort (feature 001)
 │       # Este feature no agrega puertos de salida nuevos
 │
-├── application/                                           # Un caso de uso por responsabilidad — clases concretas
-│   ├── ConsultarEstadoTicketUseCase.java                  # Consulta estado + zona + categoría + metadatos del ticket
-│   └── ConsultarEstructuraRecintoUseCase.java             # Consulta bloques, categorías y coordenadas del recinto
+├── application/
+│   └── acceso/
+│       └── ConsultarEstadoTicketUseCase.java
 │
 └── infrastructure/
     ├── adapter/in/rest/
     │   ├── acceso/
-    │   │   ├── TicketConsultaController.java              # Inyecta ConsultarEstadoTicketUseCase
+    │   │   ├── TicketConsultaController.java
     │   │   └── dto/
-    │   ├── recinto/
-    │   │   ├── RecintoController.java                     # Expone GET /recintos/{id} para estructura
-    │   │   └── dto/
+    │   │       └── TicketEstadoResponse.java
     │   └── mapper/
-    │       ├── AccesoRestMapper.java
-    │       └── RecintoRestMapper.java
+    │       └── AccesoRestMapper.java
     └── config/
-        └── BeanConfiguration.java                        # Registrar los dos nuevos beans de use case
+        └── BeanConfiguration.java
 
 src/test/java/com/ticketseller/
 ├── application/
-│   ├── ConsultarEstadoTicketUseCaseTest.java
-│   └── ConsultarEstructuraRecintoUseCaseTest.java
+│   └── acceso/
+│       └── ConsultarEstadoTicketUseCaseTest.java
 └── infrastructure/
     └── adapter/in/rest/
-        └── checkout/TicketConsultaControllerTest.java    # WebTestClient
+        └── TicketConsultaControllerTest.java
 ```
 
 **Structure Decision**: Feature exclusivamente de lectura — no agrega nuevas entidades de

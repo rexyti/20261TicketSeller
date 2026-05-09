@@ -46,52 +46,52 @@ optimista (SC-004). Los cambios masivos siempre están contextualizados a un ún
 
 ```text
 src/main/java/com/ticketseller/
-│
 ├── domain/
 │   ├── model/
 │   │   └── asiento/
-│   │       ├── EstadoAsiento.java                        # Enum: DISPONIBLE, BLOQUEADO, RESERVADO, VENDIDO,
-│   │       │                                             #   MANTENIMIENTO, ANULADO
-│   │       ├── TransicionEstadoAsiento.java              # Mapa inmutable de transiciones permitidas
-│   │       └── HistorialCambioEstado.java                # id, asientoId, eventoId, usuarioId, estados, fechaHora
+│   │       ├── EstadoAsiento.java
+│   │       └── HistorialCambioEstado.java
 │   ├── exception/
 │   │   └── asiento/
-│   │       ├── TransicionEstadoInvalidaException.java
-│   │       └── AsientoEnCompraException.java
+│   │       ├── AsientoEnCompraException.java
+│   │       └── TransicionEstadoInvalidaException.java
 │   └── repository/
 │       └── HistorialCambioEstadoRepositoryPort.java
-│       # Reutiliza AsientoRepositoryPort (feature 003)
-│
 ├── application/
 │   └── asiento/
 │       ├── CambiarEstadoAsientoUseCase.java
 │       ├── CambiarEstadoMasivoUseCase.java
 │       └── ConsultarHistorialAsientoUseCase.java
-│
 └── infrastructure/
     ├── adapter/in/rest/
     │   ├── asiento/
     │   │   ├── AsientoMantenimientoController.java
     │   │   └── dto/
+    │   │       ├── CambiarEstadoRequest.java
+    │   │       ├── CambiarEstadoMasivoRequest.java
+    │   │       ├── CambiarEstadoMasivoResponse.java
+    │   │       └── HistorialCambioResponse.java
     │   └── mapper/
     │       └── AsientoRestMapper.java
     ├── adapter/out/persistence/
     │   └── historialestadoasiento/
-    │       └── mapper/
+    │       ├── HistorialCambioEstadoEntity.java
+    │       ├── HistorialCambioEstadoR2dbcRepository.java
+    │       ├── HistorialCambioEstadoRepositoryAdapter.java
+    │       └── mapper/HistorialCambioEstadoPersistenceMapper.java
     └── config/
-        └── BeanConfiguration.java                        # Registrar los tres nuevos beans de use case
+        └── BeanConfiguration.java
 
 src/test/java/com/ticketseller/
 ├── domain/
-│   └── TransicionEstadoAsientoTest.java
+│   └── model/TransicionEstadoAsientoTest.java
 ├── application/
 │   └── asiento/
+│       ├── CambiarEstadoAsientoUseCaseTest.java
+│       └── CambiarEstadoMasivoUseCaseTest.java
 └── infrastructure/
-    └── adapter/
-        ├── in/rest/
-        │   └── asiento/AsientoMantenimientoControllerTest.java
-        └── out/persistence/
-            └── historialestadoasiento/
+    └── adapter/in/rest/
+        └── asiento/AsientoMantenimientoControllerTest.java
 ```
 
 **Structure Decision**: Arquitectura hexagonal con responsabilidad única — un use case concreto

@@ -26,7 +26,8 @@
       "Bash(./gradlew compileJava -q)",
       "Bash(awk -F'.java:' '{print $1}')",
       "Bash(grep -E \"\\\\.\\(java\\)$\")",
-      "Bash(./gradlew build *)"
+      "Bash(./gradlew build *)",
+      "Bash(grep *)"
     ]
   }
 }

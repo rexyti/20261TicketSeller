@@ -57,42 +57,59 @@ plan/
 
 ```text
 src/main/java/com/ticketseller/
-│
 ├── domain/
+│   ├── model/
+│   │   └── asiento/
+│   │       ├── AsientoHold.java
+│   │       └── EstadoHold.java
 │   ├── exception/
-│   │   └── inventario/
-│   │       ├── AsientoNoDisponibleException.java
+│   │   └── asiento/
+│   │       ├── AsientoEnZonaDiferenteException.java
+│   │       ├── AsientoInvalidoException.java
 │   │       ├── AsientoReservadoPorOtroException.java
 │   │       └── HoldExpiradoException.java
 │   └── repository/
-│       └── (extiende AsientoRepositoryPort existente con métodos de hold)
+│       └── AsientoHoldRepositoryPort.java
 │
-├── application/                                    # Casos de uso — uno por responsabilidad
+├── application/
 │   └── inventario/
-│       ├── VerificarDisponibilidadUseCase.java
-│       ├── ReservarAsientoUseCase.java
 │       ├── ConfirmarOcupacionUseCase.java
-│       └── LiberarHoldsVencidosUseCase.java
+│       ├── LiberarHoldsVencidosUseCase.java
+│       ├── LiberarHoldUseCase.java
+│       └── VerificarDisponibilidadUseCase.java
 │
 └── infrastructure/
     ├── adapter/in/rest/
     │   ├── asiento/
     │   │   ├── InventarioController.java
     │   │   └── dto/
+    │   │       ├── AsientoResponse.java
+    │   │       ├── AsignarAsientosAZonaRequest.java
+    │   │       └── DisponibilidadResponse.java
     │   └── mapper/
     │       └── AsientoRestMapper.java
     ├── adapter/in/scheduler/
     │   └── inventario/
     │       └── LiberacionHoldsScheduler.java
+    ├── adapter/out/persistence/
+    │   └── asientohold/
+    │       ├── AsientoHoldEntity.java
+    │       ├── AsientoHoldR2dbcRepository.java
+    │       ├── AsientoHoldRepositoryAdapter.java
+    │       └── mapper/AsientoHoldPersistenceMapper.java
     └── config/
-        └── BeanConfiguration.java             # Actualizar con los nuevos beans
+        └── BeanConfiguration.java
 
 src/test/java/com/ticketseller/
 ├── application/
 │   └── inventario/
+│       ├── ConfirmarOcupacionUseCaseTest.java
+│       ├── LiberarHoldsVencidosUseCaseTest.java
+│       └── VerificarDisponibilidadUseCaseTest.java
 └── infrastructure/
-    └── adapter/in/rest/
-        └── asiento/
+    └── adapter/
+        ├── in/rest/asiento/InventarioControllerTest.java
+        └── out/persistence/InventarioRepositoryIntegrationTest.java
 ```
 
 **Structure Decision**: Feature de extensión de comportamiento sobre `Asiento`. No agrega entidades

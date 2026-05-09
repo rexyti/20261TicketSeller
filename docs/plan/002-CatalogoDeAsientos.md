@@ -47,68 +47,88 @@ relacional separada).
 
 ```text
 src/main/java/com/ticketseller/
-│
 ├── domain/
 │   ├── model/
-│   │   ├── TipoAsiento.java                              # Entidad: id (UUID), nombre, descripcion,
-│   │   │                                                 #   estado (ACTIVO/INACTIVO)
-│   │   ├── Asiento.java                                  # Entidad: id (UUID), fila, columna,
-│   │   │                                                 #   numero, zonaId — sin anotaciones R2DBC
-│   │   └── MapaAsientos.java                             # (US5) recintoId, filas, columnas
+│   │   └── asiento/
+│   │       ├── TipoAsiento.java
+│   │       ├── Asiento.java
+│   │       ├── EstadoTipoAsiento.java
+│   │       └── MapaAsientos.java
 │   ├── exception/
-│   │   ├── TipoAsientoNotFoundException.java
-│   │   ├── TipoAsientoInactivoException.java
-│   │   ├── TipoAsientoEnUsoException.java
-│   │   └── NombreTipoAsientoVacioException.java
+│   │   └── asiento/
+│   │       ├── NombreTipoAsientoVacioException.java
+│   │       ├── RecintoConZonasYaActivasException.java
+│   │       ├── TipoAsientoEnUsoException.java
+│   │       ├── TipoAsientoInactivoException.java
+│   │       ├── TipoAsientoInvalidoException.java
+│   │       ├── TipoAsientoNotFoundException.java
+│   │       └── TipoAsientoYaExistenteException.java
 │   └── repository/
 │       ├── TipoAsientoRepositoryPort.java
 │       ├── AsientoRepositoryPort.java
-│       └── MapaAsientosRepositoryPort.java           # (US5)
-│
-├── application/                                          # Un caso de uso por responsabilidad — clases concretas
-│   ├── CrearTipoAsientoUseCase.java                      # Registra un nuevo tipo de asiento
-│   ├── EditarTipoAsientoUseCase.java                     # Edita descripción (y nombre con restricciones)
-│   ├── ListarTiposAsientoUseCase.java                    # Lista todos los tipos con campo enUso
-│   ├── DesactivarTipoAsientoUseCase.java                 # Desactiva un tipo sin eventos futuros
-│   ├── AsignarTipoAsientoAZonaUseCase.java               # Asigna un tipo activo a una zona de un recinto
-│   ├── CrearMapaAsientosUseCase.java                     # (US5) Genera mapa N×M de asientos numerados
-│   └── MarcarEspacioVacioUseCase.java                    # (US5) Marca un asiento como no existente
-│
+│       └── MapaAsientosRepositoryPort.java
+├── application/
+│   ├── tipoasiento/
+│   │   ├── AsignarTipoAsientoAZonaUseCase.java
+│   │   ├── CrearTipoAsientoUseCase.java
+│   │   ├── DesactivarTipoAsientoUseCase.java
+│   │   ├── EditarTipoAsientoUseCase.java
+│   │   └── ListarTiposAsientoUseCase.java
+│   └── asiento/
+│       ├── AsignarAsientosAZonaUseCase.java
+│       ├── ConsultarMapaAsientosUseCase.java
+│       ├── CrearMapaAsientosUseCase.java
+│       └── MarcarEspacioVacioUseCase.java
 └── infrastructure/
     ├── adapter/in/rest/
     │   ├── tipoasiento/
-    │   │   ├── TipoAsientoController.java                # Inyecta cada use case según el endpoint
+    │   │   ├── TipoAsientoController.java
     │   │   └── dto/
+    │   │       ├── AsientoMapaResponse.java
+    │   │       ├── AsignarTipoAsientoRequest.java
+    │   │       ├── CambiarEstadoTipoAsientoRequest.java
+    │   │       ├── CrearTipoAsientoRequest.java
+    │   │       ├── EditarTipoAsientoRequest.java
+    │   │       └── TipoAsientoResponse.java
     │   ├── asiento/
-    │   │   ├── MapaAsientosController.java               # (US5)
+    │   │   ├── MapaAsientosController.java
     │   │   └── dto/
+    │   │       └── CrearMapaAsientosRequest.java
     │   └── mapper/
     │       ├── TipoAsientoRestMapper.java
     │       └── AsientoRestMapper.java
     ├── adapter/out/persistence/
     │   ├── tipoasiento/
-    │   │   └── mapper/
+    │   │   ├── TipoAsientoEntity.java
+    │   │   ├── TipoAsientoR2dbcRepository.java
+    │   │   ├── TipoAsientoRepositoryAdapter.java
+    │   │   └── mapper/TipoAsientoPersistenceMapper.java
     │   ├── asiento/
-    │   │   └── mapper/
+    │   │   ├── AsientoEntity.java
+    │   │   ├── AsientoR2dbcRepository.java
+    │   │   ├── AsientoRepositoryAdapter.java
+    │   │   └── mapper/AsientoPersistenceMapper.java
     │   └── mapaasientos/
+    │       └── MapaAsientosRepositoryAdapter.java
     └── config/
-        └── BeanConfiguration.java                        # Registrar los nuevos beans de use case
+        └── BeanConfiguration.java
 
-tests/
+src/test/java/com/ticketseller/
 ├── application/
-│   ├── CrearTipoAsientoUseCaseTest.java
-│   ├── EditarTipoAsientoUseCaseTest.java
-│   ├── ListarTiposAsientoUseCaseTest.java
-│   ├── DesactivarTipoAsientoUseCaseTest.java
-│   ├── AsignarTipoAsientoAZonaUseCaseTest.java
-│   └── CrearMapaAsientosUseCaseTest.java                 # (US5)
+│   ├── tipoasiento/
+│   │   ├── AsignarTipoAsientoAZonaUseCaseTest.java
+│   │   ├── CrearTipoAsientoUseCaseTest.java
+│   │   ├── DesactivarTipoAsientoUseCaseTest.java
+│   │   ├── EditarTipoAsientoUseCaseTest.java
+│   │   └── ListarTiposAsientoUseCaseTest.java
+│   └── asiento/
+│       └── CrearMapaAsientosUseCaseTest.java
 └── infrastructure/
     ├── adapter/in/rest/
-    │   ├── tipoasiento/TipoAsientoControllerTest.java    # WebTestClient
-    │   └── asiento/MapaAsientosControllerTest.java       # (US5) WebTestClient
+    │   ├── TipoAsientoControllerTest.java
+    │   └── MapaAsientosControllerTest.java
     └── adapter/out/persistence/
-        ├── TipoAsientoRepositoryAdapterTest.java         # Testcontainers
-        └── AsientoRepositoryAdapterTest.java             # Testcontainers
+        └── asiento/AsientoRepositoryAdapterTest.java
 ```
 
 **Structure Decision**: Arquitectura hexagonal con responsabilidad única — un use case concreto
@@ -176,64 +196,88 @@ el tipo aparece en `GET /api/tipos-asiento`. `POST` sin `nombre` retorna HTTP 40
 
 ```text
 src/main/java/com/ticketseller/
-│
 ├── domain/
 │   ├── model/
 │   │   └── asiento/
-│   │       ├── TipoAsiento.java                          # id, nombre, descripcion, estado
-│   │       ├── Asiento.java                              # id, fila, columna, numero, zonaId
-│   │       └── MapaAsientos.java                         # (US5) recintoId, filas, columnas
+│   │       ├── TipoAsiento.java
+│   │       ├── Asiento.java
+│   │       ├── EstadoTipoAsiento.java
+│   │       └── MapaAsientos.java
 │   ├── exception/
 │   │   └── asiento/
-│   │       ├── TipoAsientoNotFoundException.java
-│   │       ├── TipoAsientoInactivoException.java
+│   │       ├── NombreTipoAsientoVacioException.java
+│   │       ├── RecintoConZonasYaActivasException.java
 │   │       ├── TipoAsientoEnUsoException.java
-│   │       └── NombreTipoAsientoVacioException.java
+│   │       ├── TipoAsientoInactivoException.java
+│   │       ├── TipoAsientoInvalidoException.java
+│   │       ├── TipoAsientoNotFoundException.java
+│   │       └── TipoAsientoYaExistenteException.java
 │   └── repository/
 │       ├── TipoAsientoRepositoryPort.java
 │       ├── AsientoRepositoryPort.java
-│       └── MapaAsientosRepositoryPort.java               # (US5)
-│
+│       └── MapaAsientosRepositoryPort.java
 ├── application/
 │   ├── tipoasiento/
+│   │   ├── AsignarTipoAsientoAZonaUseCase.java
 │   │   ├── CrearTipoAsientoUseCase.java
-│   │   ├── EditarTipoAsientoUseCase.java
-│   │   ├── ListarTiposAsientoUseCase.java
 │   │   ├── DesactivarTipoAsientoUseCase.java
-│   │   └── AsignarTipoAsientoAZonaUseCase.java
+│   │   ├── EditarTipoAsientoUseCase.java
+│   │   └── ListarTiposAsientoUseCase.java
 │   └── asiento/
-│       ├── CrearMapaAsientosUseCase.java                 # (US5)
-│       └── MarcarEspacioVacioUseCase.java                # (US5)
-│
+│       ├── AsignarAsientosAZonaUseCase.java
+│       ├── ConsultarMapaAsientosUseCase.java
+│       ├── CrearMapaAsientosUseCase.java
+│       └── MarcarEspacioVacioUseCase.java
 └── infrastructure/
     ├── adapter/in/rest/
     │   ├── tipoasiento/
     │   │   ├── TipoAsientoController.java
     │   │   └── dto/
+    │   │       ├── AsientoMapaResponse.java
+    │   │       ├── AsignarTipoAsientoRequest.java
+    │   │       ├── CambiarEstadoTipoAsientoRequest.java
+    │   │       ├── CrearTipoAsientoRequest.java
+    │   │       ├── EditarTipoAsientoRequest.java
+    │   │       └── TipoAsientoResponse.java
     │   ├── asiento/
-    │   │   ├── MapaAsientosController.java               # (US5)
+    │   │   ├── MapaAsientosController.java
     │   │   └── dto/
+    │   │       └── CrearMapaAsientosRequest.java
     │   └── mapper/
     │       ├── TipoAsientoRestMapper.java
     │       └── AsientoRestMapper.java
     ├── adapter/out/persistence/
     │   ├── tipoasiento/
+    │   │   ├── TipoAsientoEntity.java
+    │   │   ├── TipoAsientoR2dbcRepository.java
+    │   │   ├── TipoAsientoRepositoryAdapter.java
+    │   │   └── mapper/TipoAsientoPersistenceMapper.java
     │   ├── asiento/
+    │   │   ├── AsientoEntity.java
+    │   │   ├── AsientoR2dbcRepository.java
+    │   │   ├── AsientoRepositoryAdapter.java
+    │   │   └── mapper/AsientoPersistenceMapper.java
     │   └── mapaasientos/
+    │       └── MapaAsientosRepositoryAdapter.java
     └── config/
-        └── BeanConfiguration.java                        # Registrar los nuevos beans de use case
+        └── BeanConfiguration.java
 
 src/test/java/com/ticketseller/
 ├── application/
 │   ├── tipoasiento/
-│   └── asiento/                                          # (US5)
+│   │   ├── AsignarTipoAsientoAZonaUseCaseTest.java
+│   │   ├── CrearTipoAsientoUseCaseTest.java
+│   │   ├── DesactivarTipoAsientoUseCaseTest.java
+│   │   ├── EditarTipoAsientoUseCaseTest.java
+│   │   └── ListarTiposAsientoUseCaseTest.java
+│   └── asiento/
+│       └── CrearMapaAsientosUseCaseTest.java
 └── infrastructure/
     ├── adapter/in/rest/
     │   ├── TipoAsientoControllerTest.java
-    │   └── MapaAsientosControllerTest.java               # (US5)
+    │   └── MapaAsientosControllerTest.java
     └── adapter/out/persistence/
-        ├── tipoasiento/
-        └── asiento/
+        └── asiento/AsientoRepositoryAdapterTest.java
 ```
 - [ ] T027 [US2] Crear DTO `EditarTipoAsientoRequest.java` (`nombre nullable`, `descripcion nullable`)
 - [ ] T028 [US2] Implementar endpoint `PUT /api/tipos-asiento/{id}` en `TipoAsientoController.java`
