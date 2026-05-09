@@ -48,7 +48,8 @@ public class CancelacionController {
     @PostMapping("/eventos/{eventoId}/cancelar")
     public Mono<ResponseEntity<Void>> cancelarEvento(@PathVariable UUID eventoId) {
         return procesarReembolsoMasivoUseCase.ejecutar(eventoId)
-                .thenReturn(ResponseEntity.ok().build());
+                .then()
+                .thenReturn(ResponseEntity.ok().<Void>build());
     }
 }
 

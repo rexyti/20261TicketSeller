@@ -8,6 +8,7 @@ import com.ticketseller.domain.model.ticket.Ticket;
 import com.ticketseller.domain.repository.ReembolsoRepositoryPort;
 import com.ticketseller.domain.repository.TicketRepositoryPort;
 import lombok.RequiredArgsConstructor;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
@@ -19,16 +20,15 @@ public class ProcesarReembolsoMasivoUseCase {
     private final TicketRepositoryPort ticketRepositoryPort;
     private final ReembolsoRepositoryPort reembolsoRepositoryPort;
 
-    public Mono<Void> ejecutar(UUID eventoId) {
+    public Flux<Reembolso> ejecutar(UUID eventoId) {
         return ticketRepositoryPort.buscarPorEventoYEstados(eventoId, Set.of(EstadoTicket.VENDIDO))
-                .flatMap(this::cancelarYCrearReembolso)
-                .then();
+                .flatMap(this::cancelarYCrearReembolso);
     }
 
-    private Mono<Void> cancelarYCrearReembolso(Ticket ticket) {
+    private Mono<Reembolso> cancelarYCrearReembolso(Ticket ticket) {
         EstadoTicket nuevoEstado = ticket.isEsCortesia() ? EstadoTicket.ANULADO : EstadoTicket.CANCELADO;
         return ticketRepositoryPort.guardar(ticket.toBuilder().estado(nuevoEstado).build())
-                .flatMap(saved -> saved.isEsCortesia() ? Mono.empty() : crearReembolsoPendiente(saved).then());
+                .flatMap(saved -> saved.isEsCortesia() ? Mono.empty() : crearReembolsoPendiente(saved));
     }
 
     private Mono<Reembolso> crearReembolsoPendiente(Ticket ticket) {
@@ -44,4 +44,3 @@ public class ProcesarReembolsoMasivoUseCase {
         return reembolsoRepositoryPort.guardar(reembolso);
     }
 }
-

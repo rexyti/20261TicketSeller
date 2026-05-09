@@ -51,6 +51,18 @@ public class Evento {
                 .build();
     }
 
+    public Evento marcarEnProgreso() {
+        return toBuilder()
+                .estado(EstadoEvento.EN_PROGRESO)
+                .build();
+    }
+
+    public Evento finalizar() {
+        return toBuilder()
+                .estado(EstadoEvento.FINALIZADO)
+                .build();
+    }
+
     private void validarTextoObligatorio(String valor, String campo) {
         if (valor == null || valor.isBlank()) {
             throw new IllegalArgumentException("El campo %s es obligatorio".formatted(campo));

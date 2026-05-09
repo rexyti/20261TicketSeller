@@ -61,6 +61,7 @@ import com.ticketseller.application.compuerta.AsignarCompuertaAZonaUseCase;
 import com.ticketseller.application.compuerta.CrearCompuertaUseCase;
 import com.ticketseller.application.compuerta.ListarCompuertasUseCase;
 import com.ticketseller.application.evento.*;
+import com.ticketseller.application.postventa.ConsultarReembolsosMasivoUseCase;
 import com.ticketseller.application.liquidacion.ConfigurarModeloNegocioUseCase;
 import com.ticketseller.application.liquidacion.ConsultarModeloNegocioUseCase;
 import com.ticketseller.application.liquidacion.ConsultarRecaudoIncrementalUseCase;
@@ -427,6 +428,16 @@ public class BeanConfiguration {
     }
 
     @Bean
+    public IniciarEventoUseCase iniciarEventoUseCase(EventoRepositoryPort eventoRepositoryPort) {
+        return new IniciarEventoUseCase(eventoRepositoryPort);
+    }
+
+    @Bean
+    public FinalizarEventoUseCase finalizarEventoUseCase(EventoRepositoryPort eventoRepositoryPort) {
+        return new FinalizarEventoUseCase(eventoRepositoryPort);
+    }
+
+    @Bean
     public CancelarEventoUseCase cancelarEventoUseCase(EventoRepositoryPort eventoRepositoryPort,
                                                        CancelacionEventoRepositoryPort cancelacionEventoRepositoryPort,
                                                        ProcesarReembolsoMasivoUseCase procesarReembolsoMasivoUseCase) {
@@ -562,6 +573,12 @@ public class BeanConfiguration {
     public ProcesarReembolsoMasivoUseCase procesarReembolsoMasivoUseCase(TicketRepositoryPort ticketRepositoryPort,
                                                                           ReembolsoRepositoryPort reembolsoRepositoryPort) {
         return new ProcesarReembolsoMasivoUseCase(ticketRepositoryPort, reembolsoRepositoryPort);
+    }
+
+    @Bean
+    public ConsultarReembolsosMasivoUseCase consultarReembolsosMasivoUseCase(TicketRepositoryPort ticketRepositoryPort,
+                                                                              ReembolsoRepositoryPort reembolsoRepositoryPort) {
+        return new ConsultarReembolsosMasivoUseCase(ticketRepositoryPort, reembolsoRepositoryPort);
     }
 
     @Bean
