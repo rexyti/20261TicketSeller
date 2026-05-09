@@ -27,7 +27,8 @@
       "Bash(awk -F'.java:' '{print $1}')",
       "Bash(grep -E \"\\\\.\\(java\\)$\")",
       "Bash(./gradlew build *)",
-      "Bash(grep *)"
+      "Bash(grep *)",
+      "Bash(git -C /home/nestor/Programacion/Ing_Software/20261TicketSeller status -- docs/plan/front/)"
     ]
   }
 }
