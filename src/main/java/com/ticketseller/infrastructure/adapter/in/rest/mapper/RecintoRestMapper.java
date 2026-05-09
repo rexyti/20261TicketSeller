@@ -26,7 +26,7 @@ public interface RecintoRestMapper {
     RecintoResponse toResponse(Recinto recinto);
 
     default RecintoEstructuraResponse toEstructuraResponse(Recinto recinto, List<Zona> zonas, List<Compuerta> compuertas) {
-        var bloques = zonas.stream()
+        var zonasResponse = zonas.stream()
                 .map(zona -> {
                     var nombresCompuertas = compuertas.stream()
                             .filter(c -> zona.getId().equals(c.getZonaId()))
@@ -35,7 +35,7 @@ public interface RecintoRestMapper {
                     return new ZonaResponse(zona.getNombre(), nombresCompuertas);
                 })
                 .collect(Collectors.toList());
-        return new RecintoEstructuraResponse(recinto.getId(), bloques);
+        return new RecintoEstructuraResponse(recinto.getId(), zonasResponse);
     }
 }
 

@@ -52,33 +52,36 @@ plan/
 
 ```text
 src/main/java/com/ticketseller/
-│
 ├── domain/
 │   ├── model/
 │   │   ├── evento/
 │   │   │   └── SnapshotLiquidacion.java
 │   │   └── recinto/
-│   │       ├── ModeloNegocio.java
-│   │       └── ConfiguracionLiquidacion.java
+│   │       ├── ConfiguracionLiquidacion.java
+│   │       └── ModeloNegocio.java
 │   ├── exception/
-│   │   ├── evento/
-│   │   │   └── EventoNoFinalizadoException.java
-│   │   └── LiquidacionNoConfiguradaException.java
+│   │   └── liquidacion/
+│   │       ├── LiquidacionNoConfiguradaException.java
+│   │       ├── ModeloNegocioInvalidoException.java
+│   │       └── MontoFijoInvalidoException.java
 │   └── repository/
 │       └── LiquidacionQueryPort.java
-│
 ├── application/
 │   └── liquidacion/
-│       ├── ConsultarSnapshotUseCase.java
-│       ├── ConsultarModeloNegocioUseCase.java
 │       ├── ConfigurarModeloNegocioUseCase.java
-│       └── ConsultarRecaudoIncrementalUseCase.java
-│
+│       ├── ConsultarModeloNegocioUseCase.java
+│       ├── ConsultarRecaudoIncrementalUseCase.java
+│       └── ConsultarSnapshotUseCase.java
 └── infrastructure/
     ├── adapter/in/rest/
     │   ├── liquidacion/
     │   │   ├── LiquidacionController.java
     │   │   └── dto/
+    │   │       ├── CondicionTicketResponse.java
+    │   │       ├── ConfigurarModeloNegocioRequest.java
+    │   │       ├── ModeloNegocioResponse.java
+    │   │       ├── RecaudoIncrementalResponse.java
+    │   │       └── SnapshotLiquidacionResponse.java
     │   └── mapper/
     │       └── LiquidacionRestMapper.java
     ├── adapter/out/persistence/
@@ -90,11 +93,15 @@ src/main/java/com/ticketseller/
 src/test/java/com/ticketseller/
 ├── application/
 │   └── liquidacion/
+│       ├── ConfigurarModeloNegocioUseCaseTest.java
+│       ├── ConsultarModeloNegocioUseCaseTest.java
+│       ├── ConsultarRecaudoIncrementalUseCaseTest.java
+│       └── ConsultarSnapshotUseCaseTest.java
 └── infrastructure/
     ├── adapter/in/rest/
     │   └── liquidacion/LiquidacionControllerTest.java
     └── adapter/out/persistence/
-        └── liquidacion/
+        └── liquidacion/LiquidacionQueryAdapterTest.java
 ```
 
 **Structure Decision**: Feature exclusivamente de lectura con una excepción: `ConfigurarModeloNegocioUseCase`

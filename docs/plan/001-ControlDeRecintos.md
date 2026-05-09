@@ -64,34 +64,41 @@ src/main/java/com/ticketseller/
 │   │   │   └── CategoriaRecinto.java
 │   │   └── zona/
 │   │       ├── Zona.java
-│   │       └── Compuerta.java
+│   │       ├── Compuerta.java
+│   │       └── TipoZona.java
 │   ├── exception/
-│   │   ├── CapacidadInvalidaException.java
-│   │   ├── CompuertaInvalidaException.java
 │   │   ├── recinto/
 │   │   │   ├── RecintoConEventosException.java
 │   │   │   ├── RecintoDuplicadoException.java
 │   │   │   ├── RecintoInvalidoException.java
+│   │   │   ├── RecintoNoCategorizadoException.java
+│   │   │   ├── RecintoNoDisponibleException.java
 │   │   │   └── RecintoNotFoundException.java
-│   │   └── zona/
-│   │       ├── ZonaCapacidadExcedidaException.java
-│   │       ├── ZonaConTicketsVendidosException.java
-│   │       ├── ZonaInvalidaException.java
-│   │       ├── ZonaNombreDuplicadoException.java
-│   │       └── ZonaNotFoundException.java
-│   ├── repository/
-│   │   ├── RecintoRepositoryPort.java
-│   │   ├── ZonaRepositoryPort.java
-│   │   └── CompuertaRepositoryPort.java
-│   └── shared/
-│       └── Pagina.java
+│   │   ├── zona/
+│   │   │   ├── CapacidadInvalidaException.java
+│   │   │   ├── ZonaCapacidadExcedidaException.java
+│   │   │   ├── ZonaConTicketsVendidosException.java
+│   │   │   ├── ZonaInvalidaException.java
+│   │   │   ├── ZonaNombreDuplicadoException.java
+│   │   │   └── ZonaNotFoundException.java
+│   │   └── compuerta/
+│   │       ├── CompuertaInvalidaException.java
+│   │       ├── CompuertaLimiteExcedidoException.java
+│   │       └── CompuertaNotFoundException.java
+│   └── repository/
+│       ├── RecintoRepositoryPort.java
+│       ├── ZonaRepositoryPort.java
+│       └── CompuertaRepositoryPort.java
 ├── application/
 │   ├── recinto/
-│   │   ├── RegistrarRecintoUseCase.java
-│   │   ├── ListarRecintosUseCase.java
-│   │   ├── ListarRecintosFiltradosUseCase.java
+│   │   ├── ConsultarEstructuraRecintoUseCase.java
+│   │   ├── ConsultarRecintoUseCase.java
+│   │   ├── DesactivarRecintoUseCase.java
 │   │   ├── EditarRecintoUseCase.java
-│   │   └── DesactivarRecintoUseCase.java
+│   │   ├── ListarRecintosFiltradosUseCase.java
+│   │   ├── ListarRecintosUseCase.java
+│   │   ├── ReactivarRecintoUseCase.java
+│   │   └── RegistrarRecintoUseCase.java
 │   ├── capacidad/
 │   │   ├── ConfigurarCapacidadUseCase.java
 │   │   └── ConfigurarCategoriaUseCase.java
@@ -100,8 +107,8 @@ src/main/java/com/ticketseller/
 │   │   ├── ListarZonasUseCase.java
 │   │   └── ValidarZonasUseCase.java
 │   └── compuerta/
-│       ├── CrearCompuertaUseCase.java
 │       ├── AsignarCompuertaAZonaUseCase.java
+│       ├── CrearCompuertaUseCase.java
 │       └── ListarCompuertasUseCase.java
 └── infrastructure/
     ├── adapter/in/rest/
@@ -110,25 +117,45 @@ src/main/java/com/ticketseller/
     │   ├── recinto/
     │   │   ├── RecintoController.java
     │   │   └── dto/
+    │   │       ├── ConfigurarCapacidadRequest.java
+    │   │       ├── ConfigurarCategoriaRequest.java
+    │   │       ├── CrearRecintoRequest.java
+    │   │       ├── EditarRecintoRequest.java
+    │   │       ├── RecintoEstructuraResponse.java
+    │   │       ├── RecintoFiltroRequest.java
+    │   │       └── RecintoResponse.java
     │   ├── zona/
     │   │   ├── ZonaController.java
     │   │   └── dto/
+    │   │       ├── CrearZonaRequest.java
+    │   │       └── ZonaResponse.java
     │   ├── compuerta/
     │   │   ├── CompuertaController.java
     │   │   └── dto/
+    │   │       ├── CompuertaResponse.java
+    │   │       └── CrearCompuertaRequest.java
     │   └── mapper/
     │       ├── RecintoRestMapper.java
     │       ├── ZonaRestMapper.java
     │       └── CompuertaRestMapper.java
     ├── adapter/out/persistence/
     │   ├── recinto/
-    │   │   └── mapper/
+    │   │   ├── RecintoEntity.java
+    │   │   ├── RecintoR2dbcRepository.java
+    │   │   ├── RecintoRepositoryAdapter.java
+    │   │   └── mapper/RecintoPersistenceMapper.java
     │   ├── zona/
-    │   │   └── mapper/
+    │   │   ├── ZonaEntity.java
+    │   │   ├── ZonaR2dbcRepository.java
+    │   │   ├── ZonaRepositoryAdapter.java
+    │   │   └── mapper/ZonaPersistenceMapper.java
     │   └── compuerta/
-    │       └── mapper/
+    │       ├── CompuertaEntity.java
+    │       ├── CompuertaR2dbcRepository.java
+    │       ├── CompuertaRepositoryAdapter.java
+    │       └── mapper/CompuertaPersistenceMapper.java
     └── config/
-        └── BeanConfiguration.java                  # Inyección de dependencias hexagonal
+        └── BeanConfiguration.java
 
 src/test/java/com/ticketseller/
 ├── domain/
@@ -137,23 +164,28 @@ src/test/java/com/ticketseller/
 │   └── CompuertaTest.java
 ├── application/
 │   ├── recinto/
-│   │   ├── RegistrarRecintoUseCaseTest.java
+│   │   ├── DesactivarRecintoUseCaseTest.java
+│   │   ├── EditarRecintoUseCaseTest.java
 │   │   ├── ListarRecintosUseCaseTest.java
 │   │   ├── ListarRecintosFiltradosUseCaseTest.java
-│   │   ├── EditarRecintoUseCaseTest.java
-│   │   └── DesactivarRecintoUseCaseTest.java
+│   │   └── RegistrarRecintoUseCaseTest.java
 │   ├── capacidad/
+│   │   ├── ConfigurarCapacidadUseCaseTest.java
+│   │   └── ConfigurarCategoriaUseCaseTest.java
 │   ├── zona/
+│   │   └── CrearZonaUseCaseTest.java
 │   └── compuerta/
+│       ├── AsignarCompuertaAZonaUseCaseTest.java
+│       └── CrearCompuertaUseCaseTest.java
 └── infrastructure/
     ├── adapter/in/rest/
-    │   ├── recinto/RecintoControllerTest.java
-    │   ├── zona/ZonaControllerTest.java
-    │   └── compuerta/CompuertaControllerTest.java
+    │   ├── RecintoControllerTest.java
+    │   ├── ZonaControllerTest.java
+    │   └── CompuertaControllerTest.java
     └── adapter/out/persistence/
-        ├── recinto/RecintoRepositoryAdapterTest.java
-        ├── zona/ZonaRepositoryAdapterTest.java
-        └── compuerta/CompuertaRepositoryAdapterTest.java
+        ├── RecintoRepositoryAdapterTest.java
+        ├── ZonaRepositoryAdapterTest.java
+        └── CompuertaRepositoryAdapterTest.java
 ```
 
 **Structure Decision**: Arquitectura hexagonal respetando responsabilidad única. `domain/` contiene únicamente el modelo

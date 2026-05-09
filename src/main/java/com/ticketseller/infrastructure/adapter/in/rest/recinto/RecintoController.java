@@ -1,11 +1,13 @@
 package com.ticketseller.infrastructure.adapter.in.rest.recinto;
 
 import com.ticketseller.application.recinto.ConsultarEstructuraRecintoUseCase;
+import com.ticketseller.application.recinto.ConsultarRecintoUseCase;
 import com.ticketseller.application.capacidad.ConfigurarCapacidadUseCase;
 import com.ticketseller.application.capacidad.ConfigurarCategoriaUseCase;
 import com.ticketseller.application.recinto.DesactivarRecintoUseCase;
 import com.ticketseller.application.recinto.EditarRecintoUseCase;
 import com.ticketseller.application.recinto.ListarRecintosFiltradosUseCase;
+import com.ticketseller.application.recinto.ReactivarRecintoUseCase;
 import com.ticketseller.application.recinto.RegistrarRecintoUseCase;
 import com.ticketseller.domain.model.recinto.CategoriaRecinto;
 import com.ticketseller.domain.model.recinto.Recinto;
@@ -28,10 +30,12 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -51,8 +55,10 @@ public class RecintoController {
     private final ConfigurarCapacidadUseCase configurarCapacidadUseCase;
     private final EditarRecintoUseCase editarRecintoUseCase;
     private final DesactivarRecintoUseCase desactivarRecintoUseCase;
+    private final ReactivarRecintoUseCase reactivarRecintoUseCase;
     private final ConfigurarCategoriaUseCase configurarCategoriaUseCase;
     private final ConsultarEstructuraRecintoUseCase consultarEstructuraRecintoUseCase;
+    private final ConsultarRecintoUseCase consultarRecintoUseCase;
     private final RecintoRestMapper recintoRestMapper;
 
     @Operation(summary = "Registrar un nuevo recinto")
@@ -95,8 +101,18 @@ public class RecintoController {
         return "ACTIVO".equalsIgnoreCase(estado);
     }
 
+    @Operation(summary = "Obtener información completa de un recinto")
+    @ApiResponse(responseCode = "200", description = "Recinto encontrado")
+    @ApiResponse(responseCode = "404", description = "Recinto no encontrado")
+    @GetMapping("/{id}")
+    public Mono<ResponseEntity<RecintoResponse>> obtener(@PathVariable UUID id) {
+        return consultarRecintoUseCase.ejecutar(id)
+                .map(recintoRestMapper::toResponse)
+                .map(ResponseEntity::ok);
+    }
+
     @Operation(summary = "Editar información de un recinto")
-    @PatchMapping("/{id}")
+    @PutMapping("/{id}")
     public Mono<ResponseEntity<RecintoResponse>> editar(@PathVariable UUID id,
                                                         @RequestBody EditarRecintoRequest request) {
         Recinto cambios = Recinto.builder()
@@ -113,9 +129,17 @@ public class RecintoController {
     }
 
     @Operation(summary = "Desactivar un recinto")
-    @PatchMapping("/{id}/desactivar")
+    @DeleteMapping("/{id}/desactivar")
     public Mono<ResponseEntity<RecintoResponse>> desactivar(@PathVariable UUID id) {
         return desactivarRecintoUseCase.ejecutar(id)
+                .map(recintoRestMapper::toResponse)
+                .map(ResponseEntity::ok);
+    }
+
+    @Operation(summary = "Reactivar un recinto")
+    @PatchMapping("/{id}/reactivar")
+    public Mono<ResponseEntity<RecintoResponse>> reactivar(@PathVariable UUID id) {
+        return reactivarRecintoUseCase.ejecutar(id)
                 .map(recintoRestMapper::toResponse)
                 .map(ResponseEntity::ok);
     }
@@ -138,11 +162,11 @@ public class RecintoController {
                 .map(ResponseEntity::ok);
     }
 
-    @Operation(summary = "Consultar estructura del recinto", description = "Retorna la lista de bloques y zonas del recinto para validación de coherencia.")
+    @Operation(summary = "Consultar estructura del recinto", description = "Retorna la lista de zonas y compuertas del recinto para validación de coherencia.")
     @ApiResponse(responseCode = "200", description = "Estructura del recinto recuperada exitosamente",
             content = @Content(schema = @Schema(implementation = RecintoEstructuraResponse.class)))
     @ApiResponse(responseCode = "404", description = "Recinto no encontrado")
-    @GetMapping("/{id}")
+    @GetMapping("/{id}/estructura")
     public Mono<ResponseEntity<RecintoEstructuraResponse>> consultarEstructura(@PathVariable UUID id) {
         return consultarEstructuraRecintoUseCase.ejecutar(id)
                 .map(tuple -> recintoRestMapper.toEstructuraResponse(tuple.getT1(), tuple.getT2(), tuple.getT3()))

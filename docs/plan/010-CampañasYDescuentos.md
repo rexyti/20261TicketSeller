@@ -56,57 +56,94 @@ plan/
 
 ```text
 src/main/java/com/ticketseller/
-│
 ├── domain/
 │   ├── model/
 │   │   └── promocion/
-│   │       ├── Promocion.java
-│   │       ├── Descuento.java
 │   │       ├── CodigoPromocional.java
+│   │       ├── Descuento.java
+│   │       ├── EstadoCodigoPromocional.java
+│   │       ├── EstadoPromocion.java
+│   │       ├── Promocion.java
+│   │       ├── TipoDescuento.java
+│   │       ├── TipoPromocion.java
 │   │       └── TipoUsuario.java
 │   ├── exception/
 │   │   └── promocion/
-│   │       ├── CodigoPromoInvalidoException.java
-│   │       ├── CodigoPromoExpiradoException.java
 │   │       ├── CodigoPromoAgotadoException.java
+│   │       ├── CodigoPromoExpiradoException.java
+│   │       ├── CodigoPromoInvalidoException.java
+│   │       ├── FechasInvalidasPromocionException.java
 │   │       ├── PromocionNoActivaException.java
+│   │       ├── PromocionNotFoundException.java
+│   │       ├── TransicionPromocionInvalidaException.java
 │   │       └── UsuarioNoAutorizadoParaPreventaException.java
 │   └── repository/
-│       ├── PromocionRepositoryPort.java
+│       ├── CodigoPromocionalRepositoryPort.java
 │       ├── DescuentoRepositoryPort.java
-│       └── CodigoPromocionalRepositoryPort.java
-│
-├── application/                                    # Casos de uso — uno por responsabilidad
+│       └── PromocionRepositoryPort.java
+├── application/
 │   └── promocion/
-│       ├── CrearPromocionUseCase.java
-│       ├── CrearDescuentoUseCase.java
-│       ├── CrearCodigosPromocionalesUseCase.java
-│       ├── GestionarEstadoPromocionUseCase.java
 │       ├── AplicarDescuentoCarritoUseCase.java
+│       ├── CrearCodigosPromocionalesUseCase.java
+│       ├── CrearDescuentoUseCase.java
+│       ├── CrearPromocionUseCase.java
+│       ├── DescuentoAplicado.java
+│       ├── GestionarEstadoPromocionUseCase.java
+│       ├── ItemCarrito.java
+│       ├── ListarDescuentosUseCase.java
+│       ├── ListarPromocionesUseCase.java
 │       └── ValidarCodigoPromocionalUseCase.java
-│
 └── infrastructure/
     ├── adapter/in/rest/
     │   ├── promocion/
-    │   │   ├── PromocionController.java
     │   │   ├── DescuentoController.java
+    │   │   ├── PromocionController.java
     │   │   └── dto/
+    │   │       ├── ActualizarEstadoPromocionRequest.java
+    │   │       ├── AplicarCodigoRequest.java
+    │   │       ├── CalcularDescuentoRequest.java
+    │   │       ├── CrearCodigosRequest.java
+    │   │       ├── CrearDescuentoRequest.java
+    │   │       ├── CrearPromocionRequest.java
+    │   │       ├── DescuentoAplicadoResponse.java
+    │   │       ├── DescuentoResponse.java
+    │   │       └── PromocionResponse.java
     │   └── mapper/
     │       └── PromocionRestMapper.java
     ├── adapter/out/persistence/
     │   └── promocion/
+    │       ├── CodigoPromocionalEntity.java
+    │       ├── CodigoPromocionalR2dbcRepository.java
+    │       ├── CodigoPromocionalRepositoryAdapter.java
+    │       ├── DescuentoEntity.java
+    │       ├── DescuentoR2dbcRepository.java
+    │       ├── DescuentoRepositoryAdapter.java
+    │       ├── PromocionEntity.java
+    │       ├── PromocionR2dbcRepository.java
+    │       ├── PromocionRepositoryAdapter.java
     │       └── mapper/
+    │           ├── CodigoPromocionalPersistenceMapper.java
+    │           ├── DescuentoPersistenceMapper.java
+    │           └── PromocionPersistenceMapper.java
     └── config/
-        └── BeanConfiguration.java             # Actualizar con los nuevos beans
+        └── BeanConfiguration.java
 
 src/test/java/com/ticketseller/
 ├── application/
 │   └── promocion/
+│       ├── AplicarDescuentoCarritoUseCaseTest.java
+│       ├── CrearCodigosPromocionalesUseCaseTest.java
+│       ├── CrearPromocionUseCaseTest.java
+│       └── ValidarCodigoPromocionalUseCaseTest.java
 └── infrastructure/
     ├── adapter/in/rest/
     │   └── promocion/
+    │       ├── DescuentoControllerTest.java
+    │       └── PromocionControllerTest.java
     └── adapter/out/persistence/
         └── promocion/
+            ├── CodigoPromocionalRepositoryAdapterTest.java
+            └── PromocionRepositoryAdapterTest.java
 ```
 
 **Structure Decision**: Feature que crea el subsistema de campañas desde cero. `Promocion` es la

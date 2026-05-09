@@ -52,67 +52,96 @@ plan/
 
 ```text
 src/main/java/com/ticketseller/
-│
 ├── domain/
 │   ├── model/
 │   │   ├── ticket/
 │   │   │   ├── Ticket.java
+│   │   │   ├── AccessDetails.java
 │   │   │   └── EstadoTicket.java
 │   │   └── venta/
 │   │       ├── Venta.java
 │   │       ├── TransaccionFinanciera.java
 │   │       ├── EstadoVenta.java
 │   │       ├── EstadoPago.java
-│   │       └── MetodoPago.java
+│   │       ├── MetodoPago.java
+│   │       └── ResultadoPago.java
 │   ├── exception/
-│   │   ├── asiento/
-│   │   │   └── AsientoNoDisponibleException.java
 │   │   └── venta/
-│   │       ├── VentaNotFoundException.java
+│   │       ├── EstadoVentaInvalidoException.java
+│   │       ├── MetodoPagoInvalidoException.java
 │   │       ├── PagoRechazadoException.java
-│   │       └── ReservaExpiradaException.java
+│   │       ├── ReservaExpiradaException.java
+│   │       ├── SolicitudReservaInvalidaException.java
+│   │       ├── TicketNotFoundException.java
+│   │       └── VentaNotFoundException.java
 │   └── repository/
 │       ├── TicketRepositoryPort.java
 │       ├── VentaRepositoryPort.java
+│       ├── TransaccionFinancieraRepositoryPort.java
 │       ├── PasarelaPagoPort.java
-│       └── NotificacionEmailPort.java
-│
+│       ├── NotificacionEmailPort.java
+│       └── CodigoQrPort.java
 ├── application/
 │   └── checkout/
-│       ├── ReservarAsientosUseCase.java
-│       ├── ProcesarPagoUseCase.java
+│       ├── ConsultarEstadoTicketUseCase.java
+│       ├── ConsultarTodosTicketsUseCase.java
+│       ├── ConsultarVentaUseCase.java
 │       ├── LiberarReservaUseCase.java
-│       └── ConsultarVentaUseCase.java
-│
+│       ├── ProcesarPagoCommand.java
+│       ├── ProcesarPagoUseCase.java
+│       ├── ReservarAsientosCommand.java
+│       ├── ReservarAsientosUseCase.java
+│       └── VentaDetalle.java
 └── infrastructure/
     ├── adapter/in/rest/
     │   ├── checkout/
     │   │   ├── CheckoutController.java
-    │   │   ├── TicketConsultaController.java
     │   │   └── dto/
+    │   │       ├── ProcesarPagoRequest.java
+    │   │       ├── ReservarAsientosRequest.java
+    │   │       ├── TicketResponse.java
+    │   │       └── VentaResponse.java
     │   └── mapper/
     │       └── CheckoutRestMapper.java
+    ├── adapter/in/scheduler/
+    │   └── checkout/
+    │       └── LiberacionReservasExpiradasScheduler.java
     ├── adapter/out/persistence/
     │   └── checkout/
+    │       ├── TicketEntity.java
+    │       ├── TicketR2dbcRepository.java
+    │       ├── TicketRepositoryAdapter.java
+    │       ├── VentaEntity.java
+    │       ├── VentaR2dbcRepository.java
+    │       ├── VentaRepositoryAdapter.java
+    │       ├── TransaccionFinancieraEntity.java
+    │       ├── TransaccionFinancieraR2dbcRepository.java
+    │       ├── TransaccionFinancieraRepositoryAdapter.java
+    │       └── mapper/
+    │           ├── TicketPersistenceMapper.java
+    │           ├── VentaPersistenceMapper.java
+    │           └── TransaccionFinancieraPersistenceMapper.java
     ├── adapter/out/payment/
+    │   ├── PasarelaPagoAdapter.java
+    │   └── WompiAdapter.java
     ├── adapter/out/email/
+    │   └── EmailNotificacionAdapter.java
     ├── adapter/out/qr/
+    │   └── ZxingCodigoQrAdapter.java
     └── config/
-        ├── BeanConfiguration.java             # Actualizar con los nuevos beans
-        └── CheckoutReservaExpirationJob.java  # Job reactivo para liberar reservas
+        └── BeanConfiguration.java
 
 src/test/java/com/ticketseller/
-├── domain/
-│   └── VentaTest.java
 ├── application/
 │   └── checkout/
+│       ├── LiberarReservaUseCaseTest.java
+│       ├── ProcesarPagoUseCaseTest.java
+│       └── ReservarAsientosUseCaseTest.java
 └── infrastructure/
     ├── adapter/in/rest/
     │   └── checkout/CheckoutControllerTest.java
-    ├── adapter/out/persistence/
-    │   └── checkout/
-    └── adapter/out/payment/
-        └── PasarelaPagoAdapterTest.java
+    └── adapter/out/persistence/
+        └── checkout/TicketRepositoryAdapterTest.java
 ```
 
 **Structure Decision**: `PasarelaPagoPort` y `NotificacionEmailPort` viven en `domain/port/out/`

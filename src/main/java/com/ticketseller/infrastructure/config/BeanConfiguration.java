@@ -61,16 +61,19 @@ import com.ticketseller.application.compuerta.AsignarCompuertaAZonaUseCase;
 import com.ticketseller.application.compuerta.CrearCompuertaUseCase;
 import com.ticketseller.application.compuerta.ListarCompuertasUseCase;
 import com.ticketseller.application.evento.*;
+import com.ticketseller.application.postventa.ConsultarReembolsosMasivoUseCase;
 import com.ticketseller.application.liquidacion.ConfigurarModeloNegocioUseCase;
 import com.ticketseller.application.liquidacion.ConsultarModeloNegocioUseCase;
 import com.ticketseller.application.liquidacion.ConsultarRecaudoIncrementalUseCase;
 import com.ticketseller.application.liquidacion.ConsultarSnapshotUseCase;
 import com.ticketseller.application.precios.ConfigurarPreciosUseCase;
 import com.ticketseller.application.precios.ListarPreciosUseCase;
+import com.ticketseller.application.recinto.ConsultarRecintoUseCase;
 import com.ticketseller.application.recinto.DesactivarRecintoUseCase;
 import com.ticketseller.application.recinto.EditarRecintoUseCase;
 import com.ticketseller.application.recinto.ListarRecintosFiltradosUseCase;
 import com.ticketseller.application.recinto.ListarRecintosUseCase;
+import com.ticketseller.application.recinto.ReactivarRecintoUseCase;
 import com.ticketseller.application.recinto.RegistrarRecintoUseCase;
 import com.ticketseller.application.tipoasiento.AsignarTipoAsientoAZonaUseCase;
 import com.ticketseller.application.asiento.AsignarAsientosAZonaUseCase;
@@ -118,7 +121,7 @@ import com.ticketseller.domain.repository.HistorialEstadoTicketRepositoryPort;
 import com.ticketseller.domain.repository.HistorialEstadoVentaRepositoryPort;
 import com.ticketseller.domain.repository.PagoRepositoryPort;
 import com.ticketseller.domain.repository.ReembolsoRepositoryPort;
-import com.ticketseller.infrastructure.adapter.out.payment.WompiAdapter;
+import com.ticketseller.infrastructure.adapter.out.payment.PasarelaPagoAdapter;
 import com.ticketseller.infrastructure.adapter.out.persistence.cancelacionevento.CancelacionEventoR2dbcRepository;
 import com.ticketseller.infrastructure.adapter.out.persistence.cancelacionevento.CancelacionEventoRepositoryAdapter;
 import com.ticketseller.infrastructure.adapter.out.persistence.cancelacionevento.mapper.CancelacionEventoPersistenceMapper;
@@ -164,12 +167,10 @@ import com.ticketseller.infrastructure.adapter.out.persistence.historialestadoas
 import com.ticketseller.infrastructure.adapter.out.persistence.historialestadoasiento.mapper.HistorialCambioEstadoPersistenceMapper;
 import com.ticketseller.infrastructure.adapter.out.email.EmailNotificacionAdapter;
 import com.ticketseller.infrastructure.adapter.out.qr.ZxingCodigoQrAdapter;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.mail.javamail.JavaMailSenderImpl;
-import org.springframework.r2dbc.core.DatabaseClient;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.r2dbc.core.DatabaseClient;
 
 @Configuration
 public class BeanConfiguration {
@@ -269,13 +270,8 @@ public class BeanConfiguration {
     }
 
     @Bean
-    public NotificacionEmailPort notificacionEmailPort() {
-        return new EmailNotificacionAdapter(javaMailSender());
-    }
-
-    @Bean
-    public JavaMailSender javaMailSender() {
-        return new JavaMailSenderImpl();
+    public NotificacionEmailPort notificacionEmailPort(JavaMailSender javaMailSender) {
+        return new EmailNotificacionAdapter(javaMailSender);
     }
 
     @Bean
@@ -311,6 +307,16 @@ public class BeanConfiguration {
     @Bean
     public DesactivarRecintoUseCase desactivarRecintoUseCase(RecintoRepositoryPort recintoRepositoryPort) {
         return new DesactivarRecintoUseCase(recintoRepositoryPort);
+    }
+
+    @Bean
+    public ReactivarRecintoUseCase reactivarRecintoUseCase(RecintoRepositoryPort recintoRepositoryPort) {
+        return new ReactivarRecintoUseCase(recintoRepositoryPort);
+    }
+
+    @Bean
+    public ConsultarRecintoUseCase consultarRecintoUseCase(RecintoRepositoryPort recintoRepositoryPort) {
+        return new ConsultarRecintoUseCase(recintoRepositoryPort);
     }
 
     @Bean
@@ -377,8 +383,9 @@ public class BeanConfiguration {
     @Bean
     public AsignarTipoAsientoAZonaUseCase asignarTipoAsientoAZonaUseCase(
             TipoAsientoRepositoryPort tipoAsientoRepositoryPort,
-            ZonaRepositoryPort zonaRepositoryPort) {
-        return new AsignarTipoAsientoAZonaUseCase(tipoAsientoRepositoryPort, zonaRepositoryPort);
+            ZonaRepositoryPort zonaRepositoryPort,
+            AsientoRepositoryPort asientoRepositoryPort) {
+        return new AsignarTipoAsientoAZonaUseCase(tipoAsientoRepositoryPort, zonaRepositoryPort, asientoRepositoryPort);
     }
 
     @Bean
@@ -430,6 +437,16 @@ public class BeanConfiguration {
     @Bean
     public EditarEventoUseCase editarEventoUseCase(EventoRepositoryPort eventoRepositoryPort) {
         return new EditarEventoUseCase(eventoRepositoryPort);
+    }
+
+    @Bean
+    public IniciarEventoUseCase iniciarEventoUseCase(EventoRepositoryPort eventoRepositoryPort) {
+        return new IniciarEventoUseCase(eventoRepositoryPort);
+    }
+
+    @Bean
+    public FinalizarEventoUseCase finalizarEventoUseCase(EventoRepositoryPort eventoRepositoryPort) {
+        return new FinalizarEventoUseCase(eventoRepositoryPort);
     }
 
     @Bean
@@ -489,10 +506,8 @@ public class BeanConfiguration {
     }
 
     @Bean
-    public PasarelaPagoPort pasarelaPagoPort(
-            @Value("${wompi.base-url}") String baseUrl,
-            @Value("${wompi.private-key}") String privateKey) {
-        return new WompiAdapter(baseUrl, privateKey);
+    public PasarelaPagoPort pasarelaPagoPort() {
+        return new PasarelaPagoAdapter();
     }
 
     @Bean
@@ -570,6 +585,12 @@ public class BeanConfiguration {
     public ProcesarReembolsoMasivoUseCase procesarReembolsoMasivoUseCase(TicketRepositoryPort ticketRepositoryPort,
                                                                           ReembolsoRepositoryPort reembolsoRepositoryPort) {
         return new ProcesarReembolsoMasivoUseCase(ticketRepositoryPort, reembolsoRepositoryPort);
+    }
+
+    @Bean
+    public ConsultarReembolsosMasivoUseCase consultarReembolsosMasivoUseCase(TicketRepositoryPort ticketRepositoryPort,
+                                                                              ReembolsoRepositoryPort reembolsoRepositoryPort) {
+        return new ConsultarReembolsosMasivoUseCase(ticketRepositoryPort, reembolsoRepositoryPort);
     }
 
     @Bean
@@ -782,15 +803,23 @@ public class BeanConfiguration {
     public CrearCortesiaConAsientoUseCase crearCortesiaConAsientoUseCase(
             com.ticketseller.domain.repository.AsientoRepositoryPort asientoRepositoryPort,
             CortesiaRepositoryPort cortesiaRepositoryPort,
-            com.ticketseller.domain.repository.TicketRepositoryPort ticketRepositoryPort) {
-        return new CrearCortesiaConAsientoUseCase(asientoRepositoryPort, cortesiaRepositoryPort, ticketRepositoryPort);
+            com.ticketseller.domain.repository.TicketRepositoryPort ticketRepositoryPort,
+            ZonaRepositoryPort zonaRepositoryPort,
+            CompuertaRepositoryPort compuertaRepositoryPort,
+            EventoRepositoryPort eventoRepositoryPort) {
+        return new CrearCortesiaConAsientoUseCase(asientoRepositoryPort, cortesiaRepositoryPort, ticketRepositoryPort,
+                zonaRepositoryPort, compuertaRepositoryPort, eventoRepositoryPort);
     }
 
     @Bean
     public CrearCortesiaGeneralUseCase crearCortesiaGeneralUseCase(
             CortesiaRepositoryPort cortesiaRepositoryPort,
-            com.ticketseller.domain.repository.TicketRepositoryPort ticketRepositoryPort) {
-        return new CrearCortesiaGeneralUseCase(cortesiaRepositoryPort, ticketRepositoryPort);
+            com.ticketseller.domain.repository.TicketRepositoryPort ticketRepositoryPort,
+            ZonaRepositoryPort zonaRepositoryPort,
+            CompuertaRepositoryPort compuertaRepositoryPort,
+            EventoRepositoryPort eventoRepositoryPort) {
+        return new CrearCortesiaGeneralUseCase(cortesiaRepositoryPort, ticketRepositoryPort,
+                zonaRepositoryPort, compuertaRepositoryPort, eventoRepositoryPort);
     }
 
     @Bean

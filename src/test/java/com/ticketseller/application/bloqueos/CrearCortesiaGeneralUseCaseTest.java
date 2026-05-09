@@ -3,15 +3,24 @@ package com.ticketseller.application.bloqueos;
 import com.ticketseller.domain.model.bloqueos.CategoriaCortesia;
 import com.ticketseller.domain.model.bloqueos.Cortesia;
 import com.ticketseller.domain.model.bloqueos.EstadoCortesia;
+import com.ticketseller.domain.model.evento.Evento;
 import com.ticketseller.domain.model.ticket.Ticket;
+import com.ticketseller.domain.model.zona.Compuerta;
+import com.ticketseller.domain.model.zona.TipoZona;
+import com.ticketseller.domain.model.zona.Zona;
+import com.ticketseller.domain.repository.CompuertaRepositoryPort;
 import com.ticketseller.domain.repository.CortesiaRepositoryPort;
+import com.ticketseller.domain.repository.EventoRepositoryPort;
 import com.ticketseller.domain.repository.TicketRepositoryPort;
+import com.ticketseller.domain.repository.ZonaRepositoryPort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -23,6 +32,9 @@ class CrearCortesiaGeneralUseCaseTest {
 
     private CortesiaRepositoryPort cortesiaRepositoryPort;
     private TicketRepositoryPort ticketRepositoryPort;
+    private ZonaRepositoryPort zonaRepositoryPort;
+    private CompuertaRepositoryPort compuertaRepositoryPort;
+    private EventoRepositoryPort eventoRepositoryPort;
     private CrearCortesiaGeneralUseCase useCase;
 
     private final UUID eventoId = UUID.randomUUID();
@@ -32,14 +44,25 @@ class CrearCortesiaGeneralUseCaseTest {
     void setUp() {
         cortesiaRepositoryPort = mock(CortesiaRepositoryPort.class);
         ticketRepositoryPort = mock(TicketRepositoryPort.class);
-        useCase = new CrearCortesiaGeneralUseCase(cortesiaRepositoryPort, ticketRepositoryPort);
+        zonaRepositoryPort = mock(ZonaRepositoryPort.class);
+        compuertaRepositoryPort = mock(CompuertaRepositoryPort.class);
+        eventoRepositoryPort = mock(EventoRepositoryPort.class);
+        useCase = new CrearCortesiaGeneralUseCase(cortesiaRepositoryPort, ticketRepositoryPort,
+                zonaRepositoryPort, compuertaRepositoryPort, eventoRepositoryPort);
     }
 
     @Test
     void creaTicketYCortesiaSinAsiento() {
         Ticket ticket = buildTicket(zonaId);
         Cortesia cortesia = buildCortesia(ticket.getId());
+        Zona zona = Zona.builder().id(zonaId).nombre("General Zone").tipo(TipoZona.GENERAL).build();
+        Evento evento = Evento.builder().id(eventoId).fechaInicio(LocalDateTime.now().plusDays(3)).build();
+        Compuerta compuerta = Compuerta.builder().id(UUID.randomUUID()).nombre("Puerta Sur").build();
 
+        when(zonaRepositoryPort.buscarPorId(zonaId)).thenReturn(Mono.just(zona));
+        when(eventoRepositoryPort.buscarPorId(eventoId)).thenReturn(Mono.just(evento));
+        when(compuertaRepositoryPort.buscarPorZonaId(zonaId)).thenReturn(Flux.just(compuerta));
+        when(ticketRepositoryPort.buscarPorEvento(eventoId)).thenReturn(Flux.empty());
         when(ticketRepositoryPort.guardar(any())).thenReturn(Mono.just(ticket));
         when(cortesiaRepositoryPort.guardar(any())).thenReturn(Mono.just(cortesia));
 
@@ -58,7 +81,9 @@ class CrearCortesiaGeneralUseCaseTest {
     void creaTicketYCortesiaSinZona() {
         Ticket ticket = buildTicket(null);
         Cortesia cortesia = buildCortesia(ticket.getId());
+        Evento evento = Evento.builder().id(eventoId).fechaInicio(LocalDateTime.now().plusDays(3)).build();
 
+        when(eventoRepositoryPort.buscarPorId(eventoId)).thenReturn(Mono.just(evento));
         when(ticketRepositoryPort.guardar(any())).thenReturn(Mono.just(ticket));
         when(cortesiaRepositoryPort.guardar(any())).thenReturn(Mono.just(cortesia));
 

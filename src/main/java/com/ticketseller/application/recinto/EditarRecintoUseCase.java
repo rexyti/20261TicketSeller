@@ -1,6 +1,7 @@
 package com.ticketseller.application.recinto;
 
 import com.ticketseller.domain.exception.recinto.RecintoConEventosException;
+import com.ticketseller.domain.exception.recinto.RecintoDuplicadoException;
 import com.ticketseller.domain.exception.recinto.RecintoNotFoundException;
 import com.ticketseller.domain.model.recinto.Recinto;
 import com.ticketseller.domain.repository.RecintoRepositoryPort;
@@ -24,10 +25,26 @@ public class EditarRecintoUseCase {
         validarCapacidadMaxima(actual, cambios);
         Mono<Boolean> tieneTickets = recintoTieneTicketsVendidos(actual, cambios.getCapacidadMaxima());
 
-        return tieneTickets.filter(tiene -> !tiene)
-                .switchIfEmpty(Mono.error(new RecintoConEventosException("No se puede cambiar la capacidad máxima porque hay tickets vendidos")))
-                .map(permitido -> buildRecintoEditado(actual, cambios))
-                .flatMap(recintoRepositoryPort::guardar);
+        return validarNombreYCiudadUnicos(actual, cambios)
+                .then(tieneTickets.filter(tiene -> !tiene)
+                        .switchIfEmpty(Mono.error(new RecintoConEventosException("No se puede cambiar la capacidad máxima porque hay tickets vendidos")))
+                        .map(permitido -> buildRecintoEditado(actual, cambios))
+                        .flatMap(recintoRepositoryPort::guardar));
+    }
+
+    private Mono<Void> validarNombreYCiudadUnicos(Recinto actual, Recinto cambios) {
+        String nuevoNombre = cambios.getNombre() != null ? cambios.getNombre() : actual.getNombre();
+        String nuevaCiudad = cambios.getCiudad() != null ? cambios.getCiudad() : actual.getCiudad();
+        boolean cambioNombreOCiudad = !nuevoNombre.equals(actual.getNombre()) || !nuevaCiudad.equals(actual.getCiudad());
+        if (!cambioNombreOCiudad) {
+            return Mono.empty();
+        }
+        return recintoRepositoryPort.buscarPorNombreYCiudad(nuevoNombre, nuevaCiudad)
+                .flatMap(existente -> existente.getId().equals(actual.getId())
+                        ? Mono.<Void>empty()
+                        : Mono.error(new RecintoDuplicadoException(
+                                "Ya existe un recinto con el nombre '" + nuevoNombre + "' en la ciudad '" + nuevaCiudad + "'")))
+                .then();
     }
 
     private void validarCapacidadMaxima(Recinto actual, Recinto cambios) {

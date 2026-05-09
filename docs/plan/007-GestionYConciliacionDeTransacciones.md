@@ -61,45 +61,55 @@ plan/
 
 ```text
 src/main/java/com/ticketseller/
-│
 ├── domain/
 │   ├── model/
 │   │   ├── transaccion/
-│   │   │   ├── HistorialEstadoVenta.java
-│   │   │   └── TransicionesVenta.java
+│   │   │   └── HistorialEstadoVenta.java
 │   │   └── conciliacion/
+│   │       ├── EstadoConciliacion.java
 │   │       └── Pago.java
 │   ├── exception/
 │   │   ├── transaccion/
+│   │   │   ├── CambioEstadoVentaSinJustificacionException.java
 │   │   │   ├── TransicionVentaInvalidaException.java
 │   │   │   └── VentaNoEncontradaException.java
 │   │   └── conciliacion/
+│   │       ├── DiscrepanciaSinAgenteException.java
+│   │       ├── JustificacionInvalidaException.java
+│   │       ├── PagoEnDiscrepanciaException.java
+│   │       ├── PagoNoEnDiscrepanciaException.java
 │   │       ├── TransaccionDuplicadaException.java
-│   │       ├── TransaccionNoConfirmadaException.java
-│   │       └── PagoEnDiscrepanciaException.java
+│   │       └── TransaccionNoConfirmadaException.java
 │   └── repository/
 │       ├── HistorialEstadoVentaRepositoryPort.java
 │       └── PagoRepositoryPort.java
-│
 ├── application/
 │   ├── transaccion/
 │   │   ├── CambiarEstadoVentaUseCase.java
 │   │   ├── ConsultarHistorialVentaUseCase.java
+│   │   ├── FiltroTransacciones.java
 │   │   └── ListarTransaccionesUseCase.java
 │   └── conciliacion/
-│       ├── VerificarPagoUseCase.java
 │       ├── ConfirmarTransaccionUseCase.java
+│       ├── ExpirarTransaccionesPendientesUseCase.java
+│       ├── ListarDiscrepanciaUseCase.java
 │       ├── ResolverDiscrepanciaUseCase.java
-│       └── ExpirarTransaccionesPendientesUseCase.java
-│
+│       └── VerificarPagoUseCase.java
 └── infrastructure/
     ├── adapter/in/rest/
     │   ├── transaccion/
     │   │   ├── TransaccionController.java
     │   │   └── dto/
+    │   │       ├── CambiarEstadoVentaRequest.java
+    │   │       ├── HistorialEstadoVentaResponse.java
+    │   │       └── VentaResumenResponse.java
     │   ├── conciliacion/
     │   │   ├── ConciliacionController.java
     │   │   └── dto/
+    │   │       ├── ConfirmarPagoRequest.java
+    │   │       ├── PagoResponse.java
+    │   │       ├── ResolverDiscrepanciaRequest.java
+    │   │       └── VerificarPagoRequest.java
     │   └── mapper/
     │       ├── TransaccionRestMapper.java
     │       └── ConciliacionRestMapper.java
@@ -107,24 +117,37 @@ src/main/java/com/ticketseller/
     │   └── conciliacion/
     │       └── ExpiracionTransaccionesScheduler.java
     ├── adapter/out/persistence/
-    │   ├── transaccion/
-    │   │   └── historial/
-    │   └── conciliacion/
-    │       └── pago/
+    │   ├── transaccion/historial/
+    │   │   ├── HistorialEstadoVentaEntity.java
+    │   │   ├── HistorialEstadoVentaR2dbcRepository.java
+    │   │   ├── HistorialEstadoVentaRepositoryAdapter.java
+    │   │   └── mapper/HistorialEstadoVentaPersistenceMapper.java
+    │   └── conciliacion/pago/
+    │       ├── PagoEntity.java
+    │       ├── PagoR2dbcRepository.java
+    │       ├── PagoRepositoryAdapter.java
+    │       └── mapper/PagoPersistenceMapper.java
     └── config/
         └── BeanConfiguration.java
 
 src/test/java/com/ticketseller/
 ├── application/
 │   ├── transaccion/
+│   │   ├── CambiarEstadoVentaUseCaseTest.java
+│   │   ├── ConsultarHistorialVentaUseCaseTest.java
+│   │   └── ListarTransaccionesUseCaseTest.java
 │   └── conciliacion/
+│       ├── ConfirmarTransaccionUseCaseTest.java
+│       ├── ExpirarTransaccionesPendientesUseCaseTest.java
+│       ├── ResolverDiscrepanciaUseCaseTest.java
+│       └── VerificarPagoUseCaseTest.java
 └── infrastructure/
     ├── adapter/in/rest/
-    │   ├── transaccion/
-    │   └── conciliacion/
+    │   ├── transaccion/TransaccionControllerTest.java
+    │   └── conciliacion/ConciliacionControllerTest.java
     └── adapter/out/persistence/
-        ├── transaccion/
-        └── conciliacion/
+        ├── transaccion/HistorialEstadoVentaRepositoryAdapterTest.java
+        └── conciliacion/PagoRepositoryAdapterTest.java
 ```
 
 **Structure Decision**: Se unifica el ciclo transaccional y de conciliacion en un plan unico para

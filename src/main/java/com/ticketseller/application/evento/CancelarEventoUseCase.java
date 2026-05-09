@@ -27,7 +27,8 @@ public class CancelarEventoUseCase {
                 .map(Evento::cancelar)
                 .flatMap(eventoRepositoryPort::guardar)
                 .flatMap(eventoCancelado -> guardarCancelacion(eventoCancelado, motivoNormalizado)
-                        .then(procesarReembolsoMasivoUseCase.ejecutar(eventoCancelado.getId()))
+                        .thenMany(procesarReembolsoMasivoUseCase.ejecutar(eventoCancelado.getId()))
+                        .then()
                         .thenReturn(eventoCancelado));
     }
 

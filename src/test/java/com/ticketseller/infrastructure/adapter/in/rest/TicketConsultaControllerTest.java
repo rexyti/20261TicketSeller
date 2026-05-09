@@ -2,7 +2,6 @@ package com.ticketseller.infrastructure.adapter.in.rest;
 
 import com.ticketseller.application.checkout.ConsultarEstadoTicketUseCase;
 import com.ticketseller.domain.model.ticket.AccessDetails;
-import com.ticketseller.domain.model.ticket.CategoriaTicket;
 import com.ticketseller.domain.model.ticket.EstadoTicket;
 import com.ticketseller.domain.model.ticket.Ticket;
 import com.ticketseller.infrastructure.adapter.in.rest.acceso.TicketConsultaController;
@@ -40,7 +39,7 @@ class TicketConsultaControllerTest {
                 .eventoId(eventoId)
                 .estado(EstadoTicket.VENDIDO)
                 .accessDetails(AccessDetails.builder()
-                        .categoria(CategoriaTicket.VIP)
+                        .categoria("VIP")
                         .zona("A")
                         .compuerta("NORTE-1")
                         .fechaEvento(fechaEvento)
@@ -66,8 +65,8 @@ class TicketConsultaControllerTest {
                 .jsonPath("$.ticketId").isEqualTo(ticketId.toString())
                 .jsonPath("$.estado").isEqualTo("VENDIDO")
                 .jsonPath("$.categoria").isEqualTo("VIP")
-                .jsonPath("$.bloque").isEqualTo("A")
-                .jsonPath("$.coordenadaAcceso").isEqualTo("NORTE-1")
+                .jsonPath("$.zona").isEqualTo("A")
+                .jsonPath("$.compuertaAsignada").isEqualTo("NORTE-1")
                 .jsonPath("$.eventoId").isEqualTo(eventoId.toString())
                 .jsonPath("$.fechaEvento").isNotEmpty();
     }

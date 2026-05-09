@@ -11,7 +11,6 @@ import com.ticketseller.domain.model.asiento.EstadoAsiento;
 import com.ticketseller.domain.model.asiento.EstadoHold;
 import com.ticketseller.domain.model.evento.Evento;
 import com.ticketseller.domain.model.ticket.AccessDetails;
-import com.ticketseller.domain.model.ticket.CategoriaTicket;
 import com.ticketseller.domain.model.ticket.EstadoTicket;
 import com.ticketseller.domain.model.ticket.Ticket;
 import com.ticketseller.domain.model.venta.EstadoVenta;
@@ -22,6 +21,7 @@ import com.ticketseller.domain.model.venta.TransaccionFinanciera;
 import com.ticketseller.domain.model.venta.Venta;
 import com.ticketseller.domain.model.zona.Compuerta;
 import com.ticketseller.domain.model.zona.PrecioZona;
+import com.ticketseller.domain.model.zona.TipoZona;
 import com.ticketseller.domain.model.zona.Zona;
 import com.ticketseller.domain.repository.AsientoHoldRepositoryPort;
 import com.ticketseller.domain.repository.AsientoRepositoryPort;
@@ -40,8 +40,11 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @RequiredArgsConstructor
@@ -106,7 +109,7 @@ public class ProcesarPagoUseCase {
         return Mono.zip(
                         obtenerZona(venta.getZonaId()),
                         obtenerPrecio(venta.getEventoId(), venta.getZonaId()),
-                        obtenerCompuerta(venta.getZonaId()),
+                        obtenerCompuertaBalanceada(venta.getZonaId(), venta.getEventoId()),
                         obtenerEvento(venta.getEventoId()),
                         asientoHoldRepositoryPort.buscarPorVentaId(venta.getId()).collectList()
                 )
@@ -145,8 +148,27 @@ public class ProcesarPagoUseCase {
                 .switchIfEmpty(Mono.error(new ZonaSinPrecioException("No existe precio configurado para la zona en este evento")));
     }
 
-    private Mono<Compuerta> obtenerCompuerta(UUID zonaId) {
-        return compuertaRepositoryPort.buscarPorZonaId(zonaId).next().defaultIfEmpty(Compuerta.builder().build());
+    private Mono<Compuerta> obtenerCompuertaBalanceada(UUID zonaId, UUID eventoId) {
+        return compuertaRepositoryPort.buscarPorZonaId(zonaId)
+                .collectList()
+                .flatMap(compuertas -> {
+                    if (compuertas.isEmpty()) {
+                        return Mono.just(Compuerta.builder().build());
+                    }
+                    return ticketRepositoryPort.buscarPorEventoYEstados(eventoId,
+                            java.util.Set.of(EstadoTicket.VENDIDO))
+                            .collectList()
+                            .map(tickets -> seleccionarCompuertaBalanceada(compuertas, tickets));
+                });
+    }
+
+    private Compuerta seleccionarCompuertaBalanceada(List<Compuerta> compuertas, List<Ticket> tickets) {
+        Map<UUID, Long> conteo = tickets.stream()
+                .filter(t -> t.getCompuertaId() != null)
+                .collect(Collectors.groupingBy(Ticket::getCompuertaId, Collectors.counting()));
+        return compuertas.stream()
+                .min(Comparator.comparingLong(c -> conteo.getOrDefault(c.getId(), 0L)))
+                .orElse(compuertas.getFirst());
     }
 
     private Mono<Evento> obtenerEvento(UUID eventoId) {
@@ -190,11 +212,18 @@ public class ProcesarPagoUseCase {
 
     private AccessDetails buildAccessDetails(Evento evento, Zona zona, Compuerta compuerta) {
         return AccessDetails.builder()
-                .categoria(compuerta.isEsGeneral() ? CategoriaTicket.GENERAL : CategoriaTicket.VIP)
+                .categoria(resolverCategoria(zona, compuerta))
                 .zona(zona.getNombre())
                 .compuerta(compuerta.getNombre())
                 .fechaEvento(evento.getFechaInicio())
                 .build();
+    }
+
+    private String resolverCategoria(Zona zona, Compuerta compuerta) {
+        if (zona.getTipo() != null) {
+            return zona.getTipo().name();
+        }
+        return compuerta.isEsGeneral() ? TipoZona.GENERAL.name() : TipoZona.VIP.name();
     }
 
     private Mono<VentaDetalle> rechazarPago(Venta venta, ProcesarPagoCommand command, ResultadoPago resultado) {

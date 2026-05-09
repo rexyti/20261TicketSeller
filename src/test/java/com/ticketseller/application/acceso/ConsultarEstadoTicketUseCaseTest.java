@@ -3,7 +3,6 @@ package com.ticketseller.application.acceso;
 import com.ticketseller.application.checkout.ConsultarEstadoTicketUseCase;
 import com.ticketseller.domain.exception.venta.TicketNotFoundException;
 import com.ticketseller.domain.model.ticket.AccessDetails;
-import com.ticketseller.domain.model.ticket.CategoriaTicket;
 import com.ticketseller.domain.model.ticket.EstadoTicket;
 import com.ticketseller.domain.model.ticket.Ticket;
 import com.ticketseller.domain.repository.TicketRepositoryPort;
@@ -41,7 +40,7 @@ class ConsultarEstadoTicketUseCaseTest {
                 .estado(EstadoTicket.VENDIDO)
                 .eventoId(UUID.randomUUID())
                 .accessDetails(AccessDetails.builder()
-                        .categoria(CategoriaTicket.VIP)
+                        .categoria("VIP")
                         .zona("A")
                         .compuerta("Norte")
                         .fechaEvento(LocalDateTime.now())
@@ -54,7 +53,7 @@ class ConsultarEstadoTicketUseCaseTest {
                 .expectNextMatches(response ->
                         response.getId().equals(ticketId)
                                 && response.getEstado().equals(EstadoTicket.VENDIDO)
-                                && response.getAccessDetails().getCategoria().equals(CategoriaTicket.VIP)
+                                && response.getAccessDetails().getCategoria().equals("VIP")
                                 && response.getAccessDetails().getZona().equals("A")
                                 && response.getAccessDetails().getCompuerta().equals("Norte")
                 )

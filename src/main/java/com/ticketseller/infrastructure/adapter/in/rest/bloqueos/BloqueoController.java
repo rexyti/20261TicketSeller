@@ -75,9 +75,10 @@ public class BloqueoController {
     }
 
     @Operation(summary = "Liberar un bloqueo y devolver el asiento a disponible")
-    @DeleteMapping("/bloqueos/{bloqueoId}")
-    public Mono<ResponseEntity<Void>> liberarBloqueo(@PathVariable UUID bloqueoId) {
+    @DeleteMapping("/bloqueos/{bloqueoId}/liberar")
+    public Mono<ResponseEntity<BloqueoResponse>> liberarBloqueo(@PathVariable UUID bloqueoId) {
         return liberarBloqueoUseCase.ejecutar(bloqueoId)
-                .thenReturn(ResponseEntity.noContent().build());
+                .map(bloqueoRestMapper::toBloqueoResponse)
+                .map(ResponseEntity::ok);
     }
 }
