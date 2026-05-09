@@ -18,8 +18,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -73,7 +73,7 @@ public class TipoAsientoController {
     }
 
     @Operation(summary = "Desactivar un tipo de asiento")
-    @PatchMapping("/tipos-asiento/{id}/desactivar")
+    @DeleteMapping("/tipos-asiento/{id}/desactivar")
     public Mono<ResponseEntity<TipoAsientoResponse>> desactivar(@PathVariable UUID id) {
         return desactivarTipoAsientoUseCase.ejecutar(id)
                 .map(tipo -> ResponseEntity.ok(tipoAsientoRestMapper.toResponse(tipo, false)));

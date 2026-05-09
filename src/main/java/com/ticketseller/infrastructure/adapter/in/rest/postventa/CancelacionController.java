@@ -10,8 +10,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,7 +29,7 @@ public class CancelacionController {
     private final PostVentaRestMapper postVentaRestMapper;
 
     @Operation(summary = "Cancelar ticket individual")
-    @PostMapping("/{id}/cancelar")
+    @DeleteMapping("/{id}/cancelar")
     public Mono<ResponseEntity<CancelacionResponse>> cancelar(@PathVariable UUID id) {
         return cancelarTicketUseCase.cancelarTicket(id)
                 .map(postVentaRestMapper::toCancelacionResponse)
@@ -37,7 +37,7 @@ public class CancelacionController {
     }
 
     @Operation(summary = "Cancelar varios tickets")
-    @PostMapping("/cancelar-varios")
+    @DeleteMapping("/cancelar-varios")
     public Mono<ResponseEntity<CancelacionResponse>> cancelarParcial(@Valid @RequestBody CancelarTicketRequest request) {
         return cancelarTicketUseCase.cancelarVarios(request.ticketIds())
                 .map(postVentaRestMapper::toCancelacionResponse)
@@ -45,7 +45,7 @@ public class CancelacionController {
     }
 
     @Operation(summary = "Procesar cancelación masiva por evento cancelado")
-    @PostMapping("/eventos/{eventoId}/cancelar")
+    @DeleteMapping("/eventos/{eventoId}/cancelar")
     public Mono<ResponseEntity<Void>> cancelarEvento(@PathVariable UUID eventoId) {
         return procesarReembolsoMasivoUseCase.ejecutar(eventoId)
                 .then()

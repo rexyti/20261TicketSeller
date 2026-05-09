@@ -68,10 +68,12 @@ import com.ticketseller.application.liquidacion.ConsultarRecaudoIncrementalUseCa
 import com.ticketseller.application.liquidacion.ConsultarSnapshotUseCase;
 import com.ticketseller.application.precios.ConfigurarPreciosUseCase;
 import com.ticketseller.application.precios.ListarPreciosUseCase;
+import com.ticketseller.application.recinto.ConsultarRecintoUseCase;
 import com.ticketseller.application.recinto.DesactivarRecintoUseCase;
 import com.ticketseller.application.recinto.EditarRecintoUseCase;
 import com.ticketseller.application.recinto.ListarRecintosFiltradosUseCase;
 import com.ticketseller.application.recinto.ListarRecintosUseCase;
+import com.ticketseller.application.recinto.ReactivarRecintoUseCase;
 import com.ticketseller.application.recinto.RegistrarRecintoUseCase;
 import com.ticketseller.application.tipoasiento.AsignarTipoAsientoAZonaUseCase;
 import com.ticketseller.application.asiento.AsignarAsientosAZonaUseCase;
@@ -305,6 +307,16 @@ public class BeanConfiguration {
     @Bean
     public DesactivarRecintoUseCase desactivarRecintoUseCase(RecintoRepositoryPort recintoRepositoryPort) {
         return new DesactivarRecintoUseCase(recintoRepositoryPort);
+    }
+
+    @Bean
+    public ReactivarRecintoUseCase reactivarRecintoUseCase(RecintoRepositoryPort recintoRepositoryPort) {
+        return new ReactivarRecintoUseCase(recintoRepositoryPort);
+    }
+
+    @Bean
+    public ConsultarRecintoUseCase consultarRecintoUseCase(RecintoRepositoryPort recintoRepositoryPort) {
+        return new ConsultarRecintoUseCase(recintoRepositoryPort);
     }
 
     @Bean

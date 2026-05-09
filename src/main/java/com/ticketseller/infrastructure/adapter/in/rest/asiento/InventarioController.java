@@ -12,8 +12,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
@@ -49,7 +49,7 @@ public class InventarioController {
             @ApiResponse(responseCode = "404", description = "Asiento no encontrado"),
             @ApiResponse(responseCode = "409", description = "Hold expirado o asiento no en estado RESERVADO")
     })
-    @PostMapping("/{id}/ocupar")
+    @PatchMapping("/{id}/ocupar")
     public Mono<ResponseEntity<DisponibilidadResponse>> ocupar(@PathVariable UUID id) {
         return confirmarOcupacionUseCase.ejecutar(id)
                 .map(asiento -> ResponseEntity.ok(asientoRestMapper.toDisponibilidadResponse(asiento)));
@@ -60,7 +60,7 @@ public class InventarioController {
             @ApiResponse(responseCode = "200", description = "Asiento liberado y disponible"),
             @ApiResponse(responseCode = "404", description = "Asiento no encontrado")
     })
-    @PostMapping("/{id}/liberar")
+    @PatchMapping("/{id}/liberar")
     public Mono<ResponseEntity<DisponibilidadResponse>> liberar(@PathVariable UUID id) {
         return liberarHoldUseCase.ejecutar(id)
                 .flatMap(hold -> verificarDisponibilidadUseCase.ejecutar(id))

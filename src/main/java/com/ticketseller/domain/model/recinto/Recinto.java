@@ -31,6 +31,12 @@ public class Recinto {
             activo = false;
     }
 
+    public void activar(){
+        if (!activo){
+            activo = true;
+        }
+    }
+
     public Recinto normalizarDatosRegistro() {
         return this.toBuilder()
                 .nombre(trimOrNull(nombre))

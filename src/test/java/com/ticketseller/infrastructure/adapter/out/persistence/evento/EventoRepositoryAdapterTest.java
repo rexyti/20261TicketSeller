@@ -2,6 +2,7 @@ package com.ticketseller.infrastructure.adapter.out.persistence.evento;
 
 import com.ticketseller.domain.model.evento.EstadoEvento;
 import com.ticketseller.domain.model.evento.Evento;
+import com.ticketseller.domain.model.evento.TipoEvento;
 import com.ticketseller.infrastructure.adapter.out.persistence.evento.mapper.EventoPersistenceMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -85,7 +86,7 @@ class EventoRepositoryAdapterTest {
                 .nombre("Concierto")
                 .fechaInicio(LocalDateTime.now().plusDays(2))
                 .fechaFin(LocalDateTime.now().plusDays(3))
-                .tipo("MUSICAL")
+                .tipo(TipoEvento.OTRO)
                 .recintoId(recintoId)
                 .estado(EstadoEvento.ACTIVO)
                 .build();

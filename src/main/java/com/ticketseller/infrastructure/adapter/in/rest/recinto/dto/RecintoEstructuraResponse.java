@@ -5,7 +5,7 @@ import java.util.UUID;
 
 public record RecintoEstructuraResponse(
     UUID recintoId,
-    List<ZonaResponse> bloques
+    List<ZonaResponse> zonas
 ) {
 
     public record ZonaResponse(
