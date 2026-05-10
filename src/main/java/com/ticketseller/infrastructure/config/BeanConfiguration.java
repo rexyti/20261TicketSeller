@@ -422,6 +422,11 @@ public class BeanConfiguration {
     }
 
     @Bean
+    public ObtenerEventoUseCase obtenerEventoUseCase(EventoRepositoryPort eventoRepositoryPort) {
+        return new ObtenerEventoUseCase(eventoRepositoryPort);
+    }
+
+    @Bean
     public ConfigurarPreciosUseCase configurarPreciosUseCase(EventoRepositoryPort eventoRepositoryPort,
                                                              PrecioZonaRepositoryPort precioZonaRepositoryPort,
                                                              ZonaRepositoryPort zonaRepositoryPort) {
