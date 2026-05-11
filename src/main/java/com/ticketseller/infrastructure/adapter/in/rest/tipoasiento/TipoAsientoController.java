@@ -56,7 +56,7 @@ public class TipoAsientoController {
     @Operation(summary = "Obtener información completa de un Tipo Asiento")
     @ApiResponse(responseCode = "200", description = "Tipo Asiento encontrado")
     @ApiResponse(responseCode = "404", description = "Tipo Asiento no encontrado")
-    @GetMapping("/{id}")
+    @GetMapping("/tipos-asiento/{id}")
     public Mono<ResponseEntity<TipoAsientoResponse>> obtener(@PathVariable UUID id) {
         return consultarTipoAsientoUseCase.ejecutar(id)
                 .map(tipo -> ResponseEntity.ok(tipoAsientoRestMapper.toResponse(tipo)));
