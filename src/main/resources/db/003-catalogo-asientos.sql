@@ -4,6 +4,7 @@ CREATE TABLE tipos_asiento
     nombre      VARCHAR(100)  NOT NULL,
     descripcion VARCHAR(255),
     estado      VARCHAR(20)   NOT NULL,
+    en_uso      BOOLEAN       NOT NULL DEFAULT false,
     created_at  TIMESTAMPTZ   NOT NULL DEFAULT NOW()
 );
 

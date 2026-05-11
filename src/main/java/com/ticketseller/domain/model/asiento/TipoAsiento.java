@@ -18,6 +18,7 @@ public class TipoAsiento {
     private String nombre;
     private String descripcion;
     private EstadoTipoAsiento estado;
+    private boolean enUso;
 
     public TipoAsiento normalizarDatosRegistro() {
         return this.toBuilder()

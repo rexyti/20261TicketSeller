@@ -1,5 +1,6 @@
 package com.ticketseller.infrastructure.config;
 
+import com.ticketseller.application.tipoasiento.*;
 import com.ticketseller.domain.repository.AsientoHoldRepositoryPort;
 import com.ticketseller.infrastructure.adapter.out.persistence.asientohold.AsientoHoldR2dbcRepository;
 import com.ticketseller.infrastructure.adapter.out.persistence.asientohold.AsientoHoldRepositoryAdapter;
@@ -75,14 +76,9 @@ import com.ticketseller.application.recinto.ListarRecintosFiltradosUseCase;
 import com.ticketseller.application.recinto.ListarRecintosUseCase;
 import com.ticketseller.application.recinto.ReactivarRecintoUseCase;
 import com.ticketseller.application.recinto.RegistrarRecintoUseCase;
-import com.ticketseller.application.tipoasiento.AsignarTipoAsientoAZonaUseCase;
 import com.ticketseller.application.asiento.AsignarAsientosAZonaUseCase;
 import com.ticketseller.application.asiento.ConsultarMapaAsientosUseCase;
 import com.ticketseller.application.asiento.CrearMapaAsientosUseCase;
-import com.ticketseller.application.tipoasiento.CrearTipoAsientoUseCase;
-import com.ticketseller.application.tipoasiento.DesactivarTipoAsientoUseCase;
-import com.ticketseller.application.tipoasiento.EditarTipoAsientoUseCase;
-import com.ticketseller.application.tipoasiento.ListarTiposAsientoUseCase;
 import com.ticketseller.application.asiento.MarcarEspacioVacioUseCase;
 import com.ticketseller.application.zona.CrearZonaUseCase;
 import com.ticketseller.application.zona.ListarZonasUseCase;
@@ -845,5 +841,10 @@ public class BeanConfiguration {
             BloqueoRepositoryPort bloqueoRepositoryPort,
             CortesiaRepositoryPort cortesiaRepositoryPort) {
         return new ConsultarPanelBloqueosUseCase(bloqueoRepositoryPort, cortesiaRepositoryPort);
+    }
+
+    @Bean
+    public ConsultarTipoAsientoUseCase consultarTipoAsientoUseCase(TipoAsientoRepositoryPort tipoAsientoRepositoryPort) {
+        return new ConsultarTipoAsientoUseCase(tipoAsientoRepositoryPort);
     }
 }
