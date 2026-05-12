@@ -4,11 +4,13 @@ import com.ticketseller.application.promocion.AplicarDescuentoCarritoUseCase;
 import com.ticketseller.application.promocion.CrearCodigosPromocionalesUseCase;
 import com.ticketseller.application.promocion.CrearPromocionUseCase;
 import com.ticketseller.application.promocion.GestionarEstadoPromocionUseCase;
+import com.ticketseller.application.promocion.ListarCodigosPromocionalesUseCase;
 import com.ticketseller.application.promocion.ListarPromocionesUseCase;
 import com.ticketseller.domain.model.promocion.CodigoPromocional;
 import com.ticketseller.infrastructure.adapter.in.rest.mapper.PromocionRestMapper;
 import com.ticketseller.infrastructure.adapter.in.rest.promocion.dto.ActualizarEstadoPromocionRequest;
 import com.ticketseller.infrastructure.adapter.in.rest.promocion.dto.CalcularDescuentoRequest;
+import com.ticketseller.infrastructure.adapter.in.rest.promocion.dto.CodigoPromocionalResponse;
 import com.ticketseller.infrastructure.adapter.in.rest.promocion.dto.CrearCodigosRequest;
 import com.ticketseller.infrastructure.adapter.in.rest.promocion.dto.CrearPromocionRequest;
 import com.ticketseller.infrastructure.adapter.in.rest.promocion.dto.DescuentoAplicadoResponse;
@@ -45,6 +47,7 @@ public class PromocionController {
     private final CrearCodigosPromocionalesUseCase crearCodigosPromocionalesUseCase;
     private final AplicarDescuentoCarritoUseCase aplicarDescuentoCarritoUseCase;
     private final ListarPromocionesUseCase listarPromocionesUseCase;
+    private final ListarCodigosPromocionalesUseCase listarCodigosPromocionalesUseCase;
     private final PromocionRestMapper mapper;
 
     @Operation(summary = "Listar promociones de un evento")
@@ -82,6 +85,12 @@ public class PromocionController {
                 .map(CodigoPromocional::getCodigo)
                 .collectList()
                 .map(codigos -> ResponseEntity.status(HttpStatus.CREATED).body(codigos));
+    }
+
+    @Operation(summary = "Listar códigos promocionales de una promoción")
+    @GetMapping("/{id}/codigos")
+    public Flux<CodigoPromocionalResponse> listarCodigos(@PathVariable UUID id) {
+        return listarCodigosPromocionalesUseCase.ejecutar(id).map(mapper::toResponse);
     }
 
     @Operation(summary = "Calcular descuentos aplicables al carrito (incluye validación de acceso a preventa)")

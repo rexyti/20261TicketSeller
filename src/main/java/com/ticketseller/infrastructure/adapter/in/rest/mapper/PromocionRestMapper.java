@@ -2,9 +2,11 @@ package com.ticketseller.infrastructure.adapter.in.rest.mapper;
 
 import com.ticketseller.application.promocion.DescuentoAplicado;
 import com.ticketseller.application.promocion.ItemCarrito;
+import com.ticketseller.domain.model.promocion.CodigoPromocional;
 import com.ticketseller.domain.model.promocion.Descuento;
 import com.ticketseller.domain.model.promocion.Promocion;
 import com.ticketseller.infrastructure.adapter.in.rest.promocion.dto.CalcularDescuentoRequest;
+import com.ticketseller.infrastructure.adapter.in.rest.promocion.dto.CodigoPromocionalResponse;
 import com.ticketseller.infrastructure.adapter.in.rest.promocion.dto.CrearDescuentoRequest;
 import com.ticketseller.infrastructure.adapter.in.rest.promocion.dto.CrearPromocionRequest;
 import com.ticketseller.infrastructure.adapter.in.rest.promocion.dto.DescuentoAplicadoResponse;
@@ -31,6 +33,8 @@ public interface PromocionRestMapper {
     DescuentoResponse toResponse(Descuento descuento);
 
     DescuentoAplicadoResponse toResponse(DescuentoAplicado descuentoAplicado);
+
+    CodigoPromocionalResponse toResponse(CodigoPromocional codigoPromocional);
 
     default List<ItemCarrito> toItems(List<CalcularDescuentoRequest.ItemCarritoDto> dtos) {
         return dtos.stream()
