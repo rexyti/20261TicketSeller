@@ -77,6 +77,7 @@ import com.ticketseller.application.recinto.ListarRecintosUseCase;
 import com.ticketseller.application.recinto.ReactivarRecintoUseCase;
 import com.ticketseller.application.recinto.RegistrarRecintoUseCase;
 import com.ticketseller.application.asiento.AsignarAsientosAZonaUseCase;
+import com.ticketseller.application.asiento.ConsultarAsientosEventoUseCase;
 import com.ticketseller.application.asiento.ConsultarMapaAsientosUseCase;
 import com.ticketseller.application.asiento.CrearMapaAsientosUseCase;
 import com.ticketseller.application.asiento.MarcarEspacioVacioUseCase;
@@ -559,6 +560,11 @@ public class BeanConfiguration {
     @Bean
     public ConsultarHistorialAsientoUseCase consultarHistorialAsientoUseCase(HistorialCambioEstadoRepositoryPort historialRepositoryPort) {
         return new ConsultarHistorialAsientoUseCase(historialRepositoryPort);
+    }
+
+    @Bean
+    public ConsultarAsientosEventoUseCase consultarAsientosEventoUseCase(AsientoRepositoryPort asientoRepositoryPort) {
+        return new ConsultarAsientosEventoUseCase(asientoRepositoryPort);
     }
 
     @Bean

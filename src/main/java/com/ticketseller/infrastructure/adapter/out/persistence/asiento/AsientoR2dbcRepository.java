@@ -11,4 +11,7 @@ public interface AsientoR2dbcRepository extends ReactiveCrudRepository<AsientoEn
 
     @Query("SELECT * FROM asientos WHERE recinto_id = :recintoId")
     Flux<AsientoEntity> findByRecintoId(UUID recintoId);
+
+    @Query("SELECT a.* FROM asientos a JOIN eventos e ON a.recinto_id = e.recinto_id WHERE e.id = :eventoId")
+    Flux<AsientoEntity> findByEventoId(UUID eventoId);
 }
