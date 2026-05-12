@@ -9,6 +9,6 @@ import java.util.UUID;
 public interface AsientoR2dbcRepository extends ReactiveCrudRepository<AsientoEntity, UUID> {
     Flux<AsientoEntity> findByZonaId(UUID zonaId);
 
-    @Query("SELECT * FROM asientos WHERE zona_id IN (SELECT id FROM zonas WHERE recinto_id = :recintoId)")
+    @Query("SELECT * FROM asientos WHERE recinto_id = :recintoId")
     Flux<AsientoEntity> findByRecintoId(UUID recintoId);
 }

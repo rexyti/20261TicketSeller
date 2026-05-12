@@ -25,17 +25,17 @@ public class CrearMapaAsientosUseCase {
                 .switchIfEmpty(Mono.error(new RecintoConZonasYaActivasException(
                         "El recinto tiene zonas activas. No se puede crear un mapa de asientos en un recinto con zonas.")))
                 .flatMapMany(tieneZonas -> {
-                    List<Asiento> asientos = generarAsientos(filas, columnasPorFila);
+                    List<Asiento> asientos = generarAsientos(recintoId, filas, columnasPorFila);
                     return asientoRepositoryPort.guardarTodos(asientos);
                 });
     }
 
-    private List<Asiento> generarAsientos(int numFilas, int columnasPorFila) {
+    private List<Asiento> generarAsientos(UUID recintoId, int numFilas, int columnasPorFila) {
         List<Asiento> asientos = new ArrayList<>(numFilas * columnasPorFila);
         for (int fila = 1; fila <= numFilas; fila++) {
             String nombreFila = generarNombreFila(fila);
             for (int columna = 1; columna <= columnasPorFila; columna++) {
-                asientos.add(crearAsiento(nombreFila, columna));
+                asientos.add(crearAsiento(nombreFila, columna, recintoId));
             }
         }
         return asientos;
@@ -51,11 +51,12 @@ public class CrearMapaAsientosUseCase {
         return nombre.toString();
     }
 
-    private Asiento crearAsiento(String fila, int columna) {
+    private Asiento crearAsiento(String fila, int columna, UUID recintoId) {
         return Asiento.builder()
                 .fila(fila)
                 .columna(columna)
                 .zonaId(null)
+                .recintoId(recintoId)
                 .estado(EstadoAsiento.DISPONIBLE)
                 .build()
                 .normalizarDatosRegistro();

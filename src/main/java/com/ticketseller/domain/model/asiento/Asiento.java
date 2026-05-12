@@ -17,6 +17,7 @@ public class Asiento {
     private Integer columna;
     private String numero;
     private UUID zonaId;
+    private UUID recintoId;
     private TipoAsiento tipoAsiento;
     private EstadoAsiento estado;
 
