@@ -61,7 +61,7 @@ class CheckoutControllerTest {
         UUID zonaId = UUID.randomUUID();
         UUID compuertaId = UUID.randomUUID();
 
-        ReservarAsientosRequest request = new ReservarAsientosRequest(compradorId, eventoId, zonaId, 1, false, null, null);
+        ReservarAsientosRequest request = new ReservarAsientosRequest(compradorId, zonaId, 1, false, null, null);
         ReservarAsientosCommand command = new ReservarAsientosCommand(compradorId, eventoId, zonaId, 1, false, null, null);
 
         Venta venta = Venta.builder()
@@ -94,12 +94,12 @@ class CheckoutControllerTest {
                         ticket.getPrecio(), null, false))
         );
 
-        when(checkoutRestMapper.toCommand(request)).thenReturn(command);
+        when(checkoutRestMapper.toCommand(request, eventoId)).thenReturn(command);
         when(reservarAsientosUseCase.ejecutar(command)).thenReturn(Mono.just(detalle));
         when(checkoutRestMapper.toResponse(detalle)).thenReturn(response);
 
         webTestClient.post()
-                .uri("/api/v1/checkout/reservar")
+                .uri("/api/v1/eventos/{eventoId}/asientos/reservar", eventoId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(request)
                 .exchange()
@@ -110,13 +110,14 @@ class CheckoutControllerTest {
 
     @Test
     void reservarNoDisponibleRetorna409() {
-        ReservarAsientosRequest request = new ReservarAsientosRequest(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), 1, false, null, null);
-        when(checkoutRestMapper.toCommand(any(ReservarAsientosRequest.class)))
-                .thenReturn(new ReservarAsientosCommand(request.compradorId(), request.eventoId(), request.zonaId(), request.cantidad(), false, null, null));
+        UUID eventoId = UUID.randomUUID();
+        ReservarAsientosRequest request = new ReservarAsientosRequest(UUID.randomUUID(), UUID.randomUUID(), 1, false, null, null);
+        when(checkoutRestMapper.toCommand(any(ReservarAsientosRequest.class), any(UUID.class)))
+                .thenReturn(new ReservarAsientosCommand(request.compradorId(), eventoId, request.zonaId(), request.cantidad(), false, null, null));
         when(reservarAsientosUseCase.ejecutar(any())).thenReturn(Mono.error(new AsientoNoDisponibleException("ocupado")));
 
         webTestClient.post()
-                .uri("/api/v1/checkout/reservar")
+                .uri("/api/v1/eventos/{eventoId}/asientos/reservar", eventoId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(request)
                 .exchange()

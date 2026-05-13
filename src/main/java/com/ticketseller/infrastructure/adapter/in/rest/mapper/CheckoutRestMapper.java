@@ -14,11 +14,22 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 import java.util.List;
+import java.util.UUID;
 
 @Mapper(componentModel = "spring")
 public interface CheckoutRestMapper {
 
-    ReservarAsientosCommand toCommand(ReservarAsientosRequest request);
+    default ReservarAsientosCommand toCommand(ReservarAsientosRequest request, UUID eventoId) {
+        return new ReservarAsientosCommand(
+                request.compradorId(),
+                eventoId,
+                request.zonaId(),
+                request.cantidad(),
+                request.esCortesia(),
+                request.asientoIds(),
+                request.tipoUsuario()
+        );
+    }
 
     ProcesarPagoCommand toCommand(ProcesarPagoRequest request);
 
