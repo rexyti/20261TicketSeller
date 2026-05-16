@@ -28,7 +28,10 @@
       "Bash(grep -E \"\\\\.\\(java\\)$\")",
       "Bash(./gradlew build *)",
       "Bash(grep *)",
-      "Bash(git -C /home/nestor/Programacion/Ing_Software/20261TicketSeller status -- docs/plan/front/)"
+      "Bash(git -C /home/nestor/Programacion/Ing_Software/20261TicketSeller status -- docs/plan/front/)",
+      "Bash(./gradlew compileJava --rerun)",
+      "Bash(git -C /home/nestor/Programacion/Ing_Software/20261TicketSeller stash)",
+      "Bash(git -C /home/nestor/Programacion/Ing_Software/20261TicketSeller stash pop)"
     ]
   }
 }

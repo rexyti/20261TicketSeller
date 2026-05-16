@@ -13,6 +13,7 @@ public interface PrecioEventoRestMapper {
     @Mapping(target = "eventoId", ignore = true)
     PrecioZona toDomain(PrecioZonaRequest request);
 
+    @Mapping(source = "nombreZona", target = "zonaNombre")
     PrecioZonaResponse toResponse(PrecioZona precioZona);
 }
 

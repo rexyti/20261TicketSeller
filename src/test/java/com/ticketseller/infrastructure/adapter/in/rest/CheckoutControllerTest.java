@@ -90,8 +90,8 @@ class CheckoutControllerTest {
                 venta.getFechaCreacion(),
                 venta.getFechaExpiracion(),
                 venta.getTotal(),
-                List.of(new TicketResponse(ticket.getId(), zonaId, compuertaId, null,
-                        ticket.getPrecio(), null, false))
+                List.of(new TicketResponse(ticket.getId(), null, null, null,
+                        ticket.getPrecio(), null, false, null))
         );
 
         when(checkoutRestMapper.toCommand(request, eventoId)).thenReturn(command);

@@ -48,7 +48,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 @RequiredArgsConstructor
 public class ProcesarPagoUseCase {
@@ -121,24 +120,27 @@ public class ProcesarPagoUseCase {
                     Evento evento = tuple.getT3();
                     List<AsientoHold> holds = tuple.getT4();
 
-                    return cargarAsientos(holds).flatMap(asientosPorId -> {
-                        List<Ticket> tickets = IntStream.range(0, venta.getCantidad())
-                                .mapToObj(i -> {
-                                    UUID asientoId = i < holds.size() ? holds.get(i).getAsientoId() : null;
-                                    Asiento asiento = asientoId != null ? asientosPorId.get(asientoId) : null;
-                                    return buildTicket(venta, compuerta, precioZona, zona, evento, asientoId, asiento);
-                                })
-                                .peek(Ticket::validarDatosRegistro)
-                                .toList();
-
-                        return ticketRepositoryPort.guardarTodos(tickets)
-                                .collectList()
-                                .flatMap(savedTickets -> actualizarAsientosYHolds(savedTickets, holds)
-                                        .then(ventaRepositoryPort.actualizarEstado(venta.getId(), EstadoVenta.COMPLETADA))
-                                        .flatMap(ventaPagada -> guardarTransaccion(ventaPagada, command, resultado)
-                                                .then(notificacionEmailPort.enviarConfirmacion(ventaPagada, savedTickets))
-                                                .thenReturn(new VentaDetalle(ventaPagada, savedTickets))));
-                    });
+                    return cargarAsientos(holds).flatMap(asientosPorId ->
+                        Flux.range(0, venta.getCantidad())
+                            .concatMap(i -> {
+                                UUID asientoId = i < holds.size() ? holds.get(i).getAsientoId() : null;
+                                Asiento asiento = asientoId != null ? asientosPorId.get(asientoId) : null;
+                                Ticket sinQr = buildTicketSinQr(venta, compuerta, precioZona, zona, evento, asientoId, asiento);
+                                return ticketRepositoryPort.guardar(sinQr)
+                                        .flatMap(saved -> {
+                                            String qr = codigoQrPort.generarCodigo(saved.getId().toString());
+                                            Ticket conQr = saved.toBuilder().codigoQr(qr).build().normalizarDatosRegistro();
+                                            conQr.validarDatosRegistro();
+                                            return ticketRepositoryPort.guardar(conQr);
+                                        });
+                            })
+                            .collectList()
+                            .flatMap(savedTickets -> actualizarAsientosYHolds(savedTickets, holds)
+                                    .then(ventaRepositoryPort.actualizarEstado(venta.getId(), EstadoVenta.COMPLETADA))
+                                    .flatMap(ventaPagada -> guardarTransaccion(ventaPagada, command, resultado)
+                                            .then(notificacionEmailPort.enviarConfirmacion(ventaPagada, savedTickets))
+                                            .thenReturn(new VentaDetalle(ventaPagada, savedTickets))))
+                    );
                 }));
     }
 
@@ -210,8 +212,8 @@ public class ProcesarPagoUseCase {
                 .collectMap(Asiento::getId);
     }
 
-    private Ticket buildTicket(Venta venta, Compuerta compuerta, PrecioZona precioZona,
-                               Zona zona, Evento evento, UUID asientoId, Asiento asiento) {
+    private Ticket buildTicketSinQr(Venta venta, Compuerta compuerta, PrecioZona precioZona,
+                                    Zona zona, Evento evento, UUID asientoId, Asiento asiento) {
         String numeroAsiento = asiento != null ? asiento.getNumero() : null;
         AccessDetails accessDetails = buildAccessDetails(evento, zona, compuerta, numeroAsiento);
         return Ticket.builder()
@@ -222,11 +224,9 @@ public class ProcesarPagoUseCase {
                 .precio(precioZona.getPrecio())
                 .esCortesia(venta.isEsCortesia())
                 .estado(EstadoTicket.VENDIDO)
-                .codigoQr(codigoQrPort.generarCodigo(UUID.randomUUID().toString()))
                 .asientoId(asientoId)
                 .accessDetails(accessDetails)
-                .build()
-                .normalizarDatosRegistro();
+                .build();
     }
 
     private AccessDetails buildAccessDetails(Evento evento, Zona zona, Compuerta compuerta, String numeroAsiento) {

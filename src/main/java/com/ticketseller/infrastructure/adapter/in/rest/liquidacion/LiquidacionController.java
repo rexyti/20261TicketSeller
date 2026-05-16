@@ -1,8 +1,6 @@
 package com.ticketseller.infrastructure.adapter.in.rest.liquidacion;
 
-import com.ticketseller.application.liquidacion.ConsultarRecaudoIncrementalUseCase;
 import com.ticketseller.application.liquidacion.ConsultarSnapshotUseCase;
-import com.ticketseller.infrastructure.adapter.in.rest.liquidacion.dto.RecaudoIncrementalResponse;
 import com.ticketseller.infrastructure.adapter.in.rest.liquidacion.dto.SnapshotLiquidacionResponse;
 import com.ticketseller.infrastructure.adapter.in.rest.mapper.LiquidacionRestMapper;
 import io.swagger.v3.oas.annotations.Operation;
@@ -24,7 +22,6 @@ import java.util.UUID;
 public class LiquidacionController {
 
     private final ConsultarSnapshotUseCase consultarSnapshotUseCase;
-    private final ConsultarRecaudoIncrementalUseCase consultarRecaudoIncrementalUseCase;
     private final LiquidacionRestMapper liquidacionRestMapper;
 
     @Operation(summary = "Consultar snapshot de liquidación de un evento")
@@ -35,11 +32,4 @@ public class LiquidacionController {
                 .map(ResponseEntity::ok);
     }
 
-    @Operation(summary = "Consultar recaudo incremental de un evento")
-    @GetMapping("/eventos/{id}/recaudo")
-    public Mono<ResponseEntity<RecaudoIncrementalResponse>> consultarRecaudo(@PathVariable UUID id) {
-        return consultarRecaudoIncrementalUseCase.ejecutar(id)
-                .map(recaudo -> liquidacionRestMapper.toRecaudoResponse(id, recaudo))
-                .map(ResponseEntity::ok);
-    }
 }

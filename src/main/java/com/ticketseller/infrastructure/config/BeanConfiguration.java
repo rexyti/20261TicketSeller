@@ -65,7 +65,6 @@ import com.ticketseller.application.compuerta.CrearCompuertaUseCase;
 import com.ticketseller.application.compuerta.ListarCompuertasUseCase;
 import com.ticketseller.application.evento.*;
 import com.ticketseller.application.postventa.ConsultarReembolsosMasivoUseCase;
-import com.ticketseller.application.liquidacion.ConsultarRecaudoIncrementalUseCase;
 import com.ticketseller.application.liquidacion.ConsultarSnapshotUseCase;
 import com.ticketseller.application.precios.ConfigurarPreciosUseCase;
 import com.ticketseller.application.precios.ListarPreciosUseCase;
@@ -522,13 +521,6 @@ public class BeanConfiguration {
                                                              LiquidacionQueryPort liquidacionQueryPort,
                                                              RecintoRepositoryPort recintoRepositoryPort) {
         return new ConsultarSnapshotUseCase(eventoRepositoryPort, liquidacionQueryPort, recintoRepositoryPort);
-    }
-
-    @Bean
-    public ConsultarRecaudoIncrementalUseCase consultarRecaudoIncrementalUseCase(
-            EventoRepositoryPort eventoRepositoryPort,
-            LiquidacionQueryPort liquidacionQueryPort) {
-        return new ConsultarRecaudoIncrementalUseCase(eventoRepositoryPort, liquidacionQueryPort);
     }
 
     @Bean

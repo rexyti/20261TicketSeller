@@ -126,7 +126,7 @@ mismo enum en todo el módulo.
 - [ ] T005 Crear interfaz `HistorialCambioEstadoRepositoryPort.java` en `domain/port/out/` con
   métodos: `guardar(HistorialCambioEstado): Mono<HistorialCambioEstado>`,
   `findByAsientoId(UUID): Flux<HistorialCambioEstado>`
-- [ ] T006 Crear manualmente la tabla `historial_cambios_estado` en PostgreSQL con columnas:
+- [ ] T006 Crear manualmente la tabla `historial_cambios_estado_asientos` en PostgreSQL con columnas:
   `id (UUID)`, `asiento_id (UUID, FK a asientos)`, `evento_id (UUID)`, `usuario_id (varchar)`,
   `estado_anterior (varchar)`, `estado_nuevo (varchar)`, `fecha_hora (timestamptz)`,
   `motivo (varchar, nullable)` — agregar el `CREATE TABLE` al script SQL de
@@ -175,7 +175,7 @@ asiento actualizado. El mismo endpoint con `{ "estadoDestino": "DISPONIBLE" }` s
 - [ ] T016 [P] [US1] Test unitario de `TransicionEstadoAsiento` cubriendo todas las
   transiciones permitidas y bloqueadas — `TransicionEstadoAsientoTest.java`
 - [ ] T017 [P] [US1] Test de integración con Testcontainers: flujo PATCH estado → verificar
-  nuevo estado en BD y existencia del registro en `historial_cambios_estado` —
+  nuevo estado en BD y existencia del registro en `historial_cambios_estado_asientos` —
   `AsientoMantenimientoControllerTest.java`
 
 ### Implementación de User Story 1
@@ -323,7 +323,7 @@ con lista vacía.
   consulta. El controlador inyecta únicamente el use case que necesita en cada endpoint
 - **Regla de oro hexagonal**: si una clase dentro de `domain/` necesita importar algo de Spring
   o R2DBC, el diseño está mal
-- **Gestión de BD**: la tabla `historial_cambios_estado` y la columna `version` en `asientos`
+- **Gestión de BD**: la tabla `historial_cambios_estado_asientos` y la columna `version` en `asientos`
   se crean manualmente — incluir en el script SQL de `src/test/resources/` para Testcontainers
 - La validación de compra activa en US1 usa `// TODO: integrar con carrito de compra` hasta
   que el feature correspondiente esté implementado — stub retorna `Mono.just(false)` para no

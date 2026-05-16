@@ -11,5 +11,7 @@ public record TicketEstadoResponse(
     String categoria,
     String zona,
     String compuertaAsignada,
-    LocalDateTime fechaEvento
+    LocalDateTime fechaEvento,
+    String numeroAsiento,
+    boolean permiteReingreso
 ) {}

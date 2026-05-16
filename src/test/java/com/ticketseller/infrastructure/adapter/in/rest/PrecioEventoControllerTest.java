@@ -51,7 +51,7 @@ class PrecioEventoControllerTest {
 
         PrecioZona domain = PrecioZona.builder().zonaId(zonaId).precio(BigDecimal.TEN).build();
         PrecioZona saved = PrecioZona.builder().id(UUID.randomUUID()).eventoId(eventoId).zonaId(zonaId).precio(BigDecimal.TEN).build();
-        PrecioZonaResponse response = new PrecioZonaResponse(saved.getId(), eventoId, zonaId, BigDecimal.TEN);
+        PrecioZonaResponse response = new PrecioZonaResponse(saved.getId(), eventoId, zonaId, BigDecimal.TEN, null);
 
         when(precioEventoRestMapper.toDomain(any(PrecioZonaRequest.class))).thenReturn(domain);
         when(configurarPreciosUseCase.ejecutar(any(), any())).thenReturn(Flux.just(saved));
@@ -93,7 +93,7 @@ class PrecioEventoControllerTest {
     void getPreciosRetornaListado() {
         UUID eventoId = UUID.randomUUID();
         PrecioZona precio = PrecioZona.builder().id(UUID.randomUUID()).eventoId(eventoId).zonaId(UUID.randomUUID()).precio(BigDecimal.TEN).build();
-        PrecioZonaResponse response = new PrecioZonaResponse(precio.getId(), precio.getEventoId(), precio.getZonaId(), precio.getPrecio());
+        PrecioZonaResponse response = new PrecioZonaResponse(precio.getId(), precio.getEventoId(), precio.getZonaId(), precio.getPrecio(), null);
 
         when(listarPreciosUseCase.ejecutar(eventoId)).thenReturn(Flux.just(precio));
         when(precioEventoRestMapper.toResponse(precio)).thenReturn(response);
