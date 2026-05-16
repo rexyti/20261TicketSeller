@@ -56,7 +56,7 @@ public class CrearCortesiaConAsientoUseCase {
     }
 
     private Mono<Cortesia> crearTicketYCortesia(UUID eventoId, String destinatario,
-                                                 CategoriaCortesia categoria, Asiento asiento) {
+                                                CategoriaCortesia categoria, Asiento asiento) {
         String codigoUnico = UUID.randomUUID().toString();
 
         return Mono.zip(
@@ -85,14 +85,10 @@ public class CrearCortesiaConAsientoUseCase {
         }
         return compuertaRepositoryPort.buscarPorZonaId(zonaId)
                 .collectList()
-                .flatMap(compuertas -> {
-                    if (compuertas.isEmpty()) {
-                        return Mono.just(Compuerta.builder().build());
-                    }
-                    return ticketRepositoryPort.buscarPorEvento(eventoId)
-                            .collectList()
-                            .map(tickets -> seleccionarCompuertaBalanceada(compuertas, tickets));
-                });
+                .flatMap(compuertas -> ticketRepositoryPort.buscarPorEvento(eventoId)
+                        .collectList()
+                        .map(tickets -> seleccionarCompuertaBalanceada(compuertas, tickets)))
+                .switchIfEmpty(Mono.just(Compuerta.builder().build()));
     }
 
     private Compuerta seleccionarCompuertaBalanceada(List<Compuerta> compuertas, List<Ticket> tickets) {
@@ -111,6 +107,8 @@ public class CrearCortesiaConAsientoUseCase {
                 .zona(zona.getNombre())
                 .compuerta(compuerta.getNombre())
                 .fechaEvento(evento.getFechaInicio())
+                .asiento(asiento.getNumero())
+                .permiteReingreso(evento.isReingresoHabilitado())
                 .build();
         return Ticket.builder()
                 .eventoId(eventoId)
@@ -126,7 +124,7 @@ public class CrearCortesiaConAsientoUseCase {
     }
 
     private Cortesia crearCortesia(String destinatario, CategoriaCortesia categoria,
-                                  String codigoUnico, Ticket ticket) {
+                                   String codigoUnico, Ticket ticket) {
         return Cortesia.builder()
                 .eventoId(ticket.getEventoId())
                 .asientoId(ticket.getAsientoId())

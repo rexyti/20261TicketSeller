@@ -1,41 +1,36 @@
 package com.ticketseller.infrastructure.adapter.in.rest.mapper;
 
 import com.ticketseller.domain.model.evento.SnapshotLiquidacion;
-import com.ticketseller.domain.model.recinto.ConfiguracionLiquidacion;
-import com.ticketseller.domain.model.recinto.Recinto;
 import com.ticketseller.infrastructure.adapter.in.rest.liquidacion.dto.CondicionTicketResponse;
-import com.ticketseller.infrastructure.adapter.in.rest.liquidacion.dto.ModeloNegocioResponse;
 import com.ticketseller.infrastructure.adapter.in.rest.liquidacion.dto.RecaudoIncrementalResponse;
 import com.ticketseller.infrastructure.adapter.in.rest.liquidacion.dto.SnapshotLiquidacionResponse;
+import com.ticketseller.infrastructure.adapter.in.rest.liquidacion.dto.TicketResumenResponse;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 @Mapper(componentModel = "spring")
 public interface LiquidacionRestMapper {
 
-    @Mapping(source = "modeloNegocio", target = "modelo")
-    @Mapping(target = "tipoRecinto", ignore = true)
-    @Mapping(target = "recintoId", ignore = true)
-    ModeloNegocioResponse toModeloNegocioResponse(ConfiguracionLiquidacion config);
-
-    @Mapping(source = "id", target = "recintoId")
-    @Mapping(source = "configuracionLiquidacion.modeloNegocio", target = "modelo")
-    @Mapping(source = "categoria", target = "tipoRecinto")
-    @Mapping(source = "configuracionLiquidacion.montoFijo", target = "montoFijo")
-    ModeloNegocioResponse toModeloNegocioResponseFromRecinto(Recinto recinto);
-
-    CondicionTicketResponse toCondicionResponse(SnapshotLiquidacion.CondicionLiquidacion condicion);
+    default CondicionTicketResponse toCondicionResponse(SnapshotLiquidacion.CondicionLiquidacion condicion) {
+        List<TicketResumenResponse> tickets = condicion.getTickets() == null ? List.of() :
+                condicion.getTickets().stream()
+                        .map(t -> new TicketResumenResponse(t.getTicketId(), t.getPrecio()))
+                        .toList();
+        return new CondicionTicketResponse(condicion.getCondicion(), condicion.getCantidad(),
+                condicion.getValorTotal(), tickets);
+    }
 
     default SnapshotLiquidacionResponse toSnapshotResponse(SnapshotLiquidacion snapshot) {
         var condiciones = snapshot.getCondiciones().values().stream()
                 .map(this::toCondicionResponse)
                 .toList();
-        return new SnapshotLiquidacionResponse(snapshot.getEventoId(), condiciones, snapshot.getTimestampGeneracion());
+        return new SnapshotLiquidacionResponse(snapshot.getEventoId(), snapshot.getRecintoId(),
+                snapshot.getTipoRecinto(), condiciones, snapshot.getTimestampGeneracion());
     }
 
     default RecaudoIncrementalResponse toRecaudoResponse(UUID eventoId, Map<String, BigDecimal> recaudo) {

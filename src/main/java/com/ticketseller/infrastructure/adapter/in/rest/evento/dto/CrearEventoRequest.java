@@ -12,6 +12,7 @@ public record CrearEventoRequest(
         @NotNull @Future LocalDateTime fechaInicio,
         @NotNull @Future LocalDateTime fechaFin,
         @NotNull TipoEvento tipo,
-        @NotNull UUID recintoId
+        @NotNull UUID recintoId,
+        boolean reingresoHabilitado
 ) {
 }

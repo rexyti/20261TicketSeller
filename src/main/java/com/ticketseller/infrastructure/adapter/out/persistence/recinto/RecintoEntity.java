@@ -8,7 +8,6 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -32,9 +31,5 @@ public class RecintoEntity {
     private Integer compuertasIngreso;
     private Boolean activo;
     private String categoria;
-    @Column("modelo_negocio")
-    private String modeloNegocio;
-    @Column("monto_fijo")
-    private BigDecimal montoFijo;
 }
 

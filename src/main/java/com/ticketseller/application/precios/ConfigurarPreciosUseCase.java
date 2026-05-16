@@ -38,10 +38,12 @@ public class ConfigurarPreciosUseCase {
                         .collectList()
                         .flatMapMany(zonas -> {
                             Map<UUID, PrecioZona> porZona = obtenerPreciosPorZona(precios);
+                            Map<UUID, String> zonaNombres = zonas.stream()
+                                    .collect(Collectors.toMap(Zona::getId, Zona::getNombre));
 
                             return validarPreciosCompletos(zonas, porZona)
                                     .then(Mono.defer(() -> validarZonasValidas(zonas, porZona)))
-                                    .thenMany(Flux.defer(() -> eliminarYGuardarPrecios(eventoId, porZona)));
+                                    .thenMany(Flux.defer(() -> eliminarYGuardarPrecios(eventoId, porZona, zonaNombres)));
                         }));
     }
 
@@ -57,10 +59,11 @@ public class ConfigurarPreciosUseCase {
                 : Mono.empty();
     }
 
-    private Flux<PrecioZona> eliminarYGuardarPrecios(UUID eventoId, Map<UUID, PrecioZona> porZona) {
+    private Flux<PrecioZona> eliminarYGuardarPrecios(UUID eventoId, Map<UUID, PrecioZona> porZona,
+                                                      Map<UUID, String> zonaNombres) {
         return precioZonaRepositoryPort.eliminarPorEvento(eventoId)
                 .thenMany(Flux.fromIterable(porZona.values())
-                        .map(precio -> buildPrecioZona(precio, eventoId))
+                        .map(precio -> buildPrecioZona(precio, eventoId, zonaNombres))
                         .flatMap(precioZonaRepositoryPort::guardar));
     }
 
@@ -79,9 +82,10 @@ public class ConfigurarPreciosUseCase {
                 .anyMatch(zonaId -> zonas.stream().noneMatch(zona -> zona.getId().equals(zonaId)));
     }
 
-    private PrecioZona buildPrecioZona(PrecioZona precio, UUID eventoId){
+    private PrecioZona buildPrecioZona(PrecioZona precio, UUID eventoId, Map<UUID, String> zonaNombres) {
         return precio.toBuilder()
                 .eventoId(eventoId)
+                .nombreZona(zonaNombres.get(precio.getZonaId()))
                 .build();
     }
 }

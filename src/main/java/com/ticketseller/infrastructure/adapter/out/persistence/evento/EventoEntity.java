@@ -28,5 +28,7 @@ public class EventoEntity {
     @Column("recinto_id")
     private UUID recintoId;
     private String estado;
+    @Column("reingreso_habilitado")
+    private boolean reingresoHabilitado;
 }
 

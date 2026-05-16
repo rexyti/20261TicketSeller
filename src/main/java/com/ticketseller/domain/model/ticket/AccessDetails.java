@@ -16,6 +16,8 @@ public class AccessDetails {
     private String zona;
     private String compuerta;
     private LocalDateTime fechaEvento;
+    private String asiento;
+    private boolean permiteReingreso;
 
     public void validar() {
         if (sinCategoria()) {

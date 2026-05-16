@@ -10,6 +10,7 @@ public record EditarEventoRequest(
         LocalDateTime fechaInicio,
         LocalDateTime fechaFin,
         TipoEvento tipo,
-        UUID recintoId
+        UUID recintoId,
+        Boolean reingresoHabilitado
 ) {
 }

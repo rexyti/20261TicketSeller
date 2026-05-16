@@ -3,7 +3,6 @@ package com.ticketseller.application.postventa;
 import com.ticketseller.domain.exception.evento.EventoNotFoundException;
 import com.ticketseller.domain.exception.postventa.CancelacionFueraDePlazoException;
 import com.ticketseller.domain.exception.postventa.SolicitudCancelacionTicketsInvalidaException;
-import com.ticketseller.domain.exception.postventa.TicketYaUsadoException;
 import com.ticketseller.domain.exception.venta.TicketNotFoundException;
 import com.ticketseller.domain.model.asiento.Asiento;
 import com.ticketseller.domain.model.asiento.EstadoAsiento;
@@ -62,8 +61,8 @@ public class CancelarTicketUseCase {
     }
 
     private Mono<Ticket> validarTicketCancelable(Ticket ticket) {
-        if (EstadoTicket.USADO.equals(ticket.getEstado())) {
-            return Mono.error(new TicketYaUsadoException("No se puede cancelar un ticket ya usado"));
+        if (!ticket.esCancelable()) {
+            return Mono.error(new SolicitudCancelacionTicketsInvalidaException("El ticket con id %s no se puede cancelar por su estado actual: %s".formatted(ticket.getId(), ticket.getEstado())));
         }
         return eventoRepositoryPort.buscarPorId(ticket.getEventoId())
                 .switchIfEmpty(Mono.error(new EventoNotFoundException("Evento no encontrado para ticket")))

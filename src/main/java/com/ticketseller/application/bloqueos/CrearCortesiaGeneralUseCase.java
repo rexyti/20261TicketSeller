@@ -70,14 +70,10 @@ public class CrearCortesiaGeneralUseCase {
         }
         return compuertaRepositoryPort.buscarPorZonaId(zonaId)
                 .collectList()
-                .flatMap(compuertas -> {
-                    if (compuertas.isEmpty()) {
-                        return Mono.just(Compuerta.builder().build());
-                    }
-                    return ticketRepositoryPort.buscarPorEvento(eventoId)
-                            .collectList()
-                            .map(tickets -> seleccionarCompuertaBalanceada(compuertas, tickets));
-                });
+                .flatMap(compuertas -> ticketRepositoryPort.buscarPorEvento(eventoId)
+                        .collectList()
+                        .map(tickets -> seleccionarCompuertaBalanceada(compuertas, tickets)))
+                .switchIfEmpty(Mono.just(Compuerta.builder().build()));
     }
 
     private Compuerta seleccionarCompuertaBalanceada(List<Compuerta> compuertas, List<Ticket> tickets) {
@@ -96,6 +92,8 @@ public class CrearCortesiaGeneralUseCase {
                 .zona(zona.getNombre())
                 .compuerta(compuerta.getNombre())
                 .fechaEvento(evento.getFechaInicio())
+                .asiento(null)
+                .permiteReingreso(evento.isReingresoHabilitado())
                 .build();
         return Ticket.builder()
                 .eventoId(eventoId)

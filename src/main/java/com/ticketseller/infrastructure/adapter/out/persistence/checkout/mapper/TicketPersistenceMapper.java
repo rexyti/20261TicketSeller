@@ -15,6 +15,8 @@ public interface TicketPersistenceMapper {
     @Mapping(target = "fechaEvento", expression = "java(ticket.getAccessDetails() != null ? ticket.getAccessDetails().getFechaEvento() : null)")
     @Mapping(target = "zonaNombre", expression = "java(ticket.getAccessDetails() != null ? ticket.getAccessDetails().getZona() : null)")
     @Mapping(target = "compuertaNombre", expression = "java(ticket.getAccessDetails() != null ? ticket.getAccessDetails().getCompuerta() : null)")
+    @Mapping(target = "numeroAsiento", expression = "java(ticket.getAccessDetails() != null ? ticket.getAccessDetails().getAsiento() : null)")
+    @Mapping(target = "permiteReingreso", expression = "java(ticket.getAccessDetails() != null && ticket.getAccessDetails().isPermiteReingreso())")
     TicketEntity toEntity(Ticket ticket);
 
     @Mapping(target = "estado", expression = "java(toEstado(entity.getEstado()))")
@@ -35,6 +37,8 @@ public interface TicketPersistenceMapper {
                 .zona(entity.getZonaNombre())
                 .compuerta(entity.getCompuertaNombre())
                 .fechaEvento(entity.getFechaEvento())
+                .asiento(entity.getNumeroAsiento())
+                .permiteReingreso(entity.isPermiteReingreso())
                 .build();
     }
 }

@@ -18,6 +18,7 @@ public class PrecioZona {
     private UUID eventoId;
     private UUID zonaId;
     private BigDecimal precio;
+    private String nombreZona;
 
     public void validarDatosRegistro() {
         if (zonaNoSeleccionada()) {

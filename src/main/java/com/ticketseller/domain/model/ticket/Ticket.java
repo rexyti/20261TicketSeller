@@ -32,6 +32,10 @@ public class Ticket {
         }
     }
 
+    public boolean esCancelable() {
+        return EstadoTicket.VENDIDO.equals(estado);
+    }
+
     private boolean transicionInvalida(EstadoTicket destino) {
         return estado.equals(destino) || !estado.transicionesPermitidas().contains(destino);
     }
@@ -66,11 +70,11 @@ public class Ticket {
         return valor == null ? null : valor.trim();
     }
 
-    private boolean isPrecioInvalido(){
+    private boolean isPrecioInvalido() {
         return precio.compareTo(BigDecimal.ZERO) < 0;
     }
 
-    private boolean ticketVendidoSinQrGenerado(){
+    private boolean ticketVendidoSinQrGenerado() {
         return EstadoTicket.VENDIDO.equals(estado) && (codigoQr == null || codigoQr.isBlank());
     }
 }

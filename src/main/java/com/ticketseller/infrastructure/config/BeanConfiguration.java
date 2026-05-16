@@ -65,8 +65,6 @@ import com.ticketseller.application.compuerta.CrearCompuertaUseCase;
 import com.ticketseller.application.compuerta.ListarCompuertasUseCase;
 import com.ticketseller.application.evento.*;
 import com.ticketseller.application.postventa.ConsultarReembolsosMasivoUseCase;
-import com.ticketseller.application.liquidacion.ConfigurarModeloNegocioUseCase;
-import com.ticketseller.application.liquidacion.ConsultarModeloNegocioUseCase;
 import com.ticketseller.application.liquidacion.ConsultarRecaudoIncrementalUseCase;
 import com.ticketseller.application.liquidacion.ConsultarSnapshotUseCase;
 import com.ticketseller.application.precios.ConfigurarPreciosUseCase;
@@ -521,18 +519,9 @@ public class BeanConfiguration {
 
     @Bean
     public ConsultarSnapshotUseCase consultarSnapshotUseCase(EventoRepositoryPort eventoRepositoryPort,
-                                                             LiquidacionQueryPort liquidacionQueryPort) {
-        return new ConsultarSnapshotUseCase(eventoRepositoryPort, liquidacionQueryPort);
-    }
-
-    @Bean
-    public ConsultarModeloNegocioUseCase consultarModeloNegocioUseCase(RecintoRepositoryPort recintoRepositoryPort) {
-        return new ConsultarModeloNegocioUseCase(recintoRepositoryPort);
-    }
-
-    @Bean
-    public ConfigurarModeloNegocioUseCase configurarModeloNegocioUseCase(RecintoRepositoryPort recintoRepositoryPort) {
-        return new ConfigurarModeloNegocioUseCase(recintoRepositoryPort);
+                                                             LiquidacionQueryPort liquidacionQueryPort,
+                                                             RecintoRepositoryPort recintoRepositoryPort) {
+        return new ConsultarSnapshotUseCase(eventoRepositoryPort, liquidacionQueryPort, recintoRepositoryPort);
     }
 
     @Bean
