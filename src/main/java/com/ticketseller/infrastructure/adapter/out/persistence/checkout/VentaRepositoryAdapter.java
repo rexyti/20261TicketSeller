@@ -82,6 +82,14 @@ public class VentaRepositoryAdapter implements VentaRepositoryPort {
     }
 
     @Override
+    public Mono<Venta> actualizarTotal(UUID id, BigDecimal nuevoTotal) {
+        return repository.findById(id)
+                .map(entity -> entity.toBuilder().total(nuevoTotal).build())
+                .flatMap(repository::save)
+                .map(mapper::toDomain);
+    }
+
+    @Override
     public Mono<Venta> actualizarEstadoCondicional(UUID id, EstadoVenta estadoActual, EstadoVenta nuevoEstado) {
         return databaseClient.sql("UPDATE ventas SET estado = :nuevo WHERE id = :id AND estado = :actual")
                 .bind("nuevo", nuevoEstado.name())

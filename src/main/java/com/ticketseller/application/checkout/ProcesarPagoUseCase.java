@@ -1,5 +1,6 @@
 package com.ticketseller.application.checkout;
 
+import com.ticketseller.domain.exception.evento.EventoNotFoundException;
 import com.ticketseller.domain.exception.venta.MetodoPagoInvalidoException;
 import com.ticketseller.domain.exception.venta.PagoRechazadoException;
 import com.ticketseller.domain.exception.venta.ReservaExpiradaException;
@@ -106,19 +107,17 @@ public class ProcesarPagoUseCase {
     }
 
     private Mono<VentaDetalle> completarVenta(Venta venta, ProcesarPagoCommand command, ResultadoPago resultado) {
-        return Mono.zip(
-                        obtenerZona(venta.getZonaId()),
+        return obtenerZona(venta.getZonaId())
+                .flatMap(zona -> Mono.zip(
                         obtenerPrecio(venta.getEventoId(), venta.getZonaId()),
-                        obtenerCompuertaBalanceada(venta.getZonaId(), venta.getEventoId()),
+                        obtenerCompuertaBalanceada(zona.getId(), zona.getRecintoId(), venta.getEventoId()),
                         obtenerEvento(venta.getEventoId()),
                         asientoHoldRepositoryPort.buscarPorVentaId(venta.getId()).collectList()
-                )
-                .flatMap(tuple -> {
-                    Zona zona = tuple.getT1();
-                    PrecioZona precioZona = tuple.getT2();
-                    Compuerta compuerta = tuple.getT3();
-                    Evento evento = tuple.getT4();
-                    List<AsientoHold> holds = tuple.getT5();
+                ).flatMap(tuple -> {
+                    PrecioZona precioZona = tuple.getT1();
+                    Compuerta compuerta = tuple.getT2();
+                    Evento evento = tuple.getT3();
+                    List<AsientoHold> holds = tuple.getT4();
 
                     List<Ticket> tickets = IntStream.range(0, venta.getCantidad())
                             .mapToObj(i -> buildTicket(venta, compuerta, precioZona, zona, evento,
@@ -133,7 +132,7 @@ public class ProcesarPagoUseCase {
                                     .flatMap(ventaPagada -> guardarTransaccion(ventaPagada, command, resultado)
                                             .then(notificacionEmailPort.enviarConfirmacion(ventaPagada, savedTickets))
                                             .thenReturn(new VentaDetalle(ventaPagada, savedTickets))));
-                });
+                }));
     }
 
     private Mono<Zona> obtenerZona(UUID zonaId) {
@@ -148,18 +147,17 @@ public class ProcesarPagoUseCase {
                 .switchIfEmpty(Mono.error(new ZonaSinPrecioException("No existe precio configurado para la zona en este evento")));
     }
 
-    private Mono<Compuerta> obtenerCompuertaBalanceada(UUID zonaId, UUID eventoId) {
+    private Mono<Compuerta> obtenerCompuertaBalanceada(UUID zonaId, UUID recintoId, UUID eventoId) {
         return compuertaRepositoryPort.buscarPorZonaId(zonaId)
+                .switchIfEmpty(compuertaRepositoryPort.buscarPorRecintoId(recintoId)
+                        .filter(Compuerta::isEsGeneral))
                 .collectList()
-                .flatMap(compuertas -> {
-                    if (compuertas.isEmpty()) {
-                        return Mono.just(Compuerta.builder().build());
-                    }
-                    return ticketRepositoryPort.buscarPorEventoYEstados(eventoId,
-                            java.util.Set.of(EstadoTicket.VENDIDO))
-                            .collectList()
-                            .map(tickets -> seleccionarCompuertaBalanceada(compuertas, tickets));
-                });
+                .filter(compuertas -> !compuertas.isEmpty())
+                .flatMap(compuertas -> ticketRepositoryPort.buscarPorEventoYEstados(eventoId,
+                                java.util.Set.of(EstadoTicket.VENDIDO))
+                        .collectList()
+                        .map(tickets -> seleccionarCompuertaBalanceada(compuertas, tickets)))
+                .switchIfEmpty(Mono.just(Compuerta.builder().build()));
     }
 
     private Compuerta seleccionarCompuertaBalanceada(List<Compuerta> compuertas, List<Ticket> tickets) {
@@ -173,7 +171,7 @@ public class ProcesarPagoUseCase {
 
     private Mono<Evento> obtenerEvento(UUID eventoId) {
         return eventoRepositoryPort.buscarPorId(eventoId)
-                .switchIfEmpty(Mono.error(new com.ticketseller.domain.exception.evento.EventoNotFoundException("Evento no encontrado")));
+                .switchIfEmpty(Mono.error(new EventoNotFoundException("Evento no encontrado")));
     }
 
     private Mono<Void> actualizarAsientosYHolds(List<Ticket> tickets, List<AsientoHold> holds) {

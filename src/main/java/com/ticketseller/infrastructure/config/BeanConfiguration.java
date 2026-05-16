@@ -21,6 +21,7 @@ import com.ticketseller.infrastructure.adapter.out.persistence.bloqueos.Cortesia
 import com.ticketseller.infrastructure.adapter.out.persistence.bloqueos.mapper.BloqueoPersistenceMapper;
 import com.ticketseller.infrastructure.adapter.out.persistence.bloqueos.mapper.CortesiaPersistenceMapper;
 import com.ticketseller.application.conciliacion.*;
+import com.ticketseller.application.promocion.AplicarCodigoPromoVentaUseCase;
 import com.ticketseller.application.promocion.AplicarDescuentoCarritoUseCase;
 import com.ticketseller.application.promocion.CrearCodigosPromocionalesUseCase;
 import com.ticketseller.application.promocion.CrearDescuentoUseCase;
@@ -793,6 +794,13 @@ public class BeanConfiguration {
             PromocionRepositoryPort promocionRepositoryPort,
             DescuentoRepositoryPort descuentoRepositoryPort) {
         return new ValidarCodigoPromocionalUseCase(codigoRepositoryPort, promocionRepositoryPort, descuentoRepositoryPort);
+    }
+
+    @Bean
+    public AplicarCodigoPromoVentaUseCase aplicarCodigoPromoVentaUseCase(
+            ValidarCodigoPromocionalUseCase validarCodigoPromocionalUseCase,
+            VentaRepositoryPort ventaRepositoryPort) {
+        return new AplicarCodigoPromoVentaUseCase(validarCodigoPromocionalUseCase, ventaRepositoryPort);
     }
 
     @Bean

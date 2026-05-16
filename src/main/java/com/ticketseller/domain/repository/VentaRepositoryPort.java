@@ -5,6 +5,7 @@ import com.ticketseller.domain.model.venta.Venta;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -23,5 +24,7 @@ public interface VentaRepositoryPort {
     Flux<Venta> buscarConFiltros(EstadoVenta estado, LocalDateTime fechaInicio, LocalDateTime fechaFin, UUID eventoId);
 
     Mono<Venta> actualizarEstadoCondicional(UUID id, EstadoVenta estadoActual, EstadoVenta nuevoEstado);
+
+    Mono<Venta> actualizarTotal(UUID id, BigDecimal nuevoTotal);
 }
 
