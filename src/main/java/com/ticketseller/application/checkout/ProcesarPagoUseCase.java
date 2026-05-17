@@ -193,7 +193,7 @@ public class ProcesarPagoUseCase {
 
         Mono<Void> expirarHolds = Flux.fromIterable(holds)
                 .flatMap(hold -> asientoHoldRepositoryPort.guardar(
-                        hold.toBuilder().estado(EstadoHold.EXPIRADO).build()))
+                        hold.toBuilder().estado(EstadoHold.COMPLETADA).build()))
                 .then();
 
         return actualizarAsientos.then(expirarHolds);

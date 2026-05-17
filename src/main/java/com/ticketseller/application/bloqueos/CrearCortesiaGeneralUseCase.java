@@ -1,6 +1,7 @@
 package com.ticketseller.application.bloqueos;
 
 import com.ticketseller.domain.exception.evento.EventoNotFoundException;
+import com.ticketseller.domain.exception.zona.ZonaInvalidaException;
 import com.ticketseller.domain.model.bloqueos.CategoriaCortesia;
 import com.ticketseller.domain.model.bloqueos.Cortesia;
 import com.ticketseller.domain.model.bloqueos.EstadoCortesia;
@@ -37,24 +38,23 @@ public class CrearCortesiaGeneralUseCase {
     public Mono<Cortesia> ejecutar(UUID eventoId, String destinatario, CategoriaCortesia categoria, UUID zonaId) {
         String codigoUnico = UUID.randomUUID().toString();
 
-        return Mono.zip(
-                buscarZona(zonaId),
-                eventoRepositoryPort.buscarPorId(eventoId)
-                        .switchIfEmpty(Mono.error(new EventoNotFoundException("Evento no encontrado"))),
-                obtenerCompuertaBalanceada(zonaId, eventoId)
-        ).flatMap(tuple -> {
-            Zona zona = tuple.getT1();
-            Evento evento = tuple.getT2();
-            Compuerta compuerta = tuple.getT3();
+        return eventoRepositoryPort.buscarPorId(eventoId)
+                .switchIfEmpty(Mono.error(new EventoNotFoundException("Evento no encontrado")))
+                .flatMap(evento -> Mono.zip(
+                        buscarZona(zonaId),
+                        obtenerCompuertaBalanceada(zonaId, evento.getRecintoId(), eventoId)
+                ).flatMap(tuple -> {
+                    Zona zona = tuple.getT1();
+                    Compuerta compuerta = tuple.getT2();
 
-            Ticket ticket = crearTicket(eventoId, zonaId, codigoUnico, zona, evento, compuerta);
-            return ticketRepositoryPort.guardar(ticket)
-                    .flatMap(savedTicket -> {
-                        Cortesia cortesia = crearCortesia(destinatario, categoria, codigoUnico, savedTicket);
-                        cortesia.validar();
-                        return cortesiaRepositoryPort.guardar(cortesia);
-                    });
-        });
+                    Ticket ticket = crearTicket(eventoId, zonaId, codigoUnico, zona, evento, compuerta);
+                    return ticketRepositoryPort.guardar(ticket)
+                            .flatMap(savedTicket -> {
+                                Cortesia cortesia = crearCortesia(destinatario, categoria, codigoUnico, savedTicket);
+                                cortesia.validar();
+                                return cortesiaRepositoryPort.guardar(cortesia);
+                            });
+                }));
     }
 
     private Mono<Zona> buscarZona(UUID zonaId) {
@@ -64,16 +64,20 @@ public class CrearCortesiaGeneralUseCase {
         return zonaRepositoryPort.buscarPorId(zonaId).defaultIfEmpty(Zona.builder().build());
     }
 
-    private Mono<Compuerta> obtenerCompuertaBalanceada(UUID zonaId, UUID eventoId) {
+    private Mono<Compuerta> obtenerCompuertaBalanceada(UUID zonaId, UUID recintoId, UUID eventoId) {
         if (zonaId == null) {
-            return Mono.just(Compuerta.builder().build());
+            return Mono.error(new ZonaInvalidaException("La zona es obligatoria para crear una cortesía"));
         }
         return compuertaRepositoryPort.buscarPorZonaId(zonaId)
                 .collectList()
-                .flatMap(compuertas -> ticketRepositoryPort.buscarPorEvento(eventoId)
-                        .collectList()
-                        .map(tickets -> seleccionarCompuertaBalanceada(compuertas, tickets)))
-                .switchIfEmpty(Mono.just(Compuerta.builder().build()));
+                .flatMap(compuertas -> {
+                    Mono<List<Compuerta>> compuertasMono = compuertas.isEmpty()
+                            ? compuertaRepositoryPort.buscarPorRecintoId(recintoId).filter(Compuerta::isEsGeneral).collectList()
+                            : Mono.just(compuertas);
+                    return compuertasMono.flatMap(cs -> ticketRepositoryPort.buscarPorEvento(eventoId)
+                            .collectList()
+                            .map(tickets -> seleccionarCompuertaBalanceada(cs, tickets)));
+                });
     }
 
     private Compuerta seleccionarCompuertaBalanceada(List<Compuerta> compuertas, List<Ticket> tickets) {
