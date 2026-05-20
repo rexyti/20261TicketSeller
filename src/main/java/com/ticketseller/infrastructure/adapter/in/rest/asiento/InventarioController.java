@@ -24,7 +24,7 @@ import reactor.core.publisher.Mono;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/eventos/{eventoId}/asientos")
+@RequestMapping("/api/v1/eventos/{eventoId}/inventario")
 @RequiredArgsConstructor
 @Tag(name = "Inventario en Tiempo Real", description = "Endpoints para la gestión de disponibilidad y reservas de asientos")
 public class InventarioController {
