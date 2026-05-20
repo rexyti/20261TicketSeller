@@ -45,6 +45,7 @@ import com.ticketseller.infrastructure.adapter.out.persistence.promocion.mapper.
 import com.ticketseller.infrastructure.adapter.out.persistence.promocion.mapper.PromocionPersistenceMapper;
 import com.ticketseller.application.inventario.ConfirmarOcupacionUseCase;
 import com.ticketseller.application.inventario.LiberarHoldsVencidosUseCase;
+import com.ticketseller.application.inventario.ObtenerInventarioEventoUseCase;
 import com.ticketseller.application.inventario.VerificarDisponibilidadUseCase;
 import com.ticketseller.application.transaccion.CambiarEstadoVentaUseCase;
 import com.ticketseller.application.transaccion.ConsultarHistorialVentaUseCase;
@@ -695,6 +696,12 @@ public class BeanConfiguration {
     public LiberarHoldUseCase liberarHoldUseCase(AsientoRepositoryPort asientoRepositoryPort,
                                                   AsientoHoldRepositoryPort asientoHoldRepositoryPort) {
         return new LiberarHoldUseCase(asientoRepositoryPort, asientoHoldRepositoryPort);
+    }
+
+    @Bean
+    public ObtenerInventarioEventoUseCase obtenerInventarioEventoUseCase(
+            AsientoRepositoryPort asientoRepositoryPort) {
+        return new ObtenerInventarioEventoUseCase(asientoRepositoryPort);
     }
 
     @Bean

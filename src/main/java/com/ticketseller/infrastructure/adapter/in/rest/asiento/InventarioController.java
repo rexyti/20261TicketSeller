@@ -2,6 +2,7 @@ package com.ticketseller.infrastructure.adapter.in.rest.asiento;
 
 import com.ticketseller.application.inventario.ConfirmarOcupacionUseCase;
 import com.ticketseller.application.inventario.LiberarHoldUseCase;
+import com.ticketseller.application.inventario.ObtenerInventarioEventoUseCase;
 import com.ticketseller.application.inventario.VerificarDisponibilidadUseCase;
 import com.ticketseller.infrastructure.adapter.in.rest.asiento.dto.DisponibilidadResponse;
 import com.ticketseller.infrastructure.adapter.in.rest.mapper.AsientoRestMapper;
@@ -16,12 +17,13 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/inventario/asientos")
+@RequestMapping("/api/v1/eventos/{eventoId}/asientos")
 @RequiredArgsConstructor
 @Tag(name = "Inventario en Tiempo Real", description = "Endpoints para la gestión de disponibilidad y reservas de asientos")
 public class InventarioController {
@@ -29,7 +31,18 @@ public class InventarioController {
     private final VerificarDisponibilidadUseCase verificarDisponibilidadUseCase;
     private final ConfirmarOcupacionUseCase confirmarOcupacionUseCase;
     private final LiberarHoldUseCase liberarHoldUseCase;
+    private final ObtenerInventarioEventoUseCase obtenerInventarioEventoUseCase;
     private final AsientoRestMapper asientoRestMapper;
+
+    @Operation(summary = "Obtener inventario de asientos de un evento")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Inventario obtenido exitosamente")
+    })
+    @GetMapping
+    public Flux<DisponibilidadResponse> obtenerInventario(@PathVariable UUID eventoId) {
+        return obtenerInventarioEventoUseCase.ejecutar(eventoId)
+                .map(asientoRestMapper::toDisponibilidadResponse);
+    }
 
     @Operation(summary = "Verificar disponibilidad de un asiento")
     @ApiResponses(value = {
@@ -45,7 +58,7 @@ public class InventarioController {
 
     @Operation(summary = "Confirmar ocupación de un asiento tras pago exitoso")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Asiento marcado como OCUPADO"),
+            @ApiResponse(responseCode = "200", description = "Asiento marcado como VENDIDO"),
             @ApiResponse(responseCode = "404", description = "Asiento no encontrado"),
             @ApiResponse(responseCode = "409", description = "Hold expirado o asiento no en estado RESERVADO")
     })

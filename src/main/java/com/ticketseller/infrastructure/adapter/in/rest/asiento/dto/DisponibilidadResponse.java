@@ -4,8 +4,9 @@ import java.util.UUID;
 
 public record DisponibilidadResponse(
         UUID asientoId,
-        boolean disponible,
-        String estado,
-        String mensaje
+        String numeroAsiento,
+        UUID zonaId,
+        String tipoAsiento,
+        String estado
 ) {
 }
