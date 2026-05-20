@@ -5,6 +5,7 @@ import com.ticketseller.application.inventario.LiberarHoldUseCase;
 import com.ticketseller.application.inventario.ObtenerInventarioEventoUseCase;
 import com.ticketseller.application.inventario.VerificarDisponibilidadUseCase;
 import com.ticketseller.infrastructure.adapter.in.rest.asiento.dto.DisponibilidadResponse;
+import com.ticketseller.infrastructure.adapter.in.rest.asiento.dto.InventarioResponse;
 import com.ticketseller.infrastructure.adapter.in.rest.mapper.AsientoRestMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -39,9 +40,9 @@ public class InventarioController {
             @ApiResponse(responseCode = "200", description = "Inventario obtenido exitosamente")
     })
     @GetMapping
-    public Flux<DisponibilidadResponse> obtenerInventario(@PathVariable UUID eventoId) {
+    public Flux<InventarioResponse> obtenerInventario(@PathVariable UUID eventoId) {
         return obtenerInventarioEventoUseCase.ejecutar(eventoId)
-                .map(asientoRestMapper::toDisponibilidadResponse);
+                .map(asientoRestMapper::toInventarioResponse);
     }
 
     @Operation(summary = "Verificar disponibilidad de un asiento")

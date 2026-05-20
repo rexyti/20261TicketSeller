@@ -5,6 +5,7 @@ import com.ticketseller.domain.model.asiento.HistorialCambioEstado;
 import com.ticketseller.infrastructure.adapter.in.rest.asiento.dto.AsientoResponse;
 import com.ticketseller.infrastructure.adapter.in.rest.asiento.dto.DisponibilidadResponse;
 import com.ticketseller.infrastructure.adapter.in.rest.asiento.dto.HistorialCambioResponse;
+import com.ticketseller.infrastructure.adapter.in.rest.asiento.dto.InventarioResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
@@ -18,6 +19,10 @@ public interface AsientoRestMapper {
     @Mapping(target = "asientoId", source = "id")
     @Mapping(target = "numeroAsiento", source = "numero")
     @Mapping(target = "tipoAsiento", expression = "java(asiento.getTipoAsiento().name())")
+    @Mapping(target = "estado", expression = "java(asiento.getEstado().name())")
+    InventarioResponse toInventarioResponse(Asiento asiento);
+
+    @Mapping(target = "asientoId", source = "id")
     @Mapping(target = "estado", expression = "java(asiento.getEstado().name())")
     DisponibilidadResponse toDisponibilidadResponse(Asiento asiento);
 }
