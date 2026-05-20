@@ -6,7 +6,6 @@ public record InventarioResponse(
         UUID asientoId,
         String numeroAsiento,
         UUID zonaId,
-        String tipoAsiento,
         String estado
 ) {
 }

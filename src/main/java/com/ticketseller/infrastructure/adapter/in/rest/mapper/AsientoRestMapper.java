@@ -18,7 +18,6 @@ public interface AsientoRestMapper {
 
     @Mapping(target = "asientoId", source = "id")
     @Mapping(target = "numeroAsiento", source = "numero")
-    @Mapping(target = "tipoAsiento", expression = "java(asiento.getTipoAsiento().name())")
     @Mapping(target = "estado", expression = "java(asiento.getEstado().name())")
     InventarioResponse toInventarioResponse(Asiento asiento);
 
