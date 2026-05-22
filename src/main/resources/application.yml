@@ -32,11 +32,9 @@ springdoc:
   swagger-ui:
     path: /swagger-ui.html
 
-wompi:
-  base-url: ${WOMPI_BASE_URL:https://sandbox.wompi.co/v1}
-  private-key: ${WOMPI_PRIVATE_KEY:}
-
 logging:
   level:
     com.ticketseller: INFO
     org.springframework.r2dbc: WARN
+
+kind: Application
