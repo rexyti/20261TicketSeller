@@ -24,6 +24,8 @@ public class TipoAsientoEntity {
     private String nombre;
     private String descripcion;
     private String estado;
+    @Column("en_uso")
+    private boolean enUso;
     @Column("created_at")
     private OffsetDateTime createdAt;
 }

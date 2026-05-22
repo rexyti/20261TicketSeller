@@ -9,7 +9,6 @@ import java.util.UUID;
 
 public record ReservarAsientosRequest(
         @NotNull UUID compradorId,
-        @NotNull UUID eventoId,
         @NotNull UUID zonaId,
         @NotNull @Min(1) Integer cantidad,
         Boolean esCortesia,

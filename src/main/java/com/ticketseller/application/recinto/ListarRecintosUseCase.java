@@ -11,6 +11,6 @@ public class ListarRecintosUseCase {
     private final RecintoRepositoryPort recintoRepositoryPort;
 
     public Flux<Recinto> ejecutar() {
-        return recintoRepositoryPort.listarTodos().filter(Recinto::isActivo);
+        return recintoRepositoryPort.listarTodos();
     }
 }

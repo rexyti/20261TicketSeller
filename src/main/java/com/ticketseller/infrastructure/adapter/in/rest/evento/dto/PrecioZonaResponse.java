@@ -7,7 +7,8 @@ public record PrecioZonaResponse(
         UUID id,
         UUID eventoId,
         UUID zonaId,
-        BigDecimal precio
+        BigDecimal precio,
+        String zonaNombre
 ) {
 }
 

@@ -22,7 +22,7 @@ import reactor.core.publisher.Mono;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/admin")
+@RequestMapping("/api/v1/admin/eventos")
 @RequiredArgsConstructor
 @Tag(name = "Admin - Cortesías", description = "Generación de tickets de cortesía para invitados especiales")
 public class CortesiaController {
@@ -32,7 +32,7 @@ public class CortesiaController {
     private final CortesiaRestMapper cortesiaRestMapper;
 
     @Operation(summary = "Crear un ticket de cortesía con asiento específico asignado")
-    @PostMapping("/eventos/{eventoId}/cortesias/con-asiento")
+    @PostMapping("/{eventoId}/cortesias/con-asiento")
     public Mono<ResponseEntity<CortesiaResponse>> crearCortesiaConAsiento(
             @PathVariable UUID eventoId,
             @Valid @RequestBody CrearCortesiaRequest request) {
@@ -43,7 +43,7 @@ public class CortesiaController {
     }
 
     @Operation(summary = "Crear un ticket de cortesía general sin asiento asignado")
-    @PostMapping("/eventos/{eventoId}/cortesias/general")
+    @PostMapping("/{eventoId}/cortesias/general")
     public Mono<ResponseEntity<CortesiaResponse>> crearCortesiaGeneral(
             @PathVariable UUID eventoId,
             @Valid @RequestBody CrearCortesiaGeneralRequest request) {

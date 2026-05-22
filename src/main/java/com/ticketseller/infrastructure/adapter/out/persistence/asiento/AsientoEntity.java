@@ -25,6 +25,8 @@ public class AsientoEntity {
     private String numero;
     @Column("zona_id")
     private UUID zonaId;
+    @Column("recinto_id")
+    private UUID recintoId;
     private String tipo;
     private String estado;
 }

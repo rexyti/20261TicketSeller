@@ -21,6 +21,7 @@ public class Evento {
     private TipoEvento tipo;
     private UUID recintoId;
     private EstadoEvento estado;
+    private boolean reingresoHabilitado;
 
     public Evento normalizarDatosRegistro() {
         return toBuilder()

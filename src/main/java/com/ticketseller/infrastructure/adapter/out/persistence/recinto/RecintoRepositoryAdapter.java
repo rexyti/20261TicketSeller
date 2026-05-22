@@ -13,8 +13,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import io.r2dbc.spi.Row;
 
-import java.math.BigDecimal;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -170,8 +168,6 @@ public class RecintoRepositoryAdapter implements RecintoRepositoryPort {
                 .compuertasIngreso(row.get("compuertas_ingreso", Integer.class))
                 .activo(row.get("activo", Boolean.class))
                 .categoria(row.get("categoria", String.class))
-                .modeloNegocio(row.get("modelo_negocio", String.class))
-                .montoFijo(row.get("monto_fijo", BigDecimal.class))
                 .build();
     }
 

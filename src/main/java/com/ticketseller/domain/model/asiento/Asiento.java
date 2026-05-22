@@ -17,6 +17,7 @@ public class Asiento {
     private Integer columna;
     private String numero;
     private UUID zonaId;
+    private UUID recintoId;
     private TipoAsiento tipoAsiento;
     private EstadoAsiento estado;
 
@@ -57,7 +58,6 @@ public class Asiento {
             case BLOQUEADO -> validoFromBloqueado(nuevo);
             case RESERVADO -> validoFromReservado(nuevo);
             case VENDIDO -> validoFromVendido(nuevo);
-            case OCUPADO -> validoFromOcupado(nuevo);
             case MANTENIMIENTO -> validoFromMantenimiento(nuevo);
             default -> false;
         };
@@ -77,16 +77,11 @@ public class Asiento {
     }
 
     private boolean validoFromVendido(EstadoAsiento nuevo) {
-        return EstadoAsiento.ANULADO.equals(nuevo);
+        return false;
     }
 
     private boolean validoFromReservado(EstadoAsiento nuevo) {
-        return EstadoAsiento.DISPONIBLE.equals(nuevo) || EstadoAsiento.VENDIDO.equals(nuevo)
-                || EstadoAsiento.OCUPADO.equals(nuevo);
-    }
-
-    private boolean validoFromOcupado(EstadoAsiento nuevo) {
-        return EstadoAsiento.ANULADO.equals(nuevo);
+        return EstadoAsiento.DISPONIBLE.equals(nuevo) || EstadoAsiento.VENDIDO.equals(nuevo);
     }
 
     private boolean validoFromBloqueado(EstadoAsiento nuevo) {

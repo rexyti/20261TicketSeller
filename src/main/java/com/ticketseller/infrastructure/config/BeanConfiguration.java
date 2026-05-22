@@ -1,5 +1,6 @@
 package com.ticketseller.infrastructure.config;
 
+import com.ticketseller.application.tipoasiento.*;
 import com.ticketseller.domain.repository.AsientoHoldRepositoryPort;
 import com.ticketseller.infrastructure.adapter.out.persistence.asientohold.AsientoHoldR2dbcRepository;
 import com.ticketseller.infrastructure.adapter.out.persistence.asientohold.AsientoHoldRepositoryAdapter;
@@ -20,11 +21,13 @@ import com.ticketseller.infrastructure.adapter.out.persistence.bloqueos.Cortesia
 import com.ticketseller.infrastructure.adapter.out.persistence.bloqueos.mapper.BloqueoPersistenceMapper;
 import com.ticketseller.infrastructure.adapter.out.persistence.bloqueos.mapper.CortesiaPersistenceMapper;
 import com.ticketseller.application.conciliacion.*;
+import com.ticketseller.application.promocion.AplicarCodigoPromoVentaUseCase;
 import com.ticketseller.application.promocion.AplicarDescuentoCarritoUseCase;
 import com.ticketseller.application.promocion.CrearCodigosPromocionalesUseCase;
 import com.ticketseller.application.promocion.CrearDescuentoUseCase;
 import com.ticketseller.application.promocion.CrearPromocionUseCase;
 import com.ticketseller.application.promocion.GestionarEstadoPromocionUseCase;
+import com.ticketseller.application.promocion.ListarCodigosPromocionalesUseCase;
 import com.ticketseller.application.promocion.ListarDescuentosUseCase;
 import com.ticketseller.application.promocion.ListarPromocionesUseCase;
 import com.ticketseller.application.promocion.ValidarCodigoPromocionalUseCase;
@@ -42,6 +45,7 @@ import com.ticketseller.infrastructure.adapter.out.persistence.promocion.mapper.
 import com.ticketseller.infrastructure.adapter.out.persistence.promocion.mapper.PromocionPersistenceMapper;
 import com.ticketseller.application.inventario.ConfirmarOcupacionUseCase;
 import com.ticketseller.application.inventario.LiberarHoldsVencidosUseCase;
+import com.ticketseller.application.inventario.ObtenerInventarioEventoUseCase;
 import com.ticketseller.application.inventario.VerificarDisponibilidadUseCase;
 import com.ticketseller.application.transaccion.CambiarEstadoVentaUseCase;
 import com.ticketseller.application.transaccion.ConsultarHistorialVentaUseCase;
@@ -62,9 +66,6 @@ import com.ticketseller.application.compuerta.CrearCompuertaUseCase;
 import com.ticketseller.application.compuerta.ListarCompuertasUseCase;
 import com.ticketseller.application.evento.*;
 import com.ticketseller.application.postventa.ConsultarReembolsosMasivoUseCase;
-import com.ticketseller.application.liquidacion.ConfigurarModeloNegocioUseCase;
-import com.ticketseller.application.liquidacion.ConsultarModeloNegocioUseCase;
-import com.ticketseller.application.liquidacion.ConsultarRecaudoIncrementalUseCase;
 import com.ticketseller.application.liquidacion.ConsultarSnapshotUseCase;
 import com.ticketseller.application.precios.ConfigurarPreciosUseCase;
 import com.ticketseller.application.precios.ListarPreciosUseCase;
@@ -75,14 +76,10 @@ import com.ticketseller.application.recinto.ListarRecintosFiltradosUseCase;
 import com.ticketseller.application.recinto.ListarRecintosUseCase;
 import com.ticketseller.application.recinto.ReactivarRecintoUseCase;
 import com.ticketseller.application.recinto.RegistrarRecintoUseCase;
-import com.ticketseller.application.tipoasiento.AsignarTipoAsientoAZonaUseCase;
 import com.ticketseller.application.asiento.AsignarAsientosAZonaUseCase;
+import com.ticketseller.application.asiento.ConsultarAsientosEventoUseCase;
 import com.ticketseller.application.asiento.ConsultarMapaAsientosUseCase;
 import com.ticketseller.application.asiento.CrearMapaAsientosUseCase;
-import com.ticketseller.application.tipoasiento.CrearTipoAsientoUseCase;
-import com.ticketseller.application.tipoasiento.DesactivarTipoAsientoUseCase;
-import com.ticketseller.application.tipoasiento.EditarTipoAsientoUseCase;
-import com.ticketseller.application.tipoasiento.ListarTiposAsientoUseCase;
 import com.ticketseller.application.asiento.MarcarEspacioVacioUseCase;
 import com.ticketseller.application.zona.CrearZonaUseCase;
 import com.ticketseller.application.zona.ListarZonasUseCase;
@@ -422,6 +419,11 @@ public class BeanConfiguration {
     }
 
     @Bean
+    public ObtenerEventoUseCase obtenerEventoUseCase(EventoRepositoryPort eventoRepositoryPort) {
+        return new ObtenerEventoUseCase(eventoRepositoryPort);
+    }
+
+    @Bean
     public ConfigurarPreciosUseCase configurarPreciosUseCase(EventoRepositoryPort eventoRepositoryPort,
                                                              PrecioZonaRepositoryPort precioZonaRepositoryPort,
                                                              ZonaRepositoryPort zonaRepositoryPort) {
@@ -517,25 +519,9 @@ public class BeanConfiguration {
 
     @Bean
     public ConsultarSnapshotUseCase consultarSnapshotUseCase(EventoRepositoryPort eventoRepositoryPort,
-                                                             LiquidacionQueryPort liquidacionQueryPort) {
-        return new ConsultarSnapshotUseCase(eventoRepositoryPort, liquidacionQueryPort);
-    }
-
-    @Bean
-    public ConsultarModeloNegocioUseCase consultarModeloNegocioUseCase(RecintoRepositoryPort recintoRepositoryPort) {
-        return new ConsultarModeloNegocioUseCase(recintoRepositoryPort);
-    }
-
-    @Bean
-    public ConfigurarModeloNegocioUseCase configurarModeloNegocioUseCase(RecintoRepositoryPort recintoRepositoryPort) {
-        return new ConfigurarModeloNegocioUseCase(recintoRepositoryPort);
-    }
-
-    @Bean
-    public ConsultarRecaudoIncrementalUseCase consultarRecaudoIncrementalUseCase(
-            EventoRepositoryPort eventoRepositoryPort,
-            LiquidacionQueryPort liquidacionQueryPort) {
-        return new ConsultarRecaudoIncrementalUseCase(eventoRepositoryPort, liquidacionQueryPort);
+                                                             LiquidacionQueryPort liquidacionQueryPort,
+                                                             RecintoRepositoryPort recintoRepositoryPort) {
+        return new ConsultarSnapshotUseCase(eventoRepositoryPort, liquidacionQueryPort, recintoRepositoryPort);
     }
 
     @Bean
@@ -558,6 +544,11 @@ public class BeanConfiguration {
     @Bean
     public ConsultarHistorialAsientoUseCase consultarHistorialAsientoUseCase(HistorialCambioEstadoRepositoryPort historialRepositoryPort) {
         return new ConsultarHistorialAsientoUseCase(historialRepositoryPort);
+    }
+
+    @Bean
+    public ConsultarAsientosEventoUseCase consultarAsientosEventoUseCase(AsientoRepositoryPort asientoRepositoryPort) {
+        return new ConsultarAsientosEventoUseCase(asientoRepositoryPort);
     }
 
     @Bean
@@ -708,6 +699,12 @@ public class BeanConfiguration {
     }
 
     @Bean
+    public ObtenerInventarioEventoUseCase obtenerInventarioEventoUseCase(
+            AsientoRepositoryPort asientoRepositoryPort) {
+        return new ObtenerInventarioEventoUseCase(asientoRepositoryPort);
+    }
+
+    @Bean
     public PromocionRepositoryPort promocionRepositoryPort(PromocionR2dbcRepository repository,
                                                            PromocionPersistenceMapper mapper) {
         return new PromocionRepositoryAdapter(repository, mapper);
@@ -766,6 +763,13 @@ public class BeanConfiguration {
     }
 
     @Bean
+    public ListarCodigosPromocionalesUseCase listarCodigosPromocionalesUseCase(
+            CodigoPromocionalRepositoryPort codigoRepositoryPort,
+            PromocionRepositoryPort promocionRepositoryPort) {
+        return new ListarCodigosPromocionalesUseCase(codigoRepositoryPort, promocionRepositoryPort);
+    }
+
+    @Bean
     public AplicarDescuentoCarritoUseCase aplicarDescuentoCarritoUseCase(
             PromocionRepositoryPort promocionRepositoryPort,
             DescuentoRepositoryPort descuentoRepositoryPort) {
@@ -778,6 +782,13 @@ public class BeanConfiguration {
             PromocionRepositoryPort promocionRepositoryPort,
             DescuentoRepositoryPort descuentoRepositoryPort) {
         return new ValidarCodigoPromocionalUseCase(codigoRepositoryPort, promocionRepositoryPort, descuentoRepositoryPort);
+    }
+
+    @Bean
+    public AplicarCodigoPromoVentaUseCase aplicarCodigoPromoVentaUseCase(
+            ValidarCodigoPromocionalUseCase validarCodigoPromocionalUseCase,
+            VentaRepositoryPort ventaRepositoryPort) {
+        return new AplicarCodigoPromoVentaUseCase(validarCodigoPromocionalUseCase, ventaRepositoryPort);
     }
 
     @Bean
@@ -840,5 +851,10 @@ public class BeanConfiguration {
             BloqueoRepositoryPort bloqueoRepositoryPort,
             CortesiaRepositoryPort cortesiaRepositoryPort) {
         return new ConsultarPanelBloqueosUseCase(bloqueoRepositoryPort, cortesiaRepositoryPort);
+    }
+
+    @Bean
+    public ConsultarTipoAsientoUseCase consultarTipoAsientoUseCase(TipoAsientoRepositoryPort tipoAsientoRepositoryPort) {
+        return new ConsultarTipoAsientoUseCase(tipoAsientoRepositoryPort);
     }
 }

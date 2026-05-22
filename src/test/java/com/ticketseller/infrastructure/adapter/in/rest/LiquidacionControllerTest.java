@@ -2,7 +2,6 @@ package com.ticketseller.infrastructure.adapter.in.rest;
 
 import com.ticketseller.application.liquidacion.ConfigurarModeloNegocioUseCase;
 import com.ticketseller.application.liquidacion.ConsultarModeloNegocioUseCase;
-import com.ticketseller.application.liquidacion.ConsultarRecaudoIncrementalUseCase;
 import com.ticketseller.application.liquidacion.ConsultarSnapshotUseCase;
 import com.ticketseller.domain.exception.evento.EventoNoFinalizadoException;
 import com.ticketseller.domain.exception.evento.EventoNotFoundException;
@@ -14,7 +13,6 @@ import com.ticketseller.domain.model.recinto.ModeloNegocio;
 import com.ticketseller.domain.model.evento.SnapshotLiquidacion;
 import com.ticketseller.infrastructure.adapter.in.rest.liquidacion.dto.CondicionTicketResponse;
 import com.ticketseller.infrastructure.adapter.in.rest.liquidacion.dto.ModeloNegocioResponse;
-import com.ticketseller.infrastructure.adapter.in.rest.liquidacion.dto.RecaudoIncrementalResponse;
 import com.ticketseller.infrastructure.adapter.in.rest.liquidacion.dto.SnapshotLiquidacionResponse;
 import com.ticketseller.infrastructure.adapter.in.rest.liquidacion.LiquidacionController;
 import com.ticketseller.infrastructure.adapter.in.rest.mapper.LiquidacionRestMapper;
@@ -49,9 +47,6 @@ class LiquidacionControllerTest {
 
     @MockBean
     private ConfigurarModeloNegocioUseCase configurarModeloNegocioUseCase;
-
-    @MockBean
-    private ConsultarRecaudoIncrementalUseCase consultarRecaudoIncrementalUseCase;
 
     @MockBean
     private LiquidacionRestMapper liquidacionRestMapper;
@@ -263,96 +258,4 @@ class LiquidacionControllerTest {
                 .expectStatus().isNotFound();
     }
 
-    // ======================== US3: Recaudo Incremental ========================
-
-    @Test
-    void getRecaudoRetorna200ConRecaudoAcumulado() {
-        UUID eventoId = UUID.randomUUID();
-        Map<String, BigDecimal> recaudo = Map.of(
-                "recaudoRegular", BigDecimal.valueOf(1000000),
-                "recaudoCortesia", BigDecimal.ZERO,
-                "cancelaciones", BigDecimal.ZERO,
-                "recaudoNeto", BigDecimal.valueOf(1000000)
-        );
-        RecaudoIncrementalResponse response = new RecaudoIncrementalResponse(
-                eventoId,
-                BigDecimal.valueOf(1000000),
-                BigDecimal.ZERO,
-                BigDecimal.ZERO,
-                BigDecimal.valueOf(1000000),
-                LocalDateTime.now()
-        );
-
-        when(consultarRecaudoIncrementalUseCase.ejecutar(eventoId)).thenReturn(Mono.just(recaudo));
-        when(liquidacionRestMapper.toRecaudoResponse(eventoId, recaudo)).thenReturn(response);
-
-        webTestClient.get()
-                .uri("/api/v1/eventos/{id}/recaudo", eventoId)
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody()
-                .jsonPath("$.eventoId").isEqualTo(eventoId.toString())
-                .jsonPath("$.recaudoRegular").isEqualTo(1000000)
-                .jsonPath("$.recaudoNeto").isEqualTo(1000000);
-    }
-
-    @Test
-    void getRecaudoNetoDescontaCancelaciones() {
-        UUID eventoId = UUID.randomUUID();
-        Map<String, BigDecimal> recaudo = Map.of(
-                "recaudoRegular", BigDecimal.valueOf(1000000),
-                "recaudoCortesia", BigDecimal.ZERO,
-                "cancelaciones", BigDecimal.valueOf(200000),
-                "recaudoNeto", BigDecimal.valueOf(800000)
-        );
-        RecaudoIncrementalResponse response = new RecaudoIncrementalResponse(
-                eventoId,
-                BigDecimal.valueOf(1000000),
-                BigDecimal.ZERO,
-                BigDecimal.valueOf(200000),
-                BigDecimal.valueOf(800000),
-                LocalDateTime.now()
-        );
-
-        when(consultarRecaudoIncrementalUseCase.ejecutar(eventoId)).thenReturn(Mono.just(recaudo));
-        when(liquidacionRestMapper.toRecaudoResponse(eventoId, recaudo)).thenReturn(response);
-
-        webTestClient.get()
-                .uri("/api/v1/eventos/{id}/recaudo", eventoId)
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody()
-                .jsonPath("$.cancelaciones").isEqualTo(200000)
-                .jsonPath("$.recaudoNeto").isEqualTo(800000);
-    }
-
-    @Test
-    void getRecaudoDiferenciaRegularesDeCortesias() {
-        UUID eventoId = UUID.randomUUID();
-        Map<String, BigDecimal> recaudo = Map.of(
-                "recaudoRegular", BigDecimal.valueOf(800000),
-                "recaudoCortesia", BigDecimal.valueOf(200000),
-                "cancelaciones", BigDecimal.ZERO,
-                "recaudoNeto", BigDecimal.valueOf(1000000)
-        );
-        RecaudoIncrementalResponse response = new RecaudoIncrementalResponse(
-                eventoId,
-                BigDecimal.valueOf(800000),
-                BigDecimal.valueOf(200000),
-                BigDecimal.ZERO,
-                BigDecimal.valueOf(1000000),
-                LocalDateTime.now()
-        );
-
-        when(consultarRecaudoIncrementalUseCase.ejecutar(eventoId)).thenReturn(Mono.just(recaudo));
-        when(liquidacionRestMapper.toRecaudoResponse(eventoId, recaudo)).thenReturn(response);
-
-        webTestClient.get()
-                .uri("/api/v1/eventos/{id}/recaudo", eventoId)
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody()
-                .jsonPath("$.recaudoRegular").isEqualTo(800000)
-                .jsonPath("$.recaudoCortesia").isEqualTo(200000);
-    }
 }

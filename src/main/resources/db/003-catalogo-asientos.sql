@@ -4,6 +4,7 @@ CREATE TABLE tipos_asiento
     nombre      VARCHAR(100)  NOT NULL,
     descripcion VARCHAR(255),
     estado      VARCHAR(20)   NOT NULL,
+    en_uso      BOOLEAN       NOT NULL DEFAULT false,
     created_at  TIMESTAMPTZ   NOT NULL DEFAULT NOW()
 );
 
@@ -16,7 +17,8 @@ CREATE TABLE asientos
     fila     VARCHAR     NOT NULL,
     columna  INTEGER     NOT NULL,
     numero   VARCHAR(20) NOT NULL,
-    zona_id  UUID REFERENCES zonas (id),
-    estado   VARCHAR(20),
-    tipo VARCHAR(20)
+    zona_id     UUID REFERENCES zonas (id),
+    recinto_id  UUID REFERENCES recintos (id),
+    estado      VARCHAR(20),
+    tipo        VARCHAR(20)
 );

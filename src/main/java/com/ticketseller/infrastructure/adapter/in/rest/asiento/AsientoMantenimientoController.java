@@ -2,6 +2,7 @@ package com.ticketseller.infrastructure.adapter.in.rest.asiento;
 
 import com.ticketseller.application.asiento.CambiarEstadoAsientoUseCase;
 import com.ticketseller.application.asiento.CambiarEstadoMasivoUseCase;
+import com.ticketseller.application.asiento.ConsultarAsientosEventoUseCase;
 import com.ticketseller.application.asiento.ConsultarHistorialAsientoUseCase;
 import com.ticketseller.infrastructure.adapter.in.rest.asiento.dto.AsientoResponse;
 import com.ticketseller.infrastructure.adapter.in.rest.asiento.dto.CambiarEstadoMasivoRequest;
@@ -31,7 +32,16 @@ public class AsientoMantenimientoController {
     private final CambiarEstadoAsientoUseCase cambiarEstadoAsientoUseCase;
     private final CambiarEstadoMasivoUseCase cambiarEstadoMasivoUseCase;
     private final ConsultarHistorialAsientoUseCase consultarHistorialAsientoUseCase;
+    private final ConsultarAsientosEventoUseCase consultarAsientosEventoUseCase;
     private final AsientoRestMapper asientoRestMapper;
+
+    @Operation(summary = "Obtener todos los asientos del recinto asociado al evento")
+    @ApiResponse(responseCode = "200", description = "Lista de asientos retornada exitosamente")
+    @GetMapping
+    public Flux<AsientoResponse> consultarAsientosEvento(@PathVariable UUID eventoId) {
+        return consultarAsientosEventoUseCase.ejecutar(eventoId)
+                .map(asientoRestMapper::toAsientoResponse);
+    }
 
     @Operation(summary = "Cambiar el estado de un asiento individual")
     @ApiResponses(value = {
@@ -47,7 +57,7 @@ public class AsientoMantenimientoController {
             @Valid @RequestBody CambiarEstadoRequest request) {
         
         // TODO: Extraer usuarioId del contexto de seguridad (usando un mock temporal)
-        String usuarioId = "user-123";
+        String usuarioId = UUID.randomUUID().toString(); // Simulación de usuario autenticado
 
         return cambiarEstadoAsientoUseCase.ejecutar(eventoId, asientoId, request.estadoDestino(), request.motivo(), usuarioId)
                 .map(asientoRestMapper::toAsientoResponse)
@@ -63,8 +73,8 @@ public class AsientoMantenimientoController {
     public Mono<ResponseEntity<CambiarEstadoMasivoResponse>> cambiarEstadoMasivo(
             @PathVariable UUID eventoId,
             @Valid @RequestBody CambiarEstadoMasivoRequest request) {
-        
-        String usuarioId = "user-123";
+
+        String usuarioId = UUID.randomUUID().toString(); // Simulación de usuario autenticado
 
         return cambiarEstadoMasivoUseCase.ejecutar(eventoId, request.asientoIds(), request.estadoDestino(), request.motivo(), usuarioId)
                 .map(ResponseEntity::ok);

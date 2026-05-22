@@ -13,6 +13,7 @@ public record EventoResponse(
         LocalDateTime fechaFin,
         TipoEvento tipo,
         UUID recintoId,
-        EstadoEvento estado
+        EstadoEvento estado,
+        boolean reingresoHabilitado
 ) {
 }

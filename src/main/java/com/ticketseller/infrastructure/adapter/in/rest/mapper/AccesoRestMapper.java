@@ -12,5 +12,7 @@ public interface AccesoRestMapper {
     @Mapping(source = "accessDetails.zona", target = "zona")
     @Mapping(source = "accessDetails.compuerta", target = "compuertaAsignada")
     @Mapping(source = "accessDetails.fechaEvento", target = "fechaEvento")
+    @Mapping(source = "accessDetails.asiento", target = "numeroAsiento")
+    @Mapping(source = "accessDetails.permiteReingreso", target = "permiteReingreso")
     TicketEstadoResponse toResponse(Ticket ticket);
 }

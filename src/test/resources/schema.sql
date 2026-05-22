@@ -7,7 +7,7 @@ DROP TABLE IF EXISTS pagos;
 DROP TABLE IF EXISTS historial_estado_venta;
 DROP TABLE IF EXISTS historial_estado_ticket;
 DROP TABLE IF EXISTS reembolsos;
-DROP TABLE IF EXISTS historial_cambios_estado;
+DROP TABLE IF EXISTS historial_cambios_estado_asientos;
 DROP TABLE IF EXISTS tickets;
 DROP TABLE IF EXISTS transacciones_financieras;
 DROP TABLE IF EXISTS asiento_holds;

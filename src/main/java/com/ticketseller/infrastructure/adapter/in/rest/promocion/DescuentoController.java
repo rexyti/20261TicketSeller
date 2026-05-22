@@ -1,11 +1,12 @@
 package com.ticketseller.infrastructure.adapter.in.rest.promocion;
 
+import com.ticketseller.application.promocion.AplicarCodigoPromoVentaUseCase;
 import com.ticketseller.application.promocion.CrearDescuentoUseCase;
 import com.ticketseller.application.promocion.ListarDescuentosUseCase;
-import com.ticketseller.application.promocion.ValidarCodigoPromocionalUseCase;
 import com.ticketseller.infrastructure.adapter.in.rest.mapper.PromocionRestMapper;
 import com.ticketseller.infrastructure.adapter.in.rest.promocion.dto.AplicarCodigoRequest;
 import com.ticketseller.infrastructure.adapter.in.rest.promocion.dto.CrearDescuentoRequest;
+import com.ticketseller.infrastructure.adapter.in.rest.promocion.dto.DescuentoAplicadoResponse;
 import com.ticketseller.infrastructure.adapter.in.rest.promocion.dto.DescuentoResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -32,7 +33,7 @@ public class DescuentoController {
 
     private final CrearDescuentoUseCase crearDescuentoUseCase;
     private final ListarDescuentosUseCase listarDescuentosUseCase;
-    private final ValidarCodigoPromocionalUseCase validarCodigoPromocionalUseCase;
+    private final AplicarCodigoPromoVentaUseCase aplicarCodigoPromoVentaUseCase;
     private final PromocionRestMapper mapper;
 
     @Operation(summary = "Listar descuentos de una promoción")
@@ -51,11 +52,11 @@ public class DescuentoController {
                 .map(response -> ResponseEntity.status(HttpStatus.CREATED).body(response));
     }
 
-    @Operation(summary = "Aplicar un código promocional al carrito")
-    @PostMapping("/compras/carrito/aplicar-codigo")
-    public Mono<ResponseEntity<DescuentoResponse>> aplicarCodigo(
+    @Operation(summary = "Aplicar un código promocional a una venta")
+    @PostMapping("/compras/{ventaId}/aplicar-codigo")
+    public Mono<ResponseEntity<DescuentoAplicadoResponse>> aplicarCodigo(@PathVariable UUID ventaId,
             @Valid @RequestBody AplicarCodigoRequest request) {
-        return validarCodigoPromocionalUseCase.ejecutar(request.codigo())
+        return aplicarCodigoPromoVentaUseCase.ejecutar(ventaId, request.codigo())
                 .map(mapper::toResponse)
                 .map(ResponseEntity::ok);
     }

@@ -1,11 +1,13 @@
 package com.ticketseller.application.checkout;
 
+import com.ticketseller.domain.exception.evento.EventoNotFoundException;
 import com.ticketseller.domain.exception.venta.MetodoPagoInvalidoException;
 import com.ticketseller.domain.exception.venta.PagoRechazadoException;
 import com.ticketseller.domain.exception.venta.ReservaExpiradaException;
 import com.ticketseller.domain.exception.venta.VentaNotFoundException;
 import com.ticketseller.domain.exception.zona.ZonaNotFoundException;
 import com.ticketseller.domain.exception.zona.ZonaSinPrecioException;
+import com.ticketseller.domain.model.asiento.Asiento;
 import com.ticketseller.domain.model.asiento.AsientoHold;
 import com.ticketseller.domain.model.asiento.EstadoAsiento;
 import com.ticketseller.domain.model.asiento.EstadoHold;
@@ -43,9 +45,9 @@ import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 @RequiredArgsConstructor
 public class ProcesarPagoUseCase {
@@ -106,34 +108,40 @@ public class ProcesarPagoUseCase {
     }
 
     private Mono<VentaDetalle> completarVenta(Venta venta, ProcesarPagoCommand command, ResultadoPago resultado) {
-        return Mono.zip(
-                        obtenerZona(venta.getZonaId()),
+        return obtenerZona(venta.getZonaId())
+                .flatMap(zona -> Mono.zip(
                         obtenerPrecio(venta.getEventoId(), venta.getZonaId()),
-                        obtenerCompuertaBalanceada(venta.getZonaId(), venta.getEventoId()),
+                        obtenerCompuertaBalanceada(zona.getId(), zona.getRecintoId(), venta.getEventoId()),
                         obtenerEvento(venta.getEventoId()),
                         asientoHoldRepositoryPort.buscarPorVentaId(venta.getId()).collectList()
-                )
-                .flatMap(tuple -> {
-                    Zona zona = tuple.getT1();
-                    PrecioZona precioZona = tuple.getT2();
-                    Compuerta compuerta = tuple.getT3();
-                    Evento evento = tuple.getT4();
-                    List<AsientoHold> holds = tuple.getT5();
+                ).flatMap(tuple -> {
+                    PrecioZona precioZona = tuple.getT1();
+                    Compuerta compuerta = tuple.getT2();
+                    Evento evento = tuple.getT3();
+                    List<AsientoHold> holds = tuple.getT4();
 
-                    List<Ticket> tickets = IntStream.range(0, venta.getCantidad())
-                            .mapToObj(i -> buildTicket(venta, compuerta, precioZona, zona, evento,
-                                    i < holds.size() ? holds.get(i).getAsientoId() : null))
-                            .peek(Ticket::validarDatosRegistro)
-                            .toList();
-
-                    return ticketRepositoryPort.guardarTodos(tickets)
+                    return cargarAsientos(holds).flatMap(asientosPorId ->
+                        Flux.range(0, venta.getCantidad())
+                            .concatMap(i -> {
+                                UUID asientoId = i < holds.size() ? holds.get(i).getAsientoId() : null;
+                                Asiento asiento = asientoId != null ? asientosPorId.get(asientoId) : null;
+                                Ticket sinQr = buildTicketSinQr(venta, compuerta, precioZona, zona, evento, asientoId, asiento);
+                                return ticketRepositoryPort.guardar(sinQr)
+                                        .flatMap(saved -> {
+                                            String qr = codigoQrPort.generarCodigo(saved.getId().toString());
+                                            Ticket conQr = saved.toBuilder().codigoQr(qr).build().normalizarDatosRegistro();
+                                            conQr.validarDatosRegistro();
+                                            return ticketRepositoryPort.guardar(conQr);
+                                        });
+                            })
                             .collectList()
                             .flatMap(savedTickets -> actualizarAsientosYHolds(savedTickets, holds)
                                     .then(ventaRepositoryPort.actualizarEstado(venta.getId(), EstadoVenta.COMPLETADA))
                                     .flatMap(ventaPagada -> guardarTransaccion(ventaPagada, command, resultado)
                                             .then(notificacionEmailPort.enviarConfirmacion(ventaPagada, savedTickets))
-                                            .thenReturn(new VentaDetalle(ventaPagada, savedTickets))));
-                });
+                                            .thenReturn(new VentaDetalle(ventaPagada, savedTickets))))
+                    );
+                }));
     }
 
     private Mono<Zona> obtenerZona(UUID zonaId) {
@@ -148,18 +156,17 @@ public class ProcesarPagoUseCase {
                 .switchIfEmpty(Mono.error(new ZonaSinPrecioException("No existe precio configurado para la zona en este evento")));
     }
 
-    private Mono<Compuerta> obtenerCompuertaBalanceada(UUID zonaId, UUID eventoId) {
+    private Mono<Compuerta> obtenerCompuertaBalanceada(UUID zonaId, UUID recintoId, UUID eventoId) {
         return compuertaRepositoryPort.buscarPorZonaId(zonaId)
+                .switchIfEmpty(compuertaRepositoryPort.buscarPorRecintoId(recintoId)
+                        .filter(Compuerta::isEsGeneral))
                 .collectList()
-                .flatMap(compuertas -> {
-                    if (compuertas.isEmpty()) {
-                        return Mono.just(Compuerta.builder().build());
-                    }
-                    return ticketRepositoryPort.buscarPorEventoYEstados(eventoId,
-                            java.util.Set.of(EstadoTicket.VENDIDO))
-                            .collectList()
-                            .map(tickets -> seleccionarCompuertaBalanceada(compuertas, tickets));
-                });
+                .filter(compuertas -> !compuertas.isEmpty())
+                .flatMap(compuertas -> ticketRepositoryPort.buscarPorEventoYEstados(eventoId,
+                                java.util.Set.of(EstadoTicket.VENDIDO))
+                        .collectList()
+                        .map(tickets -> seleccionarCompuertaBalanceada(compuertas, tickets)))
+                .switchIfEmpty(Mono.just(Compuerta.builder().build()));
     }
 
     private Compuerta seleccionarCompuertaBalanceada(List<Compuerta> compuertas, List<Ticket> tickets) {
@@ -173,7 +180,7 @@ public class ProcesarPagoUseCase {
 
     private Mono<Evento> obtenerEvento(UUID eventoId) {
         return eventoRepositoryPort.buscarPorId(eventoId)
-                .switchIfEmpty(Mono.error(new com.ticketseller.domain.exception.evento.EventoNotFoundException("Evento no encontrado")));
+                .switchIfEmpty(Mono.error(new EventoNotFoundException("Evento no encontrado")));
     }
 
     private Mono<Void> actualizarAsientosYHolds(List<Ticket> tickets, List<AsientoHold> holds) {
@@ -186,15 +193,29 @@ public class ProcesarPagoUseCase {
 
         Mono<Void> expirarHolds = Flux.fromIterable(holds)
                 .flatMap(hold -> asientoHoldRepositoryPort.guardar(
-                        hold.toBuilder().estado(EstadoHold.EXPIRADO).build()))
+                        hold.toBuilder().estado(EstadoHold.COMPLETADA).build()))
                 .then();
 
         return actualizarAsientos.then(expirarHolds);
     }
 
-    private Ticket buildTicket(Venta venta, Compuerta compuerta, PrecioZona precioZona,
-                               Zona zona, Evento evento, UUID asientoId) {
-        AccessDetails accessDetails = buildAccessDetails(evento, zona, compuerta);
+    private Mono<Map<UUID, Asiento>> cargarAsientos(List<AsientoHold> holds) {
+        List<UUID> asientoIds = holds.stream()
+                .map(AsientoHold::getAsientoId)
+                .filter(Objects::nonNull)
+                .toList();
+        if (asientoIds.isEmpty()) {
+            return Mono.just(Map.of());
+        }
+        return Flux.fromIterable(asientoIds)
+                .flatMap(asientoRepositoryPort::buscarPorId)
+                .collectMap(Asiento::getId);
+    }
+
+    private Ticket buildTicketSinQr(Venta venta, Compuerta compuerta, PrecioZona precioZona,
+                                    Zona zona, Evento evento, UUID asientoId, Asiento asiento) {
+        String numeroAsiento = asiento != null ? asiento.getNumero() : null;
+        AccessDetails accessDetails = buildAccessDetails(evento, zona, compuerta, numeroAsiento);
         return Ticket.builder()
                 .ventaId(venta.getId())
                 .eventoId(venta.getEventoId())
@@ -203,19 +224,19 @@ public class ProcesarPagoUseCase {
                 .precio(precioZona.getPrecio())
                 .esCortesia(venta.isEsCortesia())
                 .estado(EstadoTicket.VENDIDO)
-                .codigoQr(codigoQrPort.generarCodigo(UUID.randomUUID().toString()))
                 .asientoId(asientoId)
                 .accessDetails(accessDetails)
-                .build()
-                .normalizarDatosRegistro();
+                .build();
     }
 
-    private AccessDetails buildAccessDetails(Evento evento, Zona zona, Compuerta compuerta) {
+    private AccessDetails buildAccessDetails(Evento evento, Zona zona, Compuerta compuerta, String numeroAsiento) {
         return AccessDetails.builder()
                 .categoria(resolverCategoria(zona, compuerta))
                 .zona(zona.getNombre())
                 .compuerta(compuerta.getNombre())
                 .fechaEvento(evento.getFechaInicio())
+                .asiento(numeroAsiento)
+                .permiteReingreso(evento.isReingresoHabilitado())
                 .build();
     }
 

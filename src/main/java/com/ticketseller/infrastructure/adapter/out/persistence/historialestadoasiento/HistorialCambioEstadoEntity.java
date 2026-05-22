@@ -15,7 +15,7 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table("historial_cambios_estado")
+@Table("historial_cambios_estado_asientos")
 public class HistorialCambioEstadoEntity {
     
     @Id

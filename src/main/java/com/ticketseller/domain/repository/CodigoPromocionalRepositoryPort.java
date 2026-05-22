@@ -14,4 +14,6 @@ public interface CodigoPromocionalRepositoryPort {
     Mono<CodigoPromocional> buscarPorCodigo(String codigo);
 
     Mono<CodigoPromocional> incrementarUsos(UUID id);
+
+    Flux<CodigoPromocional> buscarPorPromocionId(UUID promocionId);
 }

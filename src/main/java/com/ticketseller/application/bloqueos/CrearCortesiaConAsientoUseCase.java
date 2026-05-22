@@ -3,6 +3,7 @@ package com.ticketseller.application.bloqueos;
 import com.ticketseller.domain.exception.asiento.AsientoNotFoundException;
 import com.ticketseller.domain.exception.bloqueos.AsientoOcupadoException;
 import com.ticketseller.domain.exception.evento.EventoNotFoundException;
+import com.ticketseller.domain.exception.zona.ZonaInvalidaException;
 import com.ticketseller.domain.model.asiento.Asiento;
 import com.ticketseller.domain.model.asiento.EstadoAsiento;
 import com.ticketseller.domain.model.bloqueos.CategoriaCortesia;
@@ -56,42 +57,41 @@ public class CrearCortesiaConAsientoUseCase {
     }
 
     private Mono<Cortesia> crearTicketYCortesia(UUID eventoId, String destinatario,
-                                                 CategoriaCortesia categoria, Asiento asiento) {
+                                                CategoriaCortesia categoria, Asiento asiento) {
         String codigoUnico = UUID.randomUUID().toString();
 
-        return Mono.zip(
-                zonaRepositoryPort.buscarPorId(asiento.getZonaId()).defaultIfEmpty(Zona.builder().build()),
-                eventoRepositoryPort.buscarPorId(eventoId)
-                        .switchIfEmpty(Mono.error(new EventoNotFoundException("Evento no encontrado"))),
-                obtenerCompuertaBalanceada(asiento.getZonaId(), eventoId)
-        ).flatMap(tuple -> {
-            Zona zona = tuple.getT1();
-            Evento evento = tuple.getT2();
-            Compuerta compuerta = tuple.getT3();
+        return eventoRepositoryPort.buscarPorId(eventoId)
+                .switchIfEmpty(Mono.error(new EventoNotFoundException("Evento no encontrado")))
+                .flatMap(evento -> Mono.zip(
+                        zonaRepositoryPort.buscarPorId(asiento.getZonaId()).defaultIfEmpty(Zona.builder().build()),
+                        obtenerCompuertaBalanceada(asiento.getZonaId(), evento.getRecintoId(), eventoId)
+                ).flatMap(tuple -> {
+                    Zona zona = tuple.getT1();
+                    Compuerta compuerta = tuple.getT2();
 
-            Ticket ticket = crearTicket(eventoId, asiento, codigoUnico, zona, evento, compuerta);
-            return ticketRepositoryPort.guardar(ticket)
-                    .flatMap(savedTicket -> {
-                        Cortesia cortesia = crearCortesia(destinatario, categoria, codigoUnico, savedTicket);
-                        cortesia.validar();
-                        return cortesiaRepositoryPort.guardar(cortesia);
-                    });
-        });
+                    Ticket ticket = crearTicket(eventoId, asiento, codigoUnico, zona, evento, compuerta);
+                    return ticketRepositoryPort.guardar(ticket)
+                            .flatMap(savedTicket -> {
+                                Cortesia cortesia = crearCortesia(destinatario, categoria, codigoUnico, savedTicket);
+                                cortesia.validar();
+                                return cortesiaRepositoryPort.guardar(cortesia);
+                            });
+                }));
     }
 
-    private Mono<Compuerta> obtenerCompuertaBalanceada(UUID zonaId, UUID eventoId) {
+    private Mono<Compuerta> obtenerCompuertaBalanceada(UUID zonaId, UUID recintoId, UUID eventoId) {
         if (zonaId == null) {
-            return Mono.just(Compuerta.builder().build());
+            return Mono.error(new ZonaInvalidaException("La zona es obligatoria para crear una cortesía"));
         }
         return compuertaRepositoryPort.buscarPorZonaId(zonaId)
                 .collectList()
                 .flatMap(compuertas -> {
-                    if (compuertas.isEmpty()) {
-                        return Mono.just(Compuerta.builder().build());
-                    }
-                    return ticketRepositoryPort.buscarPorEvento(eventoId)
+                    Mono<List<Compuerta>> compuertasMono = compuertas.isEmpty()
+                            ? compuertaRepositoryPort.buscarPorRecintoId(recintoId).filter(Compuerta::isEsGeneral).collectList()
+                            : Mono.just(compuertas);
+                    return compuertasMono.flatMap(cs -> ticketRepositoryPort.buscarPorEvento(eventoId)
                             .collectList()
-                            .map(tickets -> seleccionarCompuertaBalanceada(compuertas, tickets));
+                            .map(tickets -> seleccionarCompuertaBalanceada(cs, tickets)));
                 });
     }
 
@@ -111,6 +111,8 @@ public class CrearCortesiaConAsientoUseCase {
                 .zona(zona.getNombre())
                 .compuerta(compuerta.getNombre())
                 .fechaEvento(evento.getFechaInicio())
+                .asiento(asiento.getNumero())
+                .permiteReingreso(evento.isReingresoHabilitado())
                 .build();
         return Ticket.builder()
                 .eventoId(eventoId)
@@ -126,7 +128,7 @@ public class CrearCortesiaConAsientoUseCase {
     }
 
     private Cortesia crearCortesia(String destinatario, CategoriaCortesia categoria,
-                                  String codigoUnico, Ticket ticket) {
+                                   String codigoUnico, Ticket ticket) {
         return Cortesia.builder()
                 .eventoId(ticket.getEventoId())
                 .asientoId(ticket.getAsientoId())

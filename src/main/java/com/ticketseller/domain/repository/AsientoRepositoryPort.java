@@ -13,4 +13,5 @@ public interface AsientoRepositoryPort {
     Mono<Asiento> buscarPorId(UUID id);
     Flux<Asiento> buscarPorZonaId(UUID zonaId);
     Flux<Asiento> buscarPorRecintoId(UUID recintoId);
+    Flux<Asiento> buscarPorEventoId(UUID eventoId);
 }

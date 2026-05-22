@@ -5,8 +5,6 @@ public enum EstadoAsiento {
     BLOQUEADO,
     RESERVADO,
     VENDIDO,
-    OCUPADO,
     MANTENIMIENTO,
-    ANULADO,
     INACTIVO
 }

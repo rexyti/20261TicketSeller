@@ -25,7 +25,7 @@ import java.util.UUID;
 
 @Tag(name = "Checkout", description = "Reserva y pago de tickets")
 @RestController
-@RequestMapping("/api/v1/checkout")
+@RequestMapping("/api/v1")
 @RequiredArgsConstructor
 public class CheckoutController {
 
@@ -35,15 +35,16 @@ public class CheckoutController {
     private final CheckoutRestMapper checkoutRestMapper;
 
     @Operation(summary = "Reservar asientos para un evento")
-    @PostMapping("/reservar")
-    public Mono<ResponseEntity<VentaResponse>> reservar(@Valid @RequestBody ReservarAsientosRequest request) {
-        return reservarAsientosUseCase.ejecutar(checkoutRestMapper.toCommand(request))
+    @PostMapping("/eventos/{eventoId}/asientos/reservar")
+    public Mono<ResponseEntity<VentaResponse>> reservar(@PathVariable UUID eventoId,
+                                                        @Valid @RequestBody ReservarAsientosRequest request) {
+        return reservarAsientosUseCase.ejecutar(checkoutRestMapper.toCommand(request, eventoId))
                 .map(checkoutRestMapper::toResponse)
                 .map(response -> ResponseEntity.status(HttpStatus.CREATED).body(response));
     }
 
     @Operation(summary = "Procesar el pago de una reserva activa")
-    @PostMapping("/{ventaId}/pagar")
+    @PostMapping("/checkout/{ventaId}/pagar")
     public Mono<ResponseEntity<VentaResponse>> pagar(@PathVariable UUID ventaId,
                                                      @Valid @RequestBody ProcesarPagoRequest request) {
         return procesarPagoUseCase.ejecutar(ventaId, checkoutRestMapper.toCommand(request))
@@ -52,7 +53,7 @@ public class CheckoutController {
     }
 
     @Operation(summary = "Consultar el estado de una venta")
-    @GetMapping("/{ventaId}")
+    @GetMapping("/checkout/{ventaId}")
     public Mono<ResponseEntity<VentaResponse>> consultar(@PathVariable UUID ventaId) {
         return consultarVentaUseCase.ejecutar(ventaId)
                 .map(checkoutRestMapper::toResponse)

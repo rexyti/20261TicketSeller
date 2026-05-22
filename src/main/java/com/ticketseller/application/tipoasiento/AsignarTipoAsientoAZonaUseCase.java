@@ -27,10 +27,18 @@ public class AsignarTipoAsientoAZonaUseCase {
         return tipoAsientoRepositoryPort.buscarPorId(tipoAsientoId)
                 .switchIfEmpty(Mono.error(new TipoAsientoNotFoundException("Tipo de asiento no encontrado")))
                 .doOnNext(this::validarEstadoActivo)
-                .flatMap(tipo -> zonaRepositoryPort.buscarPorId(zonaId)
-                        .switchIfEmpty(Mono.error(new ZonaNotFoundException("Zona no encontrada")))
-                        .doOnNext(zona -> validarPertenenciaRecinto(zona, recintoId))
-                        .flatMap(zona -> asignarYGuardar(zona, tipo)));
+                .flatMap(tipo -> marcarEnUso(tipo)
+                        .flatMap(tipoActualizado -> zonaRepositoryPort.buscarPorId(zonaId)
+                                .switchIfEmpty(Mono.error(new ZonaNotFoundException("Zona no encontrada")))
+                                .doOnNext(zona -> validarPertenenciaRecinto(zona, recintoId))
+                                .flatMap(zona -> asignarYGuardar(zona, tipoActualizado))));
+    }
+
+    private Mono<TipoAsiento> marcarEnUso(TipoAsiento tipo) {
+        if (tipo.isEnUso()) {
+            return Mono.just(tipo);
+        }
+        return tipoAsientoRepositoryPort.guardar(tipo.toBuilder().enUso(true).build());
     }
 
     private void validarEstadoActivo(TipoAsiento tipo) {

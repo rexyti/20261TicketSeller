@@ -52,7 +52,9 @@ class TicketConsultaControllerTest {
                 "VIP",
                 "A",
                 "NORTE-1",
-                fechaEvento
+                fechaEvento,
+                null,
+                false
         );
         when(consultarEstadoTicketUseCase.ejecutar(ticketId)).thenReturn(Mono.just(ticket));
         when(accesoRestMapper.toResponse(ticket)).thenReturn(response);

@@ -8,8 +8,11 @@ import reactor.core.publisher.Mono;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class LiquidacionQueryAdapter implements LiquidacionQueryPort {
 
@@ -21,41 +24,60 @@ public class LiquidacionQueryAdapter implements LiquidacionQueryPort {
 
     @Override
     public Mono<SnapshotLiquidacion> obtenerSnapshotPorEvento(UUID eventoId) {
-        // TODO: coordinar con Módulo 2 cómo se registra el check-in en el ticket
         String sql = """
                 SELECT
                     CASE
                         WHEN t.es_cortesia = true THEN 'CORTESIA'
-                        WHEN t.estado = 'ANULADO' OR t.estado = 'REEMBOLSADO' THEN 'CANCELADO'
+                        WHEN t.estado IN ('ANULADO', 'REEMBOLSADO') THEN 'CANCELADO'
                         WHEN t.estado = 'VENDIDO' THEN 'VENDIDO_SIN_ASISTENCIA'
                         ELSE 'OTRO'
                     END AS condicion,
-                    COUNT(*) AS cantidad,
-                    COALESCE(SUM(t.precio), 0) AS valor_total
+                    t.id AS ticket_id,
+                    t.precio
                 FROM tickets t
                 WHERE t.evento_id = :eventoId
                   AND t.estado IN ('VENDIDO', 'ANULADO', 'REEMBOLSADO')
-                GROUP BY condicion
                 """;
-        // NEEDS CLARIFICATION: ejecutar con el equipo — tickets en estados intermedios (RESERVADO, EXPIRADO) se excluyen
 
         return databaseClient.sql(sql)
                 .bind("eventoId", eventoId)
-                .map((row, metadata) -> SnapshotLiquidacion.CondicionLiquidacion.builder()
-                        .condicion(row.get("condicion", String.class))
-                        .cantidad(row.get("cantidad", Long.class))
-                        .valorTotal(row.get("valor_total", BigDecimal.class))
-                        .build())
+                .map((row, metadata) -> new TicketRow(
+                        row.get("condicion", String.class),
+                        row.get("ticket_id", UUID.class),
+                        row.get("precio", BigDecimal.class)))
                 .all()
-                .collectMap(
-                        SnapshotLiquidacion.CondicionLiquidacion::getCondicion,
-                        condicion -> condicion
-                )
-                .map(condiciones -> SnapshotLiquidacion.builder()
-                        .eventoId(eventoId)
-                        .condiciones(condiciones)
-                        .timestampGeneracion(LocalDateTime.now())
-                        .build());
+                .collectList()
+                .map(rows -> buildSnapshot(eventoId, rows));
+    }
+
+    private SnapshotLiquidacion buildSnapshot(UUID eventoId, List<TicketRow> rows) {
+        Map<String, List<TicketRow>> grouped = rows.stream()
+                .collect(Collectors.groupingBy(TicketRow::condicion, LinkedHashMap::new, Collectors.toList()));
+
+        Map<String, SnapshotLiquidacion.CondicionLiquidacion> condiciones = new LinkedHashMap<>();
+        grouped.forEach((condicion, ticketRows) -> {
+            List<SnapshotLiquidacion.TicketInfo> tickets = ticketRows.stream()
+                    .map(row -> SnapshotLiquidacion.TicketInfo.builder()
+                            .ticketId(row.ticketId())
+                            .precio(row.precio() != null ? row.precio() : BigDecimal.ZERO)
+                            .build())
+                    .toList();
+            BigDecimal valorTotal = tickets.stream()
+                    .map(SnapshotLiquidacion.TicketInfo::getPrecio)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+            condiciones.put(condicion, SnapshotLiquidacion.CondicionLiquidacion.builder()
+                    .condicion(condicion)
+                    .cantidad(tickets.size())
+                    .valorTotal(valorTotal)
+                    .tickets(tickets)
+                    .build());
+        });
+
+        return SnapshotLiquidacion.builder()
+                .eventoId(eventoId)
+                .condiciones(condiciones)
+                .timestampGeneracion(LocalDateTime.now())
+                .build();
     }
 
     @Override
@@ -89,4 +111,6 @@ public class LiquidacionQueryAdapter implements LiquidacionQueryPort {
                         "recaudoNeto", BigDecimal.ZERO
                 ));
     }
+
+    private record TicketRow(String condicion, UUID ticketId, BigDecimal precio) {}
 }

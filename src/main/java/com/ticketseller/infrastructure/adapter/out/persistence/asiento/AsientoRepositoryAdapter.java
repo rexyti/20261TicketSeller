@@ -41,4 +41,9 @@ public class AsientoRepositoryAdapter implements AsientoRepositoryPort {
     public Flux<Asiento> buscarPorRecintoId(UUID recintoId) {
         return repository.findByRecintoId(recintoId).map(mapper::toDomain);
     }
+
+    @Override
+    public Flux<Asiento> buscarPorEventoId(UUID eventoId) {
+        return repository.findByEventoId(eventoId).map(mapper::toDomain);
+    }
 }

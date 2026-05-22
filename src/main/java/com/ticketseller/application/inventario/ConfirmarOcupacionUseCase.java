@@ -29,7 +29,7 @@ public class ConfirmarOcupacionUseCase {
                         .filter(this::holdNoExpirado)
                         .switchIfEmpty(Mono.error(new HoldExpiradoException("El hold del asiento ha expirado")))
                         .flatMap(hold -> asientoRepositoryPort.guardar(
-                                asiento.toBuilder().estado(EstadoAsiento.OCUPADO).build())));
+                                asiento.toBuilder().estado(EstadoAsiento.VENDIDO).build())));
     }
 
     private boolean esReservado(Asiento asiento) {

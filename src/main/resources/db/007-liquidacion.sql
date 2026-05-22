@@ -1,11 +1,6 @@
 -- Feature 011: Liquidación y Dispersión de Fondos
--- Agrega configuración de modelo de negocio a la tabla recintos.
 
-ALTER TABLE recintos
-    ADD COLUMN IF NOT EXISTS modelo_negocio VARCHAR(30),
-    ADD COLUMN IF NOT EXISTS monto_fijo     NUMERIC(12, 2);
-
-CREATE TABLE historial_cambios_estado
+CREATE TABLE historial_cambios_estado_asientos
 (
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     asiento_id      UUID REFERENCES asientos (id),

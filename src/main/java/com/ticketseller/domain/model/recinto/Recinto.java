@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+
 @Data
 @Builder(toBuilder = true)
 @NoArgsConstructor
@@ -24,7 +25,6 @@ public class Recinto {
     private Integer compuertasIngreso;
     private boolean activo;
     private CategoriaRecinto categoria;
-    private ConfiguracionLiquidacion configuracionLiquidacion;
 
     public void desactivar(){
         if (activo)

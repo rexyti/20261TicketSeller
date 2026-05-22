@@ -5,6 +5,7 @@ import com.ticketseller.application.evento.EditarEventoUseCase;
 import com.ticketseller.application.evento.FinalizarEventoUseCase;
 import com.ticketseller.application.evento.IniciarEventoUseCase;
 import com.ticketseller.application.evento.ListarEventosUseCase;
+import com.ticketseller.application.evento.ObtenerEventoUseCase;
 import com.ticketseller.application.evento.RegistrarEventoUseCase;
 import com.ticketseller.application.postventa.ConsultarReembolsosMasivoUseCase;
 import com.ticketseller.domain.model.evento.EstadoEvento;
@@ -45,6 +46,7 @@ public class EventoController {
 
     private final RegistrarEventoUseCase registrarEventoUseCase;
     private final ListarEventosUseCase listarEventosUseCase;
+    private final ObtenerEventoUseCase obtenerEventoUseCase;
     private final EditarEventoUseCase editarEventoUseCase;
     private final CancelarEventoUseCase cancelarEventoUseCase;
     private final IniciarEventoUseCase iniciarEventoUseCase;
@@ -66,6 +68,14 @@ public class EventoController {
     public Flux<EventoResponse> listar(@RequestParam(required = false) String estado) {
         EstadoEvento filtroEstado = estado == null || estado.isBlank() ? null : EstadoEvento.valueOf(estado.toUpperCase());
         return listarEventosUseCase.ejecutar(filtroEstado).map(eventoRestMapper::toResponse);
+    }
+
+    @Operation(summary = "Obtener detalles de un evento")
+    @GetMapping("/{id}")
+    public Mono<ResponseEntity<EventoResponse>> obtener(@PathVariable UUID id) {
+        return obtenerEventoUseCase.ejecutar(id)
+                .map(eventoRestMapper::toResponse)
+                .map(ResponseEntity::ok);
     }
 
     @Operation(summary = "Editar información de un evento")

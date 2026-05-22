@@ -24,5 +24,7 @@ public class PrecioZonaEntity {
     @Column("zona_id")
     private UUID zonaId;
     private BigDecimal precio;
+    @Column("nombre_zona")
+    private String nombreZona;
 }
 

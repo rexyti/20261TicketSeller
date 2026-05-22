@@ -7,11 +7,12 @@ import java.util.UUID;
 
 public record TicketResponse(
         UUID id,
-        UUID zonaId,
-        UUID compuertaId,
+        String zonaNombre,
+        String compuertaNombre,
         EstadoTicket estado,
         BigDecimal precio,
         String codigoQr,
-        boolean esCortesia
+        boolean esCortesia,
+        String numeroAsiento
 ) {
 }

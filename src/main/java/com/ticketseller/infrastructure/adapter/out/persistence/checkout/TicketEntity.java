@@ -43,4 +43,8 @@ public class TicketEntity {
     private String zonaNombre;
     @Column("compuerta_nombre")
     private String compuertaNombre;
+    @Column("numero_asiento")
+    private String numeroAsiento;
+    @Column("permite_reingreso")
+    private boolean permiteReingreso;
 }

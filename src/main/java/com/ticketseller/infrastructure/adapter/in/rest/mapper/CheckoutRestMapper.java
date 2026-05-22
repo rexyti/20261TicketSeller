@@ -7,21 +7,34 @@ import com.ticketseller.domain.model.ticket.Ticket;
 import com.ticketseller.domain.model.venta.Venta;
 import com.ticketseller.infrastructure.adapter.in.rest.checkout.dto.ProcesarPagoRequest;
 import com.ticketseller.infrastructure.adapter.in.rest.checkout.dto.ReservarAsientosRequest;
-import com.ticketseller.infrastructure.adapter.in.rest.acceso.dto.TicketEstadoResponse;
 import com.ticketseller.infrastructure.adapter.in.rest.checkout.dto.TicketResponse;
 import com.ticketseller.infrastructure.adapter.in.rest.checkout.dto.VentaResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 import java.util.List;
+import java.util.UUID;
 
 @Mapper(componentModel = "spring")
 public interface CheckoutRestMapper {
 
-    ReservarAsientosCommand toCommand(ReservarAsientosRequest request);
+    default ReservarAsientosCommand toCommand(ReservarAsientosRequest request, UUID eventoId) {
+        return new ReservarAsientosCommand(
+                request.compradorId(),
+                eventoId,
+                request.zonaId(),
+                request.cantidad(),
+                request.esCortesia(),
+                request.asientoIds(),
+                request.tipoUsuario()
+        );
+    }
 
     ProcesarPagoCommand toCommand(ProcesarPagoRequest request);
 
+    @Mapping(source = "accessDetails.zona", target = "zonaNombre")
+    @Mapping(source = "accessDetails.compuerta", target = "compuertaNombre")
+    @Mapping(source = "accessDetails.asiento", target = "numeroAsiento")
     TicketResponse toTicketResponse(Ticket ticket);
 
     VentaResponse toVentaResponse(Venta venta, List<TicketResponse> tickets);

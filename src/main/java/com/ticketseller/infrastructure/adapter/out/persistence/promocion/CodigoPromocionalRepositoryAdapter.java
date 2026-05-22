@@ -30,6 +30,11 @@ public class CodigoPromocionalRepositoryAdapter implements CodigoPromocionalRepo
     }
 
     @Override
+    public Flux<CodigoPromocional> buscarPorPromocionId(UUID promocionId) {
+        return repository.findByPromocionId(promocionId).map(mapper::toDomain);
+    }
+
+    @Override
     public Mono<CodigoPromocional> incrementarUsos(UUID id) {
         return databaseClient.sql("""
                         UPDATE codigos_promocionales
