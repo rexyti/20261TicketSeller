@@ -3,7 +3,6 @@ package com.ticketseller.application.inventario;
 import com.ticketseller.domain.exception.asiento.AsientoNoDisponibleException;
 import com.ticketseller.domain.model.asiento.AsientoHold;
 import com.ticketseller.domain.model.asiento.EstadoAsiento;
-import com.ticketseller.domain.model.asiento.EstadoHold;
 import com.ticketseller.domain.repository.AsientoHoldRepositoryPort;
 import com.ticketseller.domain.repository.AsientoRepositoryPort;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +22,9 @@ public class LiberarHoldUseCase {
                 .flatMap(hold -> asientoRepositoryPort.buscarPorId(asientoId)
                         .flatMap(asiento -> asientoRepositoryPort.guardar(
                                 asiento.toBuilder().estado(EstadoAsiento.DISPONIBLE).build()))
-                        .then(asientoHoldRepositoryPort.guardar(
-                                hold.toBuilder().estado(EstadoHold.EXPIRADO).build())));
+                        .flatMap(saved -> {
+                            hold.expirar();
+                            return asientoHoldRepositoryPort.guardar(hold);
+                        }));
     }
 }

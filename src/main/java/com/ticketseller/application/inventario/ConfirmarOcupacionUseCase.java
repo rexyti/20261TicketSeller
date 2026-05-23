@@ -22,7 +22,7 @@ public class ConfirmarOcupacionUseCase {
     public Mono<Asiento> ejecutar(UUID asientoId) {
         return asientoRepositoryPort.buscarPorId(asientoId)
                 .switchIfEmpty(Mono.error(new AsientoNotFoundException("Asiento no encontrado: " + asientoId)))
-                .filter(this::esReservado)
+                .filter(Asiento::isReservado)
                 .switchIfEmpty(Mono.error(new AsientoNoDisponibleException("El asiento no está en estado RESERVADO")))
                 .flatMap(asiento -> asientoHoldRepositoryPort.buscarActivoPorAsientoId(asientoId)
                         .switchIfEmpty(Mono.error(new HoldExpiradoException("El hold del asiento ha expirado")))
@@ -30,10 +30,6 @@ public class ConfirmarOcupacionUseCase {
                         .switchIfEmpty(Mono.error(new HoldExpiradoException("El hold del asiento ha expirado")))
                         .flatMap(hold -> asientoRepositoryPort.guardar(
                                 asiento.toBuilder().estado(EstadoAsiento.VENDIDO).build())));
-    }
-
-    private boolean esReservado(Asiento asiento) {
-        return EstadoAsiento.RESERVADO.equals(asiento.getEstado());
     }
 
     private boolean holdNoExpirado(com.ticketseller.domain.model.asiento.AsientoHold hold) {

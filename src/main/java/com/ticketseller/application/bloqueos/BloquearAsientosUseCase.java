@@ -35,10 +35,10 @@ public class BloquearAsientosUseCase {
     }
 
     private void validarDisponible(Asiento asiento) {
-        if (EstadoAsiento.BLOQUEADO.equals(asiento.getEstado())) {
+        if (asiento.isBloqueado()) {
             throw new AsientoYaBloqueadoException(asiento.getId());
         }
-        if (!EstadoAsiento.DISPONIBLE.equals(asiento.getEstado())) {
+        if (!asiento.isDisponible()) {
             throw new AsientoOcupadoException(asiento.getId());
         }
     }

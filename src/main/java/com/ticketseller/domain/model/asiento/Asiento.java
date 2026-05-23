@@ -116,4 +116,8 @@ public class Asiento {
     public boolean isEspacioVacio(){
         return EstadoAsiento.INACTIVO.equals(estado);
     }
+
+    public boolean perteneceAZona(UUID zonaId){
+        return this.zonaId.equals(zonaId);
+    }
 }

@@ -10,7 +10,6 @@ import com.ticketseller.domain.exception.zona.ZonaSinPrecioException;
 import com.ticketseller.domain.model.asiento.Asiento;
 import com.ticketseller.domain.model.asiento.AsientoHold;
 import com.ticketseller.domain.model.asiento.EstadoAsiento;
-import com.ticketseller.domain.model.asiento.EstadoHold;
 import com.ticketseller.domain.model.evento.Evento;
 import com.ticketseller.domain.model.ticket.AccessDetails;
 import com.ticketseller.domain.model.ticket.EstadoTicket;
@@ -82,23 +81,15 @@ public class ProcesarPagoUseCase {
     }
 
     private Mono<Void> validarVentaVigente(Venta venta) {
-        if (ventaNoReservada(venta)) {
+        if (!venta.isReservada()) {
             return Mono.error(new ReservaExpiradaException("La venta no se encuentra reservada"));
         }
 
-        if (ventaExpirada(venta)) {
+        if (venta.getFechaExpiracion() != null && venta.getFechaExpiracion().isBefore(LocalDateTime.now())) {
             return ventaRepositoryPort.actualizarEstado(venta.getId(), EstadoVenta.EXPIRADA)
                     .then(Mono.error(new ReservaExpiradaException("La reserva ya expiro")));
         }
         return Mono.empty();
-    }
-
-    private boolean ventaNoReservada(Venta venta) {
-        return !EstadoVenta.RESERVADA.equals(venta.getEstado());
-    }
-
-    private boolean ventaExpirada(Venta venta) {
-        return venta.getFechaExpiracion() != null && venta.getFechaExpiracion().isBefore(LocalDateTime.now());
     }
 
     private Mono<VentaDetalle> registrarResultadoPago(Venta venta, ProcesarPagoCommand command, ResultadoPago resultado) {
@@ -192,8 +183,10 @@ public class ProcesarPagoUseCase {
                 .then();
 
         Mono<Void> expirarHolds = Flux.fromIterable(holds)
-                .flatMap(hold -> asientoHoldRepositoryPort.guardar(
-                        hold.toBuilder().estado(EstadoHold.COMPLETADA).build()))
+                .flatMap(hold -> {
+                    hold.completar();
+                    return asientoHoldRepositoryPort.guardar(hold);
+                })
                 .then();
 
         return actualizarAsientos.then(expirarHolds);

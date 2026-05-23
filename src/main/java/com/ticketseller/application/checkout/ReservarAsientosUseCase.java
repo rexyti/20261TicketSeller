@@ -110,22 +110,14 @@ public class ReservarAsientosUseCase {
 
     private Mono<List<Asiento>> validarEstadoAsientos(List<Asiento> asientos, UUID zonaId) {
         asientos.forEach(asiento -> {
-            if (asientoNoPerteneceAZona(asiento, zonaId)) {
+            if (!asiento.perteneceAZona(zonaId)) {
                 throw new AsientoEnZonaDiferenteException("El asiento %s no pertenece a la zona solicitada".formatted(asiento.getId()));
             }
-            if (asientoNoDisponible(asiento)) {
+            if (!asiento.isDisponible()) {
                 throw new AsientoNoDisponibleException("El asiento %s no está disponible".formatted(asiento.getId()));
             }
         });
         return Mono.just(asientos);
-    }
-
-    private boolean asientoNoDisponible(Asiento asiento) {
-        return !EstadoAsiento.DISPONIBLE.equals(asiento.getEstado());
-    }
-
-    private boolean asientoNoPerteneceAZona(Asiento asiento, UUID zonaId) {
-        return !zonaId.equals(asiento.getZonaId());
     }
 
     private Mono<VentaDetalle> reservar(ReservarAsientosCommand command, Zona zona,

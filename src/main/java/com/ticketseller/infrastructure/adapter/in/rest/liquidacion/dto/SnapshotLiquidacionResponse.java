@@ -8,6 +8,7 @@ import java.util.UUID;
 
 public record SnapshotLiquidacionResponse(
         UUID eventoId,
+        String nombreEvento,
         UUID recintoId,
         CategoriaRecinto tipoRecinto,
         List<CondicionTicketResponse> condiciones,

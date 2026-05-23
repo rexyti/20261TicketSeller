@@ -18,6 +18,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class SnapshotLiquidacion {
     private UUID eventoId;
+    private String nombreEvento;
     private UUID recintoId;
     private CategoriaRecinto tipoRecinto;
     private Map<String, CondicionLiquidacion> condiciones;

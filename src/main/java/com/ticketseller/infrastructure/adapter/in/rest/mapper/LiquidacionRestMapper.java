@@ -24,8 +24,8 @@ public interface LiquidacionRestMapper {
         var condiciones = snapshot.getCondiciones().values().stream()
                 .map(this::toCondicionResponse)
                 .toList();
-        return new SnapshotLiquidacionResponse(snapshot.getEventoId(), snapshot.getRecintoId(),
-                snapshot.getTipoRecinto(), condiciones, snapshot.getTimestampGeneracion());
+        return new SnapshotLiquidacionResponse(snapshot.getEventoId(), snapshot.getNombreEvento(),
+                snapshot.getRecintoId(), snapshot.getTipoRecinto(), condiciones, snapshot.getTimestampGeneracion());
     }
 
 }
