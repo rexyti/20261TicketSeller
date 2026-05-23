@@ -53,11 +53,13 @@ class ValidarCodigoPromocionalUseCaseTest {
 
         when(codigoRepositoryPort.buscarPorCodigo("VERANO10")).thenReturn(Mono.just(codigo));
         when(promocionRepositoryPort.buscarPorId(promocionId)).thenReturn(Mono.just(promocion));
-        when(codigoRepositoryPort.incrementarUsos(codigoId)).thenReturn(Mono.just(codigo));
         when(descuentoRepositoryPort.buscarPorPromocionId(promocionId)).thenReturn(Flux.just(descuento));
 
         StepVerifier.create(useCase.ejecutar("VERANO10"))
-                .assertNext(d -> assertThat(d.getPromocionId()).isEqualTo(promocionId))
+                .assertNext(d -> {
+                    assertThat(d.codigoId()).isEqualTo(codigoId);
+                    assertThat(d.descuento().getPromocionId()).isEqualTo(promocionId);
+                })
                 .verifyComplete();
     }
 

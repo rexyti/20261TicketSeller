@@ -787,8 +787,11 @@ public class BeanConfiguration {
     @Bean
     public AplicarCodigoPromoVentaUseCase aplicarCodigoPromoVentaUseCase(
             ValidarCodigoPromocionalUseCase validarCodigoPromocionalUseCase,
-            VentaRepositoryPort ventaRepositoryPort) {
-        return new AplicarCodigoPromoVentaUseCase(validarCodigoPromocionalUseCase, ventaRepositoryPort);
+            VentaRepositoryPort ventaRepositoryPort,
+            TicketRepositoryPort ticketRepositoryPort,
+            CodigoPromocionalRepositoryPort codigoPromocionalRepositoryPort) {
+        return new AplicarCodigoPromoVentaUseCase(validarCodigoPromocionalUseCase, ventaRepositoryPort,
+                ticketRepositoryPort, codigoPromocionalRepositoryPort);
     }
 
     @Bean

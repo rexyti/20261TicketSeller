@@ -1,13 +1,16 @@
 package com.ticketseller.infrastructure.adapter.in.rest.promocion;
 
+import com.ticketseller.application.promocion.AplicarCodigoPromoVentaUseCase;
 import com.ticketseller.application.promocion.CrearDescuentoUseCase;
-import com.ticketseller.application.promocion.ValidarCodigoPromocionalUseCase;
+import com.ticketseller.application.promocion.DescuentoAplicado;
+import com.ticketseller.application.promocion.ListarDescuentosUseCase;
 import com.ticketseller.domain.exception.promocion.CodigoPromoAgotadoException;
 import com.ticketseller.domain.exception.promocion.CodigoPromoExpiradoException;
 import com.ticketseller.domain.model.promocion.Descuento;
 import com.ticketseller.domain.model.promocion.TipoDescuento;
 import com.ticketseller.infrastructure.adapter.in.rest.GlobalExceptionHandler;
 import com.ticketseller.infrastructure.adapter.in.rest.mapper.PromocionRestMapper;
+import com.ticketseller.infrastructure.adapter.in.rest.promocion.dto.DescuentoAplicadoResponse;
 import com.ticketseller.infrastructure.adapter.in.rest.promocion.dto.DescuentoResponse;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +40,10 @@ class DescuentoControllerTest {
     private CrearDescuentoUseCase crearDescuentoUseCase;
 
     @MockBean
-    private ValidarCodigoPromocionalUseCase validarCodigoPromocionalUseCase;
+    private ListarDescuentosUseCase listarDescuentosUseCase;
+
+    @MockBean
+    private AplicarCodigoPromoVentaUseCase aplicarCodigoPromoVentaUseCase;
 
     @MockBean
     private PromocionRestMapper mapper;
@@ -46,7 +52,7 @@ class DescuentoControllerTest {
     void crearDescuentoPorcentualRetorna201() {
         UUID promocionId = UUID.randomUUID();
         Descuento descuento = buildDescuento(TipoDescuento.PORCENTAJE, "20");
-        DescuentoResponse response = buildResponse(descuento);
+        DescuentoResponse response = buildDescuentoResponse(descuento);
 
         when(mapper.toDomain(any(CrearDescuentoRequest.class))).thenReturn(descuento);
         when(crearDescuentoUseCase.ejecutar(eq(promocionId), any())).thenReturn(Mono.just(descuento));
@@ -70,7 +76,7 @@ class DescuentoControllerTest {
     void crearDescuentoMontoFijoRetorna201() {
         UUID promocionId = UUID.randomUUID();
         Descuento descuento = buildDescuento(TipoDescuento.MONTO_FIJO, "15000");
-        DescuentoResponse response = buildResponse(descuento);
+        DescuentoResponse response = buildDescuentoResponse(descuento);
 
         when(mapper.toDomain(any(CrearDescuentoRequest.class))).thenReturn(descuento);
         when(crearDescuentoUseCase.ejecutar(eq(promocionId), any())).thenReturn(Mono.just(descuento));
@@ -92,14 +98,18 @@ class DescuentoControllerTest {
 
     @Test
     void aplicarCodigoValidoRetorna200ConDescuento() {
-        Descuento descuento = buildDescuento(TipoDescuento.PORCENTAJE, "10");
-        DescuentoResponse response = buildResponse(descuento);
+        UUID ventaId = UUID.randomUUID();
+        DescuentoAplicado descuentoAplicado = new DescuentoAplicado(
+                BigDecimal.valueOf(50000), BigDecimal.valueOf(5000), BigDecimal.valueOf(45000));
+        DescuentoAplicadoResponse response = new DescuentoAplicadoResponse(
+                BigDecimal.valueOf(50000), BigDecimal.valueOf(5000), BigDecimal.valueOf(45000));
 
-        when(validarCodigoPromocionalUseCase.ejecutar("AMIGO20")).thenReturn(Mono.just(descuento));
-        when(mapper.toResponse(descuento)).thenReturn(response);
+        when(aplicarCodigoPromoVentaUseCase.ejecutar(eq(ventaId), eq("AMIGO20")))
+                .thenReturn(Mono.just(descuentoAplicado));
+        when(mapper.toResponse(descuentoAplicado)).thenReturn(response);
 
         webTestClient.post()
-                .uri("/api/v1/compras/carrito/aplicar-codigo")
+                .uri("/api/v1/compras/{ventaId}/aplicar-codigo", ventaId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue("{\"codigo\": \"AMIGO20\"}")
                 .exchange()
@@ -108,11 +118,12 @@ class DescuentoControllerTest {
 
     @Test
     void aplicarCodigoYaUsadoRetorna409ConMensaje() {
-        when(validarCodigoPromocionalUseCase.ejecutar("USED"))
+        UUID ventaId = UUID.randomUUID();
+        when(aplicarCodigoPromoVentaUseCase.ejecutar(eq(ventaId), eq("USED")))
                 .thenReturn(Mono.error(new CodigoPromoAgotadoException("CÓDIGO YA UTILIZADO")));
 
         webTestClient.post()
-                .uri("/api/v1/compras/carrito/aplicar-codigo")
+                .uri("/api/v1/compras/{ventaId}/aplicar-codigo", ventaId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue("{\"codigo\": \"USED\"}")
                 .exchange()
@@ -123,11 +134,12 @@ class DescuentoControllerTest {
 
     @Test
     void aplicarCodigoExpiradoRetorna409ConMensaje() {
-        when(validarCodigoPromocionalUseCase.ejecutar("EXPIRED"))
+        UUID ventaId = UUID.randomUUID();
+        when(aplicarCodigoPromoVentaUseCase.ejecutar(eq(ventaId), eq("EXPIRED")))
                 .thenReturn(Mono.error(new CodigoPromoExpiradoException("CÓDIGO EXPIRADO")));
 
         webTestClient.post()
-                .uri("/api/v1/compras/carrito/aplicar-codigo")
+                .uri("/api/v1/compras/{ventaId}/aplicar-codigo", ventaId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue("{\"codigo\": \"EXPIRED\"}")
                 .exchange()
@@ -138,11 +150,12 @@ class DescuentoControllerTest {
 
     @Test
     void aplicarCodigoConLimiteAgotadoRetorna409() {
-        when(validarCodigoPromocionalUseCase.ejecutar("LLENO"))
+        UUID ventaId = UUID.randomUUID();
+        when(aplicarCodigoPromoVentaUseCase.ejecutar(eq(ventaId), eq("LLENO")))
                 .thenReturn(Mono.error(new CodigoPromoAgotadoException("CÓDIGO YA UTILIZADO")));
 
         webTestClient.post()
-                .uri("/api/v1/compras/carrito/aplicar-codigo")
+                .uri("/api/v1/compras/{ventaId}/aplicar-codigo", ventaId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue("{\"codigo\": \"LLENO\"}")
                 .exchange()
@@ -150,30 +163,35 @@ class DescuentoControllerTest {
     }
 
     @Test
-    void carritoCalculaPrecioConDescuentoAplicado() {
-        Descuento descuento = buildDescuento(TipoDescuento.PORCENTAJE, "20");
-        DescuentoResponse response = buildResponse(descuento);
+    void aplicarCodigoRetornaTotalesActualizados() {
+        UUID ventaId = UUID.randomUUID();
+        DescuentoAplicado descuentoAplicado = new DescuentoAplicado(
+                BigDecimal.valueOf(100000), BigDecimal.valueOf(20000), BigDecimal.valueOf(80000));
+        DescuentoAplicadoResponse response = new DescuentoAplicadoResponse(
+                BigDecimal.valueOf(100000), BigDecimal.valueOf(20000), BigDecimal.valueOf(80000));
 
-        when(validarCodigoPromocionalUseCase.ejecutar("DESCUENTO20")).thenReturn(Mono.just(descuento));
-        when(mapper.toResponse(descuento)).thenReturn(response);
+        when(aplicarCodigoPromoVentaUseCase.ejecutar(eq(ventaId), eq("DESCUENTO20")))
+                .thenReturn(Mono.just(descuentoAplicado));
+        when(mapper.toResponse(descuentoAplicado)).thenReturn(response);
 
         webTestClient.post()
-                .uri("/api/v1/compras/carrito/aplicar-codigo")
+                .uri("/api/v1/compras/{ventaId}/aplicar-codigo", ventaId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue("{\"codigo\": \"DESCUENTO20\"}")
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
-                .jsonPath("$.tipo").isEqualTo("PORCENTAJE");
+                .jsonPath("$.montoDescuento").isEqualTo(20000);
     }
 
     @Test
-    void carritoMuestraPrecioSinDescuentoFueraDeVigencia() {
-        when(validarCodigoPromocionalUseCase.ejecutar("VENCIDO"))
+    void aplicarCodigoExpiradoRetorna409() {
+        UUID ventaId = UUID.randomUUID();
+        when(aplicarCodigoPromoVentaUseCase.ejecutar(eq(ventaId), eq("VENCIDO")))
                 .thenReturn(Mono.error(new CodigoPromoExpiradoException("CÓDIGO EXPIRADO")));
 
         webTestClient.post()
-                .uri("/api/v1/compras/carrito/aplicar-codigo")
+                .uri("/api/v1/compras/{ventaId}/aplicar-codigo", ventaId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue("{\"codigo\": \"VENCIDO\"}")
                 .exchange()
@@ -190,7 +208,7 @@ class DescuentoControllerTest {
                 .build();
     }
 
-    private DescuentoResponse buildResponse(Descuento d) {
+    private DescuentoResponse buildDescuentoResponse(Descuento d) {
         return new DescuentoResponse(d.getId(), d.getPromocionId(), d.getTipo(), d.getValor(), d.getZonaId(), d.isAcumulable());
     }
 }
