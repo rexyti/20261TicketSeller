@@ -51,7 +51,7 @@ public class CrearCortesiaConAsientoUseCase {
 
     private Mono<Asiento> validarYBloquear(Asiento asiento) {
         return Mono.just(asiento)
-                .filter(a -> EstadoAsiento.DISPONIBLE.equals(a.getEstado()))
+                .filter(Asiento::isDisponible)
                 .switchIfEmpty(Mono.error(new AsientoOcupadoException(asiento.getId())))
                 .flatMap(a -> asientoRepositoryPort.guardar(a.toBuilder().estado(EstadoAsiento.BLOQUEADO).build()));
     }

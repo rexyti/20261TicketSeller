@@ -38,4 +38,18 @@ public class Bloqueo {
         return fechaExpiracion != null && fechaCreacion != null
                 && fechaExpiracion.isBefore(fechaCreacion);
     }
+
+    public boolean isActivo(){
+        return EstadoBloqueo.ACTIVO.equals(estado);
+    }
+
+    public boolean isLiberado(){
+        return EstadoBloqueo.LIBERADO.equals(estado);
+    }
+
+    public void liberar(){
+        if (isActivo()){
+            this.estado = EstadoBloqueo.LIBERADO;
+        }
+    }
 }

@@ -37,4 +37,28 @@ public class Cortesia {
     private boolean sinCodigoCortesia(){
         return codigoUnico == null || codigoUnico.isBlank();
     }
+
+    public boolean isGenerada(){
+        return EstadoCortesia.GENERADA.equals(estado);
+    }
+
+    public boolean isUsada(){
+        return EstadoCortesia.USADA.equals(estado);
+    }
+
+    public boolean isNoUsada(){
+        return EstadoCortesia.NO_USADA.equals(estado);
+    }
+
+    public void usar(){
+        if (isGenerada()){
+            this.estado = EstadoCortesia.USADA;
+        }
+    }
+
+    public void marcarNoUsada(){
+        if (isGenerada()){
+            this.estado = EstadoCortesia.NO_USADA;
+        }
+    }
 }

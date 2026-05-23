@@ -29,7 +29,7 @@ public class LiquidacionQueryAdapter implements LiquidacionQueryPort {
                     CASE
                         WHEN t.es_cortesia = true THEN 'CORTESIA'
                         WHEN t.estado IN ('ANULADO', 'REEMBOLSADO') THEN 'CANCELADO'
-                        WHEN t.estado = 'VENDIDO' THEN 'VENDIDO_SIN_ASISTENCIA'
+                        WHEN t.estado = 'VENDIDO' THEN 'VENDIDO'
                         ELSE 'OTRO'
                     END AS condicion,
                     t.id AS ticket_id,

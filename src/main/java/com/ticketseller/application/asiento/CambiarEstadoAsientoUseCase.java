@@ -33,9 +33,8 @@ public class CambiarEstadoAsientoUseCase {
     }
 
     private Mono<Void> validarSinCompraActiva(Asiento asiento) {
-        boolean enCompra = EstadoAsiento.RESERVADO.equals(asiento.getEstado());
-        return Mono.just(enCompra)
-                .filter(en -> !en)
+        return Mono.just(asiento)
+                .filter(a -> !a.isReservado())
                 .switchIfEmpty(Mono.error(new AsientoEnCompraException("El asiento está siendo reservado por un cliente.")))
                 .then();
     }

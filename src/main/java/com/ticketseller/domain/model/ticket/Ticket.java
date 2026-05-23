@@ -77,4 +77,24 @@ public class Ticket {
     private boolean ticketVendidoSinQrGenerado() {
         return EstadoTicket.VENDIDO.equals(estado) && (codigoQr == null || codigoQr.isBlank());
     }
+
+    public boolean isVendido(){
+        return EstadoTicket.VENDIDO.equals(estado);
+    }
+
+    public boolean isAnulado(){
+        return EstadoTicket.ANULADO.equals(estado);
+    }
+
+    public boolean isCancelado(){
+        return EstadoTicket.CANCELADO.equals(estado);
+    }
+
+    public boolean isRembolsado(){
+        return EstadoTicket.REEMBOLSADO.equals(estado);
+    }
+
+    public boolean hasReembolsoPendiente(){
+        return EstadoTicket.REEMBOLSO_PENDIENTE.equals(estado);
+    }
 }

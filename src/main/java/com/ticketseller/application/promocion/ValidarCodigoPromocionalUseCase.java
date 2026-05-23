@@ -5,7 +5,6 @@ import com.ticketseller.domain.exception.promocion.CodigoPromoExpiradoException;
 import com.ticketseller.domain.exception.promocion.CodigoPromoInvalidoException;
 import com.ticketseller.domain.exception.promocion.PromocionNoActivaException;
 import com.ticketseller.domain.model.promocion.CodigoPromocional;
-import com.ticketseller.domain.model.promocion.Descuento;
 import com.ticketseller.domain.model.promocion.Promocion;
 import com.ticketseller.domain.repository.CodigoPromocionalRepositoryPort;
 import com.ticketseller.domain.repository.DescuentoRepositoryPort;
@@ -22,11 +21,11 @@ public class ValidarCodigoPromocionalUseCase {
     private final PromocionRepositoryPort promocionRepositoryPort;
     private final DescuentoRepositoryPort descuentoRepositoryPort;
 
-    public Mono<Descuento> ejecutar(String codigo) {
+    public Mono<CodigoValidado> ejecutar(String codigo) {
         return codigoRepositoryPort.buscarPorCodigo(codigo)
                 .switchIfEmpty(Mono.error(new CodigoPromoInvalidoException("Código promocional inválido")))
                 .flatMap(this::validarVigencia)
-                .flatMap(this::validarYRegistrarUso)
+                .flatMap(this::validarPromocionActiva)
                 .flatMap(this::obtenerDescuento);
     }
 
@@ -38,18 +37,19 @@ public class ValidarCodigoPromocionalUseCase {
                 .switchIfEmpty(Mono.error(new CodigoPromoAgotadoException("CÓDIGO YA UTILIZADO")));
     }
 
-    private Mono<CodigoPromocional> validarYRegistrarUso(CodigoPromocional codigoPromo) {
+    private Mono<CodigoPromocional> validarPromocionActiva(CodigoPromocional codigoPromo) {
         return promocionRepositoryPort.buscarPorId(codigoPromo.getPromocionId())
                 .switchIfEmpty(Mono.error(new CodigoPromoInvalidoException("Código promocional inválido")))
                 .filter(Promocion::estaActiva)
                 .switchIfEmpty(Mono.error(new PromocionNoActivaException("La promoción asociada no está activa")))
-                .flatMap(p -> codigoRepositoryPort.incrementarUsos(codigoPromo.getId()));
+                .thenReturn(codigoPromo);
     }
 
-    private Mono<Descuento> obtenerDescuento(CodigoPromocional codigoActualizado) {
+    private Mono<CodigoValidado> obtenerDescuento(CodigoPromocional codigo) {
         return descuentoRepositoryPort
-                .buscarPorPromocionId(codigoActualizado.getPromocionId())
+                .buscarPorPromocionId(codigo.getPromocionId())
                 .next()
-                .switchIfEmpty(Mono.error(new CodigoPromoInvalidoException("El código no tiene descuento asociado")));
+                .switchIfEmpty(Mono.error(new CodigoPromoInvalidoException("El código no tiene descuento asociado")))
+                .map(descuento -> new CodigoValidado(codigo.getId(), descuento));
     }
 }

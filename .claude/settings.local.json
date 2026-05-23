@@ -31,7 +31,10 @@
       "Bash(git -C /home/nestor/Programacion/Ing_Software/20261TicketSeller status -- docs/plan/front/)",
       "Bash(./gradlew compileJava --rerun)",
       "Bash(git -C /home/nestor/Programacion/Ing_Software/20261TicketSeller stash)",
-      "Bash(git -C /home/nestor/Programacion/Ing_Software/20261TicketSeller stash pop)"
+      "Bash(git -C /home/nestor/Programacion/Ing_Software/20261TicketSeller stash pop)",
+      "Bash(./gradlew compileJava --no-daemon --rerun-tasks)",
+      "Bash(./gradlew compileTestJava --no-daemon --rerun-tasks)",
+      "Bash(./gradlew compileJava --quiet)"
     ]
   }
 }
