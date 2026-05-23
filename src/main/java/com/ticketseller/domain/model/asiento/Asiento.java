@@ -92,4 +92,28 @@ public class Asiento {
         return EstadoAsiento.RESERVADO.equals(nuevo) || EstadoAsiento.BLOQUEADO.equals(nuevo)
                 || EstadoAsiento.MANTENIMIENTO.equals(nuevo);
     }
+
+    public boolean isDisponible(){
+        return EstadoAsiento.DISPONIBLE.equals(estado);
+    }
+
+    public boolean isBloqueado(){
+        return EstadoAsiento.BLOQUEADO.equals(estado);
+    }
+
+    public boolean isReservado(){
+        return EstadoAsiento.RESERVADO.equals(estado);
+    }
+
+    public boolean isVendido(){
+        return EstadoAsiento.VENDIDO.equals(estado);
+    }
+
+    public boolean isEnMantenimiento(){
+        return EstadoAsiento.MANTENIMIENTO.equals(estado);
+    }
+
+    public boolean isEspacioVacio(){
+        return EstadoAsiento.INACTIVO.equals(estado);
+    }
 }

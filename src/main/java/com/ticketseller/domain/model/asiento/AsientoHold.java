@@ -33,7 +33,7 @@ public class AsientoHold {
     }
 
     public boolean isActiva(){
-        return expiraEn.isBefore(LocalDateTime.now()) && isReservado();
+        return isReservado() && expiraEn.isBefore(LocalDateTime.now());
     }
 
     public void completar(){
