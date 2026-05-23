@@ -54,4 +54,28 @@ public class CodigoPromocional {
     public boolean tieneUsosDisponibles() {
         return usosMaximos == null || usosActuales < usosMaximos;
     }
+
+    public boolean isActivo(){
+        return EstadoCodigoPromocional.ACTIVO.equals(estado);
+    }
+
+    public boolean isAgotado(){
+        return EstadoCodigoPromocional.AGOTADO.equals(estado);
+    }
+
+    public boolean isExpirado(){
+        return EstadoCodigoPromocional.EXPIRADO.equals(estado);
+    }
+
+    public void agotar(){
+        if (isActivo()){
+            this.estado = EstadoCodigoPromocional.AGOTADO;
+        }
+    }
+
+    public void expirar(){
+        if (isActivo()){
+            this.estado = EstadoCodigoPromocional.EXPIRADO;
+        }
+    }
 }

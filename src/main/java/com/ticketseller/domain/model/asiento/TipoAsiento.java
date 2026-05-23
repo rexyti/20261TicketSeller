@@ -47,4 +47,18 @@ public class TipoAsiento {
     private String trimOrNull(String valor) {
         return valor == null ? null : valor.trim();
     }
+
+    public boolean isActivo() {
+        return EstadoTipoAsiento.ACTIVO.equals(estado);
+    }
+
+    public boolean isInactivo() {
+        return EstadoTipoAsiento.INACTIVO.equals(estado);
+    }
+
+    public void desactivar(){
+        if (isActivo()) {
+            this.estado = EstadoTipoAsiento.INACTIVO;
+        }
+    }
 }

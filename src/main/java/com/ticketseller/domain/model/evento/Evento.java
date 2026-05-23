@@ -79,6 +79,22 @@ public class Evento {
     private String trimOrNull(String valor) {
         return valor == null ? null : valor.trim();
     }
+
+    public boolean isActivo(){
+        return EstadoEvento.ACTIVO.equals(estado);
+    }
+
+    public boolean isEnProgreso(){
+        return EstadoEvento.EN_PROGRESO.equals(estado);
+    }
+
+    public boolean isFinalizado(){
+        return EstadoEvento.FINALIZADO.equals(estado);
+    }
+
+    public boolean isCancelado(){
+        return EstadoEvento.CANCELADO.equals(estado);
+    }
 }
 
 

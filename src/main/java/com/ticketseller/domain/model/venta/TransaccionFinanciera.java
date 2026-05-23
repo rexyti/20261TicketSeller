@@ -63,5 +63,17 @@ public class TransaccionFinanciera {
     private boolean pagoAprobadoSinCodigoAutorizacion(){
         return estadoPago == EstadoPago.APROBADO && (codigoAutorizacion == null || codigoAutorizacion.isBlank());
     }
+
+    public boolean isPagoApproved(){
+        return EstadoPago.APROBADO.equals(estadoPago);
+    }
+
+    public boolean isPagoRechazado(){
+        return EstadoPago.RECHAZADO.equals(estadoPago);
+    }
+
+    public boolean hasPagoError(){
+        return EstadoPago.ERROR.equals(estadoPago);
+    }
 }
 

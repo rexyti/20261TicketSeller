@@ -60,5 +60,29 @@ public class Venta {
     private boolean transicionInvalida(EstadoVenta destino) {
         return estado.equals(destino) || !estado.transicionesPermitidas().contains(destino);
     }
+
+    public boolean isPendiente(){
+        return EstadoVenta.PENDIENTE.equals(estado);
+    }
+
+    public boolean isReservada(){
+        return EstadoVenta.RESERVADA.equals(estado);
+    }
+
+    public boolean isCompletada(){
+        return EstadoVenta.COMPLETADA.equals(estado);
+    }
+
+    public boolean isExpirada(){
+        return EstadoVenta.EXPIRADA.equals(estado);
+    }
+
+    public boolean isReembolsada(){
+        return EstadoVenta.REEMBOLSADA.equals(estado);
+    }
+
+    public boolean isFallida(){
+        return EstadoVenta.FALLIDA.equals(estado);
+    }
 }
 

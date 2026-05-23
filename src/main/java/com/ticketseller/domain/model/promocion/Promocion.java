@@ -40,4 +40,32 @@ public class Promocion {
     private boolean nombreInvalido() {
         return nombre == null || nombre.isBlank();
     }
+
+    public boolean isActiva(){
+        return EstadoPromocion.ACTIVA.equals(estado);
+    }
+
+    public boolean isPausada(){
+        return EstadoPromocion.PAUSADA.equals(estado);
+    }
+
+    public boolean isFinalizada(){
+        return EstadoPromocion.FINALIZADA.equals(estado);
+    }
+
+    public void pausar(){
+        if (isActiva()){
+            this.estado = EstadoPromocion.PAUSADA;
+        }
+    }
+
+    public void finalizar(){
+        if (isFinalizable()){
+            this.estado = EstadoPromocion.FINALIZADA;
+        }
+    }
+
+    private boolean isFinalizable(){
+        return !isFinalizada();
+    }
 }

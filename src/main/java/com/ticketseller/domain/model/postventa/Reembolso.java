@@ -45,5 +45,40 @@ public class Reembolso {
             throw new IllegalArgumentException("El campo %s es obligatorio".formatted(campo));
         }
     }
+
+    public boolean isPendiente(){
+        return EstadoReembolso.PENDIENTE.equals(estado);
+    }
+
+    public boolean isCompletado(){
+        return EstadoReembolso.COMPLETADO.equals(estado);
+    }
+
+    public boolean isFallido(){
+        return EstadoReembolso.FALLIDO.equals(estado);
+    }
+
+    public boolean isEnProceso(){
+        return EstadoReembolso.EN_PROCESO.equals(estado);
+    }
+
+    public void marcarEnProceso(){
+        if (isPendiente()){
+            this.estado = EstadoReembolso.EN_PROCESO;
+        }
+    }
+
+    public void marcarCompletado(){
+        if (isEnProceso()){
+            this.estado = EstadoReembolso.COMPLETADO;
+            this.fechaCompletado = LocalDateTime.now();
+        }
+    }
+
+    public void marcarFallido(){
+        if (isEnProceso()){
+            this.estado = EstadoReembolso.FALLIDO;
+        }
+    }
 }
 
