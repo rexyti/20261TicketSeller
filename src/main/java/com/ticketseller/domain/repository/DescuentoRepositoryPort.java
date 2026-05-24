@@ -13,5 +13,5 @@ public interface DescuentoRepositoryPort {
 
     Flux<Descuento> buscarPorPromocionId(UUID promocionId);
 
-    Flux<Descuento> buscarActivosPorEvento(UUID eventoId, LocalDateTime ahora);
+    Flux<Descuento> buscarAutomaticosPorEvento(UUID eventoId, LocalDateTime ahora, String tipoUsuario);
 }

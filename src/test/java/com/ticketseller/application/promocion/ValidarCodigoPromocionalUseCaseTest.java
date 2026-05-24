@@ -8,9 +8,9 @@ import com.ticketseller.domain.model.promocion.CodigoPromocional;
 import com.ticketseller.domain.model.promocion.Descuento;
 import com.ticketseller.domain.model.promocion.EstadoCodigoPromocional;
 import com.ticketseller.domain.model.promocion.EstadoPromocion;
+import com.ticketseller.domain.model.promocion.MecanismoAplicacion;
 import com.ticketseller.domain.model.promocion.Promocion;
 import com.ticketseller.domain.model.promocion.TipoDescuento;
-import com.ticketseller.domain.model.promocion.TipoPromocion;
 import com.ticketseller.domain.repository.CodigoPromocionalRepositoryPort;
 import com.ticketseller.domain.repository.DescuentoRepositoryPort;
 import com.ticketseller.domain.repository.PromocionRepositoryPort;
@@ -115,6 +115,23 @@ class ValidarCodigoPromocionalUseCaseTest {
                 .verify();
     }
 
+    @Test
+    void deberiaFallarSiPromocionEsAutomatica() {
+        UUID promocionId = UUID.randomUUID();
+        UUID codigoId = UUID.randomUUID();
+        CodigoPromocional codigo = buildCodigoValido(codigoId, promocionId, 5, 0);
+        Promocion automatica = buildPromocionActiva(promocionId).toBuilder()
+                .mecanismo(MecanismoAplicacion.AUTOMATICO)
+                .build();
+
+        when(codigoRepositoryPort.buscarPorCodigo("AUTO")).thenReturn(Mono.just(codigo));
+        when(promocionRepositoryPort.buscarPorId(promocionId)).thenReturn(Mono.just(automatica));
+
+        StepVerifier.create(useCase.ejecutar("AUTO"))
+                .expectError(CodigoPromoInvalidoException.class)
+                .verify();
+    }
+
     private CodigoPromocional buildCodigoValido(UUID id, UUID promocionId, int usosMax, int usosActuales) {
         return CodigoPromocional.builder()
                 .id(id)
@@ -158,7 +175,7 @@ class ValidarCodigoPromocionalUseCaseTest {
         return Promocion.builder()
                 .id(id)
                 .nombre("Campaña Verano")
-                .tipo(TipoPromocion.CODIGOS)
+                .mecanismo(MecanismoAplicacion.CODIGO)
                 .eventoId(UUID.randomUUID())
                 .fechaInicio(LocalDateTime.now().minusDays(1))
                 .fechaFin(LocalDateTime.now().plusDays(30))

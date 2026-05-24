@@ -770,9 +770,8 @@ public class BeanConfiguration {
 
     @Bean
     public AplicarDescuentoCarritoUseCase aplicarDescuentoCarritoUseCase(
-            PromocionRepositoryPort promocionRepositoryPort,
             DescuentoRepositoryPort descuentoRepositoryPort) {
-        return new AplicarDescuentoCarritoUseCase(promocionRepositoryPort, descuentoRepositoryPort);
+        return new AplicarDescuentoCarritoUseCase(descuentoRepositoryPort);
     }
 
     @Bean

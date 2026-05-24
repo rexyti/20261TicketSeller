@@ -5,6 +5,7 @@ import com.ticketseller.domain.exception.promocion.CodigoPromoExpiradoException;
 import com.ticketseller.domain.exception.promocion.CodigoPromoInvalidoException;
 import com.ticketseller.domain.exception.promocion.PromocionNoActivaException;
 import com.ticketseller.domain.model.promocion.CodigoPromocional;
+import com.ticketseller.domain.model.promocion.MecanismoAplicacion;
 import com.ticketseller.domain.model.promocion.Promocion;
 import com.ticketseller.domain.repository.CodigoPromocionalRepositoryPort;
 import com.ticketseller.domain.repository.DescuentoRepositoryPort;
@@ -42,6 +43,8 @@ public class ValidarCodigoPromocionalUseCase {
                 .switchIfEmpty(Mono.error(new CodigoPromoInvalidoException("Código promocional inválido")))
                 .filter(Promocion::isActiva)
                 .switchIfEmpty(Mono.error(new PromocionNoActivaException("La promoción asociada no está activa")))
+                .filter(p -> MecanismoAplicacion.CODIGO.equals(p.getMecanismo()))
+                .switchIfEmpty(Mono.error(new CodigoPromoInvalidoException("Código promocional inválido")))
                 .thenReturn(codigoPromo);
     }
 

@@ -4,7 +4,7 @@ import com.ticketseller.domain.exception.promocion.PromocionNotFoundException;
 import com.ticketseller.domain.exception.promocion.TransicionPromocionInvalidaException;
 import com.ticketseller.domain.model.promocion.EstadoPromocion;
 import com.ticketseller.domain.model.promocion.Promocion;
-import com.ticketseller.domain.model.promocion.TipoPromocion;
+import com.ticketseller.domain.model.promocion.MecanismoAplicacion;
 import com.ticketseller.domain.repository.PromocionRepositoryPort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -107,7 +107,7 @@ class GestionarEstadoPromocionUseCaseTest {
         return Promocion.builder()
                 .id(id)
                 .nombre("Campaña Test")
-                .tipo(TipoPromocion.DESCUENTO)
+                .mecanismo(MecanismoAplicacion.AUTOMATICO)
                 .eventoId(UUID.randomUUID())
                 .fechaInicio(LocalDateTime.now().minusDays(1))
                 .fechaFin(LocalDateTime.now().plusDays(7))

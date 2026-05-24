@@ -2,7 +2,7 @@ package com.ticketseller.infrastructure.adapter.out.persistence.promocion;
 
 import com.ticketseller.domain.model.promocion.EstadoPromocion;
 import com.ticketseller.domain.model.promocion.Promocion;
-import com.ticketseller.domain.model.promocion.TipoPromocion;
+import com.ticketseller.domain.model.promocion.MecanismoAplicacion;
 import com.ticketseller.domain.model.promocion.TipoUsuario;
 import com.ticketseller.domain.repository.PromocionRepositoryPort;
 import org.junit.jupiter.api.Disabled;
@@ -48,7 +48,7 @@ class PromocionRepositoryAdapterTest {
         Promocion preventa = Promocion.builder()
                 .id(UUID.randomUUID())
                 .nombre("Preventa VIP")
-                .tipo(TipoPromocion.PREVENTA)
+                .mecanismo(MecanismoAplicacion.AUTOMATICO)
                 .eventoId(eventoId)
                 .fechaInicio(LocalDateTime.now())
                 .fechaFin(LocalDateTime.now().plusDays(7))

@@ -191,7 +191,7 @@ CREATE TABLE historial_estado_venta (
 CREATE TABLE promociones (
     id UUID PRIMARY KEY,
     nombre VARCHAR(150) NOT NULL,
-    tipo VARCHAR(20) NOT NULL,
+    mecanismo VARCHAR(20) NOT NULL,
     evento_id UUID NOT NULL REFERENCES eventos(id),
     fecha_inicio TIMESTAMP NOT NULL,
     fecha_fin TIMESTAMP NOT NULL,

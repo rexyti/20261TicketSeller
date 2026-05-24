@@ -16,7 +16,7 @@ public class Promocion {
 
     private UUID id;
     private String nombre;
-    private TipoPromocion tipo;
+    private MecanismoAplicacion mecanismo;
     private UUID eventoId;
     private LocalDateTime fechaInicio;
     private LocalDateTime fechaFin;

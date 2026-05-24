@@ -4,8 +4,8 @@ import com.ticketseller.domain.exception.evento.EventoNotFoundException;
 import com.ticketseller.domain.exception.promocion.FechasInvalidasPromocionException;
 import com.ticketseller.domain.model.evento.Evento;
 import com.ticketseller.domain.model.promocion.EstadoPromocion;
+import com.ticketseller.domain.model.promocion.MecanismoAplicacion;
 import com.ticketseller.domain.model.promocion.Promocion;
-import com.ticketseller.domain.model.promocion.TipoPromocion;
 import com.ticketseller.domain.model.promocion.TipoUsuario;
 import com.ticketseller.domain.repository.EventoRepositoryPort;
 import com.ticketseller.domain.repository.PromocionRepositoryPort;
@@ -69,7 +69,7 @@ class CrearPromocionUseCaseTest {
         UUID eventoId = UUID.randomUUID();
         Promocion request = Promocion.builder()
                 .nombre("Promo")
-                .tipo(TipoPromocion.DESCUENTO)
+                .mecanismo(MecanismoAplicacion.AUTOMATICO)
                 .eventoId(eventoId)
                 .fechaInicio(LocalDateTime.now().plusDays(5))
                 .fechaFin(LocalDateTime.now().plusDays(1))
@@ -84,7 +84,7 @@ class CrearPromocionUseCaseTest {
         return Promocion.builder()
                 .id(UUID.randomUUID())
                 .nombre("Preventa VIP")
-                .tipo(TipoPromocion.PREVENTA)
+                .mecanismo(MecanismoAplicacion.AUTOMATICO)
                 .eventoId(eventoId)
                 .fechaInicio(LocalDateTime.now())
                 .fechaFin(LocalDateTime.now().plusDays(7))

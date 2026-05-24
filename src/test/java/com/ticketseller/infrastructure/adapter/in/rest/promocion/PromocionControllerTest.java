@@ -5,12 +5,13 @@ import com.ticketseller.application.promocion.CrearCodigosPromocionalesUseCase;
 import com.ticketseller.application.promocion.CrearPromocionUseCase;
 import com.ticketseller.application.promocion.DescuentoAplicado;
 import com.ticketseller.application.promocion.GestionarEstadoPromocionUseCase;
+import com.ticketseller.application.promocion.ListarCodigosPromocionalesUseCase;
+import com.ticketseller.application.promocion.ListarPromocionesUseCase;
 import com.ticketseller.domain.exception.promocion.TransicionPromocionInvalidaException;
-import com.ticketseller.domain.exception.promocion.UsuarioNoAutorizadoParaPreventaException;
 import com.ticketseller.domain.model.promocion.CodigoPromocional;
 import com.ticketseller.domain.model.promocion.EstadoPromocion;
+import com.ticketseller.domain.model.promocion.MecanismoAplicacion;
 import com.ticketseller.domain.model.promocion.Promocion;
-import com.ticketseller.domain.model.promocion.TipoPromocion;
 import com.ticketseller.domain.model.promocion.TipoUsuario;
 import com.ticketseller.infrastructure.adapter.in.rest.GlobalExceptionHandler;
 import com.ticketseller.infrastructure.adapter.in.rest.mapper.PromocionRestMapper;
@@ -56,11 +57,17 @@ class PromocionControllerTest {
     private AplicarDescuentoCarritoUseCase aplicarDescuentoCarritoUseCase;
 
     @MockBean
+    private ListarPromocionesUseCase listarPromocionesUseCase;
+
+    @MockBean
+    private ListarCodigosPromocionalesUseCase listarCodigosPromocionalesUseCase;
+
+    @MockBean
     private PromocionRestMapper mapper;
 
     @Test
-    void crearPreventaRetorna201ConPromocionActiva() {
-        Promocion promocion = buildPromocionActiva(TipoPromocion.PREVENTA);
+    void crearPromocionAutomaticaRetorna201ConPromocionActiva() {
+        Promocion promocion = buildPromocionActiva(MecanismoAplicacion.AUTOMATICO);
         PromocionResponse response = buildPromocionResponse(promocion);
 
         when(mapper.toDomain(any(CrearPromocionRequest.class))).thenReturn(promocion);
@@ -72,8 +79,8 @@ class PromocionControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue("""
                         {
-                          "nombre": "Preventa VIP",
-                          "tipo": "PREVENTA",
+                          "nombre": "Descuento VIP",
+                          "mecanismo": "AUTOMATICO",
                           "eventoId": "00000000-0000-0000-0000-000000000001",
                           "fechaInicio": "2026-05-10T10:00:00",
                           "fechaFin": "2026-05-20T10:00:00",
@@ -87,12 +94,12 @@ class PromocionControllerTest {
     }
 
     @Test
-    void calcularDescuentosConUsuarioVipNoLanzaError() {
+    void calcularDescuentosConUsuarioVipAplicaDescuentosCorrespondientes() {
         DescuentoAplicado descuentoAplicado = new DescuentoAplicado(
-                new BigDecimal("100000"), BigDecimal.ZERO, new BigDecimal("100000"));
+                new BigDecimal("100000"), new BigDecimal("10000"), new BigDecimal("90000"));
         com.ticketseller.infrastructure.adapter.in.rest.promocion.dto.DescuentoAplicadoResponse responseDto =
                 new com.ticketseller.infrastructure.adapter.in.rest.promocion.dto.DescuentoAplicadoResponse(
-                        new BigDecimal("100000"), BigDecimal.ZERO, new BigDecimal("100000"));
+                        new BigDecimal("100000"), new BigDecimal("10000"), new BigDecimal("90000"));
 
         when(mapper.toItems(any())).thenReturn(List.of());
         when(aplicarDescuentoCarritoUseCase.ejecutar(any(), eq(TipoUsuario.VIP), any()))
@@ -114,11 +121,17 @@ class PromocionControllerTest {
     }
 
     @Test
-    void calcularDescuentosConUsuarioGeneralEnPreventaVipRetorna403() {
+    void calcularDescuentosConUsuarioGeneralSoloAplicaDescuentosSinRestriccion() {
+        DescuentoAplicado sinDescuento = new DescuentoAplicado(
+                new BigDecimal("100000"), BigDecimal.ZERO, new BigDecimal("100000"));
+        com.ticketseller.infrastructure.adapter.in.rest.promocion.dto.DescuentoAplicadoResponse responseDto =
+                new com.ticketseller.infrastructure.adapter.in.rest.promocion.dto.DescuentoAplicadoResponse(
+                        new BigDecimal("100000"), BigDecimal.ZERO, new BigDecimal("100000"));
+
         when(mapper.toItems(any())).thenReturn(List.of());
         when(aplicarDescuentoCarritoUseCase.ejecutar(any(), eq(TipoUsuario.GENERAL), any()))
-                .thenReturn(Mono.error(new UsuarioNoAutorizadoParaPreventaException(
-                        "El usuario no está autorizado para acceder a esta preventa")));
+                .thenReturn(Mono.just(sinDescuento));
+        when(mapper.toResponse(sinDescuento)).thenReturn(responseDto);
 
         webTestClient.post()
                 .uri("/api/v1/admin/promociones/calcular-descuentos")
@@ -131,13 +144,13 @@ class PromocionControllerTest {
                         }
                         """)
                 .exchange()
-                .expectStatus().isForbidden();
+                .expectStatus().isOk();
     }
 
     @Test
     void actualizarEstadoConPausadaRetorna200() {
         UUID id = UUID.randomUUID();
-        Promocion pausada = buildPromocionActiva(TipoPromocion.DESCUENTO).toBuilder()
+        Promocion pausada = buildPromocionActiva(MecanismoAplicacion.AUTOMATICO).toBuilder()
                 .estado(EstadoPromocion.PAUSADA)
                 .build();
         PromocionResponse response = buildPromocionResponse(pausada);
@@ -171,7 +184,7 @@ class PromocionControllerTest {
     @Test
     void actualizarEstadoConActivaReanudaCampana() {
         UUID id = UUID.randomUUID();
-        Promocion activa = buildPromocionActiva(TipoPromocion.DESCUENTO);
+        Promocion activa = buildPromocionActiva(MecanismoAplicacion.CODIGO);
         PromocionResponse response = buildPromocionResponse(activa);
 
         when(gestionarEstadoPromocionUseCase.ejecutar(eq(id), eq(EstadoPromocion.ACTIVA)))
@@ -229,11 +242,11 @@ class PromocionControllerTest {
                 .jsonPath("$.length()").isEqualTo(2);
     }
 
-    private Promocion buildPromocionActiva(TipoPromocion tipo) {
+    private Promocion buildPromocionActiva(MecanismoAplicacion mecanismo) {
         return Promocion.builder()
                 .id(UUID.randomUUID())
                 .nombre("Campaña Test")
-                .tipo(tipo)
+                .mecanismo(mecanismo)
                 .eventoId(UUID.randomUUID())
                 .fechaInicio(LocalDateTime.now())
                 .fechaFin(LocalDateTime.now().plusDays(7))
@@ -243,7 +256,7 @@ class PromocionControllerTest {
 
     private PromocionResponse buildPromocionResponse(Promocion p) {
         return new PromocionResponse(
-                p.getId(), p.getNombre(), p.getTipo(), p.getEventoId(),
+                p.getId(), p.getNombre(), p.getMecanismo(), p.getEventoId(),
                 p.getFechaInicio(), p.getFechaFin(), p.getEstado(), p.getTipoUsuarioRestringido());
     }
 }

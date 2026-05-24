@@ -27,7 +27,8 @@ public class DescuentoRepositoryAdapter implements DescuentoRepositoryPort {
     }
 
     @Override
-    public Flux<Descuento> buscarActivosPorEvento(UUID eventoId, LocalDateTime ahora) {
-        return repository.findActivosByEventoIdAndFecha(eventoId, ahora).map(mapper::toDomain);
+    public Flux<Descuento> buscarAutomaticosPorEvento(UUID eventoId, LocalDateTime ahora, String tipoUsuario) {
+        return repository.findAutomaticosByEventoIdAndFechaAndTipoUsuario(eventoId, ahora, tipoUsuario)
+                .map(mapper::toDomain);
     }
 }
