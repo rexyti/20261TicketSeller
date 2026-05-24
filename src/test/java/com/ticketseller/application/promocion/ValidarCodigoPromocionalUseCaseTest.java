@@ -99,7 +99,7 @@ class ValidarCodigoPromocionalUseCaseTest {
     }
 
     @Test
-    void deberiaFallarSiPromocionNoEstaActiva() {
+    void deberiaFallarSiPromocionNoIsActiva() {
         UUID promocionId = UUID.randomUUID();
         UUID codigoId = UUID.randomUUID();
         CodigoPromocional codigo = buildCodigoValido(codigoId, promocionId, 5, 2);

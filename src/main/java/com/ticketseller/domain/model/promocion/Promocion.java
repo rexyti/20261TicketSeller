@@ -23,7 +23,7 @@ public class Promocion {
     private EstadoPromocion estado;
     private TipoUsuario tipoUsuarioRestringido;
 
-    public boolean estaActiva() {
+    public boolean isActiva() {
         return EstadoPromocion.ACTIVA.equals(estado);
     }
 
@@ -39,10 +39,6 @@ public class Promocion {
 
     private boolean nombreInvalido() {
         return nombre == null || nombre.isBlank();
-    }
-
-    public boolean isActiva(){
-        return EstadoPromocion.ACTIVA.equals(estado);
     }
 
     public boolean isPausada(){

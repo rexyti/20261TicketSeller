@@ -40,7 +40,7 @@ public class ValidarCodigoPromocionalUseCase {
     private Mono<CodigoPromocional> validarPromocionActiva(CodigoPromocional codigoPromo) {
         return promocionRepositoryPort.buscarPorId(codigoPromo.getPromocionId())
                 .switchIfEmpty(Mono.error(new CodigoPromoInvalidoException("Código promocional inválido")))
-                .filter(Promocion::estaActiva)
+                .filter(Promocion::isActiva)
                 .switchIfEmpty(Mono.error(new PromocionNoActivaException("La promoción asociada no está activa")))
                 .thenReturn(codigoPromo);
     }

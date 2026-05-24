@@ -26,7 +26,7 @@ public class CrearCodigosPromocionalesUseCase {
                                             String prefijo, LocalDateTime fechaFin) {
         return promocionRepositoryPort.buscarPorId(promocionId)
                 .switchIfEmpty(Mono.error(new PromocionNotFoundException("La promoción indicada no existe")))
-                .filter(Promocion::estaActiva)
+                .filter(Promocion::isActiva)
                 .switchIfEmpty(Mono.error(new PromocionNoActivaException("Solo se pueden generar códigos para promociones activas")))
                 .flatMapMany(p -> {
                     List<CodigoPromocional> codigos = generarCodigos(promocionId, cantidad, usosMaximosPorCodigo,
