@@ -6,7 +6,6 @@ import com.ticketseller.domain.exception.venta.PagoRechazadoException;
 import com.ticketseller.domain.exception.venta.ReservaExpiradaException;
 import com.ticketseller.domain.exception.venta.VentaNotFoundException;
 import com.ticketseller.domain.exception.zona.ZonaNotFoundException;
-import com.ticketseller.domain.exception.zona.ZonaSinPrecioException;
 import com.ticketseller.domain.model.asiento.Asiento;
 import com.ticketseller.domain.model.asiento.AsientoHold;
 import com.ticketseller.domain.model.asiento.EstadoAsiento;
@@ -21,7 +20,6 @@ import com.ticketseller.domain.model.venta.ResultadoPago;
 import com.ticketseller.domain.model.venta.TransaccionFinanciera;
 import com.ticketseller.domain.model.venta.Venta;
 import com.ticketseller.domain.model.zona.Compuerta;
-import com.ticketseller.domain.model.zona.PrecioZona;
 import com.ticketseller.domain.model.zona.TipoZona;
 import com.ticketseller.domain.model.zona.Zona;
 import com.ticketseller.domain.repository.AsientoHoldRepositoryPort;
@@ -31,7 +29,6 @@ import com.ticketseller.domain.repository.CompuertaRepositoryPort;
 import com.ticketseller.domain.repository.EventoRepositoryPort;
 import com.ticketseller.domain.repository.NotificacionEmailPort;
 import com.ticketseller.domain.repository.PasarelaPagoPort;
-import com.ticketseller.domain.repository.PrecioZonaRepositoryPort;
 import com.ticketseller.domain.repository.TicketRepositoryPort;
 import com.ticketseller.domain.repository.TransaccionFinancieraRepositoryPort;
 import com.ticketseller.domain.repository.VentaRepositoryPort;
@@ -40,6 +37,8 @@ import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
@@ -60,7 +59,6 @@ public class ProcesarPagoUseCase {
     private final AsientoRepositoryPort asientoRepositoryPort;
     private final AsientoHoldRepositoryPort asientoHoldRepositoryPort;
     private final ZonaRepositoryPort zonaRepositoryPort;
-    private final PrecioZonaRepositoryPort precioZonaRepositoryPort;
     private final CompuertaRepositoryPort compuertaRepositoryPort;
     private final EventoRepositoryPort eventoRepositoryPort;
 
@@ -101,22 +99,26 @@ public class ProcesarPagoUseCase {
     private Mono<VentaDetalle> completarVenta(Venta venta, ProcesarPagoCommand command, ResultadoPago resultado) {
         return obtenerZona(venta.getZonaId())
                 .flatMap(zona -> Mono.zip(
-                        obtenerPrecio(venta.getEventoId(), venta.getZonaId()),
                         obtenerCompuertaBalanceada(zona.getId(), zona.getRecintoId(), venta.getEventoId()),
                         obtenerEvento(venta.getEventoId()),
                         asientoHoldRepositoryPort.buscarPorVentaId(venta.getId()).collectList()
                 ).flatMap(tuple -> {
-                    PrecioZona precioZona = tuple.getT1();
-                    Compuerta compuerta = tuple.getT2();
-                    Evento evento = tuple.getT3();
-                    List<AsientoHold> holds = tuple.getT4();
+                    Compuerta compuerta = tuple.getT1();
+                    Evento evento = tuple.getT2();
+                    List<AsientoHold> holds = tuple.getT3();
+                    BigDecimal precioBase = venta.getTotal().divide(
+                            BigDecimal.valueOf(venta.getCantidad()), 2, RoundingMode.DOWN);
 
                     return cargarAsientos(holds).flatMap(asientosPorId ->
                         Flux.range(0, venta.getCantidad())
                             .concatMap(i -> {
                                 UUID asientoId = i < holds.size() ? holds.get(i).getAsientoId() : null;
                                 Asiento asiento = asientoId != null ? asientosPorId.get(asientoId) : null;
-                                Ticket sinQr = buildTicketSinQr(venta, compuerta, precioZona, zona, evento, asientoId, asiento);
+                                BigDecimal precioTicket = (i == venta.getCantidad() - 1)
+                                        ? venta.getTotal().subtract(
+                                                precioBase.multiply(BigDecimal.valueOf(venta.getCantidad() - 1)))
+                                        : precioBase;
+                                Ticket sinQr = buildTicketSinQr(venta, compuerta, precioTicket, zona, evento, asientoId, asiento);
                                 return ticketRepositoryPort.guardar(sinQr)
                                         .flatMap(saved -> {
                                             String qr = codigoQrPort.generarCodigo(saved.getId().toString());
@@ -138,13 +140,6 @@ public class ProcesarPagoUseCase {
     private Mono<Zona> obtenerZona(UUID zonaId) {
         return zonaRepositoryPort.buscarPorId(zonaId)
                 .switchIfEmpty(Mono.error(new ZonaNotFoundException("Zona no encontrada")));
-    }
-
-    private Mono<PrecioZona> obtenerPrecio(UUID eventoId, UUID zonaId) {
-        return precioZonaRepositoryPort.buscarPorEvento(eventoId)
-                .filter(p -> zonaId.equals(p.getZonaId()))
-                .next()
-                .switchIfEmpty(Mono.error(new ZonaSinPrecioException("No existe precio configurado para la zona en este evento")));
     }
 
     private Mono<Compuerta> obtenerCompuertaBalanceada(UUID zonaId, UUID recintoId, UUID eventoId) {
@@ -205,7 +200,7 @@ public class ProcesarPagoUseCase {
                 .collectMap(Asiento::getId);
     }
 
-    private Ticket buildTicketSinQr(Venta venta, Compuerta compuerta, PrecioZona precioZona,
+    private Ticket buildTicketSinQr(Venta venta, Compuerta compuerta, BigDecimal precioTicket,
                                     Zona zona, Evento evento, UUID asientoId, Asiento asiento) {
         String numeroAsiento = asiento != null ? asiento.getNumero() : null;
         AccessDetails accessDetails = buildAccessDetails(evento, zona, compuerta, numeroAsiento);
@@ -214,7 +209,7 @@ public class ProcesarPagoUseCase {
                 .eventoId(venta.getEventoId())
                 .zonaId(venta.getZonaId())
                 .compuertaId(compuerta.getId())
-                .precio(precioZona.getPrecio())
+                .precio(precioTicket)
                 .esCortesia(venta.isEsCortesia())
                 .estado(EstadoTicket.VENDIDO)
                 .asientoId(asientoId)

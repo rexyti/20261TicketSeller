@@ -486,12 +486,11 @@ public class BeanConfiguration {
                                                    AsientoRepositoryPort asientoRepositoryPort,
                                                    AsientoHoldRepositoryPort asientoHoldRepositoryPort,
                                                    ZonaRepositoryPort zonaRepositoryPort,
-                                                   PrecioZonaRepositoryPort precioZonaRepositoryPort,
                                                    CompuertaRepositoryPort compuertaRepositoryPort,
                                                    EventoRepositoryPort eventoRepositoryPort) {
         return new ProcesarPagoUseCase(ventaRepositoryPort, ticketRepositoryPort,
                 transaccionFinancieraRepositoryPort, pasarelaPagoPort, notificacionEmailPort, codigoQrPort,
-                asientoRepositoryPort, asientoHoldRepositoryPort, zonaRepositoryPort, precioZonaRepositoryPort,
+                asientoRepositoryPort, asientoHoldRepositoryPort, zonaRepositoryPort,
                 compuertaRepositoryPort, eventoRepositoryPort);
     }
 
@@ -788,10 +787,9 @@ public class BeanConfiguration {
     public AplicarCodigoPromoVentaUseCase aplicarCodigoPromoVentaUseCase(
             ValidarCodigoPromocionalUseCase validarCodigoPromocionalUseCase,
             VentaRepositoryPort ventaRepositoryPort,
-            TicketRepositoryPort ticketRepositoryPort,
             CodigoPromocionalRepositoryPort codigoPromocionalRepositoryPort) {
         return new AplicarCodigoPromoVentaUseCase(validarCodigoPromocionalUseCase, ventaRepositoryPort,
-                ticketRepositoryPort, codigoPromocionalRepositoryPort);
+                codigoPromocionalRepositoryPort);
     }
 
     @Bean
