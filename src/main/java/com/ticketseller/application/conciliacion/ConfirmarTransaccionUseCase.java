@@ -79,7 +79,7 @@ public class ConfirmarTransaccionUseCase {
     private Mono<Void> confirmarOcupacionAsientos(UUID ventaId) {
         return ticketRepositoryPort.buscarPorVenta(ventaId)
                 .filter(this::ticketConAsiento)
-                .flatMap(ticket -> confirmarOcupacionUseCase.ejecutar(ticket.getAsientoId()))
+                .flatMap(ticket -> confirmarOcupacionUseCase.ejecutar(ticket.getAsientoId(), ticket.getEventoId()))
                 .then();
     }
 

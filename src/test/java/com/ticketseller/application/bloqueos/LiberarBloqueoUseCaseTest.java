@@ -1,11 +1,8 @@
 package com.ticketseller.application.bloqueos;
 
 import com.ticketseller.domain.exception.bloqueos.BloqueoNoEncontradoException;
-import com.ticketseller.domain.model.asiento.Asiento;
-import com.ticketseller.domain.model.asiento.EstadoAsiento;
 import com.ticketseller.domain.model.bloqueos.Bloqueo;
 import com.ticketseller.domain.model.bloqueos.EstadoBloqueo;
-import com.ticketseller.domain.repository.AsientoRepositoryPort;
 import com.ticketseller.domain.repository.BloqueoRepositoryPort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,6 +11,7 @@ import reactor.test.StepVerifier;
 
 import java.util.UUID;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.mock;
@@ -23,7 +21,6 @@ import static org.mockito.Mockito.when;
 class LiberarBloqueoUseCaseTest {
 
     private BloqueoRepositoryPort bloqueoRepositoryPort;
-    private AsientoRepositoryPort asientoRepositoryPort;
     private LiberarBloqueoUseCase useCase;
 
     private final UUID bloqueoId = UUID.randomUUID();
@@ -32,25 +29,20 @@ class LiberarBloqueoUseCaseTest {
     @BeforeEach
     void setUp() {
         bloqueoRepositoryPort = mock(BloqueoRepositoryPort.class);
-        asientoRepositoryPort = mock(AsientoRepositoryPort.class);
-        useCase = new LiberarBloqueoUseCase(bloqueoRepositoryPort, asientoRepositoryPort);
+        useCase = new LiberarBloqueoUseCase(bloqueoRepositoryPort);
     }
 
     @Test
-    void liberarBloqueoActualizaAsientoADisponibleYBloqueoALiberado() {
+    void liberarBloqueoActualizaBloqueoALiberado() {
         Bloqueo bloqueo = buildBloqueo(EstadoBloqueo.ACTIVO);
-        Asiento asiento = Asiento.builder().id(asientoId).estado(EstadoAsiento.BLOQUEADO).zonaId(UUID.randomUUID()).build();
-        Asiento disponible = asiento.toBuilder().estado(EstadoAsiento.DISPONIBLE).build();
 
         when(bloqueoRepositoryPort.buscarPorId(bloqueoId)).thenReturn(Mono.just(bloqueo));
-        when(asientoRepositoryPort.buscarPorId(asientoId)).thenReturn(Mono.just(asiento));
-        when(asientoRepositoryPort.guardar(any())).thenReturn(Mono.just(disponible));
         when(bloqueoRepositoryPort.guardar(any())).thenAnswer(inv -> Mono.just(inv.getArgument(0)));
 
         StepVerifier.create(useCase.ejecutar(bloqueoId))
+                .assertNext(b -> assertEquals(EstadoBloqueo.LIBERADO, b.getEstado()))
                 .verifyComplete();
 
-        verify(asientoRepositoryPort).guardar(argThat(a -> EstadoAsiento.DISPONIBLE.equals(a.getEstado())));
         verify(bloqueoRepositoryPort).guardar(argThat(b -> EstadoBloqueo.LIBERADO.equals(b.getEstado())));
     }
 

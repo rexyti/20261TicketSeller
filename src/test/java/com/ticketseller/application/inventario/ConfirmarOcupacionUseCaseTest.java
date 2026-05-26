@@ -1,13 +1,9 @@
 package com.ticketseller.application.inventario;
 
-import com.ticketseller.domain.exception.asiento.AsientoNoDisponibleException;
 import com.ticketseller.domain.exception.asiento.HoldExpiradoException;
-import com.ticketseller.domain.model.asiento.Asiento;
 import com.ticketseller.domain.model.asiento.AsientoHold;
-import com.ticketseller.domain.model.asiento.EstadoAsiento;
 import com.ticketseller.domain.model.asiento.EstadoHold;
 import com.ticketseller.domain.repository.AsientoHoldRepositoryPort;
-import com.ticketseller.domain.repository.AsientoRepositoryPort;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -22,56 +18,47 @@ import static org.mockito.Mockito.when;
 
 class ConfirmarOcupacionUseCaseTest {
 
-    private final AsientoRepositoryPort asientoRepositoryPort = mock(AsientoRepositoryPort.class);
     private final AsientoHoldRepositoryPort asientoHoldRepositoryPort = mock(AsientoHoldRepositoryPort.class);
-    private final ConfirmarOcupacionUseCase useCase = new ConfirmarOcupacionUseCase(asientoRepositoryPort, asientoHoldRepositoryPort);
+    private final ConfirmarOcupacionUseCase useCase = new ConfirmarOcupacionUseCase(asientoHoldRepositoryPort);
+    private final UUID eventoId = UUID.randomUUID();
 
     @Test
     void confirmaOcupacionExitosaCuandoHoldVigente() {
         UUID id = UUID.randomUUID();
-        Asiento reservado = Asiento.builder().id(id).estado(EstadoAsiento.RESERVADO).build();
-        Asiento ocupado = Asiento.builder().id(id).estado(EstadoAsiento.OCUPADO).build();
         AsientoHold hold = AsientoHold.builder()
                 .asientoId(id)
+                .eventoId(eventoId)
                 .expiraEn(LocalDateTime.now().plusMinutes(10))
                 .estado(EstadoHold.RESERVADO)
                 .build();
+        AsientoHold vendido = hold.toBuilder().estado(EstadoHold.VENDIDO).build();
 
-        when(asientoRepositoryPort.buscarPorId(id)).thenReturn(Mono.just(reservado));
-        when(asientoHoldRepositoryPort.buscarActivoPorAsientoId(id)).thenReturn(Mono.just(hold));
-        when(asientoRepositoryPort.guardar(any())).thenReturn(Mono.just(ocupado));
+        when(asientoHoldRepositoryPort.buscarActivoPorAsientoYEvento(id, eventoId)).thenReturn(Mono.just(hold));
+        when(asientoHoldRepositoryPort.guardar(any())).thenReturn(Mono.just(vendido));
 
-        StepVerifier.create(useCase.ejecutar(id))
-                .assertNext(a -> assertEquals(EstadoAsiento.OCUPADO, a.getEstado()))
+        StepVerifier.create(useCase.ejecutar(id, eventoId))
+                .assertNext(h -> assertEquals(EstadoHold.VENDIDO, h.getEstado()))
                 .verifyComplete();
     }
 
     @Test
-    void fallaConHoldExpiradoCuandoExpiraEnEsPasado() {
+    void fallaConHoldExpiradoCuandoNoExisteHoldActivo() {
         UUID id = UUID.randomUUID();
-        Asiento reservado = Asiento.builder().id(id).estado(EstadoAsiento.RESERVADO).build();
-        AsientoHold holdExpirado = AsientoHold.builder()
-                .asientoId(id)
-                .expiraEn(LocalDateTime.now().minusMinutes(1))
-                .estado(EstadoHold.RESERVADO)
-                .build();
+        when(asientoHoldRepositoryPort.buscarActivoPorAsientoYEvento(id, eventoId)).thenReturn(Mono.empty());
 
-        when(asientoRepositoryPort.buscarPorId(id)).thenReturn(Mono.just(reservado));
-        when(asientoHoldRepositoryPort.buscarActivoPorAsientoId(id)).thenReturn(Mono.just(holdExpirado));
-
-        StepVerifier.create(useCase.ejecutar(id))
+        StepVerifier.create(useCase.ejecutar(id, eventoId))
                 .expectError(HoldExpiradoException.class)
                 .verify();
     }
 
     @Test
-    void fallaConAsientoNoDisponibleCuandoEstadoNoEsReservado() {
+    void fallaConHoldExpiradoCuandoEventoDiferente() {
         UUID id = UUID.randomUUID();
-        Asiento disponible = Asiento.builder().id(id).estado(EstadoAsiento.DISPONIBLE).build();
-        when(asientoRepositoryPort.buscarPorId(id)).thenReturn(Mono.just(disponible));
+        UUID otroEventoId = UUID.randomUUID();
+        when(asientoHoldRepositoryPort.buscarActivoPorAsientoYEvento(id, otroEventoId)).thenReturn(Mono.empty());
 
-        StepVerifier.create(useCase.ejecutar(id))
-                .expectError(AsientoNoDisponibleException.class)
+        StepVerifier.create(useCase.ejecutar(id, otroEventoId))
+                .expectError(HoldExpiradoException.class)
                 .verify();
     }
 }

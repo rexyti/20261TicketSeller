@@ -9,6 +9,7 @@ import com.ticketseller.domain.model.zona.Zona;
 import com.ticketseller.domain.model.venta.EstadoVenta;
 import com.ticketseller.domain.repository.AsientoHoldRepositoryPort;
 import com.ticketseller.domain.repository.AsientoRepositoryPort;
+import com.ticketseller.domain.repository.BloqueoRepositoryPort;
 import com.ticketseller.domain.repository.CompuertaRepositoryPort;
 import com.ticketseller.domain.repository.PrecioZonaRepositoryPort;
 import com.ticketseller.domain.repository.TicketRepositoryPort;
@@ -40,9 +41,10 @@ class ReservarAsientosUseCaseTest {
         AsientoHoldRepositoryPort asientoHoldRepositoryPort = mock(AsientoHoldRepositoryPort.class);
         AplicarDescuentoCarritoUseCase aplicarDescuentoCarritoUseCase = mock(AplicarDescuentoCarritoUseCase.class);
 
+        BloqueoRepositoryPort bloqueoRepositoryPort = mock(BloqueoRepositoryPort.class);
         ReservarAsientosUseCase useCase = new ReservarAsientosUseCase(ticketRepositoryPort, ventaRepositoryPort,
                 zonaRepositoryPort, precioZonaRepositoryPort, asientoRepositoryPort, asientoHoldRepositoryPort,
-                aplicarDescuentoCarritoUseCase);
+                bloqueoRepositoryPort, aplicarDescuentoCarritoUseCase);
 
         UUID eventoId = UUID.randomUUID();
         UUID zonaId = UUID.randomUUID();
@@ -83,9 +85,10 @@ class ReservarAsientosUseCaseTest {
         AsientoHoldRepositoryPort asientoHoldRepositoryPort = mock(AsientoHoldRepositoryPort.class);
         AplicarDescuentoCarritoUseCase aplicarDescuentoCarritoUseCase = mock(AplicarDescuentoCarritoUseCase.class);
 
+        BloqueoRepositoryPort bloqueoRepositoryPort = mock(BloqueoRepositoryPort.class);
         ReservarAsientosUseCase useCase = new ReservarAsientosUseCase(ticketRepositoryPort, ventaRepositoryPort,
                 zonaRepositoryPort, precioZonaRepositoryPort, asientoRepositoryPort, asientoHoldRepositoryPort,
-                aplicarDescuentoCarritoUseCase);
+                bloqueoRepositoryPort, aplicarDescuentoCarritoUseCase);
 
         UUID eventoId = UUID.randomUUID();
         UUID zonaId = UUID.randomUUID();

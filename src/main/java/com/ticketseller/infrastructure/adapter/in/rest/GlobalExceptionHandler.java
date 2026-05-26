@@ -19,8 +19,6 @@ import com.ticketseller.domain.exception.evento.EventoNotFoundException;
 import com.ticketseller.domain.exception.evento.EventoSolapamientoException;
 import com.ticketseller.domain.exception.evento.SolicitudRegistroEventoInvalidaException;
 import com.ticketseller.domain.exception.liquidacion.LiquidacionNoConfiguradaException;
-import com.ticketseller.domain.exception.liquidacion.ModeloNegocioInvalidoException;
-import com.ticketseller.domain.exception.liquidacion.MontoFijoInvalidoException;
 import com.ticketseller.domain.exception.postventa.CambioEstadoTicketSinJustificacionException;
 import com.ticketseller.domain.exception.postventa.CancelacionFueraDePlazoException;
 import com.ticketseller.domain.exception.postventa.EstadoTicketInvalidoException;
@@ -196,8 +194,7 @@ public class GlobalExceptionHandler {
             SolicitudRegistroEventoInvalidaException.class, CambioEstadoTicketSinJustificacionException.class,
             EstadoTicketInvalidoException.class, MontoReembolsoInvalidoException.class,
             SolicitudCancelacionTicketsInvalidaException.class, JustificacionInvalidaException.class,
-            CambioEstadoVentaSinJustificacionException.class, ModeloNegocioInvalidoException.class,
-            MontoFijoInvalidoException.class, FechasInvalidasPromocionException.class})
+            CambioEstadoVentaSinJustificacionException.class, FechasInvalidasPromocionException.class})
     public ResponseEntity<ApiErrorResponse> badRequest(RuntimeException ex) {
         return error("VALIDATION_ERROR", ex.getMessage(), HttpStatus.BAD_REQUEST);
     }

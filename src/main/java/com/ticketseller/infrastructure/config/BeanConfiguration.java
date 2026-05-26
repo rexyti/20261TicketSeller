@@ -465,10 +465,11 @@ public class BeanConfiguration {
                                                            PrecioZonaRepositoryPort precioZonaRepositoryPort,
                                                            AsientoRepositoryPort asientoRepositoryPort,
                                                            AsientoHoldRepositoryPort asientoHoldRepositoryPort,
+                                                           BloqueoRepositoryPort bloqueoRepositoryPort,
                                                            AplicarDescuentoCarritoUseCase aplicarDescuentoCarritoUseCase) {
         return new ReservarAsientosUseCase(ticketRepositoryPort, ventaRepositoryPort, zonaRepositoryPort,
                 precioZonaRepositoryPort, asientoRepositoryPort, asientoHoldRepositoryPort,
-                aplicarDescuentoCarritoUseCase);
+                bloqueoRepositoryPort, aplicarDescuentoCarritoUseCase);
     }
 
     @Bean
@@ -546,8 +547,11 @@ public class BeanConfiguration {
     }
 
     @Bean
-    public ConsultarAsientosEventoUseCase consultarAsientosEventoUseCase(AsientoRepositoryPort asientoRepositoryPort) {
-        return new ConsultarAsientosEventoUseCase(asientoRepositoryPort);
+    public ConsultarAsientosEventoUseCase consultarAsientosEventoUseCase(
+            AsientoRepositoryPort asientoRepositoryPort,
+            AsientoHoldRepositoryPort asientoHoldRepositoryPort,
+            BloqueoRepositoryPort bloqueoRepositoryPort) {
+        return new ConsultarAsientosEventoUseCase(asientoRepositoryPort, asientoHoldRepositoryPort, bloqueoRepositoryPort);
     }
 
     @Bean
@@ -564,11 +568,9 @@ public class BeanConfiguration {
 
     @Bean
     public CancelarTicketUseCase cancelarTicketUseCase(TicketRepositoryPort ticketRepositoryPort,
-                                                       AsientoRepositoryPort asientoRepositoryPort,
                                                        EventoRepositoryPort eventoRepositoryPort,
                                                        ReembolsoRepositoryPort reembolsoRepositoryPort) {
-        return new CancelarTicketUseCase(ticketRepositoryPort, asientoRepositoryPort, eventoRepositoryPort,
-                reembolsoRepositoryPort);
+        return new CancelarTicketUseCase(ticketRepositoryPort, eventoRepositoryPort, reembolsoRepositoryPort);
     }
 
     @Bean
@@ -673,34 +675,35 @@ public class BeanConfiguration {
 
     @Bean
     public VerificarDisponibilidadUseCase verificarDisponibilidadUseCase(
-            AsientoRepositoryPort asientoRepositoryPort) {
-        return new VerificarDisponibilidadUseCase(asientoRepositoryPort);
+            AsientoRepositoryPort asientoRepositoryPort,
+            AsientoHoldRepositoryPort asientoHoldRepositoryPort,
+            BloqueoRepositoryPort bloqueoRepositoryPort) {
+        return new VerificarDisponibilidadUseCase(asientoRepositoryPort, asientoHoldRepositoryPort, bloqueoRepositoryPort);
     }
 
     @Bean
     public LiberarHoldsVencidosUseCase liberarHoldsVencidosUseCase(
-            AsientoHoldRepositoryPort asientoHoldRepositoryPort,
-            AsientoRepositoryPort asientoRepositoryPort) {
-        return new LiberarHoldsVencidosUseCase(asientoHoldRepositoryPort, asientoRepositoryPort);
+            AsientoHoldRepositoryPort asientoHoldRepositoryPort) {
+        return new LiberarHoldsVencidosUseCase(asientoHoldRepositoryPort);
     }
 
     @Bean
     public ConfirmarOcupacionUseCase confirmarOcupacionUseCase(
-            AsientoRepositoryPort asientoRepositoryPort,
             AsientoHoldRepositoryPort asientoHoldRepositoryPort) {
-        return new ConfirmarOcupacionUseCase(asientoRepositoryPort, asientoHoldRepositoryPort);
+        return new ConfirmarOcupacionUseCase(asientoHoldRepositoryPort);
     }
 
     @Bean
-    public LiberarHoldUseCase liberarHoldUseCase(AsientoRepositoryPort asientoRepositoryPort,
-                                                  AsientoHoldRepositoryPort asientoHoldRepositoryPort) {
-        return new LiberarHoldUseCase(asientoRepositoryPort, asientoHoldRepositoryPort);
+    public LiberarHoldUseCase liberarHoldUseCase(AsientoHoldRepositoryPort asientoHoldRepositoryPort) {
+        return new LiberarHoldUseCase(asientoHoldRepositoryPort);
     }
 
     @Bean
     public ObtenerInventarioEventoUseCase obtenerInventarioEventoUseCase(
-            AsientoRepositoryPort asientoRepositoryPort) {
-        return new ObtenerInventarioEventoUseCase(asientoRepositoryPort);
+            AsientoRepositoryPort asientoRepositoryPort,
+            AsientoHoldRepositoryPort asientoHoldRepositoryPort,
+            BloqueoRepositoryPort bloqueoRepositoryPort) {
+        return new ObtenerInventarioEventoUseCase(asientoRepositoryPort, asientoHoldRepositoryPort, bloqueoRepositoryPort);
     }
 
     @Bean
@@ -806,8 +809,9 @@ public class BeanConfiguration {
     @Bean
     public BloquearAsientosUseCase bloquearAsientosUseCase(
             com.ticketseller.domain.repository.AsientoRepositoryPort asientoRepositoryPort,
-            BloqueoRepositoryPort bloqueoRepositoryPort) {
-        return new BloquearAsientosUseCase(asientoRepositoryPort, bloqueoRepositoryPort);
+            BloqueoRepositoryPort bloqueoRepositoryPort,
+            AsientoHoldRepositoryPort asientoHoldRepositoryPort) {
+        return new BloquearAsientosUseCase(asientoRepositoryPort, bloqueoRepositoryPort, asientoHoldRepositoryPort);
     }
 
     @Bean
@@ -817,9 +821,12 @@ public class BeanConfiguration {
             com.ticketseller.domain.repository.TicketRepositoryPort ticketRepositoryPort,
             ZonaRepositoryPort zonaRepositoryPort,
             CompuertaRepositoryPort compuertaRepositoryPort,
-            EventoRepositoryPort eventoRepositoryPort) {
+            EventoRepositoryPort eventoRepositoryPort,
+            BloqueoRepositoryPort bloqueoRepositoryPort,
+            AsientoHoldRepositoryPort asientoHoldRepositoryPort) {
         return new CrearCortesiaConAsientoUseCase(asientoRepositoryPort, cortesiaRepositoryPort, ticketRepositoryPort,
-                zonaRepositoryPort, compuertaRepositoryPort, eventoRepositoryPort);
+                zonaRepositoryPort, compuertaRepositoryPort, eventoRepositoryPort,
+                bloqueoRepositoryPort, asientoHoldRepositoryPort);
     }
 
     @Bean
@@ -840,10 +847,8 @@ public class BeanConfiguration {
     }
 
     @Bean
-    public LiberarBloqueoUseCase liberarBloqueoUseCase(
-            BloqueoRepositoryPort bloqueoRepositoryPort,
-            com.ticketseller.domain.repository.AsientoRepositoryPort asientoRepositoryPort) {
-        return new LiberarBloqueoUseCase(bloqueoRepositoryPort, asientoRepositoryPort);
+    public LiberarBloqueoUseCase liberarBloqueoUseCase(BloqueoRepositoryPort bloqueoRepositoryPort) {
+        return new LiberarBloqueoUseCase(bloqueoRepositoryPort);
     }
 
     @Bean

@@ -6,7 +6,6 @@ import com.ticketseller.domain.model.venta.EstadoVenta;
 import com.ticketseller.domain.model.venta.ResultadoPago;
 import com.ticketseller.domain.model.venta.Venta;
 import com.ticketseller.domain.model.zona.Compuerta;
-import com.ticketseller.domain.model.zona.PrecioZona;
 import com.ticketseller.domain.model.zona.Zona;
 import com.ticketseller.domain.repository.AsientoHoldRepositoryPort;
 import com.ticketseller.domain.repository.AsientoRepositoryPort;
@@ -15,7 +14,6 @@ import com.ticketseller.domain.repository.CompuertaRepositoryPort;
 import com.ticketseller.domain.repository.EventoRepositoryPort;
 import com.ticketseller.domain.repository.NotificacionEmailPort;
 import com.ticketseller.domain.repository.PasarelaPagoPort;
-import com.ticketseller.domain.repository.PrecioZonaRepositoryPort;
 import com.ticketseller.domain.repository.TicketRepositoryPort;
 import com.ticketseller.domain.repository.TransaccionFinancieraRepositoryPort;
 import com.ticketseller.domain.repository.VentaRepositoryPort;
@@ -46,13 +44,11 @@ class ProcesarPagoUseCaseTest {
                                               AsientoRepositoryPort asientoRepositoryPort,
                                               AsientoHoldRepositoryPort asientoHoldRepositoryPort,
                                               ZonaRepositoryPort zonaRepositoryPort,
-                                              PrecioZonaRepositoryPort precioZonaRepositoryPort,
                                               CompuertaRepositoryPort compuertaRepositoryPort,
                                               EventoRepositoryPort eventoRepositoryPort) {
         return new ProcesarPagoUseCase(ventaRepositoryPort, ticketRepositoryPort, transaccionRepository,
                 pasarelaPagoPort, notificacionEmailPort, codigoQrPort, asientoRepositoryPort,
-                asientoHoldRepositoryPort, zonaRepositoryPort, precioZonaRepositoryPort,
-                compuertaRepositoryPort, eventoRepositoryPort);
+                asientoHoldRepositoryPort, zonaRepositoryPort, compuertaRepositoryPort, eventoRepositoryPort);
     }
 
     @Test
@@ -66,14 +62,13 @@ class ProcesarPagoUseCaseTest {
         AsientoRepositoryPort asientoRepositoryPort = mock(AsientoRepositoryPort.class);
         AsientoHoldRepositoryPort asientoHoldRepositoryPort = mock(AsientoHoldRepositoryPort.class);
         ZonaRepositoryPort zonaRepositoryPort = mock(ZonaRepositoryPort.class);
-        PrecioZonaRepositoryPort precioZonaRepositoryPort = mock(PrecioZonaRepositoryPort.class);
         CompuertaRepositoryPort compuertaRepositoryPort = mock(CompuertaRepositoryPort.class);
         EventoRepositoryPort eventoRepositoryPort = mock(EventoRepositoryPort.class);
 
         ProcesarPagoUseCase useCase = buildUseCase(ventaRepositoryPort, ticketRepositoryPort,
                 transaccionRepository, pasarelaPagoPort, notificacionEmailPort, codigoQrPort,
                 asientoRepositoryPort, asientoHoldRepositoryPort, zonaRepositoryPort,
-                precioZonaRepositoryPort, compuertaRepositoryPort, eventoRepositoryPort);
+                compuertaRepositoryPort, eventoRepositoryPort);
 
         UUID ventaId = UUID.randomUUID();
         UUID zonaId = UUID.randomUUID();
@@ -95,8 +90,6 @@ class ProcesarPagoUseCaseTest {
                 .thenReturn(Mono.just(new ResultadoPago(true, "APROBADO", "AUTH", "OK")));
         when(zonaRepositoryPort.buscarPorId(zonaId)).thenReturn(Mono.just(
                 Zona.builder().id(zonaId).nombre("Zona A").build()));
-        when(precioZonaRepositoryPort.buscarPorEvento(eventoId)).thenReturn(Flux.just(
-                PrecioZona.builder().zonaId(zonaId).precio(BigDecimal.valueOf(100)).build()));
         when(compuertaRepositoryPort.buscarPorZonaId(zonaId)).thenReturn(Flux.just(
                 Compuerta.builder().id(UUID.randomUUID()).nombre("Norte").esGeneral(true).build()));
         when(eventoRepositoryPort.buscarPorId(eventoId)).thenReturn(Mono.just(
@@ -129,14 +122,13 @@ class ProcesarPagoUseCaseTest {
         AsientoRepositoryPort asientoRepositoryPort = mock(AsientoRepositoryPort.class);
         AsientoHoldRepositoryPort asientoHoldRepositoryPort = mock(AsientoHoldRepositoryPort.class);
         ZonaRepositoryPort zonaRepositoryPort = mock(ZonaRepositoryPort.class);
-        PrecioZonaRepositoryPort precioZonaRepositoryPort = mock(PrecioZonaRepositoryPort.class);
         CompuertaRepositoryPort compuertaRepositoryPort = mock(CompuertaRepositoryPort.class);
         EventoRepositoryPort eventoRepositoryPort = mock(EventoRepositoryPort.class);
 
         ProcesarPagoUseCase useCase = buildUseCase(ventaRepositoryPort, ticketRepositoryPort,
                 transaccionRepository, pasarelaPagoPort, notificacionEmailPort, codigoQrPort,
                 asientoRepositoryPort, asientoHoldRepositoryPort, zonaRepositoryPort,
-                precioZonaRepositoryPort, compuertaRepositoryPort, eventoRepositoryPort);
+                compuertaRepositoryPort, eventoRepositoryPort);
 
         UUID ventaId = UUID.randomUUID();
         Venta venta = Venta.builder()

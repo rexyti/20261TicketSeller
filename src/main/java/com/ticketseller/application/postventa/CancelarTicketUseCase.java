@@ -4,15 +4,12 @@ import com.ticketseller.domain.exception.evento.EventoNotFoundException;
 import com.ticketseller.domain.exception.postventa.CancelacionFueraDePlazoException;
 import com.ticketseller.domain.exception.postventa.SolicitudCancelacionTicketsInvalidaException;
 import com.ticketseller.domain.exception.venta.TicketNotFoundException;
-import com.ticketseller.domain.model.asiento.Asiento;
-import com.ticketseller.domain.model.asiento.EstadoAsiento;
 import com.ticketseller.domain.model.evento.Evento;
 import com.ticketseller.domain.model.postventa.EstadoReembolso;
 import com.ticketseller.domain.model.postventa.Reembolso;
 import com.ticketseller.domain.model.postventa.TipoReembolso;
 import com.ticketseller.domain.model.ticket.EstadoTicket;
 import com.ticketseller.domain.model.ticket.Ticket;
-import com.ticketseller.domain.repository.AsientoRepositoryPort;
 import com.ticketseller.domain.repository.EventoRepositoryPort;
 import com.ticketseller.domain.repository.ReembolsoRepositoryPort;
 import com.ticketseller.domain.repository.TicketRepositoryPort;
@@ -29,7 +26,6 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class CancelarTicketUseCase {
     private final TicketRepositoryPort ticketRepositoryPort;
-    private final AsientoRepositoryPort asientoRepositoryPort;
     private final EventoRepositoryPort eventoRepositoryPort;
     private final ReembolsoRepositoryPort reembolsoRepositoryPort;
 
@@ -56,7 +52,7 @@ public class CancelarTicketUseCase {
         return ticketRepositoryPort.buscarPorId(ticketId)
                 .switchIfEmpty(Mono.error(new TicketNotFoundException("Ticket no encontrado: " + ticketId)))
                 .flatMap(this::validarTicketCancelable)
-                .flatMap(this::cancelarTicketYLiberarAsiento)
+                .flatMap(this::cancelarTicket)
                 .flatMap(ticket -> crearReembolsoPendiente(ticket).map(reembolso -> new CancelacionTicket(ticket, reembolso)));
     }
 
@@ -77,26 +73,12 @@ public class CancelarTicketUseCase {
     }
 
     private boolean eventoYaInicio(Evento evento){
-        return  evento.getFechaInicio() != null && LocalDateTime.now().isAfter(evento.getFechaInicio());
+        return evento.getFechaInicio() != null && LocalDateTime.now().isAfter(evento.getFechaInicio());
     }
 
-    private Mono<Ticket> cancelarTicketYLiberarAsiento(Ticket ticket) {
+    private Mono<Ticket> cancelarTicket(Ticket ticket) {
         Ticket cancelado = ticket.toBuilder().estado(EstadoTicket.CANCELADO).build();
-        return ticketRepositoryPort.guardar(cancelado)
-                .flatMap(saved -> liberarAsiento(saved).thenReturn(saved));
-    }
-
-    private Mono<Void> liberarAsiento(Ticket ticket) {
-        if (ticket.getAsientoId() == null) {
-            return Mono.empty();
-        }
-        return asientoRepositoryPort.buscarPorId(ticket.getAsientoId())
-                .flatMap(this::guardarAsientoDisponible)
-                .then();
-    }
-
-    private Mono<Asiento> guardarAsientoDisponible(Asiento asiento) {
-        return asientoRepositoryPort.guardar(asiento.toBuilder().estado(EstadoAsiento.DISPONIBLE).build());
+        return ticketRepositoryPort.guardar(cancelado);
     }
 
     private Mono<Reembolso> crearReembolsoPendiente(Ticket ticket) {
@@ -132,4 +114,3 @@ public class CancelarTicketUseCase {
     private record CancelacionTicket(Ticket ticket, Reembolso reembolso) {
     }
 }
-

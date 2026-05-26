@@ -34,7 +34,9 @@
       "Bash(git -C /home/nestor/Programacion/Ing_Software/20261TicketSeller stash pop)",
       "Bash(./gradlew compileJava --no-daemon --rerun-tasks)",
       "Bash(./gradlew compileTestJava --no-daemon --rerun-tasks)",
-      "Bash(./gradlew compileJava --quiet)"
+      "Bash(./gradlew compileJava --quiet)",
+      "Bash(python3 -c 'import sys; from html.parser import HTMLParser; *)",
+      "Bash(git stash *)"
     ]
   }
 }

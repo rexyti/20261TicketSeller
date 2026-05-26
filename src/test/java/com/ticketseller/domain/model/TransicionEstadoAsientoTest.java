@@ -9,9 +9,9 @@ import static org.junit.jupiter.api.Assertions.*;
 class TransicionEstadoAsientoTest {
 
     @Test
-    void debePermitirTransicionDeDisponibleABloqueado() {
+    void debePermitirTransicionDeDisponibleAInactivo() {
         Asiento asiento = Asiento.builder().estado(EstadoAsiento.DISPONIBLE).build();
-        assertTrue(asiento.esTransicionPermitida(EstadoAsiento.BLOQUEADO));
+        assertTrue(asiento.esTransicionPermitida(EstadoAsiento.INACTIVO));
     }
 
     @Test
@@ -21,15 +21,14 @@ class TransicionEstadoAsientoTest {
     }
 
     @Test
-    void noDebePermitirTransicionDeVendidoADisponible() {
-        Asiento asiento = Asiento.builder().estado(EstadoAsiento.VENDIDO).build();
+    void noDebePermitirTransicionDeInactivoADisponible() {
+        Asiento asiento = Asiento.builder().estado(EstadoAsiento.INACTIVO).build();
         assertFalse(asiento.esTransicionPermitida(EstadoAsiento.DISPONIBLE));
     }
 
     @Test
-    void debePermitirTransicionDeBloqueadoADisponible() {
-        Asiento asiento = Asiento.builder().estado(EstadoAsiento.BLOQUEADO).fila("A").columna(10).build().normalizarDatosRegistro();
-        System.out.println(asiento.getNumero());
+    void debePermitirTransicionDeMantenimientoADisponible() {
+        Asiento asiento = Asiento.builder().estado(EstadoAsiento.MANTENIMIENTO).fila("A").columna(10).build().normalizarDatosRegistro();
         assertTrue(asiento.esTransicionPermitida(EstadoAsiento.DISPONIBLE));
     }
 }

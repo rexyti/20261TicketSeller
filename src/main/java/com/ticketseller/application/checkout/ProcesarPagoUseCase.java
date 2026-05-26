@@ -8,7 +8,6 @@ import com.ticketseller.domain.exception.venta.VentaNotFoundException;
 import com.ticketseller.domain.exception.zona.ZonaNotFoundException;
 import com.ticketseller.domain.model.asiento.Asiento;
 import com.ticketseller.domain.model.asiento.AsientoHold;
-import com.ticketseller.domain.model.asiento.EstadoAsiento;
 import com.ticketseller.domain.model.evento.Evento;
 import com.ticketseller.domain.model.ticket.AccessDetails;
 import com.ticketseller.domain.model.ticket.EstadoTicket;
@@ -170,21 +169,12 @@ public class ProcesarPagoUseCase {
     }
 
     private Mono<Void> actualizarAsientosYHolds(List<Ticket> tickets, List<AsientoHold> holds) {
-        Mono<Void> actualizarAsientos = Flux.fromIterable(tickets)
-                .filter(ticket -> ticket.getAsientoId() != null)
-                .flatMap(ticket -> asientoRepositoryPort.buscarPorId(ticket.getAsientoId())
-                        .flatMap(asiento -> asientoRepositoryPort.guardar(
-                                asiento.toBuilder().estado(EstadoAsiento.VENDIDO).build())))
-                .then();
-
-        Mono<Void> expirarHolds = Flux.fromIterable(holds)
+        return Flux.fromIterable(holds)
                 .flatMap(hold -> {
-                    hold.completar();
+                    hold.vender();
                     return asientoHoldRepositoryPort.guardar(hold);
                 })
                 .then();
-
-        return actualizarAsientos.then(expirarHolds);
     }
 
     private Mono<Map<UUID, Asiento>> cargarAsientos(List<AsientoHold> holds) {

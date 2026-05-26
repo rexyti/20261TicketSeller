@@ -2,8 +2,8 @@ package com.ticketseller.application.conciliacion;
 
 import com.ticketseller.application.inventario.ConfirmarOcupacionUseCase;
 import com.ticketseller.domain.exception.conciliacion.PagoEnDiscrepanciaException;
-import com.ticketseller.domain.model.asiento.Asiento;
-import com.ticketseller.domain.model.asiento.EstadoAsiento;
+import com.ticketseller.domain.model.asiento.AsientoHold;
+import com.ticketseller.domain.model.asiento.EstadoHold;
 import com.ticketseller.domain.model.conciliacion.EstadoConciliacion;
 import com.ticketseller.domain.model.conciliacion.Pago;
 import com.ticketseller.domain.model.ticket.Ticket;
@@ -40,10 +40,11 @@ class ConfirmarTransaccionUseCaseTest {
         UUID ventaId = UUID.randomUUID();
         UUID pagoId = UUID.randomUUID();
         UUID asientoId = UUID.randomUUID();
+        UUID eventoId = UUID.randomUUID();
         Pago pagoVerificado = pago(pagoId, ventaId, EstadoConciliacion.VERIFICADO);
         Pago pagoConfirmado = pagoVerificado.toBuilder().estado(EstadoConciliacion.CONFIRMADO).build();
-        Ticket ticket = Ticket.builder().id(UUID.randomUUID()).ventaId(ventaId).asientoId(asientoId).build();
-        Asiento ocupado = Asiento.builder().id(asientoId).estado(EstadoAsiento.OCUPADO).build();
+        Ticket ticket = Ticket.builder().id(UUID.randomUUID()).ventaId(ventaId).asientoId(asientoId).eventoId(eventoId).build();
+        AsientoHold holdVendido = AsientoHold.builder().asientoId(asientoId).eventoId(eventoId).estado(EstadoHold.VENDIDO).build();
 
         when(pagoRepositoryPort.buscarPorIdExterno("ext-123")).thenReturn(Mono.just(pagoVerificado));
         when(ventaRepositoryPort.actualizarEstado(ventaId, EstadoVenta.COMPLETADA))
@@ -53,7 +54,7 @@ class ConfirmarTransaccionUseCaseTest {
         when(pagoRepositoryPort.actualizarEstado(pagoId, EstadoConciliacion.CONFIRMADO))
                 .thenReturn(Mono.just(pagoConfirmado));
         when(ticketRepositoryPort.buscarPorVenta(ventaId)).thenReturn(Flux.just(ticket));
-        when(confirmarOcupacionUseCase.ejecutar(asientoId)).thenReturn(Mono.just(ocupado));
+        when(confirmarOcupacionUseCase.ejecutar(asientoId, eventoId)).thenReturn(Mono.just(holdVendido));
 
         StepVerifier.create(useCase.ejecutar(ventaId, "ext-123", BigDecimal.valueOf(100)))
                 .assertNext(p -> assertEquals(EstadoConciliacion.CONFIRMADO, p.getEstado()))
@@ -64,11 +65,12 @@ class ConfirmarTransaccionUseCaseTest {
     void deberiaConfirmarOcupacionDeAsientosTrasTransaccionExitosa() {
         UUID ventaId = UUID.randomUUID();
         UUID asientoId = UUID.randomUUID();
+        UUID eventoId = UUID.randomUUID();
         Venta venta = Venta.builder().id(ventaId).estado(EstadoVenta.PENDIENTE)
                 .total(BigDecimal.valueOf(50)).fechaCreacion(LocalDateTime.now())
                 .fechaExpiracion(LocalDateTime.now().plusHours(1)).build();
-        Ticket ticket = Ticket.builder().id(UUID.randomUUID()).ventaId(ventaId).asientoId(asientoId).build();
-        Asiento ocupado = Asiento.builder().id(asientoId).estado(EstadoAsiento.OCUPADO).build();
+        Ticket ticket = Ticket.builder().id(UUID.randomUUID()).ventaId(ventaId).asientoId(asientoId).eventoId(eventoId).build();
+        AsientoHold holdVendido = AsientoHold.builder().asientoId(asientoId).eventoId(eventoId).estado(EstadoHold.VENDIDO).build();
         Pago pagoGuardado = pago(UUID.randomUUID(), ventaId, EstadoConciliacion.CONFIRMADO);
 
         when(pagoRepositoryPort.buscarPorIdExterno("ext-new")).thenReturn(Mono.empty());
@@ -76,7 +78,7 @@ class ConfirmarTransaccionUseCaseTest {
         when(ventaRepositoryPort.actualizarEstado(ventaId, EstadoVenta.COMPLETADA)).thenReturn(Mono.just(venta));
         when(pagoRepositoryPort.guardar(any())).thenReturn(Mono.just(pagoGuardado));
         when(ticketRepositoryPort.buscarPorVenta(ventaId)).thenReturn(Flux.just(ticket));
-        when(confirmarOcupacionUseCase.ejecutar(asientoId)).thenReturn(Mono.just(ocupado));
+        when(confirmarOcupacionUseCase.ejecutar(asientoId, eventoId)).thenReturn(Mono.just(holdVendido));
 
         StepVerifier.create(useCase.ejecutar(ventaId, "ext-new", BigDecimal.valueOf(50)))
                 .assertNext(p -> assertEquals(EstadoConciliacion.CONFIRMADO, p.getEstado()))

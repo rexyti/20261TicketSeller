@@ -4,6 +4,7 @@ import com.ticketseller.application.asiento.CambiarEstadoAsientoUseCase;
 import com.ticketseller.application.asiento.CambiarEstadoMasivoUseCase;
 import com.ticketseller.application.asiento.ConsultarAsientosEventoUseCase;
 import com.ticketseller.application.asiento.ConsultarHistorialAsientoUseCase;
+import com.ticketseller.application.inventario.AsientoEnEvento;
 import com.ticketseller.infrastructure.adapter.in.rest.asiento.dto.AsientoResponse;
 import com.ticketseller.infrastructure.adapter.in.rest.asiento.dto.CambiarEstadoMasivoRequest;
 import com.ticketseller.infrastructure.adapter.in.rest.asiento.dto.CambiarEstadoMasivoResponse;
@@ -40,7 +41,7 @@ public class AsientoMantenimientoController {
     @GetMapping
     public Flux<AsientoResponse> consultarAsientosEvento(@PathVariable UUID eventoId) {
         return consultarAsientosEventoUseCase.ejecutar(eventoId)
-                .map(asientoRestMapper::toAsientoResponse);
+                .map(ae -> new AsientoResponse(ae.asientoId(), ae.fila(), ae.columna(), ae.numero(), ae.zonaId(), ae.estadoEnEvento()));
     }
 
     @Operation(summary = "Cambiar el estado de un asiento individual")

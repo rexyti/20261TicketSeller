@@ -12,7 +12,9 @@ import com.ticketseller.domain.model.ticket.Ticket;
 import com.ticketseller.domain.model.zona.Compuerta;
 import com.ticketseller.domain.model.zona.TipoZona;
 import com.ticketseller.domain.model.zona.Zona;
+import com.ticketseller.domain.repository.AsientoHoldRepositoryPort;
 import com.ticketseller.domain.repository.AsientoRepositoryPort;
+import com.ticketseller.domain.repository.BloqueoRepositoryPort;
 import com.ticketseller.domain.repository.CompuertaRepositoryPort;
 import com.ticketseller.domain.repository.CortesiaRepositoryPort;
 import com.ticketseller.domain.repository.EventoRepositoryPort;
@@ -42,6 +44,8 @@ class CrearCortesiaConAsientoUseCaseTest {
     private ZonaRepositoryPort zonaRepositoryPort;
     private CompuertaRepositoryPort compuertaRepositoryPort;
     private EventoRepositoryPort eventoRepositoryPort;
+    private BloqueoRepositoryPort bloqueoRepositoryPort;
+    private AsientoHoldRepositoryPort asientoHoldRepositoryPort;
     private CrearCortesiaConAsientoUseCase useCase;
 
     private final UUID eventoId = UUID.randomUUID();
@@ -56,14 +60,16 @@ class CrearCortesiaConAsientoUseCaseTest {
         zonaRepositoryPort = mock(ZonaRepositoryPort.class);
         compuertaRepositoryPort = mock(CompuertaRepositoryPort.class);
         eventoRepositoryPort = mock(EventoRepositoryPort.class);
+        bloqueoRepositoryPort = mock(BloqueoRepositoryPort.class);
+        asientoHoldRepositoryPort = mock(AsientoHoldRepositoryPort.class);
         useCase = new CrearCortesiaConAsientoUseCase(asientoRepositoryPort, cortesiaRepositoryPort,
-                ticketRepositoryPort, zonaRepositoryPort, compuertaRepositoryPort, eventoRepositoryPort);
+                ticketRepositoryPort, zonaRepositoryPort, compuertaRepositoryPort, eventoRepositoryPort,
+                bloqueoRepositoryPort, asientoHoldRepositoryPort);
     }
 
     @Test
-    void asientoDisponibleCreaTicketBloqueasientoYGuardaCortesia() {
+    void asientoDisponibleCreaTicketBloqueaYGuardaCortesia() {
         Asiento disponible = buildAsiento(asientoId, EstadoAsiento.DISPONIBLE);
-        Asiento bloqueado = disponible.toBuilder().estado(EstadoAsiento.BLOQUEADO).build();
         Ticket ticket = buildTicket();
         Cortesia cortesia = buildCortesia(asientoId, ticket.getId());
         Zona zona = Zona.builder().id(zonaId).nombre("VIP Zone").tipo(TipoZona.VIP).build();
@@ -71,7 +77,9 @@ class CrearCortesiaConAsientoUseCaseTest {
         Compuerta compuerta = Compuerta.builder().id(UUID.randomUUID()).nombre("Puerta Norte").build();
 
         when(asientoRepositoryPort.buscarPorId(asientoId)).thenReturn(Mono.just(disponible));
-        when(asientoRepositoryPort.guardar(any())).thenReturn(Mono.just(bloqueado));
+        when(bloqueoRepositoryPort.buscarActivoPorAsientoYEvento(asientoId, eventoId)).thenReturn(Mono.empty());
+        when(asientoHoldRepositoryPort.buscarActivoPorAsientoYEvento(asientoId, eventoId)).thenReturn(Mono.empty());
+        when(bloqueoRepositoryPort.guardar(any())).thenAnswer(inv -> Mono.just(inv.getArgument(0)));
         when(zonaRepositoryPort.buscarPorId(zonaId)).thenReturn(Mono.just(zona));
         when(eventoRepositoryPort.buscarPorId(eventoId)).thenReturn(Mono.just(evento));
         when(compuertaRepositoryPort.buscarPorZonaId(zonaId)).thenReturn(Flux.just(compuerta));
@@ -85,21 +93,20 @@ class CrearCortesiaConAsientoUseCaseTest {
                         && asientoId.equals(c.getAsientoId()))
                 .verifyComplete();
 
-        verify(asientoRepositoryPort).guardar(any());
+        verify(bloqueoRepositoryPort).guardar(any());
         verify(ticketRepositoryPort).guardar(any());
         verify(cortesiaRepositoryPort).guardar(any());
     }
 
     @Test
-    void asientoOcupadoLanzaExcepcion() {
-        Asiento ocupado = buildAsiento(asientoId, EstadoAsiento.OCUPADO);
-        when(asientoRepositoryPort.buscarPorId(asientoId)).thenReturn(Mono.just(ocupado));
+    void asientoNoDisponibleLanzaExcepcion() {
+        Asiento enMantenimiento = buildAsiento(asientoId, EstadoAsiento.MANTENIMIENTO);
+        when(asientoRepositoryPort.buscarPorId(asientoId)).thenReturn(Mono.just(enMantenimiento));
 
         StepVerifier.create(useCase.ejecutar(eventoId, "Invitado", CategoriaCortesia.ARTISTA, asientoId))
                 .expectError(AsientoOcupadoException.class)
                 .verify();
 
-        verify(asientoRepositoryPort, never()).guardar(any());
         verify(ticketRepositoryPort, never()).guardar(any());
         verify(cortesiaRepositoryPort, never()).guardar(any());
     }

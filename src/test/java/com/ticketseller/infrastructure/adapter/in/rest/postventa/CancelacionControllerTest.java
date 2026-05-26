@@ -16,6 +16,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.math.BigDecimal;
@@ -106,7 +107,7 @@ class CancelacionControllerTest {
     @Test
     void cancelarEventoDisparaProcesoMasivo() {
         UUID eventoId = UUID.randomUUID();
-        when(procesarReembolsoMasivoUseCase.ejecutar(eq(eventoId))).thenReturn(Mono.empty());
+        when(procesarReembolsoMasivoUseCase.ejecutar(eq(eventoId))).thenReturn(Flux.empty());
 
         webTestClient.post()
                 .uri("/api/v1/tickets/eventos/{eventoId}/cancelar", eventoId)

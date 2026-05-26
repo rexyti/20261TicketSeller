@@ -3,17 +3,20 @@ package com.ticketseller.application.bloqueos;
 import com.ticketseller.domain.exception.bloqueos.AsientoOcupadoException;
 import com.ticketseller.domain.exception.bloqueos.AsientoYaBloqueadoException;
 import com.ticketseller.domain.model.asiento.Asiento;
+import com.ticketseller.domain.model.asiento.AsientoHold;
 import com.ticketseller.domain.model.asiento.EstadoAsiento;
+import com.ticketseller.domain.model.asiento.EstadoHold;
 import com.ticketseller.domain.model.bloqueos.Bloqueo;
 import com.ticketseller.domain.model.bloqueos.EstadoBloqueo;
+import com.ticketseller.domain.repository.AsientoHoldRepositoryPort;
 import com.ticketseller.domain.repository.AsientoRepositoryPort;
 import com.ticketseller.domain.repository.BloqueoRepositoryPort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -27,6 +30,7 @@ class BloquearAsientosUseCaseTest {
 
     private AsientoRepositoryPort asientoRepositoryPort;
     private BloqueoRepositoryPort bloqueoRepositoryPort;
+    private AsientoHoldRepositoryPort asientoHoldRepositoryPort;
     private BloquearAsientosUseCase useCase;
 
     private final UUID eventoId = UUID.randomUUID();
@@ -37,19 +41,21 @@ class BloquearAsientosUseCaseTest {
     void setUp() {
         asientoRepositoryPort = mock(AsientoRepositoryPort.class);
         bloqueoRepositoryPort = mock(BloqueoRepositoryPort.class);
-        useCase = new BloquearAsientosUseCase(asientoRepositoryPort, bloqueoRepositoryPort);
+        asientoHoldRepositoryPort = mock(AsientoHoldRepositoryPort.class);
+        useCase = new BloquearAsientosUseCase(asientoRepositoryPort, bloqueoRepositoryPort, asientoHoldRepositoryPort);
     }
 
     @Test
     void asientosDisponiblesSeBloqueaCorrectamente() {
         Asiento asiento1 = buildAsiento(asientoId1, EstadoAsiento.DISPONIBLE);
         Asiento asiento2 = buildAsiento(asientoId2, EstadoAsiento.DISPONIBLE);
-        Asiento bloqueado1 = asiento1.toBuilder().estado(EstadoAsiento.BLOQUEADO).build();
-        Asiento bloqueado2 = asiento2.toBuilder().estado(EstadoAsiento.BLOQUEADO).build();
 
         when(asientoRepositoryPort.buscarPorId(asientoId1)).thenReturn(Mono.just(asiento1));
         when(asientoRepositoryPort.buscarPorId(asientoId2)).thenReturn(Mono.just(asiento2));
-        when(asientoRepositoryPort.guardarTodos(any())).thenReturn(Flux.just(bloqueado1, bloqueado2));
+        when(bloqueoRepositoryPort.buscarActivoPorAsientoYEvento(asientoId1, eventoId)).thenReturn(Mono.empty());
+        when(bloqueoRepositoryPort.buscarActivoPorAsientoYEvento(asientoId2, eventoId)).thenReturn(Mono.empty());
+        when(asientoHoldRepositoryPort.buscarActivoPorAsientoYEvento(asientoId1, eventoId)).thenReturn(Mono.empty());
+        when(asientoHoldRepositoryPort.buscarActivoPorAsientoYEvento(asientoId2, eventoId)).thenReturn(Mono.empty());
         when(bloqueoRepositoryPort.guardar(any())).thenAnswer(inv -> Mono.just(inv.getArgument(0)));
 
         StepVerifier.create(useCase.ejecutar(eventoId, List.of(asientoId1, asientoId2), "Patrocinador A", null))
@@ -60,44 +66,54 @@ class BloquearAsientosUseCaseTest {
     }
 
     @Test
-    void asientoYaBloqueadoLanzaExcepcion() {
-        Asiento bloqueado = buildAsiento(asientoId1, EstadoAsiento.BLOQUEADO);
-        when(asientoRepositoryPort.buscarPorId(asientoId1)).thenReturn(Mono.just(bloqueado));
+    void asientoYaBloqueadoParaEventoLanzaExcepcion() {
+        Asiento asiento = buildAsiento(asientoId1, EstadoAsiento.DISPONIBLE);
+        Bloqueo bloqueoExistente = buildBloqueo(asientoId1);
+
+        when(asientoRepositoryPort.buscarPorId(asientoId1)).thenReturn(Mono.just(asiento));
+        when(bloqueoRepositoryPort.buscarActivoPorAsientoYEvento(asientoId1, eventoId)).thenReturn(Mono.just(bloqueoExistente));
+        when(asientoHoldRepositoryPort.buscarActivoPorAsientoYEvento(asientoId1, eventoId)).thenReturn(Mono.empty());
 
         StepVerifier.create(useCase.ejecutar(eventoId, List.of(asientoId1), "Sponsor", null))
                 .expectError(AsientoYaBloqueadoException.class)
                 .verify();
 
-        verify(asientoRepositoryPort, never()).guardarTodos(any());
         verify(bloqueoRepositoryPort, never()).guardar(any());
     }
 
     @Test
-    void asientoOcupadoLanzaExcepcion() {
-        Asiento ocupado = buildAsiento(asientoId1, EstadoAsiento.OCUPADO);
-        when(asientoRepositoryPort.buscarPorId(asientoId1)).thenReturn(Mono.just(ocupado));
+    void asientoEnMantenimientoLanzaExcepcion() {
+        Asiento enMantenimiento = buildAsiento(asientoId1, EstadoAsiento.MANTENIMIENTO);
+        when(asientoRepositoryPort.buscarPorId(asientoId1)).thenReturn(Mono.just(enMantenimiento));
 
         StepVerifier.create(useCase.ejecutar(eventoId, List.of(asientoId1), "Sponsor", null))
                 .expectError(AsientoOcupadoException.class)
                 .verify();
 
-        verify(asientoRepositoryPort, never()).guardarTodos(any());
         verify(bloqueoRepositoryPort, never()).guardar(any());
     }
 
     @Test
-    void listaMixtaConOcupadoNoBloquea() {
+    void listaMixtaConHoldActivoNoBloquea() {
         Asiento disponible = buildAsiento(asientoId1, EstadoAsiento.DISPONIBLE);
-        Asiento vendido = buildAsiento(asientoId2, EstadoAsiento.VENDIDO);
+        Asiento disponible2 = buildAsiento(asientoId2, EstadoAsiento.DISPONIBLE);
+        AsientoHold holdActivo = AsientoHold.builder()
+                .asientoId(asientoId2).eventoId(eventoId)
+                .estado(EstadoHold.RESERVADO)
+                .expiraEn(LocalDateTime.now().plusMinutes(10))
+                .build();
 
         when(asientoRepositoryPort.buscarPorId(asientoId1)).thenReturn(Mono.just(disponible));
-        when(asientoRepositoryPort.buscarPorId(asientoId2)).thenReturn(Mono.just(vendido));
+        when(asientoRepositoryPort.buscarPorId(asientoId2)).thenReturn(Mono.just(disponible2));
+        when(bloqueoRepositoryPort.buscarActivoPorAsientoYEvento(asientoId1, eventoId)).thenReturn(Mono.empty());
+        when(bloqueoRepositoryPort.buscarActivoPorAsientoYEvento(asientoId2, eventoId)).thenReturn(Mono.empty());
+        when(asientoHoldRepositoryPort.buscarActivoPorAsientoYEvento(asientoId1, eventoId)).thenReturn(Mono.empty());
+        when(asientoHoldRepositoryPort.buscarActivoPorAsientoYEvento(asientoId2, eventoId)).thenReturn(Mono.just(holdActivo));
 
         StepVerifier.create(useCase.ejecutar(eventoId, List.of(asientoId1, asientoId2), "Sponsor", null))
                 .expectError(AsientoOcupadoException.class)
                 .verify();
 
-        verify(asientoRepositoryPort, never()).guardarTodos(any());
         verify(bloqueoRepositoryPort, never()).guardar(any());
     }
 

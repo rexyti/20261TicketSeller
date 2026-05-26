@@ -8,6 +8,7 @@ import com.ticketseller.domain.model.evento.Evento;
 import com.ticketseller.domain.repository.CancelacionEventoRepositoryPort;
 import com.ticketseller.domain.repository.EventoRepositoryPort;
 import org.junit.jupiter.api.Test;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -45,7 +46,7 @@ class CancelarEventoUseCaseTest {
         when(repositoryPort.guardar(any(Evento.class))).thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
         when(cancelacionRepositoryPort.guardar(any(CancelacionEvento.class)))
                 .thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
-        when(procesarReembolsoMasivoUseCase.ejecutar(id)).thenReturn(Mono.empty());
+        when(procesarReembolsoMasivoUseCase.ejecutar(id)).thenReturn(Flux.empty());
 
         StepVerifier.create(useCase.ejecutar(id, "Fuerza mayor"))
                 .expectNextMatches(evento -> evento.getEstado() == EstadoEvento.CANCELADO)

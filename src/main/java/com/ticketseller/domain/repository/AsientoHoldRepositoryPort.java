@@ -11,6 +11,8 @@ public interface AsientoHoldRepositoryPort {
     Mono<AsientoHold> guardar(AsientoHold hold);
     Mono<AsientoHold> buscarPorId(UUID id);
     Flux<AsientoHold> buscarPorVentaId(UUID ventaId);
-    Mono<AsientoHold> buscarActivoPorAsientoId(UUID asientoId);
+    Mono<AsientoHold> buscarActivoPorAsientoYEvento(UUID asientoId, UUID eventoId);
+    Flux<AsientoHold> buscarPorAsientoYEvento(UUID asientoId, UUID eventoId);
+    Flux<AsientoHold> buscarPorEvento(UUID eventoId);
     Flux<AsientoHold> buscarHoldsVencidos(LocalDateTime ahora);
 }

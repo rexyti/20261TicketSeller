@@ -59,7 +59,8 @@ class EventoControllerTest {
                 LocalDateTime.now().plusDays(3),
                 LocalDateTime.now().plusDays(4),
                 TipoEvento.CONCIERTO,
-                recintoId
+                recintoId,
+                false
         );
 
         Evento eventoDomain = Evento.builder().nombre("Concierto A").build();
@@ -79,7 +80,8 @@ class EventoControllerTest {
                 eventoSaved.getFechaFin(),
                 eventoSaved.getTipo(),
                 eventoSaved.getRecintoId(),
-                eventoSaved.getEstado()
+                eventoSaved.getEstado(),
+                eventoSaved.isReingresoHabilitado()
         );
 
         when(eventoRestMapper.toDomain(any(CrearEventoRequest.class))).thenReturn(eventoDomain);
@@ -100,7 +102,8 @@ class EventoControllerTest {
     void getEventosRetornaListado() {
         Evento evento = Evento.builder().id(UUID.randomUUID()).nombre("Concierto").estado(EstadoEvento.ACTIVO).build();
         EventoResponse response = new EventoResponse(evento.getId(), evento.getNombre(), evento.getFechaInicio(),
-                evento.getFechaFin(), evento.getTipo(), evento.getRecintoId(), evento.getEstado());
+                evento.getFechaFin(), evento.getTipo(), evento.getRecintoId(), evento.getEstado(),
+                evento.isReingresoHabilitado());
 
         when(listarEventosUseCase.ejecutar(null)).thenReturn(Flux.just(evento));
         when(eventoRestMapper.toResponse(evento)).thenReturn(response);
@@ -121,7 +124,8 @@ class EventoControllerTest {
                 LocalDateTime.now().plusDays(3),
                 LocalDateTime.now().plusDays(4),
                 TipoEvento.FESTIVAL,
-                recintoId
+                recintoId,
+                false
         );
         Evento eventoDomain = Evento.builder().nombre("Concierto A").build();
 

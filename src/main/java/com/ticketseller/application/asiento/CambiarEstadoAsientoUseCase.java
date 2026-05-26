@@ -1,6 +1,5 @@
 package com.ticketseller.application.asiento;
 
-import com.ticketseller.domain.exception.asiento.AsientoEnCompraException;
 import com.ticketseller.domain.exception.asiento.TransicionEstadoInvalidaException;
 import com.ticketseller.domain.model.asiento.Asiento;
 import com.ticketseller.domain.model.asiento.EstadoAsiento;
@@ -22,7 +21,6 @@ public class CambiarEstadoAsientoUseCase {
         return asientoRepositoryPort.buscarPorId(asientoId)
                 .switchIfEmpty(Mono.error(new IllegalArgumentException("Asiento no encontrado")))
                 .flatMap(asiento -> validarTransicion(asiento, estadoDestino))
-                .flatMap(asiento -> validarSinCompraActiva(asiento).thenReturn(asiento))
                 .flatMap(asiento -> aplicarCambioEstado(asiento, estadoDestino, eventoId, motivo, usuarioId));
     }
 
@@ -30,13 +28,6 @@ public class CambiarEstadoAsientoUseCase {
         return Mono.just(asiento)
                 .filter(a -> a.esTransicionPermitida(estadoDestino))
                 .switchIfEmpty(Mono.error(new TransicionEstadoInvalidaException(asiento.getEstado(), estadoDestino)));
-    }
-
-    private Mono<Void> validarSinCompraActiva(Asiento asiento) {
-        return Mono.just(asiento)
-                .filter(a -> !a.isReservado())
-                .switchIfEmpty(Mono.error(new AsientoEnCompraException("El asiento está siendo reservado por un cliente.")))
-                .then();
     }
 
     private Mono<Asiento> aplicarCambioEstado(Asiento asiento, EstadoAsiento estadoDestino, UUID eventoId, String motivo, String usuarioId) {

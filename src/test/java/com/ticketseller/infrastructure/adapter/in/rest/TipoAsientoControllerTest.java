@@ -58,7 +58,7 @@ class TipoAsientoControllerTest {
                 .build();
         var response = new TipoAsientoResponse(tipoId, "VIP", "desc", "ACTIVO", false);
         when(crearTipoAsientoUseCase.ejecutar("VIP", "desc")).thenReturn(Mono.just(tipo));
-        when(tipoAsientoRestMapper.toResponse(tipo, false)).thenReturn(response);
+        when(tipoAsientoRestMapper.toResponse(tipo)).thenReturn(response);
         webTestClient.post()
                 .uri("/api/v1/tipos-asiento")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -100,7 +100,7 @@ class TipoAsientoControllerTest {
         var response = new TipoAsientoResponse(tipoId, "VIP", "desc", "ACTIVO", false);
         when(listarTiposAsientoUseCase.ejecutar(null)).thenReturn(Flux.just(tipo));
         when(listarTiposAsientoUseCase.calcularEnUso(tipo)).thenReturn(Flux.just(false));
-        when(tipoAsientoRestMapper.toResponse(tipo, false)).thenReturn(response);
+        when(tipoAsientoRestMapper.toResponse(tipo)).thenReturn(response);
         webTestClient.get()
                 .uri("/api/v1/tipos-asiento")
                 .exchange()

@@ -15,4 +15,6 @@ public interface BloqueoRepositoryPort {
     Flux<Bloqueo> buscarPorEvento(UUID eventoId);
 
     Flux<Bloqueo> buscarPorEventoYEstado(UUID eventoId, EstadoBloqueo estado);
+
+    Mono<Bloqueo> buscarActivoPorAsientoYEvento(UUID asientoId, UUID eventoId);
 }

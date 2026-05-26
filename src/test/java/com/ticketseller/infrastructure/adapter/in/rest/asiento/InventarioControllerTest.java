@@ -1,15 +1,14 @@
 package com.ticketseller.infrastructure.adapter.in.rest.asiento;
 
+import com.ticketseller.application.inventario.AsientoEnEvento;
 import com.ticketseller.application.inventario.ConfirmarOcupacionUseCase;
 import com.ticketseller.application.inventario.LiberarHoldUseCase;
+import com.ticketseller.application.inventario.ObtenerInventarioEventoUseCase;
 import com.ticketseller.application.inventario.VerificarDisponibilidadUseCase;
 import com.ticketseller.domain.exception.asiento.HoldExpiradoException;
-import com.ticketseller.domain.model.asiento.Asiento;
-import com.ticketseller.domain.model.asiento.EstadoAsiento;
+import com.ticketseller.domain.model.asiento.AsientoHold;
+import com.ticketseller.domain.model.asiento.EstadoHold;
 import com.ticketseller.infrastructure.adapter.in.rest.GlobalExceptionHandler;
-import com.ticketseller.infrastructure.adapter.in.rest.asiento.dto.DisponibilidadResponse;
-import com.ticketseller.infrastructure.adapter.in.rest.mapper.AsientoRestMapper;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
@@ -40,67 +39,37 @@ class InventarioControllerTest {
     private LiberarHoldUseCase liberarHoldUseCase;
 
     @MockBean
-    private AsientoRestMapper asientoRestMapper;
+    private ObtenerInventarioEventoUseCase obtenerInventarioEventoUseCase;
 
-    @BeforeEach
-    void setup() {
-        when(asientoRestMapper.toDisponibilidadResponse(any(Asiento.class))).thenAnswer(inv -> {
-            Asiento asiento = inv.getArgument(0);
-            boolean disponible = EstadoAsiento.DISPONIBLE.equals(asiento.getEstado());
-            return new DisponibilidadResponse(
-                    asiento.getId(),
-                    disponible,
-                    asiento.getEstado() != null ? asiento.getEstado().name() : null,
-                    asiento.getExpiraEn(),
-                    disponible ? null : "ASIENTO NO DISPONIBLE");
-        });
-    }
+    private final UUID eventoId = UUID.randomUUID();
 
-    // T007: GET disponibilidad con asiento DISPONIBLE → 200, disponible:true
+    // T007: GET disponibilidad con asiento DISPONIBLE → 200, estado:DISPONIBLE
     @Test
-    void disponibilidadAsientoDisponibleRetorna200ConDisponibleTrue() {
+    void disponibilidadAsientoDisponibleRetorna200ConEstadoDisponible() {
         UUID id = UUID.randomUUID();
-        Asiento asiento = Asiento.builder().id(id).estado(EstadoAsiento.DISPONIBLE).build();
-        when(verificarDisponibilidadUseCase.ejecutar(id)).thenReturn(Mono.just(asiento));
+        AsientoEnEvento resultado = new AsientoEnEvento(id, "A", 1, "A1", UUID.randomUUID(), AsientoEnEvento.DISPONIBLE);
+        when(verificarDisponibilidadUseCase.ejecutar(id, eventoId)).thenReturn(Mono.just(resultado));
 
         webTestClient.get()
-                .uri("/api/v1/inventario/asientos/{id}/disponibilidad", id)
+                .uri("/api/v1/eventos/{eventoId}/inventario/{id}/disponibilidad", eventoId, id)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
-                .jsonPath("$.disponible").isEqualTo(true)
                 .jsonPath("$.estado").isEqualTo("DISPONIBLE");
     }
 
-    // T008: GET disponibilidad con asiento OCUPADO → 200, disponible:false
+    // T008: GET disponibilidad con asiento RESERVADO → 200, estado:RESERVADO
     @Test
-    void disponibilidadAsientoOcupadoRetorna200ConDisponibleFalse() {
+    void disponibilidadAsientoReservadoRetorna200ConEstadoReservado() {
         UUID id = UUID.randomUUID();
-        Asiento asiento = Asiento.builder().id(id).estado(EstadoAsiento.OCUPADO).build();
-        when(verificarDisponibilidadUseCase.ejecutar(id)).thenReturn(Mono.just(asiento));
+        AsientoEnEvento resultado = new AsientoEnEvento(id, "A", 1, "A1", UUID.randomUUID(), AsientoEnEvento.RESERVADO);
+        when(verificarDisponibilidadUseCase.ejecutar(id, eventoId)).thenReturn(Mono.just(resultado));
 
         webTestClient.get()
-                .uri("/api/v1/inventario/asientos/{id}/disponibilidad", id)
+                .uri("/api/v1/eventos/{eventoId}/inventario/{id}/disponibilidad", eventoId, id)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
-                .jsonPath("$.disponible").isEqualTo(false)
-                .jsonPath("$.estado").isEqualTo("OCUPADO");
-    }
-
-    // T009: GET disponibilidad con asiento RESERVADO → 200, disponible:false
-    @Test
-    void disponibilidadAsientoReservadoRetorna200ConDisponibleFalse() {
-        UUID id = UUID.randomUUID();
-        Asiento asiento = Asiento.builder().id(id).estado(EstadoAsiento.RESERVADO).build();
-        when(verificarDisponibilidadUseCase.ejecutar(id)).thenReturn(Mono.just(asiento));
-
-        webTestClient.get()
-                .uri("/api/v1/inventario/asientos/{id}/disponibilidad", id)
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody()
-                .jsonPath("$.disponible").isEqualTo(false)
                 .jsonPath("$.estado").isEqualTo("RESERVADO");
     }
 
@@ -108,69 +77,55 @@ class InventarioControllerTest {
     @Test
     void disponibilidadAsientoInexistenteRetorna404() {
         UUID id = UUID.randomUUID();
-        when(verificarDisponibilidadUseCase.ejecutar(id)).thenReturn(Mono.empty());
+        when(verificarDisponibilidadUseCase.ejecutar(id, eventoId)).thenReturn(Mono.empty());
 
         webTestClient.get()
-                .uri("/api/v1/inventario/asientos/{id}/disponibilidad", id)
+                .uri("/api/v1/eventos/{eventoId}/inventario/{id}/disponibilidad", eventoId, id)
                 .exchange()
                 .expectStatus().isNotFound();
     }
 
-    // T017: Scheduler libera holds vencidos (simulado: GET após expiração retorna DISPONIBLE)
+    // T024: PATCH /ocupar con hold activo → 200 con estado VENDIDO
     @Test
-    void disponibilidadRetornaDisponibleTrasTiempoExpiracion() {
+    void ocuparAsientoConHoldActivoRetorna200ConVendido() {
         UUID id = UUID.randomUUID();
-        Asiento disponible = Asiento.builder().id(id).estado(EstadoAsiento.DISPONIBLE).build();
-        when(verificarDisponibilidadUseCase.ejecutar(id)).thenReturn(Mono.just(disponible));
+        AsientoHold hold = AsientoHold.builder()
+                .asientoId(id).eventoId(eventoId).estado(EstadoHold.VENDIDO).build();
+        when(confirmarOcupacionUseCase.ejecutar(id, eventoId)).thenReturn(Mono.just(hold));
 
-        webTestClient.get()
-                .uri("/api/v1/inventario/asientos/{id}/disponibilidad", id)
+        webTestClient.patch()
+                .uri("/api/v1/eventos/{eventoId}/inventario/{id}/ocupar", eventoId, id)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
-                .jsonPath("$.disponible").isEqualTo(true);
+                .jsonPath("$.estado").isEqualTo("VENDIDO");
     }
 
-    // T024: POST /ocupar con pago confirmado → 200 con estado OCUPADO
-    @Test
-    void ocuparAsientoConPagoConfirmadoRetorna200ConOcupado() {
-        UUID id = UUID.randomUUID();
-        Asiento ocupado = Asiento.builder().id(id).estado(EstadoAsiento.OCUPADO).build();
-        when(confirmarOcupacionUseCase.ejecutar(id)).thenReturn(Mono.just(ocupado));
-
-        webTestClient.post()
-                .uri("/api/v1/inventario/asientos/{id}/ocupar", id)
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody()
-                .jsonPath("$.estado").isEqualTo("OCUPADO");
-    }
-
-    // T025: POST /ejecutar tras pago fallido → 200 con estado DISPONIBLE
+    // T025: PATCH /liberar tras pago fallido → 200 con estado DISPONIBLE
     @Test
     void liberarAsientoTrasPagoFallidoRetorna200ConDisponible() {
         UUID id = UUID.randomUUID();
-        Asiento disponible = Asiento.builder().id(id).estado(EstadoAsiento.DISPONIBLE).build();
-        when(liberarHoldUseCase.ejecutar(id)).thenReturn(Mono.just(disponible));
+        AsientoHold hold = AsientoHold.builder()
+                .asientoId(id).eventoId(eventoId).estado(EstadoHold.EXPIRADO).build();
+        when(liberarHoldUseCase.ejecutar(id, eventoId)).thenReturn(Mono.just(hold));
 
-        webTestClient.post()
-                .uri("/api/v1/inventario/asientos/{id}/liberar", id)
+        webTestClient.patch()
+                .uri("/api/v1/eventos/{eventoId}/inventario/{id}/liberar", eventoId, id)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
-                .jsonPath("$.estado").isEqualTo("DISPONIBLE")
-                .jsonPath("$.disponible").isEqualTo(true);
+                .jsonPath("$.estado").isEqualTo("DISPONIBLE");
     }
 
-    // T026: Confirmar con hold expirado → 409
+    // T026: PATCH /ocupar con hold expirado → 409
     @Test
     void ocuparConHoldExpiradoRetorna409() {
         UUID id = UUID.randomUUID();
-        when(confirmarOcupacionUseCase.ejecutar(id))
+        when(confirmarOcupacionUseCase.ejecutar(id, eventoId))
                 .thenReturn(Mono.error(new HoldExpiradoException("El hold del asiento ha expirado")));
 
-        webTestClient.post()
-                .uri("/api/v1/inventario/asientos/{id}/ocupar", id)
+        webTestClient.patch()
+                .uri("/api/v1/eventos/{eventoId}/inventario/{id}/ocupar", eventoId, id)
                 .exchange()
                 .expectStatus().isEqualTo(409);
     }
