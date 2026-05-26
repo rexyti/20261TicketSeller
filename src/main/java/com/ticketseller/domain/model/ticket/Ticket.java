@@ -19,11 +19,11 @@ public class Ticket {
     private UUID eventoId;
     private UUID zonaId;
     private UUID compuertaId;
+    private UUID asientoId;
     private String codigoQr;
     private EstadoTicket estado;
     private BigDecimal precio;
     private boolean esCortesia;
-    private UUID asientoId;
     private AccessDetails accessDetails;
 
     public void validarTransicionA(EstadoTicket destino) {
@@ -96,5 +96,11 @@ public class Ticket {
 
     public boolean hasReembolsoPendiente(){
         return EstadoTicket.REEMBOLSO_PENDIENTE.equals(estado);
+    }
+
+    public void anular(){
+        if (isVendido()){
+            this.estado = EstadoTicket.ANULADO;
+        }
     }
 }

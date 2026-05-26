@@ -847,8 +847,10 @@ public class BeanConfiguration {
     }
 
     @Bean
-    public LiberarBloqueoUseCase liberarBloqueoUseCase(BloqueoRepositoryPort bloqueoRepositoryPort) {
-        return new LiberarBloqueoUseCase(bloqueoRepositoryPort);
+    public LiberarBloqueoUseCase liberarBloqueoUseCase(BloqueoRepositoryPort bloqueoRepositoryPort,
+                                                       CortesiaRepositoryPort cortesiaRepositoryPort,
+                                                       TicketRepositoryPort ticketRepositoryPort) {
+        return new LiberarBloqueoUseCase(bloqueoRepositoryPort, cortesiaRepositoryPort, ticketRepositoryPort);
     }
 
     @Bean

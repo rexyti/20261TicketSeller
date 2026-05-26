@@ -29,4 +29,9 @@ public class CortesiaRepositoryAdapter implements CortesiaRepositoryPort {
     public Flux<Cortesia> buscarPorEvento(UUID eventoId) {
         return repository.findByEventoId(eventoId).map(mapper::toDomain);
     }
+
+    @Override
+    public Mono<Cortesia> buscarPorEventoYAsiento(UUID eventoId, UUID asientoId) {
+        return repository.findByEventoIdAndAsientoId(eventoId, asientoId).map(mapper::toDomain);
+    }
 }

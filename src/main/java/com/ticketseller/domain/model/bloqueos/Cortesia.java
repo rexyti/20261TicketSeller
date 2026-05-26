@@ -1,5 +1,6 @@
 package com.ticketseller.domain.model.bloqueos;
 
+import com.ticketseller.domain.exception.bloqueos.CortesiaYaUsadaException;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -60,5 +61,6 @@ public class Cortesia {
         if (isGenerada()){
             this.estado = EstadoCortesia.NO_USADA;
         }
+        throw new CortesiaYaUsadaException("Cortesia ya usada. No se puede modificar estado.");
     }
 }
