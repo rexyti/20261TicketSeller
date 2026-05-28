@@ -1,11 +1,13 @@
 package com.ticketseller.infrastructure.adapter.in.rest.postventa;
 
+import com.ticketseller.application.postventa.ConsultarColaReembolsosUseCase;
 import com.ticketseller.application.postventa.ProcesarReembolsoManualUseCase;
 import com.ticketseller.domain.model.postventa.EstadoReembolso;
 import com.ticketseller.domain.model.postventa.Reembolso;
 import com.ticketseller.domain.model.postventa.TipoReembolso;
 import com.ticketseller.infrastructure.adapter.in.rest.GlobalExceptionHandler;
 import com.ticketseller.infrastructure.adapter.in.rest.postventa.dto.ReembolsoManualRequest;
+import com.ticketseller.infrastructure.adapter.in.rest.postventa.dto.ReembolsoPendienteResponse;
 import com.ticketseller.infrastructure.adapter.in.rest.postventa.dto.ReembolsoResponse;
 import com.ticketseller.infrastructure.adapter.in.rest.mapper.PostVentaRestMapper;
 import org.junit.jupiter.api.Test;
@@ -15,6 +17,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.math.BigDecimal;
@@ -33,6 +36,8 @@ class AdminReembolsoControllerTest {
 
     @MockBean
     private ProcesarReembolsoManualUseCase procesarReembolsoManualUseCase;
+    @MockBean
+    private ConsultarColaReembolsosUseCase consultarColaReembolsosUseCase;
     @MockBean
     private PostVentaRestMapper postVentaRestMapper;
 
@@ -92,6 +97,47 @@ class AdminReembolsoControllerTest {
                 .uri("/api/v1/admin/reembolsos/procesar-cola")
                 .exchange()
                 .expectStatus().isOk();
+    }
+
+    @Test
+    void obtenerColaVaciaRetorna200ConListaVacia() {
+        when(consultarColaReembolsosUseCase.ejecutar()).thenReturn(Flux.empty());
+
+        webTestClient.get()
+                .uri("/api/v1/admin/reembolsos/cola")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(ReembolsoPendienteResponse.class)
+                .hasSize(0);
+    }
+
+    @Test
+    void obtenerColaConReembolsosPendientesRetorna200ConDatos() {
+        UUID reembolsoId = UUID.randomUUID();
+        UUID ticketId = UUID.randomUUID();
+        UUID ventaId = UUID.randomUUID();
+        Reembolso reembolso = Reembolso.builder()
+                .id(reembolsoId)
+                .ticketId(ticketId)
+                .ventaId(ventaId)
+                .monto(BigDecimal.valueOf(100))
+                .tipo(TipoReembolso.TOTAL)
+                .estado(EstadoReembolso.PENDIENTE)
+                .fechaSolicitud(LocalDateTime.now())
+                .build();
+        ReembolsoPendienteResponse response = new ReembolsoPendienteResponse(
+                reembolsoId, ticketId, ventaId, BigDecimal.valueOf(100),
+                TipoReembolso.TOTAL, EstadoReembolso.PENDIENTE, reembolso.getFechaSolicitud(), null);
+
+        when(consultarColaReembolsosUseCase.ejecutar()).thenReturn(Flux.just(reembolso));
+        when(postVentaRestMapper.toReembolsoPendienteResponse(reembolso)).thenReturn(response);
+
+        webTestClient.get()
+                .uri("/api/v1/admin/reembolsos/cola")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(ReembolsoPendienteResponse.class)
+                .hasSize(1);
     }
 }
 

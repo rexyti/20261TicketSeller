@@ -2,8 +2,12 @@ package com.ticketseller.infrastructure.adapter.in.rest;
 
 import com.ticketseller.application.evento.CancelarEventoUseCase;
 import com.ticketseller.application.evento.EditarEventoUseCase;
+import com.ticketseller.application.evento.FinalizarEventoUseCase;
+import com.ticketseller.application.evento.IniciarEventoUseCase;
 import com.ticketseller.application.evento.ListarEventosUseCase;
+import com.ticketseller.application.evento.ObtenerEventoUseCase;
 import com.ticketseller.application.evento.RegistrarEventoUseCase;
+import com.ticketseller.application.postventa.ConsultarReembolsosMasivoUseCase;
 import com.ticketseller.domain.exception.evento.EventoNotFoundException;
 import com.ticketseller.domain.exception.evento.EventoSolapamientoException;
 import com.ticketseller.domain.model.evento.EstadoEvento;
@@ -13,6 +17,7 @@ import com.ticketseller.infrastructure.adapter.in.rest.evento.dto.CrearEventoReq
 import com.ticketseller.infrastructure.adapter.in.rest.evento.dto.EventoResponse;
 import com.ticketseller.infrastructure.adapter.in.rest.evento.EventoController;
 import com.ticketseller.infrastructure.adapter.in.rest.mapper.EventoRestMapper;
+import com.ticketseller.infrastructure.adapter.in.rest.mapper.PostVentaRestMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
@@ -38,18 +43,24 @@ class EventoControllerTest {
 
     @MockBean
     private RegistrarEventoUseCase registrarEventoUseCase;
-
     @MockBean
     private ListarEventosUseCase listarEventosUseCase;
-
+    @MockBean
+    private ObtenerEventoUseCase obtenerEventoUseCase;
     @MockBean
     private EditarEventoUseCase editarEventoUseCase;
-
     @MockBean
     private CancelarEventoUseCase cancelarEventoUseCase;
-
+    @MockBean
+    private IniciarEventoUseCase iniciarEventoUseCase;
+    @MockBean
+    private FinalizarEventoUseCase finalizarEventoUseCase;
+    @MockBean
+    private ConsultarReembolsosMasivoUseCase consultarReembolsosMasivoUseCase;
     @MockBean
     private EventoRestMapper eventoRestMapper;
+    @MockBean
+    private PostVentaRestMapper postVentaRestMapper;
 
     @Test
     void postEventoValidoRetorna201() {
@@ -146,7 +157,7 @@ class EventoControllerTest {
         UUID eventoId = UUID.randomUUID();
         when(editarEventoUseCase.ejecutar(any(), any())).thenReturn(Mono.error(new EventoNotFoundException("Evento no encontrado")));
 
-        webTestClient.patch()
+        webTestClient.put()
                 .uri("/api/v1/eventos/{id}", eventoId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue("""

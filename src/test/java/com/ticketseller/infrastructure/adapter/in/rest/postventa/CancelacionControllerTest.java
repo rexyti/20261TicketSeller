@@ -50,7 +50,7 @@ class CancelacionControllerTest {
         when(cancelarTicketUseCase.cancelarTicket(ticketId)).thenReturn(Mono.just(resultado));
         when(postVentaRestMapper.toCancelacionResponse(resultado)).thenReturn(response);
 
-        webTestClient.post()
+        webTestClient.delete()
                 .uri("/api/v1/tickets/{id}/cancelar", ticketId)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -65,7 +65,7 @@ class CancelacionControllerTest {
         when(cancelarTicketUseCase.cancelarTicket(ticketId))
                 .thenReturn(Mono.error(new TicketYaUsadoException("usado")));
 
-        webTestClient.post()
+        webTestClient.delete()
                 .uri("/api/v1/tickets/{id}/cancelar", ticketId)
                 .exchange()
                 .expectStatus().isEqualTo(409);
@@ -77,7 +77,7 @@ class CancelacionControllerTest {
         when(cancelarTicketUseCase.cancelarTicket(ticketId))
                 .thenReturn(Mono.error(new CancelacionFueraDePlazoException("fuera de plazo")));
 
-        webTestClient.post()
+        webTestClient.delete()
                 .uri("/api/v1/tickets/{id}/cancelar", ticketId)
                 .exchange()
                 .expectStatus().isEqualTo(422);
@@ -94,7 +94,7 @@ class CancelacionControllerTest {
         when(cancelarTicketUseCase.cancelarVarios(request.ticketIds())).thenReturn(Mono.just(resultado));
         when(postVentaRestMapper.toCancelacionResponse(resultado)).thenReturn(response);
 
-        webTestClient.post()
+        webTestClient.method(org.springframework.http.HttpMethod.DELETE)
                 .uri("/api/v1/tickets/cancelar-varios")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(request)
@@ -109,7 +109,7 @@ class CancelacionControllerTest {
         UUID eventoId = UUID.randomUUID();
         when(procesarReembolsoMasivoUseCase.ejecutar(eq(eventoId))).thenReturn(Flux.empty());
 
-        webTestClient.post()
+        webTestClient.delete()
                 .uri("/api/v1/tickets/eventos/{eventoId}/cancelar", eventoId)
                 .exchange()
                 .expectStatus().isOk();

@@ -1,11 +1,13 @@
 package com.ticketseller.infrastructure.adapter.in.rest;
 
 import com.ticketseller.application.recinto.ConsultarEstructuraRecintoUseCase;
+import com.ticketseller.application.recinto.ConsultarRecintoUseCase;
 import com.ticketseller.application.capacidad.ConfigurarCapacidadUseCase;
 import com.ticketseller.application.capacidad.ConfigurarCategoriaUseCase;
 import com.ticketseller.application.recinto.DesactivarRecintoUseCase;
 import com.ticketseller.application.recinto.EditarRecintoUseCase;
 import com.ticketseller.application.recinto.ListarRecintosFiltradosUseCase;
+import com.ticketseller.application.recinto.ReactivarRecintoUseCase;
 import com.ticketseller.application.recinto.RegistrarRecintoUseCase;
 import com.ticketseller.domain.exception.recinto.RecintoConEventosException;
 import com.ticketseller.domain.exception.recinto.RecintoDuplicadoException;
@@ -66,6 +68,12 @@ class RecintoControllerTest {
 
     @MockBean
     private ConsultarEstructuraRecintoUseCase consultarEstructuraRecintoUseCase;
+
+    @MockBean
+    private ConsultarRecintoUseCase consultarRecintoUseCase;
+
+    @MockBean
+    private ReactivarRecintoUseCase reactivarRecintoUseCase;
 
     @MockBean
     private RecintoRestMapper recintoRestMapper;
@@ -265,7 +273,7 @@ class RecintoControllerTest {
         when(editarRecintoUseCase.ejecutar(any(UUID.class), any(Recinto.class))).thenReturn(Mono.just(updated));
         when(recintoRestMapper.toResponse(updated)).thenReturn(response);
 
-        webTestClient.patch()
+        webTestClient.put()
                 .uri("/api/v1/recintos/{id}", id)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue("""
@@ -290,7 +298,7 @@ class RecintoControllerTest {
         when(editarRecintoUseCase.ejecutar(any(UUID.class), any(Recinto.class)))
                 .thenReturn(Mono.error(new RecintoNotFoundException("Recinto no encontrado")));
 
-        webTestClient.patch()
+        webTestClient.put()
                 .uri("/api/v1/recintos/{id}", id)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue("""
@@ -317,7 +325,7 @@ class RecintoControllerTest {
         when(desactivarRecintoUseCase.ejecutar(id)).thenReturn(Mono.just(desactivado));
         when(recintoRestMapper.toResponse(desactivado)).thenReturn(response);
 
-        webTestClient.patch()
+        webTestClient.delete()
                 .uri("/api/v1/recintos/{id}/desactivar", id)
                 .exchange()
                 .expectStatus().isOk()
@@ -331,7 +339,7 @@ class RecintoControllerTest {
         when(desactivarRecintoUseCase.ejecutar(id))
                 .thenReturn(Mono.error(new RecintoConEventosException("El recinto tiene eventos activos")));
 
-        webTestClient.patch()
+        webTestClient.delete()
                 .uri("/api/v1/recintos/{id}/desactivar", id)
                 .exchange()
                 .expectStatus().isEqualTo(409)
@@ -396,7 +404,7 @@ class RecintoControllerTest {
         when(recintoRestMapper.toEstructuraResponse(recinto, zonas, compuertas)).thenReturn(estructura);
 
         webTestClient.get()
-                .uri("/api/v1/recintos/{id}", id)
+                .uri("/api/v1/recintos/{id}/estructura", id)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
@@ -410,7 +418,7 @@ class RecintoControllerTest {
                 .thenReturn(Mono.error(new RecintoNotFoundException("Recinto no encontrado")));
 
         webTestClient.get()
-                .uri("/api/v1/recintos/{id}", id)
+                .uri("/api/v1/recintos/{id}/estructura", id)
                 .exchange()
                 .expectStatus().isNotFound();
     }

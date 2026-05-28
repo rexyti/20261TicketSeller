@@ -58,6 +58,7 @@ import com.ticketseller.application.checkout.ProcesarPagoUseCase;
 import com.ticketseller.application.checkout.ReservarAsientosUseCase;
 import com.ticketseller.application.postventa.CambiarEstadoTicketUseCase;
 import com.ticketseller.application.postventa.CancelarTicketUseCase;
+import com.ticketseller.application.postventa.ConsultarColaReembolsosUseCase;
 import com.ticketseller.application.postventa.ConsultarEstadoReembolsoUseCase;
 import com.ticketseller.application.postventa.ProcesarReembolsoManualUseCase;
 import com.ticketseller.application.postventa.ProcesarReembolsoMasivoUseCase;
@@ -601,6 +602,11 @@ public class BeanConfiguration {
                                                                           VentaRepositoryPort ventaRepositoryPort) {
         return new ProcesarReembolsoManualUseCase(ticketRepositoryPort, reembolsoRepositoryPort, pasarelaPagoPort,
                 notificacionEmailPort, ventaRepositoryPort);
+    }
+
+    @Bean
+    public ConsultarColaReembolsosUseCase consultarColaReembolsosUseCase(ReembolsoRepositoryPort reembolsoRepositoryPort) {
+        return new ConsultarColaReembolsosUseCase(reembolsoRepositoryPort);
     }
 
     @Bean

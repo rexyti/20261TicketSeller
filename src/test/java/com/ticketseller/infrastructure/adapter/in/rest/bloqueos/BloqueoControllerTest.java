@@ -196,12 +196,15 @@ class BloqueoControllerTest {
 
     @Test
     void deleteBloqueoLiberaAsientoADisponible() {
-        when(liberarBloqueoUseCase.ejecutar(eq(bloqueoId))).thenReturn(Mono.empty());
+        Bloqueo bloqueo = buildBloqueo();
+        BloqueoResponse response = new BloqueoResponse(bloqueoId, List.of(asientoId), "Sponsor", "LIBERADO", LocalDateTime.now());
+        when(liberarBloqueoUseCase.ejecutar(eq(bloqueoId))).thenReturn(Mono.just(bloqueo));
+        when(bloqueoRestMapper.toBloqueoResponse(bloqueo)).thenReturn(response);
 
         webTestClient.delete()
-                .uri("/api/v1/admin/bloqueos/{bloqueoId}", bloqueoId)
+                .uri("/api/v1/admin/bloqueos/{bloqueoId}/liberar", bloqueoId)
                 .exchange()
-                .expectStatus().isNoContent();
+                .expectStatus().isOk();
     }
 
     @Test
@@ -210,7 +213,7 @@ class BloqueoControllerTest {
                 .thenReturn(Mono.error(new BloqueoNoEncontradoException(bloqueoId)));
 
         webTestClient.delete()
-                .uri("/api/v1/admin/bloqueos/{bloqueoId}", bloqueoId)
+                .uri("/api/v1/admin/bloqueos/{bloqueoId}/liberar", bloqueoId)
                 .exchange()
                 .expectStatus().isNotFound();
     }

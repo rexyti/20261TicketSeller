@@ -1,6 +1,7 @@
 package com.ticketseller.infrastructure.adapter.in.rest;
 
 import com.ticketseller.application.tipoasiento.AsignarTipoAsientoAZonaUseCase;
+import com.ticketseller.application.tipoasiento.ConsultarTipoAsientoUseCase;
 import com.ticketseller.application.tipoasiento.CrearTipoAsientoUseCase;
 import com.ticketseller.application.tipoasiento.DesactivarTipoAsientoUseCase;
 import com.ticketseller.application.tipoasiento.EditarTipoAsientoUseCase;
@@ -41,6 +42,8 @@ class TipoAsientoControllerTest {
     private DesactivarTipoAsientoUseCase desactivarTipoAsientoUseCase;
     @MockBean
     private AsignarTipoAsientoAZonaUseCase asignarTipoAsientoAZonaUseCase;
+    @MockBean
+    private ConsultarTipoAsientoUseCase consultarTipoAsientoUseCase;
     @MockBean
     private TipoAsientoRestMapper tipoAsientoRestMapper;
     @MockBean

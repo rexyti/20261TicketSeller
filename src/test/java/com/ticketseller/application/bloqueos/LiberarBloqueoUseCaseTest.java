@@ -4,6 +4,8 @@ import com.ticketseller.domain.exception.bloqueos.BloqueoNoEncontradoException;
 import com.ticketseller.domain.model.bloqueos.Bloqueo;
 import com.ticketseller.domain.model.bloqueos.EstadoBloqueo;
 import com.ticketseller.domain.repository.BloqueoRepositoryPort;
+import com.ticketseller.domain.repository.CortesiaRepositoryPort;
+import com.ticketseller.domain.repository.TicketRepositoryPort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
@@ -21,6 +23,8 @@ import static org.mockito.Mockito.when;
 class LiberarBloqueoUseCaseTest {
 
     private BloqueoRepositoryPort bloqueoRepositoryPort;
+    private CortesiaRepositoryPort cortesiaRepositoryPort;
+    private TicketRepositoryPort ticketRepositoryPort;
     private LiberarBloqueoUseCase useCase;
 
     private final UUID bloqueoId = UUID.randomUUID();
@@ -29,7 +33,9 @@ class LiberarBloqueoUseCaseTest {
     @BeforeEach
     void setUp() {
         bloqueoRepositoryPort = mock(BloqueoRepositoryPort.class);
-        useCase = new LiberarBloqueoUseCase(bloqueoRepositoryPort);
+        cortesiaRepositoryPort = mock(CortesiaRepositoryPort.class);
+        ticketRepositoryPort = mock(TicketRepositoryPort.class);
+        useCase = new LiberarBloqueoUseCase(bloqueoRepositoryPort, cortesiaRepositoryPort, ticketRepositoryPort);
     }
 
     @Test
@@ -38,6 +44,7 @@ class LiberarBloqueoUseCaseTest {
 
         when(bloqueoRepositoryPort.buscarPorId(bloqueoId)).thenReturn(Mono.just(bloqueo));
         when(bloqueoRepositoryPort.guardar(any())).thenAnswer(inv -> Mono.just(inv.getArgument(0)));
+        when(cortesiaRepositoryPort.buscarPorEventoYAsiento(any(), any())).thenReturn(Mono.empty());
 
         StepVerifier.create(useCase.ejecutar(bloqueoId))
                 .assertNext(b -> assertEquals(EstadoBloqueo.LIBERADO, b.getEstado()))
