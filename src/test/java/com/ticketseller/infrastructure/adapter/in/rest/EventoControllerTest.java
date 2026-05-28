@@ -91,6 +91,7 @@ class EventoControllerTest {
                 eventoSaved.getFechaFin(),
                 eventoSaved.getTipo(),
                 eventoSaved.getRecintoId(),
+                eventoSaved.getNombreRecinto(),
                 eventoSaved.getEstado(),
                 eventoSaved.isReingresoHabilitado()
         );
@@ -113,8 +114,8 @@ class EventoControllerTest {
     void getEventosRetornaListado() {
         Evento evento = Evento.builder().id(UUID.randomUUID()).nombre("Concierto").estado(EstadoEvento.ACTIVO).build();
         EventoResponse response = new EventoResponse(evento.getId(), evento.getNombre(), evento.getFechaInicio(),
-                evento.getFechaFin(), evento.getTipo(), evento.getRecintoId(), evento.getEstado(),
-                evento.isReingresoHabilitado());
+                evento.getFechaFin(), evento.getTipo(), evento.getRecintoId(), evento.getNombreRecinto(),
+                evento.getEstado(), evento.isReingresoHabilitado());
 
         when(listarEventosUseCase.ejecutar(null)).thenReturn(Flux.just(evento));
         when(eventoRestMapper.toResponse(evento)).thenReturn(response);

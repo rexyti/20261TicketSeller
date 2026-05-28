@@ -88,6 +88,7 @@ class EventoRepositoryAdapterTest {
                 .fechaFin(LocalDateTime.now().plusDays(3))
                 .tipo(TipoEvento.OTRO)
                 .recintoId(recintoId)
+                .nombreRecinto("Arena")
                 .estado(EstadoEvento.ACTIVO)
                 .build();
 
@@ -95,7 +96,7 @@ class EventoRepositoryAdapterTest {
                 .expectNextMatches(saved -> saved.getId().equals(evento.getId()))
                 .verifyComplete();
 
-        StepVerifier.create(adapter.listarActivos().collectList())
+        StepVerifier.create(adapter.listarPorEstado(EstadoEvento.ACTIVO).collectList())
                 .expectNextMatches(list -> list.size() == 1 && "Concierto".equals(list.getFirst().getNombre()))
                 .verifyComplete();
     }

@@ -20,6 +20,7 @@ public class Evento {
     private LocalDateTime fechaFin;
     private TipoEvento tipo;
     private UUID recintoId;
+    private String nombreRecinto;
     private EstadoEvento estado;
     private boolean reingresoHabilitado;
 

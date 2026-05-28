@@ -39,7 +39,7 @@ class RegistrarEventoUseCaseTest {
                 .build();
 
         when(recintoRepositoryPort.buscarPorId(request.getRecintoId()))
-                .thenReturn(Mono.just(Recinto.builder().id(request.getRecintoId()).activo(true).build()));
+                .thenReturn(Mono.just(Recinto.builder().id(request.getRecintoId()).nombre("Arena Norte").activo(true).build()));
         when(eventoRepositoryPort.buscarEventosSolapados(any(), any(), any())).thenReturn(Flux.empty());
         when(eventoRepositoryPort.guardar(any(Evento.class))).thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
 
@@ -47,6 +47,7 @@ class RegistrarEventoUseCaseTest {
                 .assertNext(saved -> {
                     assert saved.getId() != null;
                     assert saved.getEstado() == EstadoEvento.ACTIVO;
+                    assert "Arena Norte".equals(saved.getNombreRecinto());
                 })
                 .verifyComplete();
     }

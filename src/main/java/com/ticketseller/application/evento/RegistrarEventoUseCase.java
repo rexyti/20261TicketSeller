@@ -34,7 +34,7 @@ public class RegistrarEventoUseCase {
                 .switchIfEmpty(Mono.error(new RecintoNoDisponibleException(
                         "El recinto escogido para este evento no se encuentra disponible"
                 )))
-                .thenReturn(evento);
+                .map(recinto -> evento.toBuilder().nombreRecinto(recinto.getNombre()).build());
     }
 
     private Mono<Evento> validarSolapamiento(Evento evento) {

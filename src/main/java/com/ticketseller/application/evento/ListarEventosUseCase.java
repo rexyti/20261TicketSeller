@@ -13,7 +13,7 @@ public class ListarEventosUseCase {
 
     public Flux<Evento> ejecutar(EstadoEvento estado) {
         return sinImportarElEstado(estado)
-                ? eventoRepositoryPort.listarActivos()
+                ? eventoRepositoryPort.listarTodos()
                 : eventoRepositoryPort.listarPorEstado(estado);
     }
 

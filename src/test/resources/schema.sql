@@ -86,7 +86,9 @@ CREATE TABLE eventos (
     fecha_fin TIMESTAMP NOT NULL,
     tipo VARCHAR(100) NOT NULL,
     recinto_id UUID NOT NULL REFERENCES recintos(id),
-    estado VARCHAR(40) NOT NULL
+    nombre_recinto VARCHAR(150),
+    estado VARCHAR(40) NOT NULL,
+    reingreso_habilitado BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 CREATE TABLE cancelaciones_evento (
@@ -100,6 +102,7 @@ CREATE TABLE precios_zona (
     id UUID PRIMARY KEY,
     evento_id UUID NOT NULL REFERENCES eventos(id),
     zona_id UUID NOT NULL REFERENCES zonas(id),
+    nombre_zona VARCHAR(100),
     precio NUMERIC(12,2) NOT NULL
 );
 
