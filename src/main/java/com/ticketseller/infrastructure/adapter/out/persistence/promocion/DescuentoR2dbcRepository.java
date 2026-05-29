@@ -16,9 +16,12 @@ public interface DescuentoR2dbcRepository extends ReactiveCrudRepository<Descuen
             FROM descuentos d
             JOIN promociones p ON d.promocion_id = p.id
             WHERE p.evento_id = :eventoId
+              AND p.mecanismo = 'AUTOMATICO'
               AND p.estado = 'ACTIVA'
               AND p.fecha_inicio <= :ahora
               AND p.fecha_fin >= :ahora
+              AND (p.tipo_usuario_restringido IS NULL OR p.tipo_usuario_restringido = :tipoUsuario)
             """)
-    Flux<DescuentoEntity> findActivosByEventoIdAndFecha(UUID eventoId, LocalDateTime ahora);
+    Flux<DescuentoEntity> findAutomaticosByEventoIdAndFechaAndTipoUsuario(UUID eventoId, LocalDateTime ahora,
+                                                                          String tipoUsuario);
 }

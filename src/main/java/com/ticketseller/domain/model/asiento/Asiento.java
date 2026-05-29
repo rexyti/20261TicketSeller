@@ -54,11 +54,8 @@ public class Asiento {
     private boolean transicionPermitida(EstadoAsiento actual, EstadoAsiento nuevo) {
         validarEstados(actual, nuevo);
         return switch (actual) {
-            case DISPONIBLE -> validoFromDisponible(nuevo);
-            case BLOQUEADO -> validoFromBloqueado(nuevo);
-            case RESERVADO -> validoFromReservado(nuevo);
-            case VENDIDO -> validoFromVendido(nuevo);
-            case MANTENIMIENTO -> validoFromMantenimiento(nuevo);
+            case DISPONIBLE -> nuevo == EstadoAsiento.MANTENIMIENTO || nuevo == EstadoAsiento.INACTIVO;
+            case MANTENIMIENTO -> nuevo == EstadoAsiento.DISPONIBLE || nuevo == EstadoAsiento.INACTIVO;
             default -> false;
         };
     }
@@ -72,41 +69,8 @@ public class Asiento {
         }
     }
 
-    private boolean validoFromMantenimiento(EstadoAsiento nuevo) {
-        return EstadoAsiento.DISPONIBLE.equals(nuevo) || EstadoAsiento.BLOQUEADO.equals(nuevo);
-    }
-
-    private boolean validoFromVendido(EstadoAsiento nuevo) {
-        return false;
-    }
-
-    private boolean validoFromReservado(EstadoAsiento nuevo) {
-        return EstadoAsiento.DISPONIBLE.equals(nuevo) || EstadoAsiento.VENDIDO.equals(nuevo);
-    }
-
-    private boolean validoFromBloqueado(EstadoAsiento nuevo) {
-        return EstadoAsiento.DISPONIBLE.equals(nuevo) || EstadoAsiento.MANTENIMIENTO.equals(nuevo);
-    }
-
-    private boolean validoFromDisponible(EstadoAsiento nuevo) {
-        return EstadoAsiento.RESERVADO.equals(nuevo) || EstadoAsiento.BLOQUEADO.equals(nuevo)
-                || EstadoAsiento.MANTENIMIENTO.equals(nuevo);
-    }
-
     public boolean isDisponible(){
         return EstadoAsiento.DISPONIBLE.equals(estado);
-    }
-
-    public boolean isBloqueado(){
-        return EstadoAsiento.BLOQUEADO.equals(estado);
-    }
-
-    public boolean isReservado(){
-        return EstadoAsiento.RESERVADO.equals(estado);
-    }
-
-    public boolean isVendido(){
-        return EstadoAsiento.VENDIDO.equals(estado);
     }
 
     public boolean isEnMantenimiento(){

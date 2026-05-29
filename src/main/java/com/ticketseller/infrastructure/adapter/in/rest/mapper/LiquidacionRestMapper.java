@@ -27,5 +27,4 @@ public interface LiquidacionRestMapper {
         return new SnapshotLiquidacionResponse(snapshot.getEventoId(), snapshot.getNombreEvento(),
                 snapshot.getRecintoId(), snapshot.getTipoRecinto(), condiciones, snapshot.getTimestampGeneracion());
     }
-
 }

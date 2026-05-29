@@ -3,6 +3,7 @@ package com.ticketseller.domain;
 import com.ticketseller.domain.exception.evento.EventoEnProgresoException;
 import com.ticketseller.domain.model.evento.EstadoEvento;
 import com.ticketseller.domain.model.evento.Evento;
+import com.ticketseller.domain.model.evento.TipoEvento;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
@@ -17,7 +18,7 @@ class EventoTest {
     void deberiaValidarRegistroConFechasInvalidas() {
         Evento evento = Evento.builder()
                 .nombre("Concierto")
-                .tipo("MUSICAL")
+                .tipo(TipoEvento.CONCIERTO)
                 .recintoId(UUID.randomUUID())
                 .fechaInicio(LocalDateTime.now().plusDays(2))
                 .fechaFin(LocalDateTime.now().plusDays(1))

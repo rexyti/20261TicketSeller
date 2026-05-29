@@ -10,8 +10,8 @@ import com.ticketseller.domain.exception.zona.ZonaSinPrecioException;
 import com.ticketseller.domain.exception.venta.SolicitudReservaInvalidaException;
 import com.ticketseller.domain.model.asiento.Asiento;
 import com.ticketseller.domain.model.asiento.AsientoHold;
-import com.ticketseller.domain.model.asiento.EstadoAsiento;
 import com.ticketseller.domain.model.asiento.EstadoHold;
+import com.ticketseller.domain.model.bloqueos.EstadoBloqueo;
 import com.ticketseller.domain.model.ticket.EstadoTicket;
 import com.ticketseller.domain.model.venta.EstadoVenta;
 import com.ticketseller.domain.model.zona.PrecioZona;
@@ -19,6 +19,7 @@ import com.ticketseller.domain.model.venta.Venta;
 import com.ticketseller.domain.model.zona.Zona;
 import com.ticketseller.domain.repository.AsientoHoldRepositoryPort;
 import com.ticketseller.domain.repository.AsientoRepositoryPort;
+import com.ticketseller.domain.repository.BloqueoRepositoryPort;
 import com.ticketseller.domain.repository.PrecioZonaRepositoryPort;
 import com.ticketseller.domain.repository.TicketRepositoryPort;
 import com.ticketseller.domain.repository.VentaRepositoryPort;
@@ -45,6 +46,7 @@ public class ReservarAsientosUseCase {
     private final PrecioZonaRepositoryPort precioZonaRepositoryPort;
     private final AsientoRepositoryPort asientoRepositoryPort;
     private final AsientoHoldRepositoryPort asientoHoldRepositoryPort;
+    private final BloqueoRepositoryPort bloqueoRepositoryPort;
     private final AplicarDescuentoCarritoUseCase aplicarDescuentoCarritoUseCase;
 
     public Mono<VentaDetalle> ejecutar(ReservarAsientosCommand command) {
@@ -105,19 +107,45 @@ public class ReservarAsientosUseCase {
                 .flatMap(id -> asientoRepositoryPort.buscarPorId(id)
                         .switchIfEmpty(Mono.error(new AsientoNotFoundException("Asiento no encontrado: %s".formatted(id)))))
                 .collectList()
-                .flatMap(asientos -> validarEstadoAsientos(asientos, command.zonaId()));
+                .flatMap(asientos -> validarAsientosParaEvento(asientos, command.zonaId(), command.eventoId()));
     }
 
-    private Mono<List<Asiento>> validarEstadoAsientos(List<Asiento> asientos, UUID zonaId) {
-        asientos.forEach(asiento -> {
-            if (!asiento.perteneceAZona(zonaId)) {
-                throw new AsientoEnZonaDiferenteException("El asiento %s no pertenece a la zona solicitada".formatted(asiento.getId()));
-            }
-            if (!asiento.isDisponible()) {
-                throw new AsientoNoDisponibleException("El asiento %s no está disponible".formatted(asiento.getId()));
-            }
-        });
-        return Mono.just(asientos);
+    private Mono<List<Asiento>> validarAsientosParaEvento(List<Asiento> asientos, UUID zonaId, UUID eventoId) {
+        return Flux.fromIterable(asientos)
+                .flatMap(asiento -> {
+                    if (!asiento.perteneceAZona(zonaId)) {
+                        return Mono.error(new AsientoEnZonaDiferenteException(
+                                "El asiento %s no pertenece a la zona solicitada".formatted(asiento.getId())));
+                    }
+                    if (!asiento.isDisponible()) {
+                        return Mono.error(new AsientoNoDisponibleException(
+                                "El asiento %s está en mantenimiento o inactivo".formatted(asiento.getId())));
+                    }
+                    return verificarDisponibilidadEnEvento(asiento, eventoId);
+                })
+                .collectList();
+    }
+
+    private Mono<Asiento> verificarDisponibilidadEnEvento(Asiento asiento, UUID eventoId) {
+        Mono<Boolean> tieneHold = asientoHoldRepositoryPort
+                .buscarActivoPorAsientoYEvento(asiento.getId(), eventoId)
+                .hasElement();
+        Mono<Boolean> tieneBloqueado = bloqueoRepositoryPort
+                .buscarActivoPorAsientoYEvento(asiento.getId(), eventoId)
+                .hasElement();
+
+        return Mono.zip(tieneHold, tieneBloqueado)
+                .flatMap(tuple -> {
+                    if (tuple.getT1()) {
+                        return Mono.error(new AsientoNoDisponibleException(
+                                "El asiento %s ya está reservado para este evento".formatted(asiento.getId())));
+                    }
+                    if (tuple.getT2()) {
+                        return Mono.error(new AsientoNoDisponibleException(
+                                "El asiento %s está bloqueado para este evento".formatted(asiento.getId())));
+                    }
+                    return Mono.just(asiento);
+                });
     }
 
     private Mono<VentaDetalle> reservar(ReservarAsientosCommand command, Zona zona,
@@ -135,28 +163,24 @@ public class ReservarAsientosUseCase {
                     venta.validarDatosRegistro();
 
                     return ventaRepositoryPort.guardar(venta)
-                            .flatMap(savedVenta -> crearHolds(savedVenta, asientos)
+                            .flatMap(savedVenta -> crearHolds(savedVenta, asientos, command.eventoId())
                                     .thenReturn(new VentaDetalle(savedVenta, List.of())));
                 });
     }
 
-    private Mono<Void> crearHolds(Venta venta, List<Asiento> asientos) {
+    private Mono<Void> crearHolds(Venta venta, List<Asiento> asientos, UUID eventoId) {
         if (asientos.isEmpty()) {
             return Mono.empty();
         }
         return Flux.fromIterable(asientos)
-                .flatMap(asiento -> {
-                    AsientoHold hold = buildHold(venta, asiento);
-                    return asientoHoldRepositoryPort.guardar(hold)
-                            .then(asientoRepositoryPort.guardar(
-                                    asiento.toBuilder().estado(EstadoAsiento.RESERVADO).build()));
-                })
+                .flatMap(asiento -> asientoHoldRepositoryPort.guardar(buildHold(venta, asiento, eventoId)))
                 .then();
     }
 
-    private AsientoHold buildHold(Venta venta, Asiento asiento) {
+    private AsientoHold buildHold(Venta venta, Asiento asiento, UUID eventoId) {
         return AsientoHold.builder()
                 .asientoId(asiento.getId())
+                .eventoId(eventoId)
                 .ventaId(venta.getId())
                 .numero(asiento.getNumero())
                 .expiraEn(venta.getFechaExpiracion())

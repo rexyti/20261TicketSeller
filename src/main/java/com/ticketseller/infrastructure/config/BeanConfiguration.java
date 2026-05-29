@@ -7,6 +7,7 @@ import com.ticketseller.infrastructure.adapter.out.persistence.asientohold.Asien
 import com.ticketseller.infrastructure.adapter.out.persistence.asientohold.mapper.AsientoHoldPersistenceMapper;
 import com.ticketseller.application.bloqueos.BloquearAsientosUseCase;
 import com.ticketseller.application.bloqueos.ConsultarPanelBloqueosUseCase;
+import com.ticketseller.application.bloqueos.CortesiaTicketCreator;
 import com.ticketseller.application.bloqueos.CrearCortesiaConAsientoUseCase;
 import com.ticketseller.application.bloqueos.CrearCortesiaGeneralUseCase;
 import com.ticketseller.application.bloqueos.EditarDestinatarioBloqueoUseCase;
@@ -20,7 +21,6 @@ import com.ticketseller.infrastructure.adapter.out.persistence.bloqueos.Cortesia
 import com.ticketseller.infrastructure.adapter.out.persistence.bloqueos.CortesiaRepositoryAdapter;
 import com.ticketseller.infrastructure.adapter.out.persistence.bloqueos.mapper.BloqueoPersistenceMapper;
 import com.ticketseller.infrastructure.adapter.out.persistence.bloqueos.mapper.CortesiaPersistenceMapper;
-import com.ticketseller.application.conciliacion.*;
 import com.ticketseller.application.promocion.AplicarCodigoPromoVentaUseCase;
 import com.ticketseller.application.promocion.AplicarDescuentoCarritoUseCase;
 import com.ticketseller.application.promocion.CrearCodigosPromocionalesUseCase;
@@ -58,6 +58,7 @@ import com.ticketseller.application.checkout.ProcesarPagoUseCase;
 import com.ticketseller.application.checkout.ReservarAsientosUseCase;
 import com.ticketseller.application.postventa.CambiarEstadoTicketUseCase;
 import com.ticketseller.application.postventa.CancelarTicketUseCase;
+import com.ticketseller.application.postventa.ConsultarColaReembolsosUseCase;
 import com.ticketseller.application.postventa.ConsultarEstadoReembolsoUseCase;
 import com.ticketseller.application.postventa.ProcesarReembolsoManualUseCase;
 import com.ticketseller.application.postventa.ProcesarReembolsoMasivoUseCase;
@@ -116,7 +117,6 @@ import com.ticketseller.domain.repository.VentaRepositoryPort;
 import com.ticketseller.domain.repository.HistorialCambioEstadoRepositoryPort;
 import com.ticketseller.domain.repository.HistorialEstadoTicketRepositoryPort;
 import com.ticketseller.domain.repository.HistorialEstadoVentaRepositoryPort;
-import com.ticketseller.domain.repository.PagoRepositoryPort;
 import com.ticketseller.domain.repository.ReembolsoRepositoryPort;
 import com.ticketseller.infrastructure.adapter.out.payment.PasarelaPagoAdapter;
 import com.ticketseller.infrastructure.adapter.out.persistence.cancelacionevento.CancelacionEventoR2dbcRepository;
@@ -135,9 +135,6 @@ import com.ticketseller.infrastructure.adapter.out.persistence.checkout.mapper.T
 import com.ticketseller.infrastructure.adapter.out.persistence.checkout.mapper.TransaccionFinancieraPersistenceMapper;
 import com.ticketseller.infrastructure.adapter.out.persistence.checkout.mapper.VentaPersistenceMapper;
 import com.ticketseller.infrastructure.adapter.out.persistence.liquidacion.LiquidacionQueryAdapter;
-import com.ticketseller.infrastructure.adapter.out.persistence.conciliacion.pago.PagoR2dbcRepository;
-import com.ticketseller.infrastructure.adapter.out.persistence.conciliacion.pago.PagoRepositoryAdapter;
-import com.ticketseller.infrastructure.adapter.out.persistence.conciliacion.pago.mapper.PagoPersistenceMapper;
 import com.ticketseller.infrastructure.adapter.out.persistence.transaccion.historial.HistorialEstadoVentaR2dbcRepository;
 import com.ticketseller.infrastructure.adapter.out.persistence.transaccion.historial.HistorialEstadoVentaRepositoryAdapter;
 import com.ticketseller.infrastructure.adapter.out.persistence.transaccion.historial.mapper.HistorialEstadoVentaPersistenceMapper;
@@ -465,10 +462,11 @@ public class BeanConfiguration {
                                                            PrecioZonaRepositoryPort precioZonaRepositoryPort,
                                                            AsientoRepositoryPort asientoRepositoryPort,
                                                            AsientoHoldRepositoryPort asientoHoldRepositoryPort,
+                                                           BloqueoRepositoryPort bloqueoRepositoryPort,
                                                            AplicarDescuentoCarritoUseCase aplicarDescuentoCarritoUseCase) {
         return new ReservarAsientosUseCase(ticketRepositoryPort, ventaRepositoryPort, zonaRepositoryPort,
                 precioZonaRepositoryPort, asientoRepositoryPort, asientoHoldRepositoryPort,
-                aplicarDescuentoCarritoUseCase);
+                bloqueoRepositoryPort, aplicarDescuentoCarritoUseCase);
     }
 
     @Bean
@@ -486,12 +484,11 @@ public class BeanConfiguration {
                                                    AsientoRepositoryPort asientoRepositoryPort,
                                                    AsientoHoldRepositoryPort asientoHoldRepositoryPort,
                                                    ZonaRepositoryPort zonaRepositoryPort,
-                                                   PrecioZonaRepositoryPort precioZonaRepositoryPort,
                                                    CompuertaRepositoryPort compuertaRepositoryPort,
                                                    EventoRepositoryPort eventoRepositoryPort) {
         return new ProcesarPagoUseCase(ventaRepositoryPort, ticketRepositoryPort,
                 transaccionFinancieraRepositoryPort, pasarelaPagoPort, notificacionEmailPort, codigoQrPort,
-                asientoRepositoryPort, asientoHoldRepositoryPort, zonaRepositoryPort, precioZonaRepositoryPort,
+                asientoRepositoryPort, asientoHoldRepositoryPort, zonaRepositoryPort,
                 compuertaRepositoryPort, eventoRepositoryPort);
     }
 
@@ -547,8 +544,11 @@ public class BeanConfiguration {
     }
 
     @Bean
-    public ConsultarAsientosEventoUseCase consultarAsientosEventoUseCase(AsientoRepositoryPort asientoRepositoryPort) {
-        return new ConsultarAsientosEventoUseCase(asientoRepositoryPort);
+    public ConsultarAsientosEventoUseCase consultarAsientosEventoUseCase(
+            AsientoRepositoryPort asientoRepositoryPort,
+            AsientoHoldRepositoryPort asientoHoldRepositoryPort,
+            BloqueoRepositoryPort bloqueoRepositoryPort) {
+        return new ConsultarAsientosEventoUseCase(asientoRepositoryPort, asientoHoldRepositoryPort, bloqueoRepositoryPort);
     }
 
     @Bean
@@ -565,11 +565,9 @@ public class BeanConfiguration {
 
     @Bean
     public CancelarTicketUseCase cancelarTicketUseCase(TicketRepositoryPort ticketRepositoryPort,
-                                                       AsientoRepositoryPort asientoRepositoryPort,
                                                        EventoRepositoryPort eventoRepositoryPort,
                                                        ReembolsoRepositoryPort reembolsoRepositoryPort) {
-        return new CancelarTicketUseCase(ticketRepositoryPort, asientoRepositoryPort, eventoRepositoryPort,
-                reembolsoRepositoryPort);
+        return new CancelarTicketUseCase(ticketRepositoryPort, eventoRepositoryPort, reembolsoRepositoryPort);
     }
 
     @Bean
@@ -603,6 +601,11 @@ public class BeanConfiguration {
     }
 
     @Bean
+    public ConsultarColaReembolsosUseCase consultarColaReembolsosUseCase(ReembolsoRepositoryPort reembolsoRepositoryPort) {
+        return new ConsultarColaReembolsosUseCase(reembolsoRepositoryPort);
+    }
+
+    @Bean
     public ConsultarEstadoReembolsoUseCase consultarEstadoReembolsoUseCase(VentaRepositoryPort ventaRepositoryPort,
                                                                            TicketRepositoryPort ticketRepositoryPort,
                                                                            ReembolsoRepositoryPort reembolsoRepositoryPort) {
@@ -614,12 +617,6 @@ public class BeanConfiguration {
             HistorialEstadoVentaR2dbcRepository repository,
             HistorialEstadoVentaPersistenceMapper mapper) {
         return new HistorialEstadoVentaRepositoryAdapter(repository, mapper);
-    }
-
-    @Bean
-    public PagoRepositoryPort pagoRepositoryPort(PagoR2dbcRepository repository,
-                                                 PagoPersistenceMapper mapper) {
-        return new PagoRepositoryAdapter(repository, mapper);
     }
 
     @Bean
@@ -640,68 +637,36 @@ public class BeanConfiguration {
     }
 
     @Bean
-    public VerificarPagoUseCase verificarPagoUseCase(VentaRepositoryPort ventaRepositoryPort,
-                                                     PagoRepositoryPort pagoRepositoryPort) {
-        return new VerificarPagoUseCase(ventaRepositoryPort, pagoRepositoryPort);
-    }
-
-    @Bean
-    public ConfirmarTransaccionUseCase confirmarTransaccionUseCase(VentaRepositoryPort ventaRepositoryPort,
-                                                                   PagoRepositoryPort pagoRepositoryPort,
-                                                                   TicketRepositoryPort ticketRepositoryPort,
-                                                                   ConfirmarOcupacionUseCase confirmarOcupacionUseCase) {
-        return new ConfirmarTransaccionUseCase(ventaRepositoryPort, pagoRepositoryPort,
-                ticketRepositoryPort, confirmarOcupacionUseCase);
-    }
-
-    @Bean
-    public ResolverDiscrepanciaUseCase resolverDiscrepanciaUseCase(PagoRepositoryPort pagoRepositoryPort,
-                                                                   VentaRepositoryPort ventaRepositoryPort) {
-        return new ResolverDiscrepanciaUseCase(pagoRepositoryPort, ventaRepositoryPort);
-    }
-
-    @Bean
-    public ListarDiscrepanciaUseCase listarDiscrepanciaUseCase(PagoRepositoryPort pagoRepositoryPort) {
-        return new ListarDiscrepanciaUseCase(pagoRepositoryPort);
-    }
-
-    @Bean
-    public ExpirarTransaccionesPendientesUseCase expirarTransaccionesPendientesUseCase(
-            PagoRepositoryPort pagoRepositoryPort,
-            VentaRepositoryPort ventaRepositoryPort) {
-        return new ExpirarTransaccionesPendientesUseCase(pagoRepositoryPort, ventaRepositoryPort);
-    }
-
-    @Bean
     public VerificarDisponibilidadUseCase verificarDisponibilidadUseCase(
-            AsientoRepositoryPort asientoRepositoryPort) {
-        return new VerificarDisponibilidadUseCase(asientoRepositoryPort);
+            AsientoRepositoryPort asientoRepositoryPort,
+            AsientoHoldRepositoryPort asientoHoldRepositoryPort,
+            BloqueoRepositoryPort bloqueoRepositoryPort) {
+        return new VerificarDisponibilidadUseCase(asientoRepositoryPort, asientoHoldRepositoryPort, bloqueoRepositoryPort);
     }
 
     @Bean
     public LiberarHoldsVencidosUseCase liberarHoldsVencidosUseCase(
-            AsientoHoldRepositoryPort asientoHoldRepositoryPort,
-            AsientoRepositoryPort asientoRepositoryPort) {
-        return new LiberarHoldsVencidosUseCase(asientoHoldRepositoryPort, asientoRepositoryPort);
+            AsientoHoldRepositoryPort asientoHoldRepositoryPort) {
+        return new LiberarHoldsVencidosUseCase(asientoHoldRepositoryPort);
     }
 
     @Bean
     public ConfirmarOcupacionUseCase confirmarOcupacionUseCase(
-            AsientoRepositoryPort asientoRepositoryPort,
             AsientoHoldRepositoryPort asientoHoldRepositoryPort) {
-        return new ConfirmarOcupacionUseCase(asientoRepositoryPort, asientoHoldRepositoryPort);
+        return new ConfirmarOcupacionUseCase(asientoHoldRepositoryPort);
     }
 
     @Bean
-    public LiberarHoldUseCase liberarHoldUseCase(AsientoRepositoryPort asientoRepositoryPort,
-                                                  AsientoHoldRepositoryPort asientoHoldRepositoryPort) {
-        return new LiberarHoldUseCase(asientoRepositoryPort, asientoHoldRepositoryPort);
+    public LiberarHoldUseCase liberarHoldUseCase(AsientoHoldRepositoryPort asientoHoldRepositoryPort) {
+        return new LiberarHoldUseCase(asientoHoldRepositoryPort);
     }
 
     @Bean
     public ObtenerInventarioEventoUseCase obtenerInventarioEventoUseCase(
-            AsientoRepositoryPort asientoRepositoryPort) {
-        return new ObtenerInventarioEventoUseCase(asientoRepositoryPort);
+            AsientoRepositoryPort asientoRepositoryPort,
+            AsientoHoldRepositoryPort asientoHoldRepositoryPort,
+            BloqueoRepositoryPort bloqueoRepositoryPort) {
+        return new ObtenerInventarioEventoUseCase(asientoRepositoryPort, asientoHoldRepositoryPort, bloqueoRepositoryPort);
     }
 
     @Bean
@@ -771,9 +736,8 @@ public class BeanConfiguration {
 
     @Bean
     public AplicarDescuentoCarritoUseCase aplicarDescuentoCarritoUseCase(
-            PromocionRepositoryPort promocionRepositoryPort,
             DescuentoRepositoryPort descuentoRepositoryPort) {
-        return new AplicarDescuentoCarritoUseCase(promocionRepositoryPort, descuentoRepositoryPort);
+        return new AplicarDescuentoCarritoUseCase(descuentoRepositoryPort);
     }
 
     @Bean
@@ -788,10 +752,9 @@ public class BeanConfiguration {
     public AplicarCodigoPromoVentaUseCase aplicarCodigoPromoVentaUseCase(
             ValidarCodigoPromocionalUseCase validarCodigoPromocionalUseCase,
             VentaRepositoryPort ventaRepositoryPort,
-            TicketRepositoryPort ticketRepositoryPort,
             CodigoPromocionalRepositoryPort codigoPromocionalRepositoryPort) {
         return new AplicarCodigoPromoVentaUseCase(validarCodigoPromocionalUseCase, ventaRepositoryPort,
-                ticketRepositoryPort, codigoPromocionalRepositoryPort);
+                codigoPromocionalRepositoryPort);
     }
 
     @Bean
@@ -809,31 +772,36 @@ public class BeanConfiguration {
     @Bean
     public BloquearAsientosUseCase bloquearAsientosUseCase(
             com.ticketseller.domain.repository.AsientoRepositoryPort asientoRepositoryPort,
-            BloqueoRepositoryPort bloqueoRepositoryPort) {
-        return new BloquearAsientosUseCase(asientoRepositoryPort, bloqueoRepositoryPort);
+            BloqueoRepositoryPort bloqueoRepositoryPort,
+            AsientoHoldRepositoryPort asientoHoldRepositoryPort) {
+        return new BloquearAsientosUseCase(asientoRepositoryPort, bloqueoRepositoryPort, asientoHoldRepositoryPort);
+    }
+
+    @Bean
+    public CortesiaTicketCreator cortesiaTicketCreator(
+            com.ticketseller.domain.repository.TicketRepositoryPort ticketRepositoryPort,
+            CortesiaRepositoryPort cortesiaRepositoryPort,
+            ZonaRepositoryPort zonaRepositoryPort,
+            CompuertaRepositoryPort compuertaRepositoryPort,
+            EventoRepositoryPort eventoRepositoryPort,
+            CodigoQrPort codigoQrPort) {
+        return new CortesiaTicketCreator(ticketRepositoryPort, cortesiaRepositoryPort,
+                zonaRepositoryPort, compuertaRepositoryPort, eventoRepositoryPort, codigoQrPort);
     }
 
     @Bean
     public CrearCortesiaConAsientoUseCase crearCortesiaConAsientoUseCase(
             com.ticketseller.domain.repository.AsientoRepositoryPort asientoRepositoryPort,
-            CortesiaRepositoryPort cortesiaRepositoryPort,
-            com.ticketseller.domain.repository.TicketRepositoryPort ticketRepositoryPort,
-            ZonaRepositoryPort zonaRepositoryPort,
-            CompuertaRepositoryPort compuertaRepositoryPort,
-            EventoRepositoryPort eventoRepositoryPort) {
-        return new CrearCortesiaConAsientoUseCase(asientoRepositoryPort, cortesiaRepositoryPort, ticketRepositoryPort,
-                zonaRepositoryPort, compuertaRepositoryPort, eventoRepositoryPort);
+            BloqueoRepositoryPort bloqueoRepositoryPort,
+            AsientoHoldRepositoryPort asientoHoldRepositoryPort,
+            CortesiaTicketCreator cortesiaTicketCreator) {
+        return new CrearCortesiaConAsientoUseCase(asientoRepositoryPort, bloqueoRepositoryPort,
+                asientoHoldRepositoryPort, cortesiaTicketCreator);
     }
 
     @Bean
-    public CrearCortesiaGeneralUseCase crearCortesiaGeneralUseCase(
-            CortesiaRepositoryPort cortesiaRepositoryPort,
-            com.ticketseller.domain.repository.TicketRepositoryPort ticketRepositoryPort,
-            ZonaRepositoryPort zonaRepositoryPort,
-            CompuertaRepositoryPort compuertaRepositoryPort,
-            EventoRepositoryPort eventoRepositoryPort) {
-        return new CrearCortesiaGeneralUseCase(cortesiaRepositoryPort, ticketRepositoryPort,
-                zonaRepositoryPort, compuertaRepositoryPort, eventoRepositoryPort);
+    public CrearCortesiaGeneralUseCase crearCortesiaGeneralUseCase(CortesiaTicketCreator cortesiaTicketCreator) {
+        return new CrearCortesiaGeneralUseCase(cortesiaTicketCreator);
     }
 
     @Bean
@@ -843,10 +811,10 @@ public class BeanConfiguration {
     }
 
     @Bean
-    public LiberarBloqueoUseCase liberarBloqueoUseCase(
-            BloqueoRepositoryPort bloqueoRepositoryPort,
-            com.ticketseller.domain.repository.AsientoRepositoryPort asientoRepositoryPort) {
-        return new LiberarBloqueoUseCase(bloqueoRepositoryPort, asientoRepositoryPort);
+    public LiberarBloqueoUseCase liberarBloqueoUseCase(BloqueoRepositoryPort bloqueoRepositoryPort,
+                                                       CortesiaRepositoryPort cortesiaRepositoryPort,
+                                                       TicketRepositoryPort ticketRepositoryPort) {
+        return new LiberarBloqueoUseCase(bloqueoRepositoryPort, cortesiaRepositoryPort, ticketRepositoryPort);
     }
 
     @Bean

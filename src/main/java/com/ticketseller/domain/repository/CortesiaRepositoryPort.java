@@ -12,4 +12,6 @@ public interface CortesiaRepositoryPort {
     Mono<Cortesia> buscarPorId(UUID id);
 
     Flux<Cortesia> buscarPorEvento(UUID eventoId);
+
+    Mono<Cortesia> buscarPorEventoYAsiento(UUID eventoId, UUID asientoId);
 }

@@ -31,5 +31,4 @@ public class LiquidacionController {
                 .map(liquidacionRestMapper::toSnapshotResponse)
                 .map(ResponseEntity::ok);
     }
-
 }

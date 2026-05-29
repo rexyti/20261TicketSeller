@@ -35,4 +35,9 @@ public class BloqueoRepositoryAdapter implements BloqueoRepositoryPort {
     public Flux<Bloqueo> buscarPorEventoYEstado(UUID eventoId, EstadoBloqueo estado) {
         return repository.findByEventoIdAndEstado(eventoId, estado.name()).map(mapper::toDomain);
     }
+
+    @Override
+    public Mono<Bloqueo> buscarActivoPorAsientoYEvento(UUID asientoId, UUID eventoId) {
+        return repository.findActiveByAsientoIdAndEventoId(asientoId, eventoId).map(mapper::toDomain);
+    }
 }

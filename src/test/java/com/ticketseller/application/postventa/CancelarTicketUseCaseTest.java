@@ -1,6 +1,6 @@
 package com.ticketseller.application.postventa;
 
-import com.ticketseller.domain.exception.postventa.TicketYaUsadoException;
+import com.ticketseller.domain.exception.postventa.SolicitudCancelacionTicketsInvalidaException;
 import com.ticketseller.domain.model.evento.Evento;
 import com.ticketseller.domain.model.postventa.Reembolso;
 import com.ticketseller.domain.model.ticket.EstadoTicket;
@@ -76,14 +76,14 @@ class CancelarTicketUseCaseTest {
                 .ventaId(UUID.randomUUID())
                 .eventoId(UUID.randomUUID())
                 .zonaId(UUID.randomUUID())
-                .estado(EstadoTicket.USADO)
+                .estado(EstadoTicket.ANULADO)
                 .precio(BigDecimal.TEN)
                 .build();
 
         when(ticketRepositoryPort.buscarPorId(ticketId)).thenReturn(Mono.just(ticket));
 
         StepVerifier.create(useCase.cancelarTicket(ticketId))
-                .expectError(TicketYaUsadoException.class)
+                .expectError(SolicitudCancelacionTicketsInvalidaException.class)
                 .verify();
     }
 }

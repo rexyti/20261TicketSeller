@@ -1,18 +1,10 @@
 package com.ticketseller.infrastructure.adapter.in.rest;
 
-import com.ticketseller.application.liquidacion.ConfigurarModeloNegocioUseCase;
-import com.ticketseller.application.liquidacion.ConsultarModeloNegocioUseCase;
 import com.ticketseller.application.liquidacion.ConsultarSnapshotUseCase;
 import com.ticketseller.domain.exception.evento.EventoNoFinalizadoException;
 import com.ticketseller.domain.exception.evento.EventoNotFoundException;
-import com.ticketseller.domain.exception.liquidacion.LiquidacionNoConfiguradaException;
-import com.ticketseller.domain.exception.recinto.RecintoNotFoundException;
-import com.ticketseller.domain.model.recinto.CategoriaRecinto;
-import com.ticketseller.domain.model.recinto.ConfiguracionLiquidacion;
-import com.ticketseller.domain.model.recinto.ModeloNegocio;
 import com.ticketseller.domain.model.evento.SnapshotLiquidacion;
 import com.ticketseller.infrastructure.adapter.in.rest.liquidacion.dto.CondicionTicketResponse;
-import com.ticketseller.infrastructure.adapter.in.rest.liquidacion.dto.ModeloNegocioResponse;
 import com.ticketseller.infrastructure.adapter.in.rest.liquidacion.dto.SnapshotLiquidacionResponse;
 import com.ticketseller.infrastructure.adapter.in.rest.liquidacion.LiquidacionController;
 import com.ticketseller.infrastructure.adapter.in.rest.mapper.LiquidacionRestMapper;
@@ -43,94 +35,7 @@ class LiquidacionControllerTest {
     private ConsultarSnapshotUseCase consultarSnapshotUseCase;
 
     @MockBean
-    private ConsultarModeloNegocioUseCase consultarModeloNegocioUseCase;
-
-    @MockBean
-    private ConfigurarModeloNegocioUseCase configurarModeloNegocioUseCase;
-
-    @MockBean
     private LiquidacionRestMapper liquidacionRestMapper;
-
-    // ======================== US2: Modelo de Negocio ========================
-
-    @Test
-    void getModeloNegocioTarifaPlanaRetorna200ConMontoFijo() {
-        UUID recintoId = UUID.randomUUID();
-        ConfiguracionLiquidacion config = ConfiguracionLiquidacion.builder()
-                .modeloNegocio(ModeloNegocio.TARIFA_PLANA)
-                .montoFijo(BigDecimal.valueOf(5000))
-                .build();
-        ModeloNegocioResponse response = new ModeloNegocioResponse(
-                recintoId,
-                ModeloNegocio.TARIFA_PLANA,
-                null,
-                BigDecimal.valueOf(5000)
-        );
-
-        when(consultarModeloNegocioUseCase.ejecutar(recintoId)).thenReturn(Mono.just(config));
-        when(liquidacionRestMapper.toModeloNegocioResponse(config)).thenReturn(response);
-
-        webTestClient.get()
-                .uri("/api/v1/recintos/{id}/modelo-negocio", recintoId)
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody()
-                .jsonPath("$.modelo").isEqualTo("TARIFA_PLANA")
-                .jsonPath("$.montoFijo").isEqualTo(5000);
-    }
-
-    @Test
-    void getModeloNegocioRepartoIngresosRetorna200ConTipoRecinto() {
-        UUID recintoId = UUID.randomUUID();
-        ConfiguracionLiquidacion config = ConfiguracionLiquidacion.builder()
-                .modeloNegocio(ModeloNegocio.REPARTO_INGRESOS)
-                .build();
-        ModeloNegocioResponse response = new ModeloNegocioResponse(
-                recintoId,
-                ModeloNegocio.REPARTO_INGRESOS,
-                CategoriaRecinto.ESTADIO,
-                null
-        );
-
-        when(consultarModeloNegocioUseCase.ejecutar(recintoId)).thenReturn(Mono.just(config));
-        when(liquidacionRestMapper.toModeloNegocioResponse(config)).thenReturn(response);
-
-        webTestClient.get()
-                .uri("/api/v1/recintos/{id}/modelo-negocio", recintoId)
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody()
-                .jsonPath("$.modelo").isEqualTo("REPARTO_INGRESOS")
-                .jsonPath("$.tipoRecinto").isEqualTo("ESTADIO");
-    }
-
-    @Test
-    void getModeloNegocioSinConfiguracionRetorna422() {
-        UUID recintoId = UUID.randomUUID();
-
-        when(consultarModeloNegocioUseCase.ejecutar(recintoId))
-                .thenReturn(Mono.error(new LiquidacionNoConfiguradaException("No configurado")));
-
-        webTestClient.get()
-                .uri("/api/v1/recintos/{id}/modelo-negocio", recintoId)
-                .exchange()
-                .expectStatus().isEqualTo(422);
-    }
-
-    @Test
-    void getModeloNegocioRecintoInexistenteRetorna404() {
-        UUID recintoId = UUID.randomUUID();
-
-        when(consultarModeloNegocioUseCase.ejecutar(recintoId))
-                .thenReturn(Mono.error(new RecintoNotFoundException("Recinto no encontrado")));
-
-        webTestClient.get()
-                .uri("/api/v1/recintos/{id}/modelo-negocio", recintoId)
-                .exchange()
-                .expectStatus().isNotFound();
-    }
-
-    // ======================== US1: Snapshot ========================
 
     @Test
     void getSnapshotEventoFinalizadoRetorna200ConCondiciones() {
@@ -149,10 +54,13 @@ class LiquidacionControllerTest {
                 .build();
         SnapshotLiquidacionResponse response = new SnapshotLiquidacionResponse(
                 eventoId,
+                null,
+                null,
+                null,
                 List.of(
-                        new CondicionTicketResponse("VENDIDO_SIN_ASISTENCIA", 50, BigDecimal.valueOf(2500000)),
-                        new CondicionTicketResponse("CORTESIA", 10, BigDecimal.ZERO),
-                        new CondicionTicketResponse("CANCELADO", 5, BigDecimal.valueOf(250000))
+                        new CondicionTicketResponse("VENDIDO_SIN_ASISTENCIA", 50, BigDecimal.valueOf(2500000), null),
+                        new CondicionTicketResponse("CORTESIA", 10, BigDecimal.ZERO, null),
+                        new CondicionTicketResponse("CANCELADO", 5, BigDecimal.valueOf(250000), null)
                 ),
                 snapshot.getTimestampGeneracion()
         );
@@ -196,7 +104,10 @@ class LiquidacionControllerTest {
                 .build();
         SnapshotLiquidacionResponse response = new SnapshotLiquidacionResponse(
                 eventoId,
-                List.of(new CondicionTicketResponse("VENDIDO_SIN_ASISTENCIA", 100, BigDecimal.valueOf(5000000))),
+                null,
+                null,
+                null,
+                List.of(new CondicionTicketResponse("VENDIDO_SIN_ASISTENCIA", 100, BigDecimal.valueOf(5000000), null)),
                 snapshot.getTimestampGeneracion()
         );
 
@@ -227,9 +138,12 @@ class LiquidacionControllerTest {
                 .build();
         SnapshotLiquidacionResponse response = new SnapshotLiquidacionResponse(
                 eventoId,
+                null,
+                null,
+                null,
                 List.of(
-                        new CondicionTicketResponse("VENDIDO_SIN_ASISTENCIA", 80, BigDecimal.valueOf(4000000)),
-                        new CondicionTicketResponse("CORTESIA", 20, BigDecimal.ZERO)
+                        new CondicionTicketResponse("VENDIDO_SIN_ASISTENCIA", 80, BigDecimal.valueOf(4000000), null),
+                        new CondicionTicketResponse("CORTESIA", 20, BigDecimal.ZERO, null)
                 ),
                 snapshot.getTimestampGeneracion()
         );
@@ -257,5 +171,4 @@ class LiquidacionControllerTest {
                 .exchange()
                 .expectStatus().isNotFound();
     }
-
 }

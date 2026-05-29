@@ -8,7 +8,7 @@ import java.util.UUID;
 public record HistorialEstadoVentaResponse(
         UUID id,
         UUID ventaId,
-        UUID actorId,
+        UUID agenteId,
         EstadoVenta estadoAnterior,
         EstadoVenta estadoNuevo,
         String justificacion,

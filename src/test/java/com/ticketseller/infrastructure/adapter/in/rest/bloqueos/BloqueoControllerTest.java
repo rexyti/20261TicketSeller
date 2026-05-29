@@ -137,9 +137,9 @@ class BloqueoControllerTest {
     @Test
     void getBloqueosPanelRetorna200ConListaActiva() {
         PanelItem panelItem = new PanelItem(bloqueoId, TipoPanelItem.BLOQUEO, asientoId,
-                "Sponsor", "ACTIVO", LocalDateTime.now(), null, null, null);
+                "Sponsor", "ACTIVO", LocalDateTime.now(), null, null);
         PanelItemResponse panelResponse = new PanelItemResponse(bloqueoId, "BLOQUEO", asientoId,
-                "Sponsor", "ACTIVO", LocalDateTime.now(), null, null, null);
+                "Sponsor", "ACTIVO", LocalDateTime.now(), null, null);
 
         when(consultarPanelBloqueosUseCase.ejecutar(eq(eventoId), eq(null))).thenReturn(Flux.just(panelItem));
         when(bloqueoRestMapper.toPanelItemResponse(panelItem)).thenReturn(panelResponse);
@@ -156,9 +156,9 @@ class BloqueoControllerTest {
     @Test
     void getBloqueosPanelFiltradoPorCortesiaRetornaSoloCortesias() {
         PanelItem cortesiaItem = new PanelItem(UUID.randomUUID(), TipoPanelItem.CORTESIA, null,
-                "Prensa", "GENERADA", LocalDateTime.now(), null, "codigo-123", "PRENSA");
+                "Prensa", "GENERADA", LocalDateTime.now(), null, "PRENSA");
         PanelItemResponse cortesiaResponse = new PanelItemResponse(cortesiaItem.id(), "CORTESIA", null,
-                "Prensa", "GENERADA", LocalDateTime.now(), null, "codigo-123", "PRENSA");
+                "Prensa", "GENERADA", LocalDateTime.now(), null, "PRENSA");
 
         when(consultarPanelBloqueosUseCase.ejecutar(eq(eventoId), eq(TipoPanelItem.CORTESIA)))
                 .thenReturn(Flux.just(cortesiaItem));
@@ -196,12 +196,15 @@ class BloqueoControllerTest {
 
     @Test
     void deleteBloqueoLiberaAsientoADisponible() {
-        when(liberarBloqueoUseCase.ejecutar(eq(bloqueoId))).thenReturn(Mono.empty());
+        Bloqueo bloqueo = buildBloqueo();
+        BloqueoResponse response = new BloqueoResponse(bloqueoId, List.of(asientoId), "Sponsor", "LIBERADO", LocalDateTime.now());
+        when(liberarBloqueoUseCase.ejecutar(eq(bloqueoId))).thenReturn(Mono.just(bloqueo));
+        when(bloqueoRestMapper.toBloqueoResponse(bloqueo)).thenReturn(response);
 
         webTestClient.delete()
-                .uri("/api/v1/admin/bloqueos/{bloqueoId}", bloqueoId)
+                .uri("/api/v1/admin/bloqueos/{bloqueoId}/liberar", bloqueoId)
                 .exchange()
-                .expectStatus().isNoContent();
+                .expectStatus().isOk();
     }
 
     @Test
@@ -210,7 +213,7 @@ class BloqueoControllerTest {
                 .thenReturn(Mono.error(new BloqueoNoEncontradoException(bloqueoId)));
 
         webTestClient.delete()
-                .uri("/api/v1/admin/bloqueos/{bloqueoId}", bloqueoId)
+                .uri("/api/v1/admin/bloqueos/{bloqueoId}/liberar", bloqueoId)
                 .exchange()
                 .expectStatus().isNotFound();
     }

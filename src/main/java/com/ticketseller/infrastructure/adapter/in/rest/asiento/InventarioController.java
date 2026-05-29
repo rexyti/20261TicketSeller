@@ -1,12 +1,12 @@
 package com.ticketseller.infrastructure.adapter.in.rest.asiento;
 
+import com.ticketseller.application.inventario.AsientoEnEvento;
 import com.ticketseller.application.inventario.ConfirmarOcupacionUseCase;
 import com.ticketseller.application.inventario.LiberarHoldUseCase;
 import com.ticketseller.application.inventario.ObtenerInventarioEventoUseCase;
 import com.ticketseller.application.inventario.VerificarDisponibilidadUseCase;
 import com.ticketseller.infrastructure.adapter.in.rest.asiento.dto.DisponibilidadResponse;
 import com.ticketseller.infrastructure.adapter.in.rest.asiento.dto.InventarioResponse;
-import com.ticketseller.infrastructure.adapter.in.rest.mapper.AsientoRestMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -33,27 +33,27 @@ public class InventarioController {
     private final ConfirmarOcupacionUseCase confirmarOcupacionUseCase;
     private final LiberarHoldUseCase liberarHoldUseCase;
     private final ObtenerInventarioEventoUseCase obtenerInventarioEventoUseCase;
-    private final AsientoRestMapper asientoRestMapper;
 
-    @Operation(summary = "Obtener inventario de asientos de un evento")
+    @Operation(summary = "Obtener inventario de asientos de un evento con su estado por evento")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Inventario obtenido exitosamente")
     })
     @GetMapping
     public Flux<InventarioResponse> obtenerInventario(@PathVariable UUID eventoId) {
         return obtenerInventarioEventoUseCase.ejecutar(eventoId)
-                .map(asientoRestMapper::toInventarioResponse);
+                .map(this::toInventarioResponse);
     }
 
-    @Operation(summary = "Verificar disponibilidad de un asiento")
+    @Operation(summary = "Verificar disponibilidad de un asiento para un evento específico")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Verificación exitosa"),
             @ApiResponse(responseCode = "404", description = "Asiento no encontrado")
     })
     @GetMapping("/{id}/disponibilidad")
-    public Mono<ResponseEntity<DisponibilidadResponse>> verificarDisponibilidad(@PathVariable UUID id) {
-        return verificarDisponibilidadUseCase.ejecutar(id)
-                .map(asiento -> ResponseEntity.ok(asientoRestMapper.toDisponibilidadResponse(asiento)))
+    public Mono<ResponseEntity<DisponibilidadResponse>> verificarDisponibilidad(
+            @PathVariable UUID eventoId, @PathVariable UUID id) {
+        return verificarDisponibilidadUseCase.ejecutar(id, eventoId)
+                .map(ae -> ResponseEntity.ok(toDisponibilidadResponse(ae)))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
@@ -61,23 +61,32 @@ public class InventarioController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Asiento marcado como VENDIDO"),
             @ApiResponse(responseCode = "404", description = "Asiento no encontrado"),
-            @ApiResponse(responseCode = "409", description = "Hold expirado o asiento no en estado RESERVADO")
+            @ApiResponse(responseCode = "409", description = "Hold expirado o no existente para este evento")
     })
     @PatchMapping("/{id}/ocupar")
-    public Mono<ResponseEntity<DisponibilidadResponse>> ocupar(@PathVariable UUID id) {
-        return confirmarOcupacionUseCase.ejecutar(id)
-                .map(asiento -> ResponseEntity.ok(asientoRestMapper.toDisponibilidadResponse(asiento)));
+    public Mono<ResponseEntity<DisponibilidadResponse>> ocupar(
+            @PathVariable UUID eventoId, @PathVariable UUID id) {
+        return confirmarOcupacionUseCase.ejecutar(id, eventoId)
+                .map(hold -> ResponseEntity.ok(new DisponibilidadResponse(hold.getAsientoId(), hold.getEstado().name())));
     }
 
-    @Operation(summary = "Liberar el hold de un asiento tras pago fallido")
+    @Operation(summary = "Liberar el hold de un asiento tras pago fallido o cancelación")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Asiento liberado y disponible"),
-            @ApiResponse(responseCode = "404", description = "Asiento no encontrado")
+            @ApiResponse(responseCode = "200", description = "Hold liberado, asiento disponible"),
+            @ApiResponse(responseCode = "404", description = "Hold no encontrado para este evento")
     })
     @PatchMapping("/{id}/liberar")
-    public Mono<ResponseEntity<DisponibilidadResponse>> liberar(@PathVariable UUID id) {
-        return liberarHoldUseCase.ejecutar(id)
-                .flatMap(hold -> verificarDisponibilidadUseCase.ejecutar(id))
-                .map(asiento -> ResponseEntity.ok(asientoRestMapper.toDisponibilidadResponse(asiento)));
+    public Mono<ResponseEntity<DisponibilidadResponse>> liberar(
+            @PathVariable UUID eventoId, @PathVariable UUID id) {
+        return liberarHoldUseCase.ejecutar(id, eventoId)
+                .map(hold -> ResponseEntity.ok(new DisponibilidadResponse(hold.getAsientoId(), AsientoEnEvento.DISPONIBLE)));
+    }
+
+    private InventarioResponse toInventarioResponse(AsientoEnEvento ae) {
+        return new InventarioResponse(ae.asientoId(), ae.numero(), ae.zonaId(), ae.estadoEnEvento());
+    }
+
+    private DisponibilidadResponse toDisponibilidadResponse(AsientoEnEvento ae) {
+        return new DisponibilidadResponse(ae.asientoId(), ae.estadoEnEvento());
     }
 }

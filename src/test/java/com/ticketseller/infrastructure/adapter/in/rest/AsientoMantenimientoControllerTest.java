@@ -2,6 +2,7 @@ package com.ticketseller.infrastructure.adapter.in.rest;
 
 import com.ticketseller.application.asiento.CambiarEstadoAsientoUseCase;
 import com.ticketseller.application.asiento.CambiarEstadoMasivoUseCase;
+import com.ticketseller.application.asiento.ConsultarAsientosEventoUseCase;
 import com.ticketseller.application.asiento.ConsultarHistorialAsientoUseCase;
 import com.ticketseller.domain.model.asiento.EstadoAsiento;
 import com.ticketseller.infrastructure.adapter.in.rest.asiento.AsientoMantenimientoController;
@@ -34,6 +35,9 @@ class AsientoMantenimientoControllerTest {
 
     @MockBean
     private CambiarEstadoMasivoUseCase cambiarEstadoMasivoUseCase;
+
+    @MockBean
+    private ConsultarAsientosEventoUseCase consultarAsientosEventoUseCase;
 
     @MockBean
     private ConsultarHistorialAsientoUseCase consultarHistorialAsientoUseCase;

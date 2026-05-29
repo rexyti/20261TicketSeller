@@ -39,3 +39,5 @@ CREATE TABLE transacciones_financieras (
 
 CREATE INDEX idx_tickets_evento_zona_estado ON tickets (evento_id, zona_id, estado);
 CREATE INDEX idx_ventas_estado_expiracion ON ventas (estado, fecha_expiracion);
+CREATE INDEX IF NOT EXISTS idx_tickets_id_estado ON tickets (id, estado);
+CREATE INDEX IF NOT EXISTS idx_tickets_venta_id ON tickets (venta_id);

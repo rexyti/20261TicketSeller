@@ -5,6 +5,7 @@ import com.ticketseller.application.postventa.TicketConReembolso;
 import com.ticketseller.domain.model.postventa.Reembolso;
 import com.ticketseller.domain.model.ticket.Ticket;
 import com.ticketseller.infrastructure.adapter.in.rest.postventa.dto.CancelacionResponse;
+import com.ticketseller.infrastructure.adapter.in.rest.postventa.dto.ReembolsoPendienteResponse;
 import com.ticketseller.infrastructure.adapter.in.rest.postventa.dto.ReembolsoResponse;
 import com.ticketseller.infrastructure.adapter.in.rest.postventa.dto.TicketConReembolsoResponse;
 import org.mapstruct.Mapper;
@@ -16,6 +17,9 @@ public interface PostVentaRestMapper {
 
     @Mapping(source = "id", target = "reembolsoId")
     ReembolsoResponse toReembolsoResponse(Reembolso reembolso);
+
+    @Mapping(source = "id", target = "reembolsoId")
+    ReembolsoPendienteResponse toReembolsoPendienteResponse(Reembolso reembolso);
 
     @Mapping(source = "id", target = "ticketId")
     @Mapping(source = "estado", target = "estadoTicket")

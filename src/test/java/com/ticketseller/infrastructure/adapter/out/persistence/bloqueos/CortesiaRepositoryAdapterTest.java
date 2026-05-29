@@ -83,7 +83,6 @@ class CortesiaRepositoryAdapterTest {
         StepVerifier.create(adapter.guardar(cortesia))
                 .expectNextMatches(c -> EstadoCortesia.GENERADA.equals(c.getEstado())
                         && CategoriaCortesia.PRENSA.equals(c.getCategoria())
-                        && c.getCodigoUnico() != null
                         && c.getAsientoId() == null)
                 .verifyComplete();
     }
@@ -104,7 +103,6 @@ class CortesiaRepositoryAdapterTest {
                 .eventoId(eventoId)
                 .destinatario("Periodista ABC")
                 .categoria(CategoriaCortesia.PRENSA)
-                .codigoUnico(UUID.randomUUID().toString())
                 .estado(EstadoCortesia.GENERADA)
                 .build();
     }

@@ -86,7 +86,9 @@ CREATE TABLE eventos (
     fecha_fin TIMESTAMP NOT NULL,
     tipo VARCHAR(100) NOT NULL,
     recinto_id UUID NOT NULL REFERENCES recintos(id),
-    estado VARCHAR(40) NOT NULL
+    nombre_recinto VARCHAR(150),
+    estado VARCHAR(40) NOT NULL,
+    reingreso_habilitado BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 CREATE TABLE cancelaciones_evento (
@@ -100,6 +102,7 @@ CREATE TABLE precios_zona (
     id UUID PRIMARY KEY,
     evento_id UUID NOT NULL REFERENCES eventos(id),
     zona_id UUID NOT NULL REFERENCES zonas(id),
+    nombre_zona VARCHAR(100),
     precio NUMERIC(12,2) NOT NULL
 );
 
@@ -181,7 +184,7 @@ CREATE TABLE historial_cambios_estado (
 CREATE TABLE historial_estado_venta (
     id UUID PRIMARY KEY,
     venta_id UUID NOT NULL REFERENCES ventas(id),
-    actor_id UUID,
+    agente_id UUID,
     estado_anterior VARCHAR(40) NOT NULL,
     estado_nuevo VARCHAR(40) NOT NULL,
     justificacion VARCHAR(255),
@@ -191,7 +194,7 @@ CREATE TABLE historial_estado_venta (
 CREATE TABLE promociones (
     id UUID PRIMARY KEY,
     nombre VARCHAR(150) NOT NULL,
-    tipo VARCHAR(20) NOT NULL,
+    mecanismo VARCHAR(20) NOT NULL,
     evento_id UUID NOT NULL REFERENCES eventos(id),
     fecha_inicio TIMESTAMP NOT NULL,
     fecha_fin TIMESTAMP NOT NULL,
@@ -235,7 +238,6 @@ CREATE TABLE cortesias (
     evento_id UUID NOT NULL REFERENCES eventos(id),
     destinatario VARCHAR(255) NOT NULL,
     categoria VARCHAR(50) NOT NULL,
-    codigo_unico VARCHAR(100) NOT NULL UNIQUE,
     ticket_id UUID REFERENCES tickets(id),
     estado VARCHAR(20) NOT NULL
 );

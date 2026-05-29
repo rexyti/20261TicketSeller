@@ -16,7 +16,7 @@ import java.util.UUID;
 public class HistorialEstadoVenta {
     private UUID id;
     private UUID ventaId;
-    private UUID actorId;
+    private UUID agenteId;
     private EstadoVenta estadoAnterior;
     private EstadoVenta estadoNuevo;
     private String justificacion;

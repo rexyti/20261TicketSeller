@@ -6,6 +6,7 @@ CREATE TABLE eventos
     fecha_fin    TIMESTAMP    NOT NULL,
     tipo         VARCHAR(100) NOT NULL,
     recinto_id   UUID         NOT NULL REFERENCES recintos (id),
+    nombre_recinto VARCHAR(150) NOT NULL,
     estado       VARCHAR(40)  NOT NULL,
     reingreso_habilitado BOOLEAN NOT NULL DEFAULT FALSE
 );

@@ -32,8 +32,18 @@ public class AsientoHoldRepositoryAdapter implements AsientoHoldRepositoryPort {
     }
 
     @Override
-    public Mono<AsientoHold> buscarActivoPorAsientoId(UUID asientoId) {
-        return repository.findActiveByAsientoId(asientoId).map(mapper::toDomain);
+    public Mono<AsientoHold> buscarActivoPorAsientoYEvento(UUID asientoId, UUID eventoId) {
+        return repository.findActiveByAsientoIdAndEventoId(asientoId, eventoId).map(mapper::toDomain);
+    }
+
+    @Override
+    public Flux<AsientoHold> buscarPorAsientoYEvento(UUID asientoId, UUID eventoId) {
+        return repository.findByAsientoIdAndEventoId(asientoId, eventoId).map(mapper::toDomain);
+    }
+
+    @Override
+    public Flux<AsientoHold> buscarPorEvento(UUID eventoId) {
+        return repository.findByEventoId(eventoId).map(mapper::toDomain);
     }
 
     @Override

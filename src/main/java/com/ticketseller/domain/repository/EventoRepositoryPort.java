@@ -14,7 +14,7 @@ public interface EventoRepositoryPort {
 
     Mono<Evento> buscarPorId(UUID id);
 
-    Flux<Evento> listarActivos();
+    Flux<Evento> listarTodos();
 
     Flux<Evento> listarPorEstado(EstadoEvento estado);
 

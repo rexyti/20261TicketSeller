@@ -32,4 +32,3 @@ public class RecintoEntity {
     private Boolean activo;
     private String categoria;
 }
-

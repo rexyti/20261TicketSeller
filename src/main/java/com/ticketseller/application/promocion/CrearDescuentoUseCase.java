@@ -23,7 +23,7 @@ public class CrearDescuentoUseCase {
     public Mono<Descuento> ejecutar(UUID promocionId, Descuento request) {
         return promocionRepositoryPort.buscarPorId(promocionId)
                 .switchIfEmpty(Mono.error(new PromocionNotFoundException("La promoción indicada no existe")))
-                .filter(Promocion::estaActiva)
+                .filter(Promocion::isActiva)
                 .switchIfEmpty(Mono.error(new PromocionNoActivaException("Solo se pueden agregar descuentos a promociones activas")))
                 .doOnNext(p -> request.validar())
                 .flatMap(p -> validarZona(request, p.getEventoId()))

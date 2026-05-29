@@ -15,6 +15,7 @@ import java.util.UUID;
 public class AsientoHold {
     private UUID id;
     private UUID asientoId;
+    private UUID eventoId;
     private UUID ventaId;
     private String numero;
     private LocalDateTime expiraEn;
@@ -28,17 +29,17 @@ public class AsientoHold {
         return EstadoHold.EXPIRADO.equals(estado);
     }
 
-    public boolean isCompletada(){
-        return EstadoHold.COMPLETADA.equals(estado);
+    public boolean isVendido(){
+        return EstadoHold.VENDIDO.equals(estado);
     }
 
     public boolean isActiva(){
-        return isReservado() && expiraEn.isBefore(LocalDateTime.now());
+        return isReservado() && expiraEn.isAfter(LocalDateTime.now());
     }
 
-    public void completar(){
+    public void vender(){
         if (isReservado()){
-            this.estado = EstadoHold.COMPLETADA;
+            this.estado = EstadoHold.VENDIDO;
         }
     }
 

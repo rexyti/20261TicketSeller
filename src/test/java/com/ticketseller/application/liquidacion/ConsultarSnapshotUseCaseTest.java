@@ -7,6 +7,7 @@ import com.ticketseller.domain.model.evento.Evento;
 import com.ticketseller.domain.model.evento.SnapshotLiquidacion;
 import com.ticketseller.domain.repository.EventoRepositoryPort;
 import com.ticketseller.domain.repository.LiquidacionQueryPort;
+import com.ticketseller.domain.repository.RecintoRepositoryPort;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -25,7 +26,8 @@ class ConsultarSnapshotUseCaseTest {
 
     private final EventoRepositoryPort eventoRepositoryPort = mock(EventoRepositoryPort.class);
     private final LiquidacionQueryPort liquidacionQueryPort = mock(LiquidacionQueryPort.class);
-    private final ConsultarSnapshotUseCase useCase = new ConsultarSnapshotUseCase(eventoRepositoryPort, liquidacionQueryPort);
+    private final RecintoRepositoryPort recintoRepositoryPort = mock(RecintoRepositoryPort.class);
+    private final ConsultarSnapshotUseCase useCase = new ConsultarSnapshotUseCase(eventoRepositoryPort, liquidacionQueryPort, recintoRepositoryPort);
 
     @Test
     void deberiaRetornarSnapshotCuandoEventoFinalizado() {

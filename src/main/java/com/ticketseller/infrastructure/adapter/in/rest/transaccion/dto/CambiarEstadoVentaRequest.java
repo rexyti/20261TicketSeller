@@ -11,6 +11,6 @@ public record CambiarEstadoVentaRequest(
         EstadoVenta nuevoEstado,
         @NotBlank(message = "justificacion es obligatoria")
         String justificacion,
-        UUID actorId
+        UUID agenteId
 ) {
 }

@@ -28,8 +28,8 @@ public class EventoRepositoryAdapter implements EventoRepositoryPort {
     }
 
     @Override
-    public Flux<Evento> listarActivos() {
-        return repository.findByEstado(EstadoEvento.ACTIVO.name()).map(mapper::toDomain);
+    public Flux<Evento> listarTodos() {
+        return repository.findAll().map(mapper::toDomain);
     }
 
     @Override

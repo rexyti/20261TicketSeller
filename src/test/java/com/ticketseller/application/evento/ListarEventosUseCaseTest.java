@@ -13,11 +13,11 @@ import static org.mockito.Mockito.when;
 class ListarEventosUseCaseTest {
 
     @Test
-    void deberiaListarActivosPorDefecto() {
+    void deberiaListarTodosCuandoNoHayFiltro() {
         EventoRepositoryPort repositoryPort = mock(EventoRepositoryPort.class);
         ListarEventosUseCase useCase = new ListarEventosUseCase(repositoryPort);
 
-        when(repositoryPort.listarActivos()).thenReturn(Flux.just(Evento.builder().nombre("E1").build()));
+        when(repositoryPort.listarTodos()).thenReturn(Flux.just(Evento.builder().nombre("E1").build()));
 
         StepVerifier.create(useCase.ejecutar(null))
                 .expectNextMatches(evento -> "E1".equals(evento.getNombre()))

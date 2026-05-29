@@ -6,12 +6,6 @@ import com.ticketseller.domain.exception.bloqueos.AsientoYaBloqueadoException;
 import com.ticketseller.domain.exception.bloqueos.BloqueoNoEncontradoException;
 import com.ticketseller.domain.exception.compuerta.CompuertaInvalidaException;
 import com.ticketseller.domain.exception.compuerta.CompuertaNotFoundException;
-import com.ticketseller.domain.exception.conciliacion.DiscrepanciaSinAgenteException;
-import com.ticketseller.domain.exception.conciliacion.JustificacionInvalidaException;
-import com.ticketseller.domain.exception.conciliacion.PagoEnDiscrepanciaException;
-import com.ticketseller.domain.exception.conciliacion.PagoNoEnDiscrepanciaException;
-import com.ticketseller.domain.exception.conciliacion.TransaccionDuplicadaException;
-import com.ticketseller.domain.exception.conciliacion.TransaccionNoConfirmadaException;
 import com.ticketseller.domain.exception.evento.EventoCanceladoSinMotivoException;
 import com.ticketseller.domain.exception.evento.EventoEnProgresoException;
 import com.ticketseller.domain.exception.evento.EventoNoFinalizadoException;
@@ -19,8 +13,6 @@ import com.ticketseller.domain.exception.evento.EventoNotFoundException;
 import com.ticketseller.domain.exception.evento.EventoSolapamientoException;
 import com.ticketseller.domain.exception.evento.SolicitudRegistroEventoInvalidaException;
 import com.ticketseller.domain.exception.liquidacion.LiquidacionNoConfiguradaException;
-import com.ticketseller.domain.exception.liquidacion.ModeloNegocioInvalidoException;
-import com.ticketseller.domain.exception.liquidacion.MontoFijoInvalidoException;
 import com.ticketseller.domain.exception.postventa.CambioEstadoTicketSinJustificacionException;
 import com.ticketseller.domain.exception.postventa.CancelacionFueraDePlazoException;
 import com.ticketseller.domain.exception.postventa.EstadoTicketInvalidoException;
@@ -119,21 +111,6 @@ public class GlobalExceptionHandler {
         return error("TRANSICION_VENTA_INVALIDA", ex.getMessage(), HttpStatus.UNPROCESSABLE_ENTITY);
     }
 
-    @ExceptionHandler(TransaccionDuplicadaException.class)
-    public ResponseEntity<ApiErrorResponse> transaccionDuplicada(TransaccionDuplicadaException ex) {
-        return error("TRANSACCION_DUPLICADA", ex.getMessage(), HttpStatus.CONFLICT);
-    }
-
-    @ExceptionHandler(TransaccionNoConfirmadaException.class)
-    public ResponseEntity<ApiErrorResponse> transaccionNoConfirmada(TransaccionNoConfirmadaException ex) {
-        return error("TRANSACCION_NOT_FOUND", ex.getMessage(), HttpStatus.NOT_FOUND);
-    }
-
-    @ExceptionHandler(PagoEnDiscrepanciaException.class)
-    public ResponseEntity<ApiErrorResponse> pagoEnDiscrepancia(PagoEnDiscrepanciaException ex) {
-        return error("PAGO_EN_DISCREPANCIA", ex.getMessage(), HttpStatus.CONFLICT);
-    }
-
     @ExceptionHandler({AsientoYaBloqueadoException.class, AsientoOcupadoException.class})
     public ResponseEntity<ApiErrorResponse> bloqueoConflict(RuntimeException ex) {
         return error("BLOQUEO_CONFLICT", ex.getMessage(), HttpStatus.CONFLICT);
@@ -150,7 +127,7 @@ public class GlobalExceptionHandler {
             TipoAsientoEnUsoException.class, TipoAsientoInactivoException.class,
             TransicionEstadoInvalidaException.class, AsientoEnCompraException.class,
             AsientoEnZonaDiferenteException.class, RecintoConZonasYaActivasException.class,
-            ZonaNombreDuplicadoException.class, PagoNoEnDiscrepanciaException.class})
+            ZonaNombreDuplicadoException.class})
     public ResponseEntity<ApiErrorResponse> conflict(RuntimeException ex) {
         return error("CONFLICT", ex.getMessage(), HttpStatus.CONFLICT);
     }
@@ -195,9 +172,8 @@ public class GlobalExceptionHandler {
             SolicitudReservaInvalidaException.class, EventoCanceladoSinMotivoException.class,
             SolicitudRegistroEventoInvalidaException.class, CambioEstadoTicketSinJustificacionException.class,
             EstadoTicketInvalidoException.class, MontoReembolsoInvalidoException.class,
-            SolicitudCancelacionTicketsInvalidaException.class, JustificacionInvalidaException.class,
-            CambioEstadoVentaSinJustificacionException.class, ModeloNegocioInvalidoException.class,
-            MontoFijoInvalidoException.class, FechasInvalidasPromocionException.class})
+            SolicitudCancelacionTicketsInvalidaException.class,
+            CambioEstadoVentaSinJustificacionException.class, FechasInvalidasPromocionException.class})
     public ResponseEntity<ApiErrorResponse> badRequest(RuntimeException ex) {
         return error("VALIDATION_ERROR", ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
@@ -209,8 +185,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler({CancelacionFueraDePlazoException.class,
             com.ticketseller.domain.exception.postventa.TransicionEstadoInvalidaException.class,
-            RecintoNoCategorizadoException.class, TicketNoAptoParaReembolsoException.class,
-            DiscrepanciaSinAgenteException.class})
+            RecintoNoCategorizadoException.class, TicketNoAptoParaReembolsoException.class})
     public ResponseEntity<ApiErrorResponse> unprocessable(RuntimeException ex) {
         return error("UNPROCESSABLE_ENTITY", ex.getMessage(), HttpStatus.UNPROCESSABLE_ENTITY);
     }

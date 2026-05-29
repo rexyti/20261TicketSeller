@@ -21,6 +21,8 @@ public class AsientoHoldEntity {
     private UUID id;
     @Column("asiento_id")
     private UUID asientoId;
+    @Column("evento_id")
+    private UUID eventoId;
     @Column("venta_id")
     private UUID ventaId;
     private String numero;

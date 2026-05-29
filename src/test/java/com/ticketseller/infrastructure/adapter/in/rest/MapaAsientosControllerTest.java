@@ -66,7 +66,7 @@ class MapaAsientosControllerTest {
                 .estado(EstadoAsiento.DISPONIBLE)
                 .build();
 
-        AsientoResponse response = new AsientoResponse(asientoId, "A", 1, "A1", zonaId, EstadoAsiento.DISPONIBLE);
+        AsientoResponse response = new AsientoResponse(asientoId, "A", 1, "A1", zonaId, EstadoAsiento.DISPONIBLE.name());
 
         when(asignarAsientosAZonaUseCase.ejecutar(any(), any())).thenReturn(Flux.just(asiento));
         when(asientoRestMapper.toAsientoResponse(asiento)).thenReturn(response);
@@ -157,7 +157,7 @@ class MapaAsientosControllerTest {
                 .build();
 
         Pagina<Asiento> pagina = new Pagina<>(List.of(asiento), 1L, 0, 20);
-        AsientoResponse response = new AsientoResponse(asiento.getId(), "A", 1, "A1", zonaId, EstadoAsiento.DISPONIBLE);
+        AsientoResponse response = new AsientoResponse(asiento.getId(), "A", 1, "A1", zonaId, EstadoAsiento.DISPONIBLE.name());
 
         when(consultarMapaAsientosUseCase.ejecutar(any(), anyInt(), anyInt())).thenReturn(Mono.just(pagina));
         when(asientoRestMapper.toAsientoResponse(asiento)).thenReturn(response);

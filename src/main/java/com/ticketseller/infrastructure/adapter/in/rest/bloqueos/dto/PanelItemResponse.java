@@ -11,7 +11,6 @@ public record PanelItemResponse(
         String estado,
         LocalDateTime fechaCreacion,
         LocalDateTime fechaExpiracion,
-        String codigoUnico,
         String categoria
 ) {
 }

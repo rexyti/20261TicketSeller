@@ -16,14 +16,14 @@ public class Promocion {
 
     private UUID id;
     private String nombre;
-    private TipoPromocion tipo;
+    private MecanismoAplicacion mecanismo;
     private UUID eventoId;
     private LocalDateTime fechaInicio;
     private LocalDateTime fechaFin;
     private EstadoPromocion estado;
     private TipoUsuario tipoUsuarioRestringido;
 
-    public boolean estaActiva() {
+    public boolean isActiva() {
         return EstadoPromocion.ACTIVA.equals(estado);
     }
 
@@ -39,10 +39,6 @@ public class Promocion {
 
     private boolean nombreInvalido() {
         return nombre == null || nombre.isBlank();
-    }
-
-    public boolean isActiva(){
-        return EstadoPromocion.ACTIVA.equals(estado);
     }
 
     public boolean isPausada(){

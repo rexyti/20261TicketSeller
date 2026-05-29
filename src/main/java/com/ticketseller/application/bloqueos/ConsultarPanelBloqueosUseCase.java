@@ -41,14 +41,14 @@ public class ConsultarPanelBloqueosUseCase {
         return new PanelItem(
                 b.getId(), TipoPanelItem.BLOQUEO, b.getAsientoId(),
                 b.getDestinatario(), b.getEstado().name(),
-                b.getFechaCreacion(), b.getFechaExpiracion(), null, null);
+                b.getFechaCreacion(), b.getFechaExpiracion(), null);
     }
 
     private PanelItem toPanelItemDeCortesia(Cortesia c) {
         return new PanelItem(
                 c.getId(), TipoPanelItem.CORTESIA, c.getAsientoId(),
                 c.getDestinatario(), c.getEstado().name(),
-                null, null, c.getCodigoUnico(),
+                null, null,
                 c.getCategoria() != null ? c.getCategoria().name() : null);
     }
 

@@ -6,7 +6,7 @@ import com.ticketseller.domain.model.promocion.Descuento;
 import com.ticketseller.domain.model.promocion.EstadoPromocion;
 import com.ticketseller.domain.model.promocion.Promocion;
 import com.ticketseller.domain.model.promocion.TipoDescuento;
-import com.ticketseller.domain.model.promocion.TipoPromocion;
+import com.ticketseller.domain.model.promocion.MecanismoAplicacion;
 import com.ticketseller.domain.repository.DescuentoRepositoryPort;
 import com.ticketseller.domain.repository.PromocionRepositoryPort;
 import com.ticketseller.domain.repository.ZonaRepositoryPort;
@@ -150,7 +150,7 @@ class CrearDescuentoUseCaseTest {
         return Promocion.builder()
                 .id(id)
                 .nombre("Descuento Flash")
-                .tipo(TipoPromocion.DESCUENTO)
+                .mecanismo(MecanismoAplicacion.AUTOMATICO)
                 .eventoId(UUID.randomUUID())
                 .fechaInicio(LocalDateTime.now().minusDays(1))
                 .fechaFin(LocalDateTime.now().plusDays(7))

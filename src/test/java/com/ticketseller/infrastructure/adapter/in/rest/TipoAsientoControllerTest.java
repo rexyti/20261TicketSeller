@@ -1,6 +1,7 @@
 package com.ticketseller.infrastructure.adapter.in.rest;
 
 import com.ticketseller.application.tipoasiento.AsignarTipoAsientoAZonaUseCase;
+import com.ticketseller.application.tipoasiento.ConsultarTipoAsientoUseCase;
 import com.ticketseller.application.tipoasiento.CrearTipoAsientoUseCase;
 import com.ticketseller.application.tipoasiento.DesactivarTipoAsientoUseCase;
 import com.ticketseller.application.tipoasiento.EditarTipoAsientoUseCase;
@@ -42,6 +43,8 @@ class TipoAsientoControllerTest {
     @MockBean
     private AsignarTipoAsientoAZonaUseCase asignarTipoAsientoAZonaUseCase;
     @MockBean
+    private ConsultarTipoAsientoUseCase consultarTipoAsientoUseCase;
+    @MockBean
     private TipoAsientoRestMapper tipoAsientoRestMapper;
     @MockBean
     private ZonaRestMapper zonaRestMapper;
@@ -58,7 +61,7 @@ class TipoAsientoControllerTest {
                 .build();
         var response = new TipoAsientoResponse(tipoId, "VIP", "desc", "ACTIVO", false);
         when(crearTipoAsientoUseCase.ejecutar("VIP", "desc")).thenReturn(Mono.just(tipo));
-        when(tipoAsientoRestMapper.toResponse(tipo, false)).thenReturn(response);
+        when(tipoAsientoRestMapper.toResponse(tipo)).thenReturn(response);
         webTestClient.post()
                 .uri("/api/v1/tipos-asiento")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -100,7 +103,7 @@ class TipoAsientoControllerTest {
         var response = new TipoAsientoResponse(tipoId, "VIP", "desc", "ACTIVO", false);
         when(listarTiposAsientoUseCase.ejecutar(null)).thenReturn(Flux.just(tipo));
         when(listarTiposAsientoUseCase.calcularEnUso(tipo)).thenReturn(Flux.just(false));
-        when(tipoAsientoRestMapper.toResponse(tipo, false)).thenReturn(response);
+        when(tipoAsientoRestMapper.toResponse(tipo)).thenReturn(response);
         webTestClient.get()
                 .uri("/api/v1/tipos-asiento")
                 .exchange()

@@ -4,6 +4,7 @@ import com.ticketseller.domain.exception.promocion.PromocionNoActivaException;
 import com.ticketseller.domain.exception.promocion.PromocionNotFoundException;
 import com.ticketseller.domain.model.promocion.CodigoPromocional;
 import com.ticketseller.domain.model.promocion.EstadoCodigoPromocional;
+import com.ticketseller.domain.model.promocion.MecanismoAplicacion;
 import com.ticketseller.domain.model.promocion.Promocion;
 import com.ticketseller.domain.repository.CodigoPromocionalRepositoryPort;
 import com.ticketseller.domain.repository.PromocionRepositoryPort;
@@ -26,8 +27,10 @@ public class CrearCodigosPromocionalesUseCase {
                                             String prefijo, LocalDateTime fechaFin) {
         return promocionRepositoryPort.buscarPorId(promocionId)
                 .switchIfEmpty(Mono.error(new PromocionNotFoundException("La promoción indicada no existe")))
-                .filter(Promocion::estaActiva)
+                .filter(Promocion::isActiva)
                 .switchIfEmpty(Mono.error(new PromocionNoActivaException("Solo se pueden generar códigos para promociones activas")))
+                .filter(p -> MecanismoAplicacion.CODIGO.equals(p.getMecanismo()))
+                .switchIfEmpty(Mono.error(new IllegalStateException("Solo se pueden generar códigos para promociones con mecanismo CODIGO")))
                 .flatMapMany(p -> {
                     List<CodigoPromocional> codigos = generarCodigos(promocionId, cantidad, usosMaximosPorCodigo,
                             prefijo, LocalDateTime.now(), fechaFin);

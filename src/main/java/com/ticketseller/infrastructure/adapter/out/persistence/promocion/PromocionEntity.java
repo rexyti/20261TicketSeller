@@ -23,7 +23,7 @@ public class PromocionEntity {
     @Id
     private UUID id;
     private String nombre;
-    private String tipo;
+    private String mecanismo;
     @Column("evento_id")
     private UUID eventoId;
     @Column("fecha_inicio")

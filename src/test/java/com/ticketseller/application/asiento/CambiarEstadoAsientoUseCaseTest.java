@@ -69,7 +69,7 @@ class CambiarEstadoAsientoUseCaseTest {
         
         Asiento asiento = Asiento.builder()
                 .id(asientoId)
-                .estado(EstadoAsiento.VENDIDO)
+                .estado(EstadoAsiento.INACTIVO)
                 .build();
 
         when(asientoRepositoryPort.buscarPorId(asientoId)).thenReturn(Mono.just(asiento));
