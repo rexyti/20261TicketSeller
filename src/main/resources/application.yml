@@ -2,12 +2,18 @@ spring:
   application:
     name: ticketseller
   r2dbc:
-    url: ${SPRING_R2DBC_URL:r2dbc:postgresql://localhost:5432/ticketseller}
-    username: ${SPRING_R2DBC_USERNAME:postgres}
-    password: ${SPRING_R2DBC_PASSWORD:postgres}
+    url: ${SPRING_R2DBC_URL}
+    username: ${SPRING_R2DBC_USERNAME}
+    password: ${SPRING_R2DBC_PASSWORD}
+    pool:
+      enabled: true
+      initial-size: 2
+      max-size: 10
+      max-idle-time: 30m
+      validation-query: SELECT 1
   mail:
-    host: ${SPRING_MAIL_HOST:localhost}
-    port: ${SPRING_MAIL_PORT:1025}
+    host: ${SPRING_MAIL_HOST}
+    port: ${SPRING_MAIL_PORT}
     username: ${SPRING_MAIL_USERNAME:}
     password: ${SPRING_MAIL_PASSWORD:}
     protocol: smtp
@@ -24,7 +30,7 @@ spring:
         debug: true
 
 server:
-  port: ${SERVER_PORT:8080}
+  port: ${SERVER_PORT}
 
 springdoc:
   api-docs:
