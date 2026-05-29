@@ -18,25 +18,13 @@ public class Cortesia {
     private UUID eventoId;
     private String destinatario;
     private CategoriaCortesia categoria;
-    private String codigoUnico;
     private UUID ticketId;
     private EstadoCortesia estado;
 
     public void validar() {
-        if (sinDestinatario()) {
+        if (destinatario == null || destinatario.isBlank()) {
             throw new IllegalArgumentException("El destinatario de la cortesía no puede estar vacío");
         }
-        if (sinCodigoCortesia()) {
-            throw new IllegalArgumentException("El código único de la cortesía no puede estar vacío");
-        }
-    }
-
-    private boolean sinDestinatario(){
-        return destinatario == null || destinatario.isBlank();
-    }
-
-    private boolean sinCodigoCortesia(){
-        return codigoUnico == null || codigoUnico.isBlank();
     }
 
     public boolean isGenerada(){

@@ -238,7 +238,6 @@ CREATE TABLE cortesias (
     evento_id UUID NOT NULL REFERENCES eventos(id),
     destinatario VARCHAR(255) NOT NULL,
     categoria VARCHAR(50) NOT NULL,
-    codigo_unico VARCHAR(100) NOT NULL UNIQUE,
     ticket_id UUID REFERENCES tickets(id),
     estado VARCHAR(20) NOT NULL
 );

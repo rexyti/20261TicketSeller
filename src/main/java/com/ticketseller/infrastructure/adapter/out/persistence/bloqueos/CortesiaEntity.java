@@ -26,8 +26,6 @@ public class CortesiaEntity {
     private UUID eventoId;
     private String destinatario;
     private String categoria;
-    @Column("codigo_unico")
-    private String codigoUnico;
     @Column("ticket_id")
     private UUID ticketId;
     private String estado;

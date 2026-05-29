@@ -7,6 +7,7 @@ import com.ticketseller.infrastructure.adapter.out.persistence.asientohold.Asien
 import com.ticketseller.infrastructure.adapter.out.persistence.asientohold.mapper.AsientoHoldPersistenceMapper;
 import com.ticketseller.application.bloqueos.BloquearAsientosUseCase;
 import com.ticketseller.application.bloqueos.ConsultarPanelBloqueosUseCase;
+import com.ticketseller.application.bloqueos.CortesiaTicketCreator;
 import com.ticketseller.application.bloqueos.CrearCortesiaConAsientoUseCase;
 import com.ticketseller.application.bloqueos.CrearCortesiaGeneralUseCase;
 import com.ticketseller.application.bloqueos.EditarDestinatarioBloqueoUseCase;
@@ -821,29 +822,30 @@ public class BeanConfiguration {
     }
 
     @Bean
-    public CrearCortesiaConAsientoUseCase crearCortesiaConAsientoUseCase(
-            com.ticketseller.domain.repository.AsientoRepositoryPort asientoRepositoryPort,
-            CortesiaRepositoryPort cortesiaRepositoryPort,
+    public CortesiaTicketCreator cortesiaTicketCreator(
             com.ticketseller.domain.repository.TicketRepositoryPort ticketRepositoryPort,
+            CortesiaRepositoryPort cortesiaRepositoryPort,
             ZonaRepositoryPort zonaRepositoryPort,
             CompuertaRepositoryPort compuertaRepositoryPort,
             EventoRepositoryPort eventoRepositoryPort,
-            BloqueoRepositoryPort bloqueoRepositoryPort,
-            AsientoHoldRepositoryPort asientoHoldRepositoryPort) {
-        return new CrearCortesiaConAsientoUseCase(asientoRepositoryPort, cortesiaRepositoryPort, ticketRepositoryPort,
-                zonaRepositoryPort, compuertaRepositoryPort, eventoRepositoryPort,
-                bloqueoRepositoryPort, asientoHoldRepositoryPort);
+            CodigoQrPort codigoQrPort) {
+        return new CortesiaTicketCreator(ticketRepositoryPort, cortesiaRepositoryPort,
+                zonaRepositoryPort, compuertaRepositoryPort, eventoRepositoryPort, codigoQrPort);
     }
 
     @Bean
-    public CrearCortesiaGeneralUseCase crearCortesiaGeneralUseCase(
-            CortesiaRepositoryPort cortesiaRepositoryPort,
-            com.ticketseller.domain.repository.TicketRepositoryPort ticketRepositoryPort,
-            ZonaRepositoryPort zonaRepositoryPort,
-            CompuertaRepositoryPort compuertaRepositoryPort,
-            EventoRepositoryPort eventoRepositoryPort) {
-        return new CrearCortesiaGeneralUseCase(cortesiaRepositoryPort, ticketRepositoryPort,
-                zonaRepositoryPort, compuertaRepositoryPort, eventoRepositoryPort);
+    public CrearCortesiaConAsientoUseCase crearCortesiaConAsientoUseCase(
+            com.ticketseller.domain.repository.AsientoRepositoryPort asientoRepositoryPort,
+            BloqueoRepositoryPort bloqueoRepositoryPort,
+            AsientoHoldRepositoryPort asientoHoldRepositoryPort,
+            CortesiaTicketCreator cortesiaTicketCreator) {
+        return new CrearCortesiaConAsientoUseCase(asientoRepositoryPort, bloqueoRepositoryPort,
+                asientoHoldRepositoryPort, cortesiaTicketCreator);
+    }
+
+    @Bean
+    public CrearCortesiaGeneralUseCase crearCortesiaGeneralUseCase(CortesiaTicketCreator cortesiaTicketCreator) {
+        return new CrearCortesiaGeneralUseCase(cortesiaTicketCreator);
     }
 
     @Bean

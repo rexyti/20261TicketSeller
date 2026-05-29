@@ -36,7 +36,9 @@
       "Bash(./gradlew compileTestJava --no-daemon --rerun-tasks)",
       "Bash(./gradlew compileJava --quiet)",
       "Bash(python3 -c 'import sys; from html.parser import HTMLParser; *)",
-      "Bash(git stash *)"
+      "Bash(git stash *)",
+      "Bash(./gradlew compileJava compileTestJava --no-daemon -q)",
+      "Bash(./gradlew compileJava compileTestJava --quiet)"
     ]
   }
 }

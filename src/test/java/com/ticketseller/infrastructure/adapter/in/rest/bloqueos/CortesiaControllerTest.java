@@ -66,7 +66,6 @@ class CortesiaControllerTest {
                 .exchange()
                 .expectStatus().isCreated()
                 .expectBody()
-                .jsonPath("$.codigoUnico").isNotEmpty()
                 .jsonPath("$.cortesiaId").isNotEmpty();
     }
 
@@ -91,7 +90,7 @@ class CortesiaControllerTest {
                 .exchange()
                 .expectStatus().isCreated()
                 .expectBody()
-                .jsonPath("$.codigoUnico").isNotEmpty();
+                .jsonPath("$.cortesiaId").isNotEmpty();
     }
 
     @Test
@@ -115,7 +114,7 @@ class CortesiaControllerTest {
                 .exchange()
                 .expectStatus().isCreated()
                 .expectBody()
-                .jsonPath("$.codigoUnico").isNotEmpty();
+                .jsonPath("$.cortesiaId").isNotEmpty();
     }
 
     @Test
@@ -142,13 +141,12 @@ class CortesiaControllerTest {
                 .asientoId(asientoIdRef)
                 .destinatario("Invitado")
                 .categoria(CategoriaCortesia.PATROCINADOR)
-                .codigoUnico(UUID.randomUUID().toString())
                 .estado(EstadoCortesia.GENERADA)
                 .build();
     }
 
     private CortesiaResponse buildResponse(Cortesia cortesia) {
-        return new CortesiaResponse(cortesia.getId(), cortesia.getCodigoUnico(),
+        return new CortesiaResponse(cortesia.getId(),
                 cortesia.getDestinatario(), "PATROCINADOR", cortesia.getAsientoId(), cortesia.getTicketId());
     }
 }

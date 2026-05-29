@@ -137,9 +137,9 @@ class BloqueoControllerTest {
     @Test
     void getBloqueosPanelRetorna200ConListaActiva() {
         PanelItem panelItem = new PanelItem(bloqueoId, TipoPanelItem.BLOQUEO, asientoId,
-                "Sponsor", "ACTIVO", LocalDateTime.now(), null, null, null);
+                "Sponsor", "ACTIVO", LocalDateTime.now(), null, null);
         PanelItemResponse panelResponse = new PanelItemResponse(bloqueoId, "BLOQUEO", asientoId,
-                "Sponsor", "ACTIVO", LocalDateTime.now(), null, null, null);
+                "Sponsor", "ACTIVO", LocalDateTime.now(), null, null);
 
         when(consultarPanelBloqueosUseCase.ejecutar(eq(eventoId), eq(null))).thenReturn(Flux.just(panelItem));
         when(bloqueoRestMapper.toPanelItemResponse(panelItem)).thenReturn(panelResponse);
@@ -156,9 +156,9 @@ class BloqueoControllerTest {
     @Test
     void getBloqueosPanelFiltradoPorCortesiaRetornaSoloCortesias() {
         PanelItem cortesiaItem = new PanelItem(UUID.randomUUID(), TipoPanelItem.CORTESIA, null,
-                "Prensa", "GENERADA", LocalDateTime.now(), null, "codigo-123", "PRENSA");
+                "Prensa", "GENERADA", LocalDateTime.now(), null, "PRENSA");
         PanelItemResponse cortesiaResponse = new PanelItemResponse(cortesiaItem.id(), "CORTESIA", null,
-                "Prensa", "GENERADA", LocalDateTime.now(), null, "codigo-123", "PRENSA");
+                "Prensa", "GENERADA", LocalDateTime.now(), null, "PRENSA");
 
         when(consultarPanelBloqueosUseCase.ejecutar(eq(eventoId), eq(TipoPanelItem.CORTESIA)))
                 .thenReturn(Flux.just(cortesiaItem));
