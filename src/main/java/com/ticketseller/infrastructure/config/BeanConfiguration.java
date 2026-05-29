@@ -21,7 +21,6 @@ import com.ticketseller.infrastructure.adapter.out.persistence.bloqueos.Cortesia
 import com.ticketseller.infrastructure.adapter.out.persistence.bloqueos.CortesiaRepositoryAdapter;
 import com.ticketseller.infrastructure.adapter.out.persistence.bloqueos.mapper.BloqueoPersistenceMapper;
 import com.ticketseller.infrastructure.adapter.out.persistence.bloqueos.mapper.CortesiaPersistenceMapper;
-import com.ticketseller.application.conciliacion.*;
 import com.ticketseller.application.promocion.AplicarCodigoPromoVentaUseCase;
 import com.ticketseller.application.promocion.AplicarDescuentoCarritoUseCase;
 import com.ticketseller.application.promocion.CrearCodigosPromocionalesUseCase;
@@ -118,7 +117,6 @@ import com.ticketseller.domain.repository.VentaRepositoryPort;
 import com.ticketseller.domain.repository.HistorialCambioEstadoRepositoryPort;
 import com.ticketseller.domain.repository.HistorialEstadoTicketRepositoryPort;
 import com.ticketseller.domain.repository.HistorialEstadoVentaRepositoryPort;
-import com.ticketseller.domain.repository.PagoRepositoryPort;
 import com.ticketseller.domain.repository.ReembolsoRepositoryPort;
 import com.ticketseller.infrastructure.adapter.out.payment.PasarelaPagoAdapter;
 import com.ticketseller.infrastructure.adapter.out.persistence.cancelacionevento.CancelacionEventoR2dbcRepository;
@@ -137,9 +135,6 @@ import com.ticketseller.infrastructure.adapter.out.persistence.checkout.mapper.T
 import com.ticketseller.infrastructure.adapter.out.persistence.checkout.mapper.TransaccionFinancieraPersistenceMapper;
 import com.ticketseller.infrastructure.adapter.out.persistence.checkout.mapper.VentaPersistenceMapper;
 import com.ticketseller.infrastructure.adapter.out.persistence.liquidacion.LiquidacionQueryAdapter;
-import com.ticketseller.infrastructure.adapter.out.persistence.conciliacion.pago.PagoR2dbcRepository;
-import com.ticketseller.infrastructure.adapter.out.persistence.conciliacion.pago.PagoRepositoryAdapter;
-import com.ticketseller.infrastructure.adapter.out.persistence.conciliacion.pago.mapper.PagoPersistenceMapper;
 import com.ticketseller.infrastructure.adapter.out.persistence.transaccion.historial.HistorialEstadoVentaR2dbcRepository;
 import com.ticketseller.infrastructure.adapter.out.persistence.transaccion.historial.HistorialEstadoVentaRepositoryAdapter;
 import com.ticketseller.infrastructure.adapter.out.persistence.transaccion.historial.mapper.HistorialEstadoVentaPersistenceMapper;
@@ -625,12 +620,6 @@ public class BeanConfiguration {
     }
 
     @Bean
-    public PagoRepositoryPort pagoRepositoryPort(PagoR2dbcRepository repository,
-                                                 PagoPersistenceMapper mapper) {
-        return new PagoRepositoryAdapter(repository, mapper);
-    }
-
-    @Bean
     public CambiarEstadoVentaUseCase cambiarEstadoVentaUseCase(VentaRepositoryPort ventaRepositoryPort,
                                                                HistorialEstadoVentaRepositoryPort historialEstadoVentaRepositoryPort) {
         return new CambiarEstadoVentaUseCase(ventaRepositoryPort, historialEstadoVentaRepositoryPort);
@@ -645,39 +634,6 @@ public class BeanConfiguration {
     @Bean
     public ListarTransaccionesUseCase listarTransaccionesUseCase(VentaRepositoryPort ventaRepositoryPort) {
         return new ListarTransaccionesUseCase(ventaRepositoryPort);
-    }
-
-    @Bean
-    public VerificarPagoUseCase verificarPagoUseCase(VentaRepositoryPort ventaRepositoryPort,
-                                                     PagoRepositoryPort pagoRepositoryPort) {
-        return new VerificarPagoUseCase(ventaRepositoryPort, pagoRepositoryPort);
-    }
-
-    @Bean
-    public ConfirmarTransaccionUseCase confirmarTransaccionUseCase(VentaRepositoryPort ventaRepositoryPort,
-                                                                   PagoRepositoryPort pagoRepositoryPort,
-                                                                   TicketRepositoryPort ticketRepositoryPort,
-                                                                   ConfirmarOcupacionUseCase confirmarOcupacionUseCase) {
-        return new ConfirmarTransaccionUseCase(ventaRepositoryPort, pagoRepositoryPort,
-                ticketRepositoryPort, confirmarOcupacionUseCase);
-    }
-
-    @Bean
-    public ResolverDiscrepanciaUseCase resolverDiscrepanciaUseCase(PagoRepositoryPort pagoRepositoryPort,
-                                                                   VentaRepositoryPort ventaRepositoryPort) {
-        return new ResolverDiscrepanciaUseCase(pagoRepositoryPort, ventaRepositoryPort);
-    }
-
-    @Bean
-    public ListarDiscrepanciaUseCase listarDiscrepanciaUseCase(PagoRepositoryPort pagoRepositoryPort) {
-        return new ListarDiscrepanciaUseCase(pagoRepositoryPort);
-    }
-
-    @Bean
-    public ExpirarTransaccionesPendientesUseCase expirarTransaccionesPendientesUseCase(
-            PagoRepositoryPort pagoRepositoryPort,
-            VentaRepositoryPort ventaRepositoryPort) {
-        return new ExpirarTransaccionesPendientesUseCase(pagoRepositoryPort, ventaRepositoryPort);
     }
 
     @Bean

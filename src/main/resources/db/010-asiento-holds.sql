@@ -4,9 +4,12 @@ CREATE TABLE asiento_holds (
     venta_id UUID NOT NULL REFERENCES ventas (id),
     numero VARCHAR(20) NOT NULL,
     expira_en TIMESTAMP NOT NULL,
-    estado VARCHAR(20) NOT NULL
+    estado VARCHAR(20) NOT NULL,
+    evento_id UUID NOT NULL REFERENCES eventos(id)
 );
 
 CREATE INDEX idx_asiento_holds_venta ON asiento_holds (venta_id);
 CREATE INDEX idx_asiento_holds_estado_expira ON asiento_holds (estado, expira_en);
 CREATE INDEX idx_asiento_holds_asiento ON asiento_holds (asiento_id);
+CREATE INDEX idx_asiento_holds_asiento_evento ON asiento_holds (asiento_id, evento_id);
+CREATE INDEX idx_asiento_holds_evento ON asiento_holds (evento_id);

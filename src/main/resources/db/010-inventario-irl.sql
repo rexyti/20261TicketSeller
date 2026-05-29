@@ -1,1 +1,0 @@
--- existente column removed; use EstadoAsiento.MANTENIMIENTO via MarcarEspacioVacioUseCase instead
