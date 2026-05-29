@@ -2,34 +2,28 @@ services:
   app:
     build: .
     ports:
-      - "8080:8080"
+      - "${SERVER_PORT:-8080}:8080"
+    env_file:
+      - .env
     depends_on:
       db:
         condition: service_healthy
       mailhog:
         condition: service_healthy
-    environment:
-      SPRING_R2DBC_URL: r2dbc:postgresql://db:5432/ticketseller
-      SPRING_R2DBC_USERNAME: postgres
-      SPRING_R2DBC_PASSWORD: postgres
-      SPRING_MAIL_HOST: mailhog
-      SPRING_MAIL_PORT: 1025
     restart: on-failure
 
   db:
     image: postgres:16-alpine
     restart: always
-    environment:
-      POSTGRES_DB: ticketseller
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+    env_file:
+      - .env
     ports:
       - "5433:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./src/main/resources/db:/docker-entrypoint-initdb.d
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
       interval: 5s
       timeout: 5s
       retries: 5

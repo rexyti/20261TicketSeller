@@ -46,6 +46,10 @@ Thumbs.db
 ### Checkstyle config (keep in repo) ###
 !config/
 
+### Environment / secrets ###
+.env
+.env.local
+
 ### Spec template ###
 *template.md
 guia*.md
