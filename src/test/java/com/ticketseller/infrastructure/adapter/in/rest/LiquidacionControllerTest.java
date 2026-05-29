@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import com.ticketseller.infrastructure.config.TestWebSecurityConfig;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
 
@@ -25,7 +26,7 @@ import java.util.UUID;
 import static org.mockito.Mockito.when;
 
 @WebFluxTest(controllers = LiquidacionController.class)
-@Import(GlobalExceptionHandler.class)
+@Import({GlobalExceptionHandler.class, TestWebSecurityConfig.class})
 class LiquidacionControllerTest {
 
     @Autowired

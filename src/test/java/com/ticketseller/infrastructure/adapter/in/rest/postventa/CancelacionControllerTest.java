@@ -6,6 +6,7 @@ import com.ticketseller.application.postventa.ProcesarReembolsoMasivoUseCase;
 import com.ticketseller.domain.exception.postventa.CancelacionFueraDePlazoException;
 import com.ticketseller.domain.exception.postventa.TicketYaUsadoException;
 import com.ticketseller.infrastructure.adapter.in.rest.GlobalExceptionHandler;
+import com.ticketseller.infrastructure.config.TestWebSecurityConfig;
 import com.ticketseller.infrastructure.adapter.in.rest.postventa.dto.CancelacionResponse;
 import com.ticketseller.infrastructure.adapter.in.rest.postventa.dto.CancelarTicketRequest;
 import com.ticketseller.infrastructure.adapter.in.rest.mapper.PostVentaRestMapper;
@@ -27,7 +28,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @WebFluxTest(controllers = CancelacionController.class)
-@Import(GlobalExceptionHandler.class)
+@Import({GlobalExceptionHandler.class, TestWebSecurityConfig.class})
 class CancelacionControllerTest {
 
     @Autowired

@@ -12,7 +12,8 @@ public class CrearCortesiaGeneralUseCase {
 
     private final CortesiaTicketCreator cortesiaTicketCreator;
 
-    public Mono<Cortesia> ejecutar(UUID eventoId, String destinatario, CategoriaCortesia categoria, UUID zonaId) {
-        return cortesiaTicketCreator.crear(eventoId, destinatario, categoria, zonaId, null);
+    public Mono<Cortesia> ejecutar(UUID eventoId, UUID destinatarioId, String emailDestinatario,
+                                   CategoriaCortesia categoria, UUID zonaId) {
+        return cortesiaTicketCreator.crear(eventoId, destinatarioId, emailDestinatario, categoria, zonaId, null);
     }
 }

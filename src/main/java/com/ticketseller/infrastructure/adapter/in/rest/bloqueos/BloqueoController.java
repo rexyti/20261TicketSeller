@@ -16,6 +16,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -44,6 +45,7 @@ public class BloqueoController {
 
     @Operation(summary = "Bloquear asientos para un patrocinador")
     @PostMapping("/eventos/{eventoId}/bloqueos")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'COORDINADOR_PATROCINIOS', 'GESTOR_INVENTARIO')")
     public Mono<ResponseEntity<BloqueoResponse>> bloquearAsientos(
             @PathVariable UUID eventoId,
             @Valid @RequestBody BloquearAsientosRequest request) {
@@ -55,6 +57,7 @@ public class BloqueoController {
 
     @Operation(summary = "Consultar panel de bloqueos y cortesías de un evento")
     @GetMapping("/eventos/{eventoId}/bloqueos")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'COORDINADOR_PATROCINIOS', 'GESTOR_INVENTARIO')")
     public Mono<ResponseEntity<List<PanelItemResponse>>> consultarPanel(
             @PathVariable UUID eventoId,
             @RequestParam(required = false) TipoPanelItem tipo) {
@@ -66,6 +69,7 @@ public class BloqueoController {
 
     @Operation(summary = "Editar el destinatario de un bloqueo")
     @PatchMapping("/bloqueos/{bloqueoId}")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'COORDINADOR_PATROCINIOS', 'GESTOR_INVENTARIO')")
     public Mono<ResponseEntity<BloqueoResponse>> editarBloqueo(
             @PathVariable UUID bloqueoId,
             @Valid @RequestBody EditarBloqueoRequest request) {
@@ -76,6 +80,7 @@ public class BloqueoController {
 
     @Operation(summary = "Liberar un bloqueo y devolver el asiento a disponible")
     @DeleteMapping("/bloqueos/{bloqueoId}/liberar")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'COORDINADOR_PATROCINIOS', 'GESTOR_INVENTARIO')")
     public Mono<ResponseEntity<BloqueoResponse>> liberarBloqueo(@PathVariable UUID bloqueoId) {
         return liberarBloqueoUseCase.ejecutar(bloqueoId)
                 .map(bloqueoRestMapper::toBloqueoResponse)

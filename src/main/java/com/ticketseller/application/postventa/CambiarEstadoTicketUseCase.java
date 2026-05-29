@@ -69,6 +69,6 @@ public class CambiarEstadoTicketUseCase {
         if (!EstadoTicket.ANULADO.equals(ticket.getEstado())) {
             return Mono.empty();
         }
-        return notificacionEmailPort.enviarCancelacionTicket(ticket, justificacion);
+        return notificacionEmailPort.enviarCancelacionTicket(ticket, justificacion, ticket.getId().toString());
     }
 }

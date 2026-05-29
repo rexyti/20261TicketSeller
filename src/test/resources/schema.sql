@@ -236,7 +236,8 @@ CREATE TABLE cortesias (
     id UUID PRIMARY KEY,
     asiento_id UUID REFERENCES asientos(id),
     evento_id UUID NOT NULL REFERENCES eventos(id),
-    destinatario VARCHAR(255) NOT NULL,
+    destinatario_id UUID,
+    email_destinatario VARCHAR(255),
     categoria VARCHAR(50) NOT NULL,
     ticket_id UUID REFERENCES tickets(id),
     estado VARCHAR(20) NOT NULL

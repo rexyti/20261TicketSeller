@@ -45,11 +45,17 @@ public class ConsultarPanelBloqueosUseCase {
     }
 
     private PanelItem toPanelItemDeCortesia(Cortesia c) {
+        String label = getUserLabel(c);
         return new PanelItem(
                 c.getId(), TipoPanelItem.CORTESIA, c.getAsientoId(),
-                c.getDestinatario(), c.getEstado().name(),
+                label, c.getEstado().name(),
                 null, null,
                 c.getCategoria() != null ? c.getCategoria().name() : null);
+    }
+
+    private String getUserLabel(Cortesia c){
+        return c.getEmailDestinatario() != null ? c.getEmailDestinatario()
+                : (c.getDestinatarioId() != null ? c.getDestinatarioId().toString() : null);
     }
 
     private boolean debeIncluirBloqueos(TipoPanelItem tipo) {

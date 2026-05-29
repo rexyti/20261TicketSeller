@@ -5,6 +5,7 @@ import com.ticketseller.domain.exception.postventa.TransicionEstadoInvalidaExcep
 import com.ticketseller.domain.model.ticket.EstadoTicket;
 import com.ticketseller.domain.model.ticket.Ticket;
 import com.ticketseller.infrastructure.adapter.in.rest.GlobalExceptionHandler;
+import com.ticketseller.infrastructure.config.TestWebSecurityConfig;
 import com.ticketseller.infrastructure.adapter.in.rest.mapper.PostVentaRestMapper;
 import com.ticketseller.infrastructure.adapter.in.rest.postventa.dto.CambiarEstadoTicketRequest;
 import com.ticketseller.infrastructure.adapter.in.rest.postventa.dto.TicketConReembolsoResponse;
@@ -24,7 +25,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @WebFluxTest(controllers = AdminTicketController.class)
-@Import(GlobalExceptionHandler.class)
+@Import({GlobalExceptionHandler.class, TestWebSecurityConfig.class})
 class AdminTicketControllerTest {
 
     @Autowired

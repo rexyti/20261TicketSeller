@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.UUID;
 
 public record ReservarAsientosRequest(
-        @NotNull UUID compradorId,
         @NotNull UUID zonaId,
         @NotNull @Min(1) Integer cantidad,
         Boolean esCortesia,
@@ -16,4 +15,3 @@ public record ReservarAsientosRequest(
         TipoUsuario tipoUsuario
 ) {
 }
-

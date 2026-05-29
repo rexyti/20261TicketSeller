@@ -24,7 +24,10 @@ public class CortesiaEntity {
     private UUID asientoId;
     @Column("evento_id")
     private UUID eventoId;
-    private String destinatario;
+    @Column("destinatario_id")
+    private UUID destinatarioId;
+    @Column("email_destinatario")
+    private String emailDestinatario;
     private String categoria;
     @Column("ticket_id")
     private UUID ticketId;

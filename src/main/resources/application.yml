@@ -37,4 +37,7 @@ logging:
     com.ticketseller: INFO
     org.springframework.r2dbc: WARN
 
+jwt:
+  secret: ${JWT_SECRET:dev-secret-key-not-for-production-use-only}
+
 kind: Application

@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,6 +32,7 @@ public class PrecioEventoController {
 
     @Operation(summary = "Configurar precios de zonas para un evento")
     @PostMapping("/{eventoId}/precios")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'PROMOTOR_EVENTOS')")
     public Flux<PrecioZonaResponse> configurarPrecios(@PathVariable UUID eventoId,
                                                       @Valid @RequestBody ConfigurarPreciosRequest request) {
         var precios = request.precios().stream().map(precioEventoRestMapper::toDomain).toList();
@@ -40,9 +42,8 @@ public class PrecioEventoController {
 
     @Operation(summary = "Listar precios configurados para un evento")
     @GetMapping("/{eventoId}/precios")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'PROMOTOR_EVENTOS', 'COMPRADOR', 'AGENTE_VENTAS')")
     public Flux<PrecioZonaResponse> listarPrecios(@PathVariable UUID eventoId) {
         return listarPreciosUseCase.ejecutar(eventoId).map(precioEventoRestMapper::toResponse);
     }
 }
-
-

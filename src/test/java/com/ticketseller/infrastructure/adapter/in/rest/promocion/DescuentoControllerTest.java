@@ -9,6 +9,7 @@ import com.ticketseller.domain.exception.promocion.CodigoPromoExpiradoException;
 import com.ticketseller.domain.model.promocion.Descuento;
 import com.ticketseller.domain.model.promocion.TipoDescuento;
 import com.ticketseller.infrastructure.adapter.in.rest.GlobalExceptionHandler;
+import com.ticketseller.infrastructure.config.TestWebSecurityConfig;
 import com.ticketseller.infrastructure.adapter.in.rest.mapper.PromocionRestMapper;
 import com.ticketseller.infrastructure.adapter.in.rest.promocion.dto.DescuentoAplicadoResponse;
 import com.ticketseller.infrastructure.adapter.in.rest.promocion.dto.DescuentoResponse;
@@ -30,7 +31,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @WebFluxTest(controllers = DescuentoController.class)
-@Import(GlobalExceptionHandler.class)
+@Import({GlobalExceptionHandler.class, TestWebSecurityConfig.class})
 class DescuentoControllerTest {
 
     @Autowired

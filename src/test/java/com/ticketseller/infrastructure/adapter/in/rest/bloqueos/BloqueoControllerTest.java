@@ -12,6 +12,7 @@ import com.ticketseller.domain.model.bloqueos.EstadoBloqueo;
 import com.ticketseller.application.bloqueos.PanelItem;
 import com.ticketseller.application.bloqueos.TipoPanelItem;
 import com.ticketseller.infrastructure.adapter.in.rest.GlobalExceptionHandler;
+import com.ticketseller.infrastructure.config.TestWebSecurityConfig;
 import com.ticketseller.infrastructure.adapter.in.rest.mapper.BloqueoRestMapper;
 import com.ticketseller.infrastructure.adapter.in.rest.bloqueos.dto.BloqueoResponse;
 import com.ticketseller.infrastructure.adapter.in.rest.bloqueos.dto.PanelItemResponse;
@@ -34,7 +35,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @WebFluxTest(controllers = BloqueoController.class)
-@Import(GlobalExceptionHandler.class)
+@Import({GlobalExceptionHandler.class, TestWebSecurityConfig.class})
 class BloqueoControllerTest {
 
     @Autowired

@@ -101,7 +101,7 @@ class CortesiaRepositoryAdapterTest {
         return Cortesia.builder()
                 .id(UUID.randomUUID())
                 .eventoId(eventoId)
-                .destinatario("Periodista ABC")
+                .emailDestinatario("periodista@abc.com")
                 .categoria(CategoriaCortesia.PRENSA)
                 .estado(EstadoCortesia.GENERADA)
                 .build();

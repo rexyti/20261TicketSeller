@@ -30,6 +30,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -63,6 +64,7 @@ public class RecintoController {
 
     @Operation(summary = "Registrar un nuevo recinto")
     @PostMapping
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMINISTRADOR_RECINTO')")
     public Mono<ResponseEntity<RecintoResponse>> crear(@Valid @RequestBody CrearRecintoRequest request) {
         return registrarRecintoUseCase.ejecutar(recintoRestMapper.toDomain(request))
                 .map(recintoRestMapper::toResponse)
@@ -71,6 +73,7 @@ public class RecintoController {
 
     @Operation(summary = "Listar recintos con filtros y paginación")
     @GetMapping
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMINISTRADOR_RECINTO', 'GESTOR_INVENTARIO', 'PROMOTOR_EVENTOS', 'AGENTE_VENTAS')")
     public Mono<ResponseEntity<Page<RecintoResponse>>> listar(
             @RequestParam(required = false) String nombre,
             @RequestParam(required = false) String ciudad,
@@ -105,6 +108,7 @@ public class RecintoController {
     @ApiResponse(responseCode = "200", description = "Recinto encontrado")
     @ApiResponse(responseCode = "404", description = "Recinto no encontrado")
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMINISTRADOR_RECINTO', 'GESTOR_INVENTARIO', 'PROMOTOR_EVENTOS')")
     public Mono<ResponseEntity<RecintoResponse>> obtener(@PathVariable UUID id) {
         return consultarRecintoUseCase.ejecutar(id)
                 .map(recintoRestMapper::toResponse)
@@ -113,6 +117,7 @@ public class RecintoController {
 
     @Operation(summary = "Editar información de un recinto")
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMINISTRADOR_RECINTO')")
     public Mono<ResponseEntity<RecintoResponse>> editar(@PathVariable UUID id,
                                                         @RequestBody EditarRecintoRequest request) {
         Recinto cambios = Recinto.builder()
@@ -130,6 +135,7 @@ public class RecintoController {
 
     @Operation(summary = "Desactivar un recinto")
     @DeleteMapping("/{id}/desactivar")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMINISTRADOR_RECINTO')")
     public Mono<ResponseEntity<RecintoResponse>> desactivar(@PathVariable UUID id) {
         return desactivarRecintoUseCase.ejecutar(id)
                 .map(recintoRestMapper::toResponse)
@@ -138,6 +144,7 @@ public class RecintoController {
 
     @Operation(summary = "Reactivar un recinto")
     @PatchMapping("/{id}/reactivar")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMINISTRADOR_RECINTO')")
     public Mono<ResponseEntity<RecintoResponse>> reactivar(@PathVariable UUID id) {
         return reactivarRecintoUseCase.ejecutar(id)
                 .map(recintoRestMapper::toResponse)
@@ -146,6 +153,7 @@ public class RecintoController {
 
     @Operation(summary = "Configurar capacidad máxima del recinto")
     @PatchMapping("/{id}/capacidad")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMINISTRADOR_RECINTO')")
     public Mono<ResponseEntity<RecintoResponse>> configurarCapacidad(@PathVariable UUID id,
                                                                      @Valid @RequestBody ConfigurarCapacidadRequest request) {
         return configurarCapacidadUseCase.ejecutar(id, request.capacidadMaxima())
@@ -155,6 +163,7 @@ public class RecintoController {
 
     @Operation(summary = "Configurar categoría del recinto")
     @PatchMapping("/{id}/categoria")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMINISTRADOR_RECINTO')")
     public Mono<ResponseEntity<RecintoResponse>> configurarCategoria(@PathVariable UUID id,
                                                                      @Valid @RequestBody ConfigurarCategoriaRequest request) {
         return configurarCategoriaUseCase.ejecutar(id, request.categoria())
@@ -162,11 +171,13 @@ public class RecintoController {
                 .map(ResponseEntity::ok);
     }
 
-    @Operation(summary = "Consultar estructura del recinto", description = "Retorna la lista de zonas y compuertas del recinto para validación de coherencia.")
+    @Operation(summary = "Consultar estructura del recinto",
+            description = "Retorna la lista de zonas y compuertas del recinto para validación de coherencia.")
     @ApiResponse(responseCode = "200", description = "Estructura del recinto recuperada exitosamente",
             content = @Content(schema = @Schema(implementation = RecintoEstructuraResponse.class)))
     @ApiResponse(responseCode = "404", description = "Recinto no encontrado")
     @GetMapping("/{id}/estructura")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMINISTRADOR_RECINTO', 'GESTOR_INVENTARIO', 'PROMOTOR_EVENTOS')")
     public Mono<ResponseEntity<RecintoEstructuraResponse>> consultarEstructura(@PathVariable UUID id) {
         return consultarEstructuraRecintoUseCase.ejecutar(id)
                 .map(tuple -> recintoRestMapper.toEstructuraResponse(tuple.getT1(), tuple.getT2(), tuple.getT3()))

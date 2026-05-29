@@ -14,6 +14,7 @@ import com.ticketseller.domain.model.promocion.MecanismoAplicacion;
 import com.ticketseller.domain.model.promocion.Promocion;
 import com.ticketseller.domain.model.promocion.TipoUsuario;
 import com.ticketseller.infrastructure.adapter.in.rest.GlobalExceptionHandler;
+import com.ticketseller.infrastructure.config.TestWebSecurityConfig;
 import com.ticketseller.infrastructure.adapter.in.rest.mapper.PromocionRestMapper;
 import com.ticketseller.infrastructure.adapter.in.rest.promocion.dto.PromocionResponse;
 import org.junit.jupiter.api.Test;
@@ -38,7 +39,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @WebFluxTest(controllers = PromocionController.class)
-@Import(GlobalExceptionHandler.class)
+@Import({GlobalExceptionHandler.class, TestWebSecurityConfig.class})
 class PromocionControllerTest {
 
     @Autowired

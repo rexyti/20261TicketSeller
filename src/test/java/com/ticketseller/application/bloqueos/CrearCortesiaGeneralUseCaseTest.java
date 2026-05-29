@@ -21,6 +21,8 @@ class CrearCortesiaGeneralUseCaseTest {
 
     private final UUID eventoId = UUID.randomUUID();
     private final UUID zonaId = UUID.randomUUID();
+    private final UUID destinatarioId = UUID.randomUUID();
+    private static final String EMAIL = "prensa@abc.com";
 
     @BeforeEach
     void setUp() {
@@ -33,19 +35,20 @@ class CrearCortesiaGeneralUseCaseTest {
         Cortesia cortesia = Cortesia.builder()
                 .id(UUID.randomUUID())
                 .eventoId(eventoId)
-                .destinatario("Prensa ABC")
+                .destinatarioId(destinatarioId)
+                .emailDestinatario(EMAIL)
                 .categoria(CategoriaCortesia.PRENSA)
                 .ticketId(UUID.randomUUID())
                 .estado(EstadoCortesia.GENERADA)
                 .build();
 
-        when(cortesiaTicketCreator.crear(eventoId, "Prensa ABC", CategoriaCortesia.PRENSA, zonaId, null))
+        when(cortesiaTicketCreator.crear(eventoId, destinatarioId, EMAIL, CategoriaCortesia.PRENSA, zonaId, null))
                 .thenReturn(Mono.just(cortesia));
 
-        StepVerifier.create(useCase.ejecutar(eventoId, "Prensa ABC", CategoriaCortesia.PRENSA, zonaId))
+        StepVerifier.create(useCase.ejecutar(eventoId, destinatarioId, EMAIL, CategoriaCortesia.PRENSA, zonaId))
                 .expectNext(cortesia)
                 .verifyComplete();
 
-        verify(cortesiaTicketCreator).crear(eventoId, "Prensa ABC", CategoriaCortesia.PRENSA, zonaId, null);
+        verify(cortesiaTicketCreator).crear(eventoId, destinatarioId, EMAIL, CategoriaCortesia.PRENSA, zonaId, null);
     }
 }

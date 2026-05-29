@@ -16,6 +16,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -44,16 +45,18 @@ public class MapaAsientosController {
 
     @Operation(summary = "Crear mapa de asientos NxM para un recinto")
     @PostMapping("/{recintoId}/mapa")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMINISTRADOR_RECINTO')")
     public Flux<AsientoResponse> crearMapa(@PathVariable UUID recintoId,
-                                               @Valid @RequestBody CrearMapaAsientosRequest request) {
+                                           @Valid @RequestBody CrearMapaAsientosRequest request) {
         return crearMapaAsientosUseCase.ejecutar(recintoId, request.filas(), request.columnasPorFila())
                 .map(asientoRestMapper::toAsientoResponse);
     }
 
     @Operation(summary = "Marcar un asiento como espacio vacío")
     @PatchMapping("/{recintoId}/mapa/asientos/{asientoId}")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'GESTOR_INVENTARIO')")
     public Mono<ResponseEntity<AsientoResponse>> marcarEspacioVacio(@PathVariable UUID recintoId,
-                                                                        @PathVariable UUID asientoId) {
+                                                                    @PathVariable UUID asientoId) {
         return marcarEspacioVacioUseCase.ejecutar(asientoId)
                 .map(asientoRestMapper::toAsientoResponse)
                 .map(ResponseEntity::ok);
@@ -61,18 +64,20 @@ public class MapaAsientosController {
 
     @Operation(summary = "Asignar una lista de asientos a una zona")
     @PostMapping("/{recintoId}/zonas/{zonaId}/asientos")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMINISTRADOR_RECINTO')")
     public Flux<AsientoResponse> asignarAsientosAZona(@PathVariable UUID recintoId,
-                                                          @PathVariable UUID zonaId,
-                                                          @Valid @RequestBody AsignarAsientosAZonaRequest request) {
+                                                      @PathVariable UUID zonaId,
+                                                      @Valid @RequestBody AsignarAsientosAZonaRequest request) {
         return asignarAsientosAZonaUseCase.ejecutar(request.asientoIds(), zonaId)
                 .map(asientoRestMapper::toAsientoResponse);
     }
 
     @Operation(summary = "Consultar mapa de asientos del recinto paginado")
     @GetMapping("/{recintoId}/mapa/asientos")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMINISTRADOR_RECINTO', 'GESTOR_INVENTARIO', 'COMPRADOR', 'AGENTE_VENTAS')")
     public Mono<Page<AsientoResponse>> consultarMapa(@PathVariable UUID recintoId,
-                                                         @RequestParam(defaultValue = "0") int pagina,
-                                                         @RequestParam(defaultValue = "20") int size) {
+                                                     @RequestParam(defaultValue = "0") int pagina,
+                                                     @RequestParam(defaultValue = "20") int size) {
         return consultarMapaAsientosUseCase.ejecutar(recintoId, pagina, size)
                 .map(p -> {
                     List<AsientoResponse> responses = p.contenido().stream()

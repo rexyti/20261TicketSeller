@@ -10,6 +10,7 @@ import com.ticketseller.domain.model.venta.EstadoVenta;
 import com.ticketseller.domain.model.venta.Venta;
 import com.ticketseller.infrastructure.adapter.in.rest.GlobalExceptionHandler;
 import com.ticketseller.infrastructure.adapter.in.rest.mapper.TransaccionRestMapperImpl;
+import com.ticketseller.infrastructure.config.TestWebSecurityConfig;
 import com.ticketseller.infrastructure.adapter.in.rest.transaccion.dto.CambiarEstadoVentaRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +30,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @WebFluxTest(controllers = TransaccionController.class)
-@Import({GlobalExceptionHandler.class, TransaccionRestMapperImpl.class})
+@Import({GlobalExceptionHandler.class, TransaccionRestMapperImpl.class, TestWebSecurityConfig.class})
 class TransaccionControllerTest {
 
     @Autowired

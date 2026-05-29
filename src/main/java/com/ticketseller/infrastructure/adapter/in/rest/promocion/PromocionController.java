@@ -21,6 +21,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -33,7 +34,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
-
 import java.util.UUID;
 
 @Tag(name = "Promociones", description = "Gestión de campañas y descuentos")
@@ -52,12 +52,14 @@ public class PromocionController {
 
     @Operation(summary = "Listar promociones de un evento")
     @GetMapping
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'PROMOTOR_EVENTOS')")
     public Flux<PromocionResponse> listar(@RequestParam UUID eventoId) {
         return listarPromocionesUseCase.ejecutar(eventoId).map(mapper::toResponse);
     }
 
     @Operation(summary = "Crear una nueva promoción o preventa")
     @PostMapping
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'PROMOTOR_EVENTOS')")
     public Mono<ResponseEntity<PromocionResponse>> crear(@Valid @RequestBody CrearPromocionRequest request) {
         return crearPromocionUseCase.ejecutar(mapper.toDomain(request))
                 .map(mapper::toResponse)
@@ -66,6 +68,7 @@ public class PromocionController {
 
     @Operation(summary = "Cambiar el estado de una promoción")
     @PatchMapping("/{id}/estado")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'PROMOTOR_EVENTOS')")
     public Mono<ResponseEntity<PromocionResponse>> actualizarEstado(
             @PathVariable UUID id,
             @Valid @RequestBody ActualizarEstadoPromocionRequest request) {
@@ -76,6 +79,7 @@ public class PromocionController {
 
     @Operation(summary = "Generar códigos promocionales para una promoción")
     @PostMapping("/{id}/codigos")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'PROMOTOR_EVENTOS')")
     public Mono<ResponseEntity<List<String>>> crearCodigos(
             @PathVariable UUID id,
             @Valid @RequestBody CrearCodigosRequest request) {
@@ -89,12 +93,14 @@ public class PromocionController {
 
     @Operation(summary = "Listar códigos promocionales de una promoción")
     @GetMapping("/{id}/codigos")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'PROMOTOR_EVENTOS', 'AGENTE_VENTAS')")
     public Flux<CodigoPromocionalResponse> listarCodigos(@PathVariable UUID id) {
         return listarCodigosPromocionalesUseCase.ejecutar(id).map(mapper::toResponse);
     }
 
     @Operation(summary = "Calcular descuentos aplicables al carrito (incluye validación de acceso a preventa)")
     @PostMapping("/calcular-descuentos")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'AGENTE_VENTAS', 'PROMOTOR_EVENTOS')")
     public Mono<ResponseEntity<DescuentoAplicadoResponse>> calcularDescuentos(
             @Valid @RequestBody CalcularDescuentoRequest request) {
         return aplicarDescuentoCarritoUseCase.ejecutar(

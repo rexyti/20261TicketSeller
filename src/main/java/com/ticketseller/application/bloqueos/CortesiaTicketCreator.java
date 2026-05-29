@@ -16,6 +16,7 @@ import com.ticketseller.domain.repository.CodigoQrPort;
 import com.ticketseller.domain.repository.CompuertaRepositoryPort;
 import com.ticketseller.domain.repository.CortesiaRepositoryPort;
 import com.ticketseller.domain.repository.EventoRepositoryPort;
+import com.ticketseller.domain.repository.NotificacionEmailPort;
 import com.ticketseller.domain.repository.TicketRepositoryPort;
 import com.ticketseller.domain.repository.ZonaRepositoryPort;
 import lombok.RequiredArgsConstructor;
@@ -37,20 +38,22 @@ public class CortesiaTicketCreator {
     private final CompuertaRepositoryPort compuertaRepositoryPort;
     private final EventoRepositoryPort eventoRepositoryPort;
     private final CodigoQrPort codigoQrPort;
+    private final NotificacionEmailPort notificacionEmailPort;
 
-    public Mono<Cortesia> crear(UUID eventoId, String destinatario, CategoriaCortesia categoria,
-                                UUID zonaId, Asiento asiento) {
+    public Mono<Cortesia> crear(UUID eventoId, UUID destinatarioId, String emailDestinatario,
+                                CategoriaCortesia categoria, UUID zonaId, Asiento asiento) {
         return eventoRepositoryPort.buscarPorId(eventoId)
                 .switchIfEmpty(Mono.error(new EventoNotFoundException("Evento no encontrado")))
                 .flatMap(evento -> Mono.zip(
                         buscarZona(zonaId),
                         obtenerCompuertaBalanceada(zonaId, evento.getRecintoId(), eventoId)
                 ).flatMap(tuple -> crearTicketConQrYCortesia(
-                        eventoId, destinatario, categoria, zonaId, asiento,
+                        eventoId, destinatarioId, emailDestinatario, categoria, zonaId, asiento,
                         evento, tuple.getT1(), tuple.getT2())));
     }
 
-    private Mono<Cortesia> crearTicketConQrYCortesia(UUID eventoId, String destinatario,
+    private Mono<Cortesia> crearTicketConQrYCortesia(UUID eventoId, UUID destinatarioId,
+                                                     String emailDestinatario,
                                                      CategoriaCortesia categoria,
                                                      UUID zonaId, Asiento asiento,
                                                      Evento evento, Zona zona, Compuerta compuerta) {
@@ -61,10 +64,21 @@ public class CortesiaTicketCreator {
                     return ticketRepositoryPort.guardar(saved.toBuilder().codigoQr(qr).build());
                 })
                 .flatMap(savedTicket -> {
-                    Cortesia cortesia = buildCortesia(eventoId, asiento, destinatario, categoria, savedTicket);
+                    Cortesia cortesia = buildCortesia(eventoId, asiento, destinatarioId,
+                            emailDestinatario, categoria, savedTicket);
                     cortesia.validar();
                     return cortesiaRepositoryPort.guardar(cortesia);
-                });
+                })
+                .flatMap(cortesia -> Mono.just(cortesia)
+                        .filter(this::cortesiaConEmailDeDestinatario)
+                        .flatMap(c -> notificacionEmailPort.enviarCortesiaGenerada(
+                                c, evento.getNombre(), c.getEmailDestinatario())
+                                .thenReturn(c))
+                        .defaultIfEmpty(cortesia));
+    }
+
+    private boolean cortesiaConEmailDeDestinatario(Cortesia cortesia){
+        return cortesia.getEmailDestinatario() != null && !cortesia.getEmailDestinatario().isBlank();
     }
 
     private Mono<Zona> buscarZona(UUID zonaId) {
@@ -121,12 +135,14 @@ public class CortesiaTicketCreator {
                 .build();
     }
 
-    private Cortesia buildCortesia(UUID eventoId, Asiento asiento, String destinatario,
-                                   CategoriaCortesia categoria, Ticket savedTicket) {
+    private Cortesia buildCortesia(UUID eventoId, Asiento asiento, UUID destinatarioId,
+                                   String emailDestinatario, CategoriaCortesia categoria,
+                                   Ticket savedTicket) {
         return Cortesia.builder()
                 .eventoId(eventoId)
                 .asientoId(asiento != null ? asiento.getId() : null)
-                .destinatario(destinatario)
+                .destinatarioId(destinatarioId)
+                .emailDestinatario(emailDestinatario)
                 .categoria(categoria)
                 .ticketId(savedTicket.getId())
                 .estado(EstadoCortesia.GENERADA)

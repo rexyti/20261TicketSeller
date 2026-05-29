@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -39,6 +40,7 @@ public class InventarioController {
             @ApiResponse(responseCode = "200", description = "Inventario obtenido exitosamente")
     })
     @GetMapping
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'GESTOR_INVENTARIO', 'PROMOTOR_EVENTOS', 'AGENTE_VENTAS')")
     public Flux<InventarioResponse> obtenerInventario(@PathVariable UUID eventoId) {
         return obtenerInventarioEventoUseCase.ejecutar(eventoId)
                 .map(this::toInventarioResponse);
@@ -50,6 +52,7 @@ public class InventarioController {
             @ApiResponse(responseCode = "404", description = "Asiento no encontrado")
     })
     @GetMapping("/{id}/disponibilidad")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'GESTOR_INVENTARIO', 'AGENTE_VENTAS')")
     public Mono<ResponseEntity<DisponibilidadResponse>> verificarDisponibilidad(
             @PathVariable UUID eventoId, @PathVariable UUID id) {
         return verificarDisponibilidadUseCase.ejecutar(id, eventoId)
@@ -64,6 +67,7 @@ public class InventarioController {
             @ApiResponse(responseCode = "409", description = "Hold expirado o no existente para este evento")
     })
     @PatchMapping("/{id}/ocupar")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'GESTOR_INVENTARIO')")
     public Mono<ResponseEntity<DisponibilidadResponse>> ocupar(
             @PathVariable UUID eventoId, @PathVariable UUID id) {
         return confirmarOcupacionUseCase.ejecutar(id, eventoId)
@@ -76,6 +80,7 @@ public class InventarioController {
             @ApiResponse(responseCode = "404", description = "Hold no encontrado para este evento")
     })
     @PatchMapping("/{id}/liberar")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'GESTOR_INVENTARIO')")
     public Mono<ResponseEntity<DisponibilidadResponse>> liberar(
             @PathVariable UUID eventoId, @PathVariable UUID id) {
         return liberarHoldUseCase.ejecutar(id, eventoId)

@@ -1,0 +1,7 @@
+jwt:
+  secret: "test-secret-for-unit-tests-min-256-bits-here!!"
+
+spring:
+  mail:
+    host: localhost
+    port: 25

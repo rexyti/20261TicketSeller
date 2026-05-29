@@ -43,7 +43,8 @@
       "Bash(rm -f /home/nestor/Programacion/Ing_Software/20261TicketSeller/src/main/java/com/ticketseller/domain/model/conciliacion/EstadoConciliacion.java)",
       "Bash(rm -f /home/nestor/Programacion/Ing_Software/20261TicketSeller/src/main/java/com/ticketseller/domain/repository/PagoRepositoryPort.java)",
       "Bash(rm -rf /home/nestor/Programacion/Ing_Software/20261TicketSeller/src/main/java/com/ticketseller/domain/exception/conciliacion/)",
-      "Bash(rm -rf /home/nestor/Programacion/Ing_Software/20261TicketSeller/src/main/java/com/ticketseller/application/conciliacion/)"
+      "Bash(rm -rf /home/nestor/Programacion/Ing_Software/20261TicketSeller/src/main/java/com/ticketseller/application/conciliacion/)",
+      "Bash(xargs sed *)"
     ]
   }
 }

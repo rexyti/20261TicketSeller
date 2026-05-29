@@ -23,6 +23,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -57,6 +58,7 @@ public class EventoController {
 
     @Operation(summary = "Registrar un nuevo evento")
     @PostMapping
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'PROMOTOR_EVENTOS')")
     public Mono<ResponseEntity<EventoResponse>> crear(@Valid @RequestBody CrearEventoRequest request) {
         return registrarEventoUseCase.ejecutar(eventoRestMapper.toDomain(request))
                 .map(eventoRestMapper::toResponse)
@@ -65,6 +67,7 @@ public class EventoController {
 
     @Operation(summary = "Listar eventos")
     @GetMapping
+    @PreAuthorize("isAuthenticated()")
     public Flux<EventoResponse> listar(@RequestParam(required = false) String estado) {
         EstadoEvento filtroEstado = estado == null || estado.isBlank() ? null : EstadoEvento.valueOf(estado.toUpperCase());
         return listarEventosUseCase.ejecutar(filtroEstado).map(eventoRestMapper::toResponse);
@@ -72,6 +75,7 @@ public class EventoController {
 
     @Operation(summary = "Obtener detalles de un evento")
     @GetMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
     public Mono<ResponseEntity<EventoResponse>> obtener(@PathVariable UUID id) {
         return obtenerEventoUseCase.ejecutar(id)
                 .map(eventoRestMapper::toResponse)
@@ -80,6 +84,7 @@ public class EventoController {
 
     @Operation(summary = "Editar información de un evento")
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'PROMOTOR_EVENTOS')")
     public Mono<ResponseEntity<EventoResponse>> editar(@PathVariable UUID id,
                                                        @RequestBody EditarEventoRequest request) {
         Evento cambios = eventoRestMapper.toDomain(request);
@@ -90,6 +95,7 @@ public class EventoController {
 
     @Operation(summary = "Cancelar un evento")
     @DeleteMapping("/{id}/cancelar")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'PROMOTOR_EVENTOS')")
     public Mono<ResponseEntity<EventoResponse>> cancelar(@PathVariable UUID id,
                                                          @Valid @RequestBody CancelarEventoRequest request) {
         return cancelarEventoUseCase.ejecutar(id, request.motivo())
@@ -99,6 +105,7 @@ public class EventoController {
 
     @Operation(summary = "Marcar un evento como en progreso")
     @PatchMapping("/{id}/iniciar")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'PROMOTOR_EVENTOS')")
     public Mono<ResponseEntity<EventoResponse>> iniciar(@PathVariable UUID id) {
         return iniciarEventoUseCase.ejecutar(id)
                 .map(eventoRestMapper::toResponse)
@@ -107,6 +114,7 @@ public class EventoController {
 
     @Operation(summary = "Marcar un evento como finalizado")
     @PatchMapping("/{id}/finalizar")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'PROMOTOR_EVENTOS')")
     public Mono<ResponseEntity<EventoResponse>> finalizar(@PathVariable UUID id) {
         return finalizarEventoUseCase.ejecutar(id)
                 .map(eventoRestMapper::toResponse)
@@ -115,6 +123,7 @@ public class EventoController {
 
     @Operation(summary = "Consultar reembolsos generados por la cancelación masiva de un evento")
     @GetMapping("/{id}/reembolsos")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'AGENTE_VENTAS')")
     public Flux<ReembolsoResponse> consultarReembolsos(@PathVariable UUID id,
                                                         @RequestParam(defaultValue = "0") int page,
                                                         @RequestParam(defaultValue = "20") int size) {

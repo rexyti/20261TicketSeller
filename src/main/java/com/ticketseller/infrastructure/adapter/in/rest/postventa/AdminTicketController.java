@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -28,6 +29,7 @@ public class AdminTicketController {
 
     @Operation(summary = "Cambiar estado manual de ticket")
     @PatchMapping("/{id}/estado")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'AGENTE_VENTAS')")
     public Mono<ResponseEntity<TicketConReembolsoResponse>> cambiarEstado(@PathVariable UUID id,
                                                                            @Valid @RequestBody CambiarEstadoTicketRequest request) {
         return cambiarEstadoTicketUseCase.ejecutar(id, request.estado(), request.justificacion(), request.agenteId())

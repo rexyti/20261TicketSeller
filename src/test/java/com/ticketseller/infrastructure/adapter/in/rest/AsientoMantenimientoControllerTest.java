@@ -14,7 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import com.ticketseller.infrastructure.config.TestWebSecurityConfig;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.web.reactive.server.SecurityMockServerConfigurers;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
 
@@ -24,7 +26,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @WebFluxTest(controllers = AsientoMantenimientoController.class)
-@Import(GlobalExceptionHandler.class)
+@Import({GlobalExceptionHandler.class, TestWebSecurityConfig.class})
 class AsientoMantenimientoControllerTest {
 
     @Autowired
@@ -58,7 +60,9 @@ class AsientoMantenimientoControllerTest {
     void transicionValidaRetorna200() {
         CambiarEstadoRequest request = new CambiarEstadoRequest(EstadoAsiento.MANTENIMIENTO, "Motivo test");
 
-        webTestClient.patch()
+        webTestClient
+                .mutateWith(SecurityMockServerConfigurers.mockUser(UUID.randomUUID().toString()).roles("GESTOR_INVENTARIO"))
+                .patch()
                 .uri("/api/v1/eventos/{eventoId}/asientos/{asientoId}/estado", eventoId, UUID.randomUUID())
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(request)

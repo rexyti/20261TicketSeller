@@ -6,6 +6,7 @@ import com.ticketseller.domain.model.postventa.EstadoReembolso;
 import com.ticketseller.domain.model.postventa.Reembolso;
 import com.ticketseller.domain.model.postventa.TipoReembolso;
 import com.ticketseller.infrastructure.adapter.in.rest.GlobalExceptionHandler;
+import com.ticketseller.infrastructure.config.TestWebSecurityConfig;
 import com.ticketseller.infrastructure.adapter.in.rest.postventa.dto.ReembolsoManualRequest;
 import com.ticketseller.infrastructure.adapter.in.rest.postventa.dto.ReembolsoPendienteResponse;
 import com.ticketseller.infrastructure.adapter.in.rest.postventa.dto.ReembolsoResponse;
@@ -28,7 +29,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @WebFluxTest(controllers = AdminReembolsoController.class)
-@Import(GlobalExceptionHandler.class)
+@Import({GlobalExceptionHandler.class, TestWebSecurityConfig.class})
 class AdminReembolsoControllerTest {
 
     @Autowired

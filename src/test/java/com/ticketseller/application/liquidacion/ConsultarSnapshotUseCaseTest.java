@@ -32,7 +32,8 @@ class ConsultarSnapshotUseCaseTest {
     @Test
     void deberiaRetornarSnapshotCuandoEventoFinalizado() {
         UUID eventoId = UUID.randomUUID();
-        Evento evento = Evento.builder().id(eventoId).estado(EstadoEvento.FINALIZADO).build();
+        UUID recintoId = UUID.randomUUID();
+        Evento evento = Evento.builder().id(eventoId).recintoId(recintoId).estado(EstadoEvento.FINALIZADO).build();
         SnapshotLiquidacion snapshot = SnapshotLiquidacion.builder()
                 .eventoId(eventoId)
                 .condiciones(Map.of(
@@ -46,6 +47,7 @@ class ConsultarSnapshotUseCaseTest {
 
         when(eventoRepositoryPort.buscarPorId(eventoId)).thenReturn(Mono.just(evento));
         when(liquidacionQueryPort.obtenerSnapshotPorEvento(eventoId)).thenReturn(Mono.just(snapshot));
+        when(recintoRepositoryPort.buscarPorId(recintoId)).thenReturn(Mono.empty());
 
         StepVerifier.create(useCase.ejecutar(eventoId))
                 .assertNext(result -> {

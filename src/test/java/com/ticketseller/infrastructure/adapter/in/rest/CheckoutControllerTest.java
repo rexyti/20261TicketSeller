@@ -22,7 +22,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import com.ticketseller.infrastructure.config.TestWebSecurityConfig;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.web.reactive.server.SecurityMockServerConfigurers;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
 
@@ -35,7 +37,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @WebFluxTest(controllers = CheckoutController.class)
-@Import(GlobalExceptionHandler.class)
+@Import({GlobalExceptionHandler.class, TestWebSecurityConfig.class})
 class CheckoutControllerTest {
 
     @Autowired
@@ -53,20 +55,21 @@ class CheckoutControllerTest {
     @MockBean
     private CheckoutRestMapper checkoutRestMapper;
 
+    private static final UUID COMPRADOR_ID = UUID.randomUUID();
+
     @Test
     void reservarDisponibleRetorna201() {
         UUID ventaId = UUID.randomUUID();
-        UUID compradorId = UUID.randomUUID();
         UUID eventoId = UUID.randomUUID();
         UUID zonaId = UUID.randomUUID();
         UUID compuertaId = UUID.randomUUID();
 
-        ReservarAsientosRequest request = new ReservarAsientosRequest(compradorId, zonaId, 1, false, null, null);
-        ReservarAsientosCommand command = new ReservarAsientosCommand(compradorId, eventoId, zonaId, 1, false, null, null);
+        ReservarAsientosRequest request = new ReservarAsientosRequest(zonaId, 1, false, null, null);
+        ReservarAsientosCommand command = new ReservarAsientosCommand(COMPRADOR_ID, eventoId, zonaId, 1, false, null, null);
 
         Venta venta = Venta.builder()
                 .id(ventaId)
-                .compradorId(compradorId)
+                .compradorId(COMPRADOR_ID)
                 .eventoId(eventoId)
                 .estado(EstadoVenta.RESERVADA)
                 .fechaCreacion(LocalDateTime.now())
@@ -84,7 +87,7 @@ class CheckoutControllerTest {
 
         VentaResponse response = new VentaResponse(
                 ventaId,
-                compradorId,
+                COMPRADOR_ID,
                 eventoId,
                 EstadoVenta.RESERVADA,
                 venta.getFechaCreacion(),
@@ -94,11 +97,13 @@ class CheckoutControllerTest {
                         ticket.getPrecio(), null, false, null))
         );
 
-        when(checkoutRestMapper.toCommand(request, eventoId)).thenReturn(command);
+        when(checkoutRestMapper.toCommand(any(ReservarAsientosRequest.class), any(UUID.class), any(UUID.class))).thenReturn(command);
         when(reservarAsientosUseCase.ejecutar(command)).thenReturn(Mono.just(detalle));
         when(checkoutRestMapper.toResponse(detalle)).thenReturn(response);
 
-        webTestClient.post()
+        webTestClient
+                .mutateWith(SecurityMockServerConfigurers.mockUser(COMPRADOR_ID.toString()).roles("COMPRADOR"))
+                .post()
                 .uri("/api/v1/eventos/{eventoId}/asientos/reservar", eventoId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(request)
@@ -111,12 +116,14 @@ class CheckoutControllerTest {
     @Test
     void reservarNoDisponibleRetorna409() {
         UUID eventoId = UUID.randomUUID();
-        ReservarAsientosRequest request = new ReservarAsientosRequest(UUID.randomUUID(), UUID.randomUUID(), 1, false, null, null);
-        when(checkoutRestMapper.toCommand(any(ReservarAsientosRequest.class), any(UUID.class)))
-                .thenReturn(new ReservarAsientosCommand(request.compradorId(), eventoId, request.zonaId(), request.cantidad(), false, null, null));
+        ReservarAsientosRequest request = new ReservarAsientosRequest(UUID.randomUUID(), 1, false, null, null);
+        when(checkoutRestMapper.toCommand(any(ReservarAsientosRequest.class), any(UUID.class), any(UUID.class)))
+                .thenReturn(new ReservarAsientosCommand(COMPRADOR_ID, eventoId, request.zonaId(), request.cantidad(), false, null, null));
         when(reservarAsientosUseCase.ejecutar(any())).thenReturn(Mono.error(new AsientoNoDisponibleException("ocupado")));
 
-        webTestClient.post()
+        webTestClient
+                .mutateWith(SecurityMockServerConfigurers.mockUser(COMPRADOR_ID.toString()).roles("COMPRADOR"))
+                .post()
                 .uri("/api/v1/eventos/{eventoId}/asientos/reservar", eventoId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(request)
@@ -131,7 +138,9 @@ class CheckoutControllerTest {
         when(checkoutRestMapper.toCommand(request)).thenReturn(new ProcesarPagoCommand(request.metodoPago(), request.ip()));
         when(procesarPagoUseCase.ejecutar(any(), any())).thenReturn(Mono.error(new PagoRechazadoException("Sin fondos")));
 
-        webTestClient.post()
+        webTestClient
+                .mutateWith(SecurityMockServerConfigurers.mockUser(COMPRADOR_ID.toString()).roles("COMPRADOR"))
+                .post()
                 .uri("/api/v1/checkout/{ventaId}/pagar", ventaId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(request)

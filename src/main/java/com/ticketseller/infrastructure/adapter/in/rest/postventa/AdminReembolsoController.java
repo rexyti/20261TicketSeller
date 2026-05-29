@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -33,6 +34,7 @@ public class AdminReembolsoController {
 
     @Operation(summary = "Procesar reembolso manual por ticket")
     @PostMapping("/tickets/{id}/reembolso")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'AGENTE_VENTAS')")
     public Mono<ResponseEntity<ReembolsoResponse>> procesarManual(@PathVariable UUID id,
                                                                   @Valid @RequestBody ReembolsoManualRequest request) {
         return procesarReembolsoManualUseCase.ejecutar(id, request.tipo(), request.monto(), request.agenteId())
@@ -42,6 +44,7 @@ public class AdminReembolsoController {
 
     @Operation(summary = "Obtener cola de reembolsos pendientes")
     @GetMapping("/reembolsos/cola")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'AGENTE_VENTAS')")
     public Flux<ReembolsoPendienteResponse> obtenerCola() {
         return consultarColaReembolsosUseCase.ejecutar()
                 .map(postVentaRestMapper::toReembolsoPendienteResponse);
@@ -49,9 +52,9 @@ public class AdminReembolsoController {
 
     @Operation(summary = "Procesar cola automática de reembolsos pendientes")
     @PostMapping("/reembolsos/procesar-cola")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'AGENTE_VENTAS')")
     public Mono<ResponseEntity<Void>> procesarCola() {
         return procesarReembolsoManualUseCase.procesarColaPendiente()
                 .thenReturn(ResponseEntity.ok().build());
     }
 }
-

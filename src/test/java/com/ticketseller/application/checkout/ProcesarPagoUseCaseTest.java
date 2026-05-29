@@ -5,6 +5,7 @@ import com.ticketseller.domain.model.evento.Evento;
 import com.ticketseller.domain.model.venta.EstadoVenta;
 import com.ticketseller.domain.model.venta.ResultadoPago;
 import com.ticketseller.domain.model.venta.Venta;
+import com.ticketseller.domain.model.ticket.Ticket;
 import com.ticketseller.domain.model.zona.Compuerta;
 import com.ticketseller.domain.model.zona.Zona;
 import com.ticketseller.domain.repository.AsientoHoldRepositoryPort;
@@ -26,7 +27,6 @@ import reactor.test.StepVerifier;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -73,11 +73,14 @@ class ProcesarPagoUseCaseTest {
         UUID ventaId = UUID.randomUUID();
         UUID zonaId = UUID.randomUUID();
         UUID eventoId = UUID.randomUUID();
+        UUID recintoId = UUID.randomUUID();
+        UUID compradorId = UUID.randomUUID();
 
         Venta venta = Venta.builder()
                 .id(ventaId)
                 .eventoId(eventoId)
                 .zonaId(zonaId)
+                .compradorId(compradorId)
                 .cantidad(1)
                 .esCortesia(false)
                 .estado(EstadoVenta.RESERVADA)
@@ -89,19 +92,27 @@ class ProcesarPagoUseCaseTest {
         when(pasarelaPagoPort.procesarPago(any(), any(), any()))
                 .thenReturn(Mono.just(new ResultadoPago(true, "APROBADO", "AUTH", "OK")));
         when(zonaRepositoryPort.buscarPorId(zonaId)).thenReturn(Mono.just(
-                Zona.builder().id(zonaId).nombre("Zona A").build()));
+                Zona.builder().id(zonaId).nombre("Zona A").recintoId(recintoId).build()));
         when(compuertaRepositoryPort.buscarPorZonaId(zonaId)).thenReturn(Flux.just(
                 Compuerta.builder().id(UUID.randomUUID()).nombre("Norte").esGeneral(true).build()));
+        when(compuertaRepositoryPort.buscarPorRecintoId(recintoId)).thenReturn(Flux.empty());
         when(eventoRepositoryPort.buscarPorId(eventoId)).thenReturn(Mono.just(
                 Evento.builder().id(eventoId).fechaInicio(LocalDateTime.now().plusDays(30)).build()));
         when(asientoHoldRepositoryPort.buscarPorVentaId(ventaId)).thenReturn(Flux.empty());
+        when(ticketRepositoryPort.buscarPorEventoYEstados(any(), any())).thenReturn(Flux.empty());
         when(codigoQrPort.generarCodigo(any())).thenReturn("qr-code");
-        when(ticketRepositoryPort.guardarTodos(any()))
-                .thenAnswer(invocation -> Flux.fromIterable(invocation.getArgument(0)));
+        when(ticketRepositoryPort.guardar(any()))
+                .thenAnswer(invocation -> {
+                    Ticket t = invocation.getArgument(0);
+                    if (t.getId() == null) {
+                        t = t.toBuilder().id(UUID.randomUUID()).build();
+                    }
+                    return Mono.just(t);
+                });
         when(ventaRepositoryPort.actualizarEstado(ventaId, EstadoVenta.COMPLETADA))
                 .thenReturn(Mono.just(venta.toBuilder().estado(EstadoVenta.COMPLETADA).build()));
         when(transaccionRepository.guardar(any())).thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
-        when(notificacionEmailPort.enviarConfirmacion(any(), any())).thenReturn(Mono.empty());
+        when(notificacionEmailPort.enviarConfirmacion(any(), any(), any())).thenReturn(Mono.empty());
 
         StepVerifier.create(useCase.ejecutar(ventaId, new ProcesarPagoCommand("TARJETA", "127.0.0.1")))
                 .assertNext(detalle -> {

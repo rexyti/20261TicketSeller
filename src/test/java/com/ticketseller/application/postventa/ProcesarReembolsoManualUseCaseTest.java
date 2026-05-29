@@ -81,7 +81,7 @@ class ProcesarReembolsoManualUseCaseTest {
                 .thenReturn(Mono.just(new ResultadoPago(true, "APROBADO", "REF", "OK")));
         when(ticketRepositoryPort.guardar(any(Ticket.class))).thenAnswer(i -> Mono.just(i.getArgument(0)));
         when(ventaRepositoryPort.buscarPorId(ventaId)).thenReturn(Mono.just(venta));
-        when(notificacionEmailPort.enviarReembolsoCompletado(any(), any(), any(), any())).thenReturn(Mono.empty());
+        when(notificacionEmailPort.enviarReembolsoCompletado(any(), any(), any(), any(), any())).thenReturn(Mono.empty());
 
         StepVerifier.create(useCase.ejecutar(ticketId, TipoReembolso.TOTAL, null, UUID.randomUUID()))
                 .expectNextMatches(r -> EstadoReembolso.COMPLETADO.equals(r.getEstado()))

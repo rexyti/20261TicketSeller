@@ -14,6 +14,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -38,12 +39,14 @@ public class DescuentoController {
 
     @Operation(summary = "Listar descuentos de una promoción")
     @GetMapping("/admin/promociones/{id}/descuentos")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'PROMOTOR_EVENTOS')")
     public Flux<DescuentoResponse> listarDescuentos(@PathVariable UUID id) {
         return listarDescuentosUseCase.ejecutar(id).map(mapper::toResponse);
     }
 
     @Operation(summary = "Crear un descuento para una promoción")
     @PostMapping("/admin/promociones/{id}/descuentos")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'PROMOTOR_EVENTOS')")
     public Mono<ResponseEntity<DescuentoResponse>> crearDescuento(
             @PathVariable UUID id,
             @Valid @RequestBody CrearDescuentoRequest request) {
@@ -54,6 +57,7 @@ public class DescuentoController {
 
     @Operation(summary = "Aplicar un código promocional a una venta")
     @PostMapping("/compras/{ventaId}/aplicar-codigo")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'COMPRADOR', 'AGENTE_VENTAS')")
     public Mono<ResponseEntity<DescuentoAplicadoResponse>> aplicarCodigo(@PathVariable UUID ventaId,
             @Valid @RequestBody AplicarCodigoRequest request) {
         return aplicarCodigoPromoVentaUseCase.ejecutar(ventaId, request.codigo())

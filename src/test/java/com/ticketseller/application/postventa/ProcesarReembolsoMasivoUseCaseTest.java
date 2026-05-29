@@ -52,6 +52,7 @@ class ProcesarReembolsoMasivoUseCaseTest {
         when(reembolsoRepositoryPort.guardar(any(Reembolso.class))).thenAnswer(i -> Mono.just(i.getArgument(0)));
 
         StepVerifier.create(useCase.ejecutar(eventoId))
+                .expectNextCount(1)
                 .verifyComplete();
     }
 }

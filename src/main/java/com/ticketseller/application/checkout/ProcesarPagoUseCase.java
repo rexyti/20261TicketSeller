@@ -130,7 +130,7 @@ public class ProcesarPagoUseCase {
                             .flatMap(savedTickets -> actualizarAsientosYHolds(savedTickets, holds)
                                     .then(ventaRepositoryPort.actualizarEstado(venta.getId(), EstadoVenta.COMPLETADA))
                                     .flatMap(ventaPagada -> guardarTransaccion(ventaPagada, command, resultado)
-                                            .then(notificacionEmailPort.enviarConfirmacion(ventaPagada, savedTickets))
+                                            .then(notificacionEmailPort.enviarConfirmacion(ventaPagada, savedTickets, ventaPagada.getCompradorId().toString()))
                                             .thenReturn(new VentaDetalle(ventaPagada, savedTickets))))
                     );
                 }));

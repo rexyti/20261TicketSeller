@@ -13,7 +13,14 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -31,6 +38,7 @@ public class CompuertaController {
 
     @Operation(summary = "Crear una compuerta en un recinto")
     @PostMapping("/{recintoId}/compuertas")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMINISTRADOR_RECINTO')")
     public Mono<ResponseEntity<CompuertaResponse>> crearCompuerta(@PathVariable UUID recintoId,
                                                                   @Valid @RequestBody CrearCompuertaRequest request) {
         Compuerta compuerta = compuertaRestMapper.toDomain(request);
@@ -41,12 +49,14 @@ public class CompuertaController {
 
     @Operation(summary = "Listar compuertas de un recinto")
     @GetMapping("/{recintoId}/compuertas")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMINISTRADOR_RECINTO', 'CONTROLADOR_ACCESOS')")
     public Flux<CompuertaResponse> listarCompuertas(@PathVariable UUID recintoId) {
         return listarCompuertasUseCase.ejecutar(recintoId).map(compuertaRestMapper::toResponse);
     }
 
     @Operation(summary = "Asignar compuerta a una zona")
     @PatchMapping("/zonas/{zonaId}/compuertas/{compuertaId}")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMINISTRADOR_RECINTO')")
     public Mono<ResponseEntity<CompuertaResponse>> asignarCompuertaZona(@PathVariable UUID compuertaId,
                                                                         @PathVariable UUID zonaId) {
         return asignarCompuertaAZonaUseCase.ejecutar(compuertaId, zonaId)

@@ -16,6 +16,7 @@ import com.ticketseller.domain.repository.CodigoQrPort;
 import com.ticketseller.domain.repository.CompuertaRepositoryPort;
 import com.ticketseller.domain.repository.CortesiaRepositoryPort;
 import com.ticketseller.domain.repository.EventoRepositoryPort;
+import com.ticketseller.domain.repository.NotificacionEmailPort;
 import com.ticketseller.domain.repository.TicketRepositoryPort;
 import com.ticketseller.domain.repository.ZonaRepositoryPort;
 import org.junit.jupiter.api.BeforeEach;
@@ -44,6 +45,7 @@ class CortesiaTicketCreatorTest {
     private CompuertaRepositoryPort compuertaRepositoryPort;
     private EventoRepositoryPort eventoRepositoryPort;
     private CodigoQrPort codigoQrPort;
+    private NotificacionEmailPort notificacionEmailPort;
     private CortesiaTicketCreator creator;
 
     private final UUID eventoId = UUID.randomUUID();
@@ -57,8 +59,10 @@ class CortesiaTicketCreatorTest {
         compuertaRepositoryPort = mock(CompuertaRepositoryPort.class);
         eventoRepositoryPort = mock(EventoRepositoryPort.class);
         codigoQrPort = mock(CodigoQrPort.class);
+        notificacionEmailPort = mock(NotificacionEmailPort.class);
         creator = new CortesiaTicketCreator(ticketRepositoryPort, cortesiaRepositoryPort,
-                zonaRepositoryPort, compuertaRepositoryPort, eventoRepositoryPort, codigoQrPort);
+                zonaRepositoryPort, compuertaRepositoryPort, eventoRepositoryPort, codigoQrPort,
+                notificacionEmailPort);
     }
 
     @Test
@@ -80,8 +84,9 @@ class CortesiaTicketCreatorTest {
         when(codigoQrPort.generarCodigo(eq(ticketId.toString()))).thenReturn(qrBase64);
         when(ticketRepositoryPort.guardar(argThat(t -> t != null && t.getCodigoQr() != null))).thenReturn(Mono.just(conQr));
         when(cortesiaRepositoryPort.guardar(any())).thenReturn(Mono.just(cortesia));
+        when(notificacionEmailPort.enviarCortesiaGenerada(any(), any(), any())).thenReturn(Mono.empty());
 
-        StepVerifier.create(creator.crear(eventoId, "Prensa ABC", CategoriaCortesia.PRENSA, zonaId, null))
+        StepVerifier.create(creator.crear(eventoId, null, "prensa@abc.com", CategoriaCortesia.PRENSA, zonaId, null))
                 .expectNextMatches(c -> EstadoCortesia.GENERADA.equals(c.getEstado())
                         && c.getTicketId() != null
                         && c.getAsientoId() == null)
@@ -114,8 +119,9 @@ class CortesiaTicketCreatorTest {
         when(codigoQrPort.generarCodigo(eq(ticketId.toString()))).thenReturn(qrBase64);
         when(ticketRepositoryPort.guardar(argThat(t -> t != null && t.getCodigoQr() != null))).thenReturn(Mono.just(conQr));
         when(cortesiaRepositoryPort.guardar(any())).thenReturn(Mono.just(cortesia));
+        when(notificacionEmailPort.enviarCortesiaGenerada(any(), any(), any())).thenReturn(Mono.empty());
 
-        StepVerifier.create(creator.crear(eventoId, "Invitado VIP", CategoriaCortesia.PATROCINADOR, zonaId, asiento))
+        StepVerifier.create(creator.crear(eventoId, null, "invitado@vip.com", CategoriaCortesia.PATROCINADOR, zonaId, asiento))
                 .expectNextMatches(c -> EstadoCortesia.GENERADA.equals(c.getEstado())
                         && asientoId.equals(c.getAsientoId()))
                 .verifyComplete();
@@ -128,7 +134,7 @@ class CortesiaTicketCreatorTest {
         Evento evento = Evento.builder().id(eventoId).build();
         when(eventoRepositoryPort.buscarPorId(eventoId)).thenReturn(Mono.just(evento));
 
-        StepVerifier.create(creator.crear(eventoId, "Invitado", CategoriaCortesia.ARTISTA, null, null))
+        StepVerifier.create(creator.crear(eventoId, null, "invitado@test.com", CategoriaCortesia.ARTISTA, null, null))
                 .expectError(ZonaInvalidaException.class)
                 .verify();
     }
@@ -137,7 +143,7 @@ class CortesiaTicketCreatorTest {
     void eventoNoEncontradoLanzaEventoNotFoundException() {
         when(eventoRepositoryPort.buscarPorId(eventoId)).thenReturn(Mono.empty());
 
-        StepVerifier.create(creator.crear(eventoId, "Invitado", CategoriaCortesia.PRENSA, zonaId, null))
+        StepVerifier.create(creator.crear(eventoId, null, "invitado@test.com", CategoriaCortesia.PRENSA, zonaId, null))
                 .expectError(EventoNotFoundException.class)
                 .verify();
     }
@@ -159,7 +165,7 @@ class CortesiaTicketCreatorTest {
                 .id(UUID.randomUUID())
                 .eventoId(eventoId)
                 .asientoId(asientoId)
-                .destinatario("Prensa ABC")
+                .emailDestinatario("prensa@abc.com")
                 .categoria(CategoriaCortesia.PRENSA)
                 .ticketId(ticketId)
                 .estado(EstadoCortesia.GENERADA)

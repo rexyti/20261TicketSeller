@@ -9,6 +9,7 @@ import com.ticketseller.domain.exception.asiento.HoldExpiradoException;
 import com.ticketseller.domain.model.asiento.AsientoHold;
 import com.ticketseller.domain.model.asiento.EstadoHold;
 import com.ticketseller.infrastructure.adapter.in.rest.GlobalExceptionHandler;
+import com.ticketseller.infrastructure.config.TestWebSecurityConfig;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
@@ -23,7 +24,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @WebFluxTest(controllers = InventarioController.class)
-@Import(GlobalExceptionHandler.class)
+@Import({GlobalExceptionHandler.class, TestWebSecurityConfig.class})
 class InventarioControllerTest {
 
     @Autowired

@@ -12,6 +12,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -33,22 +34,24 @@ public class CortesiaController {
 
     @Operation(summary = "Crear un ticket de cortesía con asiento específico asignado")
     @PostMapping("/{eventoId}/cortesias/con-asiento")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'COORDINADOR_PATROCINIOS')")
     public Mono<ResponseEntity<CortesiaResponse>> crearCortesiaConAsiento(
             @PathVariable UUID eventoId,
             @Valid @RequestBody CrearCortesiaRequest request) {
-        return crearCortesiaConAsientoUseCase.ejecutar(eventoId, request.destinatario(),
-                        request.categoria(), request.asientoId())
+        return crearCortesiaConAsientoUseCase.ejecutar(eventoId, request.destinatarioId(),
+                        request.emailDestinatario(), request.categoria(), request.asientoId())
                 .map(cortesiaRestMapper::toCortesiaResponse)
                 .map(r -> ResponseEntity.status(HttpStatus.CREATED).body(r));
     }
 
     @Operation(summary = "Crear un ticket de cortesía general sin asiento asignado")
     @PostMapping("/{eventoId}/cortesias/general")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'COORDINADOR_PATROCINIOS')")
     public Mono<ResponseEntity<CortesiaResponse>> crearCortesiaGeneral(
             @PathVariable UUID eventoId,
             @Valid @RequestBody CrearCortesiaGeneralRequest request) {
-        return crearCortesiaGeneralUseCase.ejecutar(eventoId, request.destinatario(),
-                        request.categoria(), request.zonaId())
+        return crearCortesiaGeneralUseCase.ejecutar(eventoId, request.destinatarioId(),
+                        request.emailDestinatario(), request.categoria(), request.zonaId())
                 .map(cortesiaRestMapper::toCortesiaResponse)
                 .map(r -> ResponseEntity.status(HttpStatus.CREATED).body(r));
     }

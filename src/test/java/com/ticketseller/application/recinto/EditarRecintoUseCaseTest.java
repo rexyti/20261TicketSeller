@@ -33,7 +33,7 @@ class EditarRecintoUseCaseTest {
     @Test
     void deberiaBloquearCambioEstructuralConTicketsVendidos() {
         UUID id = UUID.randomUUID();
-        Recinto actual = Recinto.builder().id(id).capacidadMaxima(1000).activo(true).build();
+        Recinto actual = Recinto.builder().id(id).nombre("Arena").ciudad("Bogota").capacidadMaxima(1000).activo(true).build();
         RecintoRepositoryPort port = mock(RecintoRepositoryPort.class);
         EditarRecintoUseCase useCase = new EditarRecintoUseCase(port);
 

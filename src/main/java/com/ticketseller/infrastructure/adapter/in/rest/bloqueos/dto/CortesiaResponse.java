@@ -4,7 +4,8 @@ import java.util.UUID;
 
 public record CortesiaResponse(
         UUID cortesiaId,
-        String destinatario,
+        UUID destinatarioId,
+        String emailDestinatario,
         String categoria,
         UUID asientoId,
         UUID ticketId

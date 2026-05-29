@@ -11,6 +11,7 @@ import com.ticketseller.infrastructure.adapter.in.rest.asiento.dto.CambiarEstado
 import com.ticketseller.infrastructure.adapter.in.rest.asiento.dto.CambiarEstadoRequest;
 import com.ticketseller.infrastructure.adapter.in.rest.asiento.dto.HistorialCambioResponse;
 import com.ticketseller.infrastructure.adapter.in.rest.mapper.AsientoRestMapper;
+import com.ticketseller.infrastructure.config.SecurityContextUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -18,7 +19,13 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -39,6 +46,7 @@ public class AsientoMantenimientoController {
     @Operation(summary = "Obtener todos los asientos del recinto asociado al evento")
     @ApiResponse(responseCode = "200", description = "Lista de asientos retornada exitosamente")
     @GetMapping
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'GESTOR_INVENTARIO', 'ADMINISTRADOR_RECINTO')")
     public Flux<AsientoResponse> consultarAsientosEvento(@PathVariable UUID eventoId) {
         return consultarAsientosEventoUseCase.ejecutar(eventoId)
                 .map(ae -> new AsientoResponse(ae.asientoId(), ae.fila(), ae.columna(), ae.numero(), ae.zonaId(), ae.estadoEnEvento()));
@@ -52,15 +60,14 @@ public class AsientoMantenimientoController {
             @ApiResponse(responseCode = "409", description = "Transición de estado inválida o asiento en proceso de compra")
     })
     @PatchMapping("/{asientoId}/estado")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'GESTOR_INVENTARIO')")
     public Mono<ResponseEntity<AsientoResponse>> cambiarEstadoIndividual(
             @PathVariable UUID eventoId,
             @PathVariable UUID asientoId,
             @Valid @RequestBody CambiarEstadoRequest request) {
-        
-        // TODO: Extraer usuarioId del contexto de seguridad (usando un mock temporal)
-        String usuarioId = UUID.randomUUID().toString(); // Simulación de usuario autenticado
-
-        return cambiarEstadoAsientoUseCase.ejecutar(eventoId, asientoId, request.estadoDestino(), request.motivo(), usuarioId)
+        return SecurityContextUtils.getUsuarioId()
+                .flatMap(usuarioId -> cambiarEstadoAsientoUseCase.ejecutar(
+                        eventoId, asientoId, request.estadoDestino(), request.motivo(), usuarioId.toString()))
                 .map(asientoRestMapper::toAsientoResponse)
                 .map(ResponseEntity::ok);
     }
@@ -71,23 +78,23 @@ public class AsientoMantenimientoController {
             @ApiResponse(responseCode = "400", description = "Petición inválida")
     })
     @PatchMapping("/estado-masivo")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'GESTOR_INVENTARIO')")
     public Mono<ResponseEntity<CambiarEstadoMasivoResponse>> cambiarEstadoMasivo(
             @PathVariable UUID eventoId,
             @Valid @RequestBody CambiarEstadoMasivoRequest request) {
-
-        String usuarioId = UUID.randomUUID().toString(); // Simulación de usuario autenticado
-
-        return cambiarEstadoMasivoUseCase.ejecutar(eventoId, request.asientoIds(), request.estadoDestino(), request.motivo(), usuarioId)
+        return SecurityContextUtils.getUsuarioId()
+                .flatMap(usuarioId -> cambiarEstadoMasivoUseCase.ejecutar(
+                        eventoId, request.asientoIds(), request.estadoDestino(), request.motivo(), usuarioId.toString()))
                 .map(ResponseEntity::ok);
     }
 
     @Operation(summary = "Consultar el historial de auditoría de cambios de estado de un asiento")
     @ApiResponse(responseCode = "200", description = "Lista de historial retornada exitosamente")
     @GetMapping("/{asientoId}/historial")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'GESTOR_INVENTARIO', 'ADMINISTRADOR_FINANCIERO')")
     public Flux<HistorialCambioResponse> consultarHistorial(
             @PathVariable UUID eventoId,
             @PathVariable UUID asientoId) {
-        
         return consultarHistorialAsientoUseCase.ejecutar(eventoId, asientoId)
                 .map(asientoRestMapper::toHistorialResponse);
     }

@@ -784,9 +784,11 @@ public class BeanConfiguration {
             ZonaRepositoryPort zonaRepositoryPort,
             CompuertaRepositoryPort compuertaRepositoryPort,
             EventoRepositoryPort eventoRepositoryPort,
-            CodigoQrPort codigoQrPort) {
+            CodigoQrPort codigoQrPort,
+            com.ticketseller.domain.repository.NotificacionEmailPort notificacionEmailPort) {
         return new CortesiaTicketCreator(ticketRepositoryPort, cortesiaRepositoryPort,
-                zonaRepositoryPort, compuertaRepositoryPort, eventoRepositoryPort, codigoQrPort);
+                zonaRepositoryPort, compuertaRepositoryPort, eventoRepositoryPort, codigoQrPort,
+                notificacionEmailPort);
     }
 
     @Bean

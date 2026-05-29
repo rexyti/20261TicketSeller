@@ -15,6 +15,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -41,6 +42,7 @@ public class TransaccionController {
 
     @Operation(summary = "Cambiar estado de una venta")
     @PatchMapping("/{id}/estado")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'AGENTE_VENTAS')")
     public Mono<ResponseEntity<VentaResumenResponse>> cambiarEstado(
             @PathVariable UUID id,
             @Valid @RequestBody CambiarEstadoVentaRequest request) {
@@ -51,12 +53,14 @@ public class TransaccionController {
 
     @Operation(summary = "Consultar historial de estados de una venta")
     @GetMapping("/{id}/historial")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'AGENTE_VENTAS')")
     public Flux<HistorialEstadoVentaResponse> consultarHistorial(@PathVariable UUID id) {
         return consultarHistorialVentaUseCase.ejecutar(id).map(mapper::toHistorialResponse);
     }
 
     @Operation(summary = "Listar transacciones con filtros opcionales")
     @GetMapping
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'AGENTE_VENTAS')")
     public Flux<VentaResumenResponse> listar(
             @RequestParam(required = false) EstadoVenta estado,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fechaInicio,

@@ -12,7 +12,13 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -29,6 +35,7 @@ public class ZonaController {
 
     @Operation(summary = "Crear una zona en un recinto")
     @PostMapping("/{recintoId}/zonas")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMINISTRADOR_RECINTO')")
     public Mono<ResponseEntity<ZonaResponse>> crearZona(@PathVariable UUID recintoId,
                                                         @Valid @RequestBody CrearZonaRequest request) {
         Zona zona = zonaRestMapper.toDomain(request);
@@ -39,6 +46,7 @@ public class ZonaController {
 
     @Operation(summary = "Listar zonas de un recinto")
     @GetMapping("/{recintoId}/zonas")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMINISTRADOR_RECINTO', 'GESTOR_INVENTARIO', 'PROMOTOR_EVENTOS')")
     public Flux<ZonaResponse> listarZonas(@PathVariable UUID recintoId) {
         return listarZonasUseCase.ejecutar(recintoId).map(zonaRestMapper::toResponse);
     }

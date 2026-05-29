@@ -148,7 +148,7 @@ public class ProcesarReembolsoManualUseCase {
         return ventaRepositoryPort.buscarPorId(ticket.getVentaId())
                 .switchIfEmpty(Mono.error(new VentaNotFoundException("Venta no encontrada: " + ticket.getVentaId())))
                 .flatMap(venta -> notificacionEmailPort.enviarReembolsoCompletado(
-                        venta, ticket, reembolso.getMonto(), PLAZO_ACREDITACION));
+                        venta, ticket, reembolso.getMonto(), PLAZO_ACREDITACION, venta.getCompradorId().toString()));
     }
 
     private Mono<Reembolso> registrarFallo(Reembolso reembolso, String detalle) {

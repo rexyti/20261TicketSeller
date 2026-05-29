@@ -6,16 +6,15 @@ import com.ticketseller.infrastructure.adapter.in.rest.checkout.dto.TicketRespon
 import com.ticketseller.infrastructure.adapter.in.rest.postventa.dto.TicketConReembolsoResponse;
 import com.ticketseller.infrastructure.adapter.in.rest.mapper.CheckoutRestMapper;
 import com.ticketseller.infrastructure.adapter.in.rest.mapper.PostVentaRestMapper;
+import com.ticketseller.infrastructure.config.SecurityContextUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
-
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/compras")
@@ -29,15 +28,19 @@ public class MisComprasController {
 
     @Operation(summary = "Consultar tickets cancelados/reembolsados del comprador autenticado")
     @GetMapping("/mis-compras")
-    public Flux<TicketConReembolsoResponse> misCompras(@RequestHeader("X-Comprador-Id") UUID compradorId) {
-        return consultarEstadoReembolsoUseCase.ejecutar(compradorId)
-                .map(postVentaRestMapper::toTicketConReembolsoResponse);
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'COMPRADOR')")
+    public Flux<TicketConReembolsoResponse> misCompras() {
+        return SecurityContextUtils.getUsuarioId()
+                .flatMapMany(compradorId -> consultarEstadoReembolsoUseCase.ejecutar(compradorId)
+                        .map(postVentaRestMapper::toTicketConReembolsoResponse));
     }
 
     @Operation(summary = "Consultar todos los tickets del comprador autenticado")
     @GetMapping("/mis-tickets")
-    public Flux<TicketResponse> misTickets(@RequestHeader("X-Comprador-Id") UUID compradorId) {
-        return consultarTodosTicketsUseCase.ejecutar(compradorId)
-                .map(checkoutRestMapper::toTicketResponse);
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'COMPRADOR')")
+    public Flux<TicketResponse> misTickets() {
+        return SecurityContextUtils.getUsuarioId()
+                .flatMapMany(compradorId -> consultarTodosTicketsUseCase.ejecutar(compradorId)
+                        .map(checkoutRestMapper::toTicketResponse));
     }
 }

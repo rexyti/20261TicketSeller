@@ -18,9 +18,9 @@ import java.util.UUID;
 @Mapper(componentModel = "spring")
 public interface CheckoutRestMapper {
 
-    default ReservarAsientosCommand toCommand(ReservarAsientosRequest request, UUID eventoId) {
+    default ReservarAsientosCommand toCommand(ReservarAsientosRequest request, UUID eventoId, UUID compradorId) {
         return new ReservarAsientosCommand(
-                request.compradorId(),
+                compradorId,
                 eventoId,
                 request.zonaId(),
                 request.cantidad(),
@@ -44,4 +44,3 @@ public interface CheckoutRestMapper {
         return toVentaResponse(ventaDetalle.venta(), tickets);
     }
 }
-

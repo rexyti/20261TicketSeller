@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -30,6 +31,7 @@ public class CancelacionController {
 
     @Operation(summary = "Cancelar ticket individual")
     @DeleteMapping("/{id}/cancelar")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'COMPRADOR', 'AGENTE_VENTAS')")
     public Mono<ResponseEntity<CancelacionResponse>> cancelar(@PathVariable UUID id) {
         return cancelarTicketUseCase.cancelarTicket(id)
                 .map(postVentaRestMapper::toCancelacionResponse)
@@ -38,6 +40,7 @@ public class CancelacionController {
 
     @Operation(summary = "Cancelar varios tickets")
     @DeleteMapping("/cancelar-varios")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'AGENTE_VENTAS', 'COMPRADOR')")
     public Mono<ResponseEntity<CancelacionResponse>> cancelarParcial(@Valid @RequestBody CancelarTicketRequest request) {
         return cancelarTicketUseCase.cancelarVarios(request.ticketIds())
                 .map(postVentaRestMapper::toCancelacionResponse)
@@ -46,10 +49,10 @@ public class CancelacionController {
 
     @Operation(summary = "Procesar cancelación masiva por evento cancelado")
     @DeleteMapping("/eventos/{eventoId}/cancelar")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'PROMOTOR_EVENTOS', 'AGENTE_VENTAS')")
     public Mono<ResponseEntity<Void>> cancelarEvento(@PathVariable UUID eventoId) {
         return procesarReembolsoMasivoUseCase.ejecutar(eventoId)
                 .then()
                 .thenReturn(ResponseEntity.ok().<Void>build());
     }
 }
-

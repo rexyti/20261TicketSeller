@@ -25,13 +25,15 @@ public class CrearCortesiaConAsientoUseCase {
     private final AsientoHoldRepositoryPort asientoHoldRepositoryPort;
     private final CortesiaTicketCreator cortesiaTicketCreator;
 
-    public Mono<Cortesia> ejecutar(UUID eventoId, String destinatario, CategoriaCortesia categoria, UUID asientoId) {
+    public Mono<Cortesia> ejecutar(UUID eventoId, UUID destinatarioId, String emailDestinatario,
+                                   CategoriaCortesia categoria, UUID asientoId) {
         return asientoRepositoryPort.buscarPorId(asientoId)
                 .switchIfEmpty(Mono.error(new AsientoNotFoundException(
                         "Asiento %s no encontrado".formatted(asientoId))))
                 .flatMap(asiento -> validarDisponibleParaEvento(asiento, eventoId))
-                .flatMap(asiento -> crearBloqueo(asiento, eventoId, destinatario)
-                        .then(cortesiaTicketCreator.crear(eventoId, destinatario, categoria, asiento.getZonaId(), asiento)));
+                .flatMap(asiento -> crearBloqueo(asiento, eventoId, destinatarioId, emailDestinatario)
+                        .then(cortesiaTicketCreator.crear(eventoId, destinatarioId, emailDestinatario,
+                                categoria, asiento.getZonaId(), asiento)));
     }
 
     private Mono<Asiento> validarDisponibleParaEvento(Asiento asiento, UUID eventoId) {
@@ -41,26 +43,28 @@ public class CrearCortesiaConAsientoUseCase {
         return Mono.zip(
                 bloqueoRepositoryPort.buscarActivoPorAsientoYEvento(asiento.getId(), eventoId).hasElement(),
                 asientoHoldRepositoryPort.buscarActivoPorAsientoYEvento(asiento.getId(), eventoId).hasElement()
-        ).flatMap(tuple -> {
-            if (tuple.getT1()) {
-                return Mono.error(new AsientoYaBloqueadoException(asiento.getId()));
-            }
-            if (tuple.getT2()) {
-                return Mono.error(new AsientoOcupadoException(asiento.getId()));
-            }
-            return Mono.just(asiento);
-        });
+        ).flatMap(tuple -> Mono.just(asiento)
+                .filter(a -> !tuple.getT1())
+                .switchIfEmpty(Mono.error(new AsientoYaBloqueadoException(asiento.getId())))
+                .filter(a -> !tuple.getT2())
+                .switchIfEmpty(Mono.error(new AsientoOcupadoException(asiento.getId()))));
     }
 
-    private Mono<Bloqueo> crearBloqueo(Asiento asiento, UUID eventoId, String destinatario) {
+    private Mono<Bloqueo> crearBloqueo(Asiento asiento, UUID eventoId,
+                                       UUID destinatarioId, String emailDestinatario) {
+        String destinatarioLabel = getDestinatarioLabel(emailDestinatario, destinatarioId);
         Bloqueo bloqueo = Bloqueo.builder()
                 .asientoId(asiento.getId())
                 .eventoId(eventoId)
-                .destinatario(destinatario)
+                .destinatario(destinatarioLabel)
                 .fechaCreacion(LocalDateTime.now())
                 .fechaExpiracion(null)
                 .estado(EstadoBloqueo.ACTIVO)
                 .build();
         return bloqueoRepositoryPort.guardar(bloqueo);
+    }
+
+    private String getDestinatarioLabel(String emailDestinatario, UUID destinatarioId) {
+        return emailDestinatario != null ? emailDestinatario : destinatarioId.toString();
     }
 }

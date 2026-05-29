@@ -36,6 +36,8 @@ class CrearCortesiaConAsientoUseCaseTest {
     private final UUID eventoId = UUID.randomUUID();
     private final UUID asientoId = UUID.randomUUID();
     private final UUID zonaId = UUID.randomUUID();
+    private final UUID destinatarioId = UUID.randomUUID();
+    private static final String EMAIL = "invitado@vip.com";
 
     @BeforeEach
     void setUp() {
@@ -56,16 +58,16 @@ class CrearCortesiaConAsientoUseCaseTest {
         when(bloqueoRepositoryPort.buscarActivoPorAsientoYEvento(asientoId, eventoId)).thenReturn(Mono.empty());
         when(asientoHoldRepositoryPort.buscarActivoPorAsientoYEvento(asientoId, eventoId)).thenReturn(Mono.empty());
         when(bloqueoRepositoryPort.guardar(any())).thenAnswer(inv -> Mono.just(inv.getArgument(0)));
-        when(cortesiaTicketCreator.crear(eq(eventoId), eq("Invitado VIP"), eq(CategoriaCortesia.PATROCINADOR),
-                eq(zonaId), eq(disponible))).thenReturn(Mono.just(cortesia));
+        when(cortesiaTicketCreator.crear(eq(eventoId), eq(destinatarioId), eq(EMAIL),
+                eq(CategoriaCortesia.PATROCINADOR), eq(zonaId), eq(disponible))).thenReturn(Mono.just(cortesia));
 
-        StepVerifier.create(useCase.ejecutar(eventoId, "Invitado VIP", CategoriaCortesia.PATROCINADOR, asientoId))
+        StepVerifier.create(useCase.ejecutar(eventoId, destinatarioId, EMAIL, CategoriaCortesia.PATROCINADOR, asientoId))
                 .expectNextMatches(c -> EstadoCortesia.GENERADA.equals(c.getEstado())
                         && asientoId.equals(c.getAsientoId()))
                 .verifyComplete();
 
         verify(bloqueoRepositoryPort).guardar(any());
-        verify(cortesiaTicketCreator).crear(any(), any(), any(), any(), any());
+        verify(cortesiaTicketCreator).crear(any(), any(), any(), any(), any(), any());
     }
 
     @Test
@@ -73,22 +75,22 @@ class CrearCortesiaConAsientoUseCaseTest {
         Asiento enMantenimiento = Asiento.builder().id(asientoId).estado(EstadoAsiento.MANTENIMIENTO).build();
         when(asientoRepositoryPort.buscarPorId(asientoId)).thenReturn(Mono.just(enMantenimiento));
 
-        StepVerifier.create(useCase.ejecutar(eventoId, "Invitado", CategoriaCortesia.ARTISTA, asientoId))
+        StepVerifier.create(useCase.ejecutar(eventoId, destinatarioId, EMAIL, CategoriaCortesia.ARTISTA, asientoId))
                 .expectError(AsientoOcupadoException.class)
                 .verify();
 
-        verify(cortesiaTicketCreator, never()).crear(any(), any(), any(), any(), any());
+        verify(cortesiaTicketCreator, never()).crear(any(), any(), any(), any(), any(), any());
     }
 
     @Test
     void asientoNoEncontradoLanzaExcepcion() {
         when(asientoRepositoryPort.buscarPorId(asientoId)).thenReturn(Mono.empty());
 
-        StepVerifier.create(useCase.ejecutar(eventoId, "Invitado", CategoriaCortesia.ARTISTA, asientoId))
+        StepVerifier.create(useCase.ejecutar(eventoId, destinatarioId, EMAIL, CategoriaCortesia.ARTISTA, asientoId))
                 .expectError(AsientoNotFoundException.class)
                 .verify();
 
-        verify(cortesiaTicketCreator, never()).crear(any(), any(), any(), any(), any());
+        verify(cortesiaTicketCreator, never()).crear(any(), any(), any(), any(), any(), any());
     }
 
     @Test
@@ -99,11 +101,11 @@ class CrearCortesiaConAsientoUseCaseTest {
                 .thenReturn(Mono.just(com.ticketseller.domain.model.bloqueos.Bloqueo.builder().build()));
         when(asientoHoldRepositoryPort.buscarActivoPorAsientoYEvento(asientoId, eventoId)).thenReturn(Mono.empty());
 
-        StepVerifier.create(useCase.ejecutar(eventoId, "Invitado", CategoriaCortesia.ARTISTA, asientoId))
+        StepVerifier.create(useCase.ejecutar(eventoId, destinatarioId, EMAIL, CategoriaCortesia.ARTISTA, asientoId))
                 .expectError(AsientoYaBloqueadoException.class)
                 .verify();
 
-        verify(cortesiaTicketCreator, never()).crear(any(), any(), any(), any(), any());
+        verify(cortesiaTicketCreator, never()).crear(any(), any(), any(), any(), any(), any());
     }
 
     private Cortesia buildCortesia(UUID asientoIdRef, UUID ticketIdRef) {
@@ -111,7 +113,8 @@ class CrearCortesiaConAsientoUseCaseTest {
                 .id(UUID.randomUUID())
                 .eventoId(eventoId)
                 .asientoId(asientoIdRef)
-                .destinatario("Invitado VIP")
+                .destinatarioId(destinatarioId)
+                .emailDestinatario(EMAIL)
                 .categoria(CategoriaCortesia.PATROCINADOR)
                 .ticketId(ticketIdRef)
                 .estado(EstadoCortesia.GENERADA)

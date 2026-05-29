@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,6 +27,7 @@ public class LiquidacionController {
 
     @Operation(summary = "Consultar snapshot de liquidación de un evento")
     @GetMapping("/eventos/{id}/snapshot")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMINISTRADOR_FINANCIERO')")
     public Mono<ResponseEntity<SnapshotLiquidacionResponse>> consultarSnapshot(@PathVariable UUID id) {
         return consultarSnapshotUseCase.ejecutar(id)
                 .map(liquidacionRestMapper::toSnapshotResponse)

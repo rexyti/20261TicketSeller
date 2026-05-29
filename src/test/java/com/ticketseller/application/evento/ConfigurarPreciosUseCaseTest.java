@@ -53,8 +53,8 @@ class ConfigurarPreciosUseCaseTest {
 
         when(eventoRepositoryPort.buscarPorId(eventoId)).thenReturn(Mono.just(Evento.builder().id(eventoId).recintoId(recintoId).build()));
         when(zonaRepositoryPort.buscarPorRecintoId(recintoId)).thenReturn(Flux.just(
-                Zona.builder().id(zonaA).build(),
-                Zona.builder().id(zonaB).build()
+                Zona.builder().id(zonaA).nombre("Zona A").build(),
+                Zona.builder().id(zonaB).nombre("Zona B").build()
         ));
 
         List<PrecioZona> request = List.of(PrecioZona.builder().zonaId(zonaA).precio(BigDecimal.TEN).build());
@@ -76,7 +76,7 @@ class ConfigurarPreciosUseCaseTest {
         UUID zonaA = UUID.randomUUID();
 
         when(eventoRepositoryPort.buscarPorId(eventoId)).thenReturn(Mono.just(Evento.builder().id(eventoId).recintoId(recintoId).build()));
-        when(zonaRepositoryPort.buscarPorRecintoId(recintoId)).thenReturn(Flux.just(Zona.builder().id(zonaA).build()));
+        when(zonaRepositoryPort.buscarPorRecintoId(recintoId)).thenReturn(Flux.just(Zona.builder().id(zonaA).nombre("Zona A").build()));
         when(precioZonaRepositoryPort.eliminarPorEvento(eventoId)).thenReturn(Mono.empty());
         when(precioZonaRepositoryPort.guardar(any(PrecioZona.class))).thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
 
