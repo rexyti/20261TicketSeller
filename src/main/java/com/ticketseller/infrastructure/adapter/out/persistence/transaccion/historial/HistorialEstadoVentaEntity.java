@@ -21,8 +21,8 @@ public class HistorialEstadoVentaEntity {
     private UUID id;
     @Column("venta_id")
     private UUID ventaId;
-    @Column("actor_id")
-    private UUID actorId;
+    @Column("agente_id")
+    private UUID agenteId;
     @Column("estado_anterior")
     private String estadoAnterior;
     @Column("estado_nuevo")

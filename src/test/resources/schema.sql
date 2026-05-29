@@ -184,7 +184,7 @@ CREATE TABLE historial_cambios_estado (
 CREATE TABLE historial_estado_venta (
     id UUID PRIMARY KEY,
     venta_id UUID NOT NULL REFERENCES ventas(id),
-    actor_id UUID,
+    agente_id UUID,
     estado_anterior VARCHAR(40) NOT NULL,
     estado_nuevo VARCHAR(40) NOT NULL,
     justificacion VARCHAR(255),

@@ -44,7 +44,7 @@ public class TransaccionController {
     public Mono<ResponseEntity<VentaResumenResponse>> cambiarEstado(
             @PathVariable UUID id,
             @Valid @RequestBody CambiarEstadoVentaRequest request) {
-        return cambiarEstadoVentaUseCase.ejecutar(id, request.nuevoEstado(), request.justificacion(), request.actorId())
+        return cambiarEstadoVentaUseCase.ejecutar(id, request.nuevoEstado(), request.justificacion(), request.agenteId())
                 .map(mapper::toResumen)
                 .map(ResponseEntity::ok);
     }

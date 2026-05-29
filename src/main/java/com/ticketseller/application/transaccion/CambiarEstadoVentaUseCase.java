@@ -21,7 +21,7 @@ public class CambiarEstadoVentaUseCase {
     private final VentaRepositoryPort ventaRepositoryPort;
     private final HistorialEstadoVentaRepositoryPort historialRepositoryPort;
 
-    public Mono<Venta> ejecutar(UUID ventaId, EstadoVenta nuevoEstado, String justificacion, UUID actorId) {
+    public Mono<Venta> ejecutar(UUID ventaId, EstadoVenta nuevoEstado, String justificacion, UUID agenteId) {
         if (esNuevoEstadoInvalido(nuevoEstado)) {
             return Mono.error(new EstadoVentaInvalidoException("Nuevo Estado es obligatorio"));
         }
@@ -34,7 +34,7 @@ public class CambiarEstadoVentaUseCase {
                 .switchIfEmpty(Mono.error(new VentaNoEncontradaException(ventaId)))
                 .flatMap(venta -> {
                     venta.validarTransicionA(nuevoEstado);
-                    return persistirCambio(venta, nuevoEstado, justificacionNormalizada, actorId);
+                    return persistirCambio(venta, nuevoEstado, justificacionNormalizada, agenteId);
                 });
     }
 
@@ -46,26 +46,26 @@ public class CambiarEstadoVentaUseCase {
         return justificacion == null || justificacion.isBlank();
     }
 
-    private Mono<Venta> persistirCambio(Venta venta, EstadoVenta nuevoEstado, String justificacion, UUID actorId) {
+    private Mono<Venta> persistirCambio(Venta venta, EstadoVenta nuevoEstado, String justificacion, UUID agenteId) {
         EstadoVenta estadoAnterior = venta.getEstado();
         return ventaRepositoryPort.actualizarEstadoCondicional(venta.getId(), estadoAnterior, nuevoEstado)
                 .switchIfEmpty(Mono.error(new TransicionVentaInvalidaException(
                         "Estado de la venta modificado concurrentemente. Intente nuevamente.")))
                 .flatMap(ventaActualizada ->
-                        registrarHistorial(ventaActualizada, estadoAnterior, nuevoEstado, justificacion, actorId));
+                        registrarHistorial(ventaActualizada, estadoAnterior, nuevoEstado, justificacion, agenteId));
     }
 
     private Mono<Venta> registrarHistorial(Venta venta, EstadoVenta estadoAnterior, EstadoVenta estadoNuevo,
-                                           String justificacion, UUID actorId) {
-        HistorialEstadoVenta historial = crearRegistroHistorial(venta, estadoAnterior, estadoNuevo, justificacion, actorId);
+                                           String justificacion, UUID agenteId) {
+        HistorialEstadoVenta historial = crearRegistroHistorial(venta, estadoAnterior, estadoNuevo, justificacion, agenteId);
         return historialRepositoryPort.guardar(historial).thenReturn(venta);
     }
 
     private HistorialEstadoVenta crearRegistroHistorial(Venta venta, EstadoVenta estadoAnterior, EstadoVenta estadoNuevo,
-                                                        String justificacion, UUID actorId) {
+                                                        String justificacion, UUID agenteId) {
         return HistorialEstadoVenta.builder()
                 .ventaId(venta.getId())
-                .actorId(actorId)
+                .agenteId(agenteId)
                 .estadoAnterior(estadoAnterior)
                 .estadoNuevo(estadoNuevo)
                 .justificacion(justificacion)
