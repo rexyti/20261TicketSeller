@@ -14,6 +14,16 @@ public interface EventoR2dbcRepository extends ReactiveCrudRepository<EventoEnti
     @Query("""
             SELECT *
             FROM eventos
+            WHERE (:estado IS NULL OR estado = :estado)
+              AND (:tipo IS NULL OR tipo = :tipo)
+              AND (:fechaInicioDesde IS NULL OR fecha_inicio >= :fechaInicioDesde)
+              AND (:fechaInicioHasta IS NULL OR fecha_inicio <= :fechaInicioHasta)
+            """)
+    Flux<EventoEntity> listarConFiltros(String estado, String tipo, LocalDateTime fechaInicioDesde, LocalDateTime fechaInicioHasta);
+
+    @Query("""
+            SELECT *
+            FROM eventos
             WHERE recinto_id = :recintoId
               AND estado <> 'CANCELADO'
               AND fecha_inicio < :fechaFin

@@ -30,7 +30,7 @@ spring:
         debug: true
 
 server:
-  port: ${SERVER_PORT}
+  port: ${SERVER_PORT:8080}
 
 springdoc:
   api-docs:
@@ -44,3 +44,6 @@ logging:
     org.springframework.r2dbc: WARN
 
 kind: Application
+
+frontend:
+  url: ${FRONTEND_URL}
