@@ -2,13 +2,16 @@ package com.ticketseller.infrastructure.adapter.out.persistence.evento;
 
 import com.ticketseller.domain.model.evento.EstadoEvento;
 import com.ticketseller.domain.model.evento.Evento;
+import com.ticketseller.domain.model.evento.TipoEvento;
 import com.ticketseller.domain.repository.EventoRepositoryPort;
 import com.ticketseller.infrastructure.adapter.out.persistence.evento.mapper.EventoPersistenceMapper;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.UUID;
 
 @RequiredArgsConstructor
@@ -35,6 +38,15 @@ public class EventoRepositoryAdapter implements EventoRepositoryPort {
     @Override
     public Flux<Evento> listarPorEstado(EstadoEvento estado) {
         return repository.findByEstado(estado.name()).map(mapper::toDomain);
+    }
+
+    @Override
+    public Flux<Evento> listarConFiltros(EstadoEvento estado, TipoEvento tipo, LocalDate fechaInicioDesde, LocalDate fechaInicioHasta) {
+        String estadoStr = estado == null ? null : estado.name();
+        String tipoStr = tipo == null ? null : tipo.name();
+        LocalDateTime desde = fechaInicioDesde == null ? null : fechaInicioDesde.atStartOfDay();
+        LocalDateTime hasta = fechaInicioHasta == null ? null : fechaInicioHasta.atTime(LocalTime.MAX);
+        return repository.listarConFiltros(estadoStr, tipoStr, desde, hasta).map(mapper::toDomain);
     }
 
     @Override

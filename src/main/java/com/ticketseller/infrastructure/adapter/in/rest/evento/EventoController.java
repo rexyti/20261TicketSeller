@@ -10,6 +10,7 @@ import com.ticketseller.application.evento.RegistrarEventoUseCase;
 import com.ticketseller.application.postventa.ConsultarReembolsosMasivoUseCase;
 import com.ticketseller.domain.model.evento.EstadoEvento;
 import com.ticketseller.domain.model.evento.Evento;
+import com.ticketseller.domain.model.evento.TipoEvento;
 import com.ticketseller.infrastructure.adapter.in.rest.evento.dto.CancelarEventoRequest;
 import com.ticketseller.infrastructure.adapter.in.rest.evento.dto.CrearEventoRequest;
 import com.ticketseller.infrastructure.adapter.in.rest.evento.dto.EditarEventoRequest;
@@ -21,6 +22,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -36,6 +38,7 @@ import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Tag(name = "Eventos", description = "Gestión de eventos")
@@ -65,9 +68,15 @@ public class EventoController {
 
     @Operation(summary = "Listar eventos")
     @GetMapping
-    public Flux<EventoResponse> listar(@RequestParam(required = false) String estado) {
+    public Flux<EventoResponse> listar(
+            @RequestParam(required = false) String estado,
+            @RequestParam(required = false) String tipo,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "dd/MM/yyyy") LocalDate fechaInicioDesde,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "dd/MM/yyyy") LocalDate fechaInicioHasta) {
         EstadoEvento filtroEstado = estado == null || estado.isBlank() ? null : EstadoEvento.valueOf(estado.toUpperCase());
-        return listarEventosUseCase.ejecutar(filtroEstado).map(eventoRestMapper::toResponse);
+        TipoEvento filtroTipo = tipo == null || tipo.isBlank() ? null : TipoEvento.valueOf(tipo.toUpperCase());
+        return listarEventosUseCase.ejecutar(filtroEstado, filtroTipo, fechaInicioDesde, fechaInicioHasta)
+                .map(eventoRestMapper::toResponse);
     }
 
     @Operation(summary = "Obtener detalles de un evento")
